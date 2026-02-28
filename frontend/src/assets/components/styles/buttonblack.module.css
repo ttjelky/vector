@@ -1,0 +1,17 @@
+.buttonblack{
+  padding: 16px 32px;
+  background: black;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.buttonblack:hover {
+  background: white;
+  color: black;
+  border: black 2px solid;
+}
