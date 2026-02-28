@@ -17,7 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from apps.firsttest.views import index
+from django.http import JsonResponse
+
+def test_api(request):
+    return JsonResponse({"message": "backend працює"})
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', index)
+    path('', index),
+    path('api/test/', test_api)
 ]
