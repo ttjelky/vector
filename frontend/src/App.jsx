@@ -1,11 +1,12 @@
-import ButtonBlack from "./assets/components/buttonblack";
-import LandingNavBar from "./assets/components/LandingNavBar";
+import LandingNavBar from "./assets/components/landingNavBar";
+import LandingBody from "./assets/components/LandingBody";
 
 const App = () => {
   return (
     <div>
-      <h1>To do list</h1>
       <LandingNavBar />
+      <LandingBody />
+
     </div>
 
   );
