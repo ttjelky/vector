@@ -1,7 +1,13 @@
-.LandingBodyAll {
-    margin: 0 auto;
-    max-width: 1500px;
-    
+
+
+.TopLandingPhoto {
+    position: absolute;
+    left: 50vw;
+    transform: translateX(-50%);
+    top: -560px;
+    margin: 0;
+    max-width: 100%;
+
 }
 
 .LandingHero {
@@ -42,7 +48,20 @@
 .LandingBodyText {
     font-family: "Google Sans", sans-serif;
     font-size: 60px;
-    margin-top: 150px;
-    margin-bottom: 150px;
+    padding: 20px;
+    margin: 150px 50px 10px 50px;
     -webkit-font-smoothing: antialiased;
+    border: 5px solid black;
+}
+
+.LandingBodyFeatures {
+    display: flex;
+    justify-content: space-around;
+    padding: 50px;
+}
+
+.LandingBodyFeature {
+    padding-top: 40px;
+    border-top: 2px solid rgb(237, 237, 237);
+    max-width: 250px;
 }

@@ -6,10 +6,15 @@ import Cableicon from "./static/icons/Cableicon.svg";
 import Earthicon from "./static/icons/Earthicon.svg";
 import Charticon from "./static/icons/Charticon.svg";
 import Accounticon from "./static/icons/Accounticon.svg";
+import TopLandingPhoto from "./static/TopLandingPhoto.png";
 
 const LandingBody = () => {
     return (
     <div className={styles.LandingBodyAll}>
+
+        <div className={styles.TopLandingPhotoContainer}>
+        <img src={TopLandingPhoto} alt="Top Landing Photo" className={styles.TopLandingPhoto} />
+        </div>
 
     <header className={styles.LandingHero}> 
             <h1 className={styles.LandingBodyTitle}>Вас вітає</h1>
@@ -23,7 +28,7 @@ const LandingBody = () => {
         <div className={styles.LandingBodyFeatures}>
             <section className={styles.LandingBodyFeature}>
                 <img className={styles.LandingBodyIcon} src={Cableicon} alt="Cable icon" />
-                <div>
+                <div id="info">
                     <p>Створюйте турнірні раунди</p>
                     <p>Легко запускайте раунди з дедлайнами, завданнями та автоматичним керуванням етапами.</p>
                 </div>

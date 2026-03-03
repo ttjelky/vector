@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 .header {
     position: fixed;
     z-index: 1000;
@@ -16,6 +20,16 @@
     column-gap: 20px;
     font-family: "Google Sans", sans-serif;
     -webkit-font-smoothing: antialiased;
+}
+
+.logoContainer {
+    background:rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 75px;
+    display: flex;
+    padding: 3px 10px;
 }
 
 .navBarList {
@@ -37,7 +51,7 @@
     align-items: center;
     text-decoration: none;
     color: black;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
 }
 
@@ -47,15 +61,16 @@
     align-items: center;
     height: 48px;
     padding-inline: 22px;
-    font-size: 14px;
+    font-size: 16px;
     background-color: black;
+    outline: 2px solid black;
     color: white;
     border: none;
+    cursor: pointer;
     border-radius: 1000px;
 }
 .navBarButton:hover {
     background-color: white;
     color: black;
-    outline: 3px solid black;
     transition-duration: 0.2s;
 }
