@@ -7,6 +7,11 @@ import Earthicon from "./static/icons/Earthicon.svg";
 import Charticon from "./static/icons/Charticon.svg";
 import Accounticon from "./static/icons/Accounticon.svg";
 import TopLandingPhoto from "./static/TopLandingPhoto.png";
+import HeroImage from "./static/HeroImage.png";
+import HeroImage2 from "./static/HeroImage2.png";
+import LightningS from "./static/stickers/LightningS.svg";
+import HelloS from "./static/stickers/HelloS.svg";
+import YouCanS from "./static/stickers/YouCanS.svg";
 
 const LandingBody = () => {
     return (
@@ -17,44 +22,88 @@ const LandingBody = () => {
         </div>
 
     <header className={styles.LandingHero}> 
-            <h1 className={styles.LandingBodyTitle}>Вас вітає</h1>
+        <div className={styles.LandingHeroContent}>
+            <h1 className={styles.LandingBodyTitle}>Змагайтеся із</h1>
             <img className={styles.LogoText} src={logotext} alt="Vector" />
+            <img src={HelloS} className={styles.HelloSticker}/>
+            <img src={YouCanS} className={styles.YouCanSticker}/>
+        </div>
+            <p className={styles.UnderTitle}>Завдання, дедлайни, оцінювання, прогрес — все в одному місці.</p>
             <img className={styles.TabletPhoto} src={tabletphoto} alt="Tablet Photo" />
     </header>
 
     <main>
         <section className={styles.LandingBodySection}>
-        <p className={styles.LandingBodyText}>Vector - це платформа для <br />проведення турнірів.</p>
+        <p className={styles.LandingBodyText}>Vector - це платформа для проведення турнірів.</p>
+        <img src={LightningS} className={styles.LightningSticker}/>
         <div className={styles.LandingBodyFeatures}>
             <section className={styles.LandingBodyFeature}>
                 <img className={styles.LandingBodyIcon} src={Cableicon} alt="Cable icon" />
                 <div id="info">
-                    <p>Створюйте турнірні раунди</p>
-                    <p>Легко запускайте раунди з дедлайнами, завданнями та автоматичним керуванням етапами.</p>
+                    <p className={styles.LandingBodyFeatureTitle}>Створюйте турніри</p>
+                    <p className={styles.LandingBodyFeatureText}>Легко запускайте раунди з дедлайнами, завданнями та автоматичним керуванням етапами.</p>
                 </div>
             </section>
             <section className={styles.LandingBodyFeature}>
                 <img className={styles.LandingBodyIcon} src={Earthicon} alt="Earth icon" />
                 <div>
-                    <p>Відстежуйте прогрес</p>
-                    <p>Переглядайте результати команд у реальному часі. Бали, статуси завдань і дедлайни — все в одному місці.</p>
+                    <p className={styles.LandingBodyFeatureTitle}>Відстежуйте прогрес</p>
+                    <p className={styles.LandingBodyFeatureText}>Переглядайте результати команд у реальному часі. Бали, статуси завдань і дедлайни — все в одному місці.</p>
                 </div>
             </section>
             <section className={styles.LandingBodyFeature}>
                 <img className={styles.LandingBodyIcon} src={Accounticon} alt="Account icon" />
                 <div>
-                    <p>Перевіряйте роботи</p>
-                    <p>Учасники подають рішення прямо на платформі. Журі оцінює роботи, залишає коментарі та виставляє бали.</p>
+                    <p className={styles.LandingBodyFeatureTitle}>Перевіряйте роботи</p>
+                    <p className={styles.LandingBodyFeatureText}>Учасники подають рішення прямо на платформі. Журі оцінює роботи, залишає коментарі та виставляє бали.</p>
                 </div>
             </section>
             <section className={styles.LandingBodyFeature}>
                 <img className={styles.LandingBodyIcon} src={Charticon} alt="Chart icon" />
                 <div>
-                    <p>Гнучкі ролі та керування</p>
-                    <p>Ролі: учасник, журі, адміністратор. Кожен має свій функціонал і рівень доступу.</p>
+                    <p className={styles.LandingBodyFeatureTitle}>Гнучкі ролі та керування</p>
+                    <p className={styles.LandingBodyFeatureText}>Ролі: учасник, журі, адміністратор. Кожен має свій функціонал і рівень доступу.</p>
                 </div>
             </section>
         </div>
+        <div className={styles.HeroImageContainer}>
+            <img src={HeroImage} alt="Hero Image" className={styles.HeroImage} />
+        </div>
+        </section>
+        <section className={styles.LandingBodyHowToStart}>
+            <p className={styles.LandingBodyHowToStartTitle}>Як почати?</p>
+            <div className={styles.LandingBodyHowToStartSteps}>
+                <section className={styles.LandingBodyHowToStartStep}>
+                    <p className={styles.LandingBodyHowToStartStepNumber}>01</p>
+                    <div>
+                        <p className={styles.LandingBodyHowToStartStepTitle}>Зареєструйтесь</p>
+                        <p className={styles.LandingBodyHowToStartStepText}>Створіть акаунт як організатор, учасник або член журі. Це займає менше хвилини.</p>
+                    </div>
+                </section>
+                <section className={styles.LandingBodyHowToStartStep}>
+                    <p className={styles.LandingBodyHowToStartStepNumber}>02</p>
+                    <div>
+                        <p className={styles.LandingBodyHowToStartStepTitle}>Приєднайтеся до турніру</p>
+                        <p className={styles.LandingBodyHowToStartStepText}>Організатор створює турнір і додає раунди. Команди приєднуються за запрошенням або кодом.</p>
+                    </div>
+                </section>
+                <section className={styles.LandingBodyHowToStartStep}>
+                    <p className={styles.LandingBodyHowToStartStepNumber}>03</p>
+                    <div>
+                        <p className={styles.LandingBodyHowToStartStepTitle}>Проводьте та змагайтесь</p>
+                        <p className={styles.LandingBodyHowToStartStepText}>Завантажуйте завдання, подавайте рішення, виставляйте оцінки та відстежуйте результати в реальному часі.</p>
+                    </div>
+                </section>
+            </div>
+            <div className={styles.HeroImage2Container}>
+            <img src={HeroImage2} alt="Hero Image 2" className={styles.HeroImage2} />
+            </div>
+        </section>
+        <section className={styles.LandingBodyContactUs}>
+            <p className={styles.LandingBodyContactUsTitle}>Зв'язатися з нами</p>
+            <p className={styles.LandingBodyContactUsText}>Маєте питання? Зв'яжіться з нами у будь-яку мить.</p>
+            <p className={styles.LandingBodyContactUsEmail}>Vectorcommand6742@gmail.com</p>
+            <p className={styles.LandingBodyContactUsPhone}>+380 (68) 767 54 20</p>
         </section>
     </main>
     
