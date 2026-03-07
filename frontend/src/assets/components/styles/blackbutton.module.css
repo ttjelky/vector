@@ -1,0 +1,20 @@
+.blackbutton {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding-inline: 22px;
+    font-size: 16px;
+    background-color: black;
+    outline: 2px solid black;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 1000px;
+}
+
+.blackbutton:hover {
+    background-color: white;
+    color: black;
+    transition-duration: 0.2s;
+}
+

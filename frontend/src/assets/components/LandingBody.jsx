@@ -9,9 +9,11 @@ import Accounticon from "./static/icons/Accounticon.svg";
 import TopLandingPhoto from "./static/TopLandingPhoto.png";
 import HeroImage from "./static/HeroImage.png";
 import HeroImage2 from "./static/HeroImage2.png";
-import LightningS from "./static/stickers/LightningS.svg";
 import HelloS from "./static/stickers/HelloS.svg";
 import YouCanS from "./static/stickers/YouCanS.svg";
+import BlackButton from "./blackbutton";
+import WhiteButton from "./WhiteButton";
+import iPad from "./static/Ipad.png"
 
 const LandingBody = () => {
     return (
@@ -29,13 +31,18 @@ const LandingBody = () => {
             <img src={YouCanS} className={styles.YouCanSticker}/>
         </div>
             <p className={styles.UnderTitle}>Завдання, дедлайни, оцінювання, прогрес — все в одному місці.</p>
-            <img className={styles.TabletPhoto} src={tabletphoto} alt="Tablet Photo" />
+            <div className={styles.UnderTitleButtons}>
+            <BlackButton text={"Приєднатися до турніру"} />
+            <WhiteButton text={"Дізнатися більше"} />
+            </div>
+            <div className={styles.TabletPhotoWrapper}>
+            <img className={styles.TabletPhoto} src={iPad} alt="Tablet Photo" />
+            </div>
     </header>
 
     <main>
         <section className={styles.LandingBodySection}>
         <p className={styles.LandingBodyText}>Vector - це платформа для проведення турнірів.</p>
-        <img src={LightningS} className={styles.LightningSticker}/>
         <div className={styles.LandingBodyFeatures}>
             <section className={styles.LandingBodyFeature}>
                 <img className={styles.LandingBodyIcon} src={Cableicon} alt="Cable icon" />

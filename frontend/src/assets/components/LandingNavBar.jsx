@@ -2,6 +2,7 @@ import React from "react";
 import logo from "./static/VectorLogo.svg";
 import styles from "./styles/landingNavBar.module.css";
 import LandingBody from "./LandingBody";
+import BlackButton from "./blackbutton";
 
 const LandingNavBar = () => {
     return (
@@ -27,9 +28,7 @@ const LandingNavBar = () => {
         </nav>  
 
         <div>
-            <button className={styles.navBarButton}>
-                Увійти
-            </button>
+            <BlackButton text={"Увійти"}/>
         </div>
         
     </header>
