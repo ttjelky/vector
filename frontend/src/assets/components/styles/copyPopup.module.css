@@ -1,0 +1,37 @@
+.button {
+    padding: 10px 20px;
+    font-family: "Google Sans", sans-serif;
+    font-size: 30px;
+    cursor: pointer;
+    border-radius: 30px;
+    border: 2px solid rgb(238, 238, 238);
+    background-color: white;
+    color: black;
+    position: relative;
+    overflow: hidden;
+}
+
+.button:hover {
+    border: 2px solid black;
+    transition-duration: 0.2s;
+}
+
+.copy-popup {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.8);
+  background-color: #4caf50;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+
+.copy-popup.show {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}

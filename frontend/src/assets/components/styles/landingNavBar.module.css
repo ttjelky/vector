@@ -1,0 +1,75 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.header {
+    position: fixed;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 20px;
+    padding-inline: 40px;
+    column-gap: 20px;
+    font-family: "Google Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.logoContainer {
+    display: flex;
+    padding: 3px 10px;
+    background:rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.05),
+    0 1px 1px rgba(0, 0, 0, 0.02);
+    border-radius: 20px;
+  
+   
+}
+
+.navBarList {
+    background:rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 4px 30px rgba(0, 0, 0, 0.05),
+        0 1px 1px rgba(0, 0, 0, 0.02);
+    border-radius: 75px;
+    list-style: none;
+    display: flex;
+    column-gap: 30px;
+    gap: 27px;
+    padding: 20px;
+
+}
+
+
+.navBarLink {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: black;
+    font-size: 16px;
+    font-weight: 700;
+    position: relative;
+}
+
+.buttons {
+    display: flex;
+    gap: 20px;
+}
+
+@media (max-width: 1030px) {
+
+}

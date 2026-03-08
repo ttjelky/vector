@@ -1,11 +1,15 @@
-import ButtonBlack from "./assets/components/buttonblack";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Landing from "./assets/pages/Landing";
+import Login from "./assets/pages/Login";
 
 const App = () => {
   return (
-    <div>
-      <h1>To do list</h1>
-      <ButtonBlack text="Add Task" onClick={() => console.log("Add Task clicked")} />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    </BrowserRouter>
 
   );
 };
