@@ -1,7 +1,6 @@
 import React from "react";
 import styles from "./styles/landingBody.module.css";
 import logotext from "./static/VectorLogoText.svg";
-import tabletphoto from "./static/TabletPhoto.png";
 import Cableicon from "./static/icons/Cableicon.svg";
 import Earthicon from "./static/icons/Earthicon.svg";
 import Charticon from "./static/icons/Charticon.svg";
@@ -14,8 +13,11 @@ import YouCanS from "./static/stickers/YouCanS.svg";
 import BlackButton from "./blackbutton";
 import WhiteButton from "./WhiteButton";
 import iPad from "./static/Ipad.png"
+import CopyPopup from "./CopyPopup";
 
 const LandingBody = () => {
+    const email = "Vectorcommand6742@gmail.com";
+    const phone = "+380 (68) 767 54 20";
     return (
     <div className={styles.LandingBodyAll}>
 
@@ -23,7 +25,7 @@ const LandingBody = () => {
         <img src={TopLandingPhoto} alt="Top Landing Photo" className={styles.TopLandingPhoto} />
         </div>
 
-    <header className={styles.LandingHero}> 
+    <header className={styles.LandingHero} id="main"> 
         <div className={styles.LandingHeroContent}>
             <h1 className={styles.LandingBodyTitle}>Змагайтеся із</h1>
             <img className={styles.LogoText} src={logotext} alt="Vector" />
@@ -33,7 +35,7 @@ const LandingBody = () => {
             <p className={styles.UnderTitle}>Завдання, дедлайни, оцінювання, прогрес — все в одному місці.</p>
             <div className={styles.UnderTitleButtons}>
             <BlackButton text={"Приєднатися до турніру"} />
-            <WhiteButton text={"Дізнатися більше"} />
+            <WhiteButton text={"Дізнатися більше"} onClick={() => window.location.href = "#info"}/>
             </div>
             <div className={styles.TabletPhotoWrapper}>
             <img className={styles.TabletPhoto} src={iPad} alt="Tablet Photo" />
@@ -41,12 +43,12 @@ const LandingBody = () => {
     </header>
 
     <main>
-        <section className={styles.LandingBodySection}>
+        <section className={styles.LandingBodySection} id="info">
         <p className={styles.LandingBodyText}>Vector - це платформа для проведення турнірів.</p>
         <div className={styles.LandingBodyFeatures}>
             <section className={styles.LandingBodyFeature}>
                 <img className={styles.LandingBodyIcon} src={Cableicon} alt="Cable icon" />
-                <div id="info">
+                <div>
                     <p className={styles.LandingBodyFeatureTitle}>Створюйте турніри</p>
                     <p className={styles.LandingBodyFeatureText}>Легко запускайте раунди з дедлайнами, завданнями та автоматичним керуванням етапами.</p>
                 </div>
@@ -77,7 +79,7 @@ const LandingBody = () => {
             <img src={HeroImage} alt="Hero Image" className={styles.HeroImage} />
         </div>
         </section>
-        <section className={styles.LandingBodyHowToStart}>
+        <section className={styles.LandingBodyHowToStart} id="howToStart">
             <p className={styles.LandingBodyHowToStartTitle}>Як почати?</p>
             <div className={styles.LandingBodyHowToStartSteps}>
                 <section className={styles.LandingBodyHowToStartStep}>
@@ -106,11 +108,13 @@ const LandingBody = () => {
             <img src={HeroImage2} alt="Hero Image 2" className={styles.HeroImage2} />
             </div>
         </section>
-        <section className={styles.LandingBodyContactUs}>
+        <section className={styles.LandingBodyContactUs} id="contactUs">
             <p className={styles.LandingBodyContactUsTitle}>Зв'язатися з нами</p>
             <p className={styles.LandingBodyContactUsText}>Маєте питання? Зв'яжіться з нами у будь-яку мить.</p>
-            <p className={styles.LandingBodyContactUsEmail}>Vectorcommand6742@gmail.com</p>
-            <p className={styles.LandingBodyContactUsPhone}>+380 (68) 767 54 20</p>
+            <div className={styles.email}>
+            <CopyPopup label={email} copyText={email} />
+            </div>
+            <CopyPopup label={phone} copyText={phone} />
         </section>
     </main>
     

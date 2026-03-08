@@ -7,12 +7,13 @@
     background-color: white;
     outline: 2px solid black;
     color: black;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     border: none;
     cursor: pointer;
     border-radius: 1000px;
 }
 
 .whitebutton:hover {
-    background-color: rgb(239, 239, 239);
+    background-color: rgb(225, 225, 225);
     transition-duration: 0.2s;
 }

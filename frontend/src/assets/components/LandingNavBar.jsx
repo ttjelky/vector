@@ -3,13 +3,14 @@ import logo from "./static/VectorLogo.svg";
 import styles from "./styles/landingNavBar.module.css";
 import LandingBody from "./LandingBody";
 import BlackButton from "./blackbutton";
+import WhiteButton from "./WhiteButton";
 
 const LandingNavBar = () => {
     return (
     <header className={styles.header}>
     
     <div className={styles.logoContainer}>
-        <a className="landingNavLogo" href="/">
+        <a className="landingNavLogo" href="#main">
         <img src={logo} alt="Logo" />
         </a>
     </div>
@@ -19,16 +20,17 @@ const LandingNavBar = () => {
                 <a href="#info" className={styles.navBarLink}>Інфо</a>
             </li>
             <li className={styles.navBarItem}>
-                <a href="/" className={styles.navBarLink}>Як почати?</a>
+                <a href="#howToStart" className={styles.navBarLink}>Як почати?</a>
             </li>
             <li className={styles.navBarItem}>
-                <a href="/" className={styles.navBarLink}>Зв’язатися з нами</a>
+                <a href="#contactUs" className={styles.navBarLink}>Зв’язатися з нами</a>
             </li>
         </ul>
         </nav>  
 
-        <div>
-            <BlackButton text={"Увійти"}/>
+        <div className={styles.buttons}> 
+            <WhiteButton text={"Реєстрація"}/>
+            <BlackButton text={"Вхід"}/>
         </div>
         
     </header>

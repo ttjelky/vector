@@ -1,14 +1,15 @@
-import LandingNavBar from "./assets/components/landingNavBar";
-import LandingBody from "./assets/components/LandingBody";
-import LandingFooter from "./assets/components/LandingFooter";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Landing from "./assets/pages/Landing";
+import Login from "./assets/pages/Login";
 
 const App = () => {
   return (
-    <div>
-      <LandingNavBar />
-      <LandingBody />
-      <LandingFooter />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    </BrowserRouter>
 
   );
 };

@@ -5,15 +5,15 @@
     padding-inline: 22px;
     font-size: 16px;
     background-color: black;
-    outline: 2px solid black;
     color: white;
-    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     cursor: pointer;
     border-radius: 1000px;
 }
 
 .blackbutton:hover {
-    background-color: white;
+    background-color: rgb(225, 225, 225);
     color: black;
     transition-duration: 0.2s;
 }

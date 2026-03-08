@@ -1,14 +1,15 @@
 import React from "react";
 import styles from "./styles/landingFooter.module.css";
 import Logo from "./static/LogoOnly.svg";
+import LandingBody from "./LandingBody";
 
 const LandingFooter = () => {
     return (
         <footer className={styles.LandingFooter}>
         <div className={styles.LandingFooterLinks}>
-        <a href="/">Інфо</a>
-        <a href="/">Як почати?</a>
-        <a href="/">Зв’язатися з нами</a>
+        <a href="#info">Інфо</a>
+        <a href="#howToStart">Як почати?</a>
+        <a href="#contactUs">Зв’язатися з нами</a>
         </div>
         <div className={styles.LandingFooterBottom}>
             <div className={styles.LandingFooterLogoEmail}>
