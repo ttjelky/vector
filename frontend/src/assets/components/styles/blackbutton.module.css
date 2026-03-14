@@ -4,17 +4,24 @@
     min-height: 48px;
     padding-inline: 22px;
     font-size: 16px;
-    background-color: black;
+    background: linear-gradient(180deg, #3a3a3a, #1f1f1f);
+    box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.15),
+    inset 0 -2px 4px rgba(0,0,0,0.6),
+    0 6px 12px rgba(0,0,0,0.15);
     color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.8);
     cursor: pointer;
     border-radius: 1000px;
 }
 
 .blackbutton:hover {
-    background-color: rgb(225, 225, 225);
-    color: black;
+    background: linear-gradient(180deg, #444, #242424);
+    transform: translateY(-1px);
+    box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.2),
+    inset 0 -2px 5px rgba(0,0,0,0.7),
+    0 12px 20px rgba(0,0,0,0.25);
     transition-duration: 0.2s;
 }
 

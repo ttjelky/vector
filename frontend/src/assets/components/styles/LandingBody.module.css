@@ -57,6 +57,7 @@
     -webkit-font-smoothing: antialiased;
     margin-bottom: 10px;
     
+    
 }
 
 .LogoText {
@@ -252,4 +253,23 @@
     padding: 20px 80px 60px 80px;
     margin-top: 50px;
 }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px); /* Починає на 30px нижче */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);    /* Стає у звичне положення */
+  }
+}
+
+.animate {
+  /* Назва анімації, тривалість 0.8с, м'який старт/фініш */
+  animation: fadeInUp 0.8s ease-out forwards;
+  
+  /* Початковий стан, щоб заголовок не "блимнув" перед анімацією */
+  opacity: 0; 
 }

@@ -12,7 +12,7 @@ import HelloS from "./static/stickers/HelloS.svg";
 import YouCanS from "./static/stickers/YouCanS.svg";
 import BlackButton from "./blackbutton";
 import WhiteButton from "./WhiteButton";
-import iPad from "./static/Ipad.png"
+import iPad from "./static/Ipad.png";
 import CopyPopup from "./CopyPopup";
 
 const LandingBody = () => {
@@ -26,11 +26,13 @@ const LandingBody = () => {
         </div>
 
     <header className={styles.LandingHero} id="main"> 
+        <div className={styles.animate}>
         <div className={styles.LandingHeroContent}>
             <h1 className={styles.LandingBodyTitle}>Змагайтеся із</h1>
             <img className={styles.LogoText} src={logotext} alt="Vector" />
             <img src={HelloS} className={styles.HelloSticker}/>
             <img src={YouCanS} className={styles.YouCanSticker}/>
+        </div>
         </div>
             <p className={styles.UnderTitle}>Завдання, дедлайни, оцінювання, прогрес — все в одному місці.</p>
             <div className={styles.UnderTitleButtons}>
@@ -41,9 +43,8 @@ const LandingBody = () => {
             <img className={styles.TabletPhoto} src={iPad} alt="Tablet Photo" />
             </div>
     </header>
-
     <main>
-        <section className={styles.LandingBodySection} id="info">
+    <section className={styles.LandingBodySection} id="info">
         <p className={styles.LandingBodyText}>Vector - це платформа для проведення турнірів.</p>
         <div className={styles.LandingBodyFeatures}>
             <section className={styles.LandingBodyFeature}>

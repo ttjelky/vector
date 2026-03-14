@@ -1,9 +1,9 @@
 import React from "react";
-import styles from "../components/styles/loginPage.module.css";
+import styles from "../components/styles/registerPage.module.css";
 import cross from "../components/static/icons/cross.svg"
 import BlackButton from "../components/blackbutton";
 
-const Login = ({isOpen, onClose}) => {
+const Register = ({isOpen, onClose}) => {
     if (!isOpen) return null;
     return (
       <div className={styles.overlay} onClick={onClose}>
@@ -14,9 +14,15 @@ const Login = ({isOpen, onClose}) => {
         </div>
 
         <div className={styles.form}>
-        <h1 className={styles.logintitle}>Вхід на сайт</h1>
+        <h1 className={styles.logintitle}>Реєстрація</h1>
 
         <section className={styles.inputform}>
+
+          <div className={styles.name}>
+          <p style={{color: "gray"}}>Ім’я та прізвище</p>
+          <input type="name" className={styles.input} />
+          </div>
+
 
           <div className={styles.email}>
           <p style={{color: "gray"}}>Email</p>
@@ -37,18 +43,15 @@ const Login = ({isOpen, onClose}) => {
 
         <div className={styles.button}>
           <button className={styles.thebutton}>
-            Увійти
+            Зареєструватися
           </button>
         </div>
 
         <section className={styles.underform}>
-        <div>
-          <a href="/" className={styles.forgot}>Забули пароль?</a>
-        </div>
 
           <div>
-            <span>Не маєте акаунту? </span>
-            <a href="/">Зареєструватися</a>
+            <span>Вже маєте акаунт? </span>
+            <a href="/">Увійти</a>
           </div>
         </section>
         </div>
@@ -57,4 +60,4 @@ const Login = ({isOpen, onClose}) => {
     );
 };
 
-export default Login
+export default Register
