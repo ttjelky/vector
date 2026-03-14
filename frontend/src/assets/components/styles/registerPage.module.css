@@ -126,7 +126,7 @@ a {
     border-radius: 1000px;
 }
 
-.thebutton:hover {
+.thebutton:hover:not(:disabled) {
     background: linear-gradient(180deg, #444, #242424);
     transform: translateY(-1px);
     box-shadow:
@@ -134,6 +134,20 @@ a {
     inset 0 -2px 5px rgba(0,0,0,0.7),
     0 12px 20px rgba(0,0,0,0.25);
     transition-duration: 0.2s;
+}
+
+.thebutton:disabled {
+    background: #555;
+    cursor: unset;
+    opacity: 0.6;
+}
+
+.errorText {
+    color: #ff4d4d;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+    text-align: left;
 }
 
 .underform {
