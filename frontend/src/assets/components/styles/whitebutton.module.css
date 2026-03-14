@@ -4,16 +4,21 @@
     min-height: 48px;
     padding-inline: 22px;
     font-size: 16px;
-    background-color: white;
-    outline: 2px solid black;
-    color: black;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    border: none;
+    background: #ffffff;
+    color: #222;
+    border: 1px solid #e5e5e5;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
     cursor: pointer;
     border-radius: 1000px;
 }
 
 .whitebutton:hover {
-    background-color: rgb(225, 225, 225);
-    transition-duration: 0.2s;
+    background: #ffffff;
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 6px 14px rgba(0,0,0,0.12),
+    inset 0 1px 0 rgba(255,255,255,1);
 }

@@ -4,8 +4,15 @@ import styles from "./styles/landingNavBar.module.css";
 import LandingBody from "./LandingBody";
 import BlackButton from "./blackbutton";
 import WhiteButton from "./WhiteButton";
+import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import Login from "../pages/Login";
+import Register from "../pages/Register";
 
 const LandingNavBar = () => {
+    const [isLoginOpen, setIsLoginOpen] = useState(false);
+    const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+    const navigate = useNavigate();
     return (
     <header className={styles.header}>
     
@@ -29,10 +36,19 @@ const LandingNavBar = () => {
         </nav>  
 
         <div className={styles.buttons}> 
-            <WhiteButton text={"Реєстрація"}/>
-            <BlackButton text={"Вхід"}/>
+            <WhiteButton text={"Реєстрація"} onClick={() => setIsRegisterOpen(true)}/>
+            <BlackButton text={"Вхід"} onClick={() => setIsLoginOpen(true)}/>
         </div>
-        
+        <Login 
+        isOpen={isLoginOpen} 
+        onClose={() => setIsLoginOpen(false)} 
+        />
+
+      <Register
+        isOpen={isRegisterOpen}
+        onClose={() => setIsRegisterOpen(false)}
+        />
+
     </header>
     );
 }
