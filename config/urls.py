@@ -16,14 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from apps.firsttest.views import index
 from django.http import JsonResponse
-
-def test_api(request):
-    return JsonResponse({"message": "backend працює"})
+from django.contrib import admin
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', index),
-    path('api/test/', test_api)
+    path('api/users/', include('apps.users.urls')),
 ]

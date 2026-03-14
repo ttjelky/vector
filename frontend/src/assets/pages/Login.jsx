@@ -2,6 +2,7 @@ import React from "react";
 import styles from "../components/styles/loginPage.module.css";
 import cross from "../components/static/icons/cross.svg"
 import BlackButton from "../components/blackbutton";
+import { registerUser, loginUser } from '../../api';
 
 const Login = ({isOpen, onClose}) => {
     if (!isOpen) return null;
