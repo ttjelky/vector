@@ -13,6 +13,17 @@ const LandingNavBar = () => {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
     const navigate = useNavigate();
+
+    const switchToLogin = () => {
+    setIsRegisterOpen(false);
+    setIsLoginOpen(true);
+  };
+
+  const switchToRegister = () => {
+    setIsLoginOpen(false);
+    setIsRegisterOpen(true);
+  };
+
     return (
     <header className={styles.header}>
     
@@ -42,11 +53,13 @@ const LandingNavBar = () => {
         <Login 
         isOpen={isLoginOpen} 
         onClose={() => setIsLoginOpen(false)} 
+        onSwitchToRegister={switchToRegister}
         />
 
       <Register
         isOpen={isRegisterOpen}
         onClose={() => setIsRegisterOpen(false)}
+        onSwitchToLogin={switchToLogin}
         />
 
     </header>

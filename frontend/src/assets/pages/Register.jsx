@@ -4,7 +4,7 @@ import cross from "../components/static/icons/cross.svg"
 import { registerUser, loginUser } from '../../api';
 import { useNavigate } from 'react-router-dom';
 
-const Register = ({isOpen, onClose}) => {
+const Register = ({isOpen, onClose, onSwitchToLogin}) => {
 
   const navigate = useNavigate();
 
@@ -126,16 +126,16 @@ const Register = ({isOpen, onClose}) => {
         </div>
 
         <div className={styles.button}>
-          <button type="submit" disabled={isLoading || !formData.full_name || !formData.password} className={styles.thebutton}>
+          <button type="submit" disabled={!formData.email || !formData.password || !formData.last_name || !formData.first_name} className={styles.thebutton}>
             Зареєструватися
           </button>
         </div>
 
         <section className={styles.underform}>
 
-          <div>
+          <div onClick={onSwitchToLogin} style={{cursor: "pointer"}}>
             <span>Вже маєте акаунт? </span>
-            <a href="/">Увійти</a>
+            <a>Увійти</a>
           </div>
         </section>
         </div>
