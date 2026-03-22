@@ -26,6 +26,7 @@
     overflow-y: auto;
     padding: 20px;
     position: relative;
+    animation: modalIn 0.4s ease;
 }
 
 .cross {
@@ -57,7 +58,7 @@
 
 .logintitle {
     font-family: "Google Sans", sans-serif;
-    font-size: 60px;
+    font-size: 48px;
 }
 
 .input {
@@ -71,6 +72,11 @@
     font-size: 16px;
     box-sizing: border-box;
     outline: none;
+    transition-duration: 0.08s;
+}
+
+input:focus {
+  border: 1px solid black;
 }
 
 .inputform {
@@ -78,11 +84,11 @@
 }
 
 .name {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .email {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .password {
@@ -126,7 +132,7 @@ a {
     border-radius: 1000px;
 }
 
-.thebutton:hover {
+.thebutton:hover:not(:disabled) {
     background: linear-gradient(180deg, #444, #242424);
     transform: translateY(-1px);
     box-shadow:
@@ -136,7 +142,36 @@ a {
     transition-duration: 0.2s;
 }
 
+.thebutton:disabled {
+    background: #555;
+    cursor: unset;
+    opacity: 0.6;
+}
+
+.errorText {
+    color: #ff4d4d;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+    text-align: left;
+}
+
 .underform {
     display: flex;
     justify-content: space-between;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }

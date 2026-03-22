@@ -4,19 +4,24 @@ import cross from "../components/static/icons/cross.svg"
 import { registerUser, loginUser } from '../../api';
 import { useNavigate } from 'react-router-dom';
 
-const Register = ({isOpen, onClose}) => {
+const Register = ({isOpen, onClose, onSwitchToLogin}) => {
 
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    username: '',
+    first_name: '',
+    last_name: '',
     email: '',
     password: ''
   });
 
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
   if (!isOpen) return null;
 
   const handleChange = (e) => {
+    
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -25,27 +30,30 @@ const Register = ({isOpen, onClose}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+    setIsLoading(true);
     try {
-      await registerUser(formData);
-      
-      const response = await loginUser({
-        username: formData.username,
-        password: formData.password
-      });
-
-      localStorage.setItem('accessToken', response.data.access);
-      localStorage.setItem('refreshToken', response.data.refresh);
-      
-      navigate('/dashboard');
-      onClose();
+        await registerUser(formData);
+        const response = await loginUser({
+            username: formData.email,
+            password: formData.password
+        });
+        localStorage.setItem('accessToken', response.data.access);
+        onClose();
+        navigate('/dashboard');
     } catch (error) {
-      console.error(error.response?.data);
-      alert('Помилка реєстрації. Можливо, такий користувач вже існує.');
+        if (error.response && error.response.data) {
+            setErrors(error.response.data); 
+        } else {
+            alert("Щось пішло не так. Перевірте з'єднання.");
+        }
+    } finally {
+        setIsLoading(false);
     }
-  };
+};
   
     return (
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
       <div className={styles.overlay} onClick={onClose}>
       <div className={styles.login} onClick={(e) => e.stopPropagation()}>
 
@@ -59,14 +67,29 @@ const Register = ({isOpen, onClose}) => {
         <section className={styles.inputform}>
 
           <div className={styles.name}>
-          <p style={{color: "gray"}}>Ім’я та прізвище</p>
+          <p style={{color: "gray"}}>Ім’я</p>
           <input 
           type="text" 
-          name="username"
-          value={formData.username}
+          name="first_name"
+          value={formData.first_name}
           onChange={handleChange}
           className={styles.input}
+          required
           />
+          {errors.first_name && <span className={styles.errorText}>{errors.first_name[0]}</span>}
+          </div>
+
+          <div className={styles.name}>
+          <p style={{color: "gray"}}>Прізвище</p>
+          <input 
+          type="text" 
+          name="last_name"
+          value={formData.last_name}
+          onChange={handleChange}
+          className={styles.input}
+          required
+          />
+          {errors.last_name && <span className={styles.errorText}>{errors.last_name[0]}</span>}
           </div>
 
 
@@ -78,7 +101,9 @@ const Register = ({isOpen, onClose}) => {
           value={formData.email}
           onChange={handleChange}
           className={styles.input}
+          required
           />
+          {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
           </div>
 
           <div className={styles.password}>
@@ -89,6 +114,7 @@ const Register = ({isOpen, onClose}) => {
           value={formData.password}
           onChange={handleChange}
           className={styles.input}
+          required
           />
           </div>
 
@@ -100,16 +126,16 @@ const Register = ({isOpen, onClose}) => {
         </div>
 
         <div className={styles.button}>
-          <button type="submit" className={styles.thebutton}>
+          <button type="submit" disabled={!formData.email || !formData.password || !formData.last_name || !formData.first_name} className={styles.thebutton}>
             Зареєструватися
           </button>
         </div>
 
         <section className={styles.underform}>
 
-          <div>
+          <div onClick={onSwitchToLogin} style={{cursor: "pointer"}}>
             <span>Вже маєте акаунт? </span>
-            <a href="/">Увійти</a>
+            <a>Увійти</a>
           </div>
         </section>
         </div>
