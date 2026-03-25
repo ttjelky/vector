@@ -5,7 +5,9 @@ import BlackButton from "../components/blackbutton";
 import { registerUser, loginUser } from '../../api';
 import { useNavigate } from "react-router-dom";
 
-const Login = ({isOpen, onClose, onSwitchToRegister}) => {
+const Login = ({isOpen, onClose, onSwitchToRegister, onSwitchToForgot}) => {
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
   const navigate = useNavigate();
   const [loginData, setLoginData] = useState({
     email: '',
@@ -116,8 +118,8 @@ const handleSubmit = async (e) => {
             <a>Зареєструватися</a>
           </div>
 
-          <div>
-          <a href="/" className={styles.forgot}>Забули пароль?</a>
+        <div onClick={onSwitchToForgot}>
+          <a className={styles.forgot} style={{cursor: "pointer"}}>Забули пароль?</a>
         </div>
         </section>
         </div>

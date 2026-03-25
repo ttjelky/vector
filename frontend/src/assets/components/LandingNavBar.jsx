@@ -8,20 +8,32 @@ import { useNavigate } from "react-router-dom";
 import { useState } from 'react';
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import Forgot from "../pages/Forgot";
 
 const LandingNavBar = () => {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+    const [isForgotOpen, setIsForgotOpen] = useState(false);
     const navigate = useNavigate();
+
+    const backToLogin = () => {
+    setIsForgotOpen(false);
+    setIsLoginOpen(true);
+    };
 
     const switchToLogin = () => {
     setIsRegisterOpen(false);
     setIsLoginOpen(true);
   };
 
-  const switchToRegister = () => {
+    const switchToRegister = () => {
     setIsLoginOpen(false);
     setIsRegisterOpen(true);
+  };
+
+  const switchToForgot = () => {
+    setIsLoginOpen(false);
+    setIsForgotOpen(true);
   };
 
     return (
@@ -54,14 +66,20 @@ const LandingNavBar = () => {
         isOpen={isLoginOpen} 
         onClose={() => setIsLoginOpen(false)} 
         onSwitchToRegister={switchToRegister}
+        onSwitchToForgot={switchToForgot}
         />
 
-      <Register
+        <Register
         isOpen={isRegisterOpen}
         onClose={() => setIsRegisterOpen(false)}
         onSwitchToLogin={switchToLogin}
         />
 
+        <Forgot 
+        isOpen={isForgotOpen} 
+        onClose={() => setIsForgotOpen(false)}
+        onBackToLogin={backToLogin}
+        />
     </header>
     );
 }

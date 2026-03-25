@@ -72,45 +72,21 @@
     font-size: 16px;
     box-sizing: border-box;
     outline: none;
-    transition-duration: 0.08s;
-}
-
-input:focus {
-  border: 1px solid black;
 }
 
 .inputform {
     margin-top: 32px;
 }
 
-.name {
-    margin-bottom: 12px;
-}
-
 .email {
-    margin-bottom: 12px;
-}
-
-.password {
-    margin-bottom: 10px;
-}
-
-.rememberme {
-    font-size: 16px;
-    display: flex;
-    gap: 5px;
     margin-bottom: 20px;
-    color: gray;
 }
 
-a {
+.backToLogin {
     text-decoration: none;
-    color: black;
-    font-weight: 600;
-}
-
-.button {
-    margin-bottom: 20px;
+    color: gray;
+    cursor: pointer;
+    font-weight: 500;
 }
 
 .thebutton {
@@ -148,21 +124,10 @@ a {
     opacity: 0.6;
 }
 
-.errorText {
-    color: #ff4d4d;
-    font-size: 12px;
-    margin-top: 5px;
-    display: block;
-    text-align: left;
-}
-
-.underform {
-    display: flex;
-    justify-content: space-between;
-}
-
-a:hover {
-  text-decoration: underline;
+.bottom {
+    padding: 15px 0px;
+    margin-top: 50px;
+    border-top: 2px solid lightgray;
 }
 
 @keyframes modalIn {

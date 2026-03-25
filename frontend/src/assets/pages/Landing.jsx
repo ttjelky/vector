@@ -1,4 +1,4 @@
-import LandingNavBar from "../components/landingNavBar";
+import LandingNavBar from "../components/LandingNavBar";
 import LandingBody from "../components/LandingBody";
 import LandingFooter from "../components/LandingFooter";
 
