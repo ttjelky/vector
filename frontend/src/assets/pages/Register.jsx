@@ -18,8 +18,6 @@ const Register = ({isOpen, onClose, onSwitchToLogin}) => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  if (!isOpen) return null;
-
   const handleChange = (e) => {
     
     setFormData({
@@ -50,98 +48,98 @@ const Register = ({isOpen, onClose, onSwitchToLogin}) => {
     } finally {
         setIsLoading(false);
     }
-};
+    
+  };
   
-    return (
-      <form onSubmit={handleSubmit} noValidate>
-      <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.login} onClick={(e) => e.stopPropagation()}>
+if (!isOpen) return null;
 
-        <div className={styles.navbar}>
-            <img src={cross} alt="back" className={styles.cross} onClick={onClose} />
-        </div>
+return (
+  <form onSubmit={handleSubmit} noValidate>
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.register} onClick={(e) => e.stopPropagation()}>
+
+        <img src={cross} alt="back" className={styles.cross} onClick={onClose} />
 
         <div className={styles.form}>
-        <h1 className={styles.logintitle}>Реєстрація</h1>
 
-        <section className={styles.inputform}>
+          <h1 className={styles.title}>Реєстрація</h1>
 
-          <div className={styles.name}>
-          <p style={{color: "gray"}}>Ім’я</p>
-          <input 
-          type="text" 
-          name="first_name"
-          value={formData.first_name}
-          onChange={handleChange}
-          className={styles.input}
-          required
-          />
-          {errors.first_name && <span className={styles.errorText}>{errors.first_name[0]}</span>}
-          </div>
+          <section style={{marginTop: "32px"}}>
+            <div style={{marginBottom: "12px"}}>
+              <p style={{color: "gray"}}>Ім’я</p>
+              <input 
+              type="text" 
+              name="first_name"
+              value={formData.first_name}
+              onChange={handleChange}
+              className={styles.input}
+              required
+              />
+              {errors.first_name && <span className={styles.errorText}>{errors.first_name[0]}</span>}
+            </div>
 
-          <div className={styles.name}>
-          <p style={{color: "gray"}}>Прізвище</p>
-          <input 
-          type="text" 
-          name="last_name"
-          value={formData.last_name}
-          onChange={handleChange}
-          className={styles.input}
-          required
-          />
-          {errors.last_name && <span className={styles.errorText}>{errors.last_name[0]}</span>}
-          </div>
+            <div style={{marginBottom: "12px"}}>
+              <p style={{color: "gray"}}>Прізвище</p>
+              <input 
+              type="text" 
+              name="last_name"
+              value={formData.last_name}
+              onChange={handleChange}
+              className={styles.input}
+              required
+              />
+              {errors.last_name && <span className={styles.errorText}>{errors.last_name[0]}</span>}
+            </div>
 
 
-          <div className={styles.email}>
-          <p style={{color: "gray"}}>Email</p>
-          <input
-          type="email" 
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          className={styles.input}
-          required
-          />
-          {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
-          </div>
+            <div style={{marginBottom: "12px"}}>
+              <p style={{color: "gray"}}>Email</p>
+              <input
+              type="email" 
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={styles.input}
+              required
+              />
+              {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
+            </div>
 
-          <div className={styles.password}>
-          <p style={{color: "gray"}}>Пароль</p>
-          <input
-          type="password" 
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          className={styles.input}
-          required
-          />
-          </div>
+            <div style={{marginBottom: "10px"}}>
+              <p style={{color: "gray"}}>Пароль</p>
+              <input
+              type="password" 
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={styles.input}
+              required
+              />
+            </div>
+          </section>
 
-        </section>
-
-        <div className={styles.rememberme}>
+          <div className={styles.rememberme}>
             <input type="checkbox" id="remember" name="remember" />
             <label htmlFor="remember">Запам'ятати мене</label>
-        </div>
-
-        <div className={styles.button}>
-          <button type="submit" disabled={!formData.email || !formData.password || !formData.last_name || !formData.first_name} className={styles.thebutton}>
-            Зареєструватися
-          </button>
-        </div>
-
-        <section className={styles.underform}>
-
-          <div onClick={onSwitchToLogin} style={{cursor: "pointer"}}>
-            <span>Вже маєте акаунт? </span>
-            <a>Увійти</a>
           </div>
-        </section>
+
+          <div style={{marginBottom: "20px"}}>
+            <button type="submit" disabled={!formData.email || !formData.password || !formData.last_name || !formData.first_name} className={styles.button}>
+              Зареєструватися
+            </button>
+          </div>
+
+          <section className={styles.underform}>
+            <div onClick={onSwitchToLogin} style={{cursor: "pointer"}}>
+              <span>Вже маєте акаунт? </span>
+              <a>Увійти</a>
+            </div>
+          </section>
+
         </div>
       </div>
     </div>
-    </form>
+  </form>
     );
 };
 

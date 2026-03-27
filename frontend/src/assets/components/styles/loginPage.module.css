@@ -47,10 +47,6 @@
     cursor: pointer;
 }
 
-.arrow:hover {
-    color: lightgray;
-}
-
 .form {
     margin-top: 30px;
     padding: 10px 30px;
@@ -74,18 +70,6 @@
     outline: none;
 }
 
-.inputform {
-    margin-top: 32px;
-}
-
-.email {
-    margin-bottom: 20px;
-}
-
-.password {
-    margin-bottom: 10px;
-}
-
 .rememberme {
     font-size: 16px;
     display: flex;
@@ -100,16 +84,12 @@ a {
     font-weight: 600;
 }
 
-.button {
-    margin-bottom: 20px;
-}
-
 .thebutton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 48px;
-    min-width: 500px;
+    min-width: 490px;
     padding-inline: 22px;
     font-size: 16px;
     background: linear-gradient(180deg, #3a3a3a, #1f1f1f);
