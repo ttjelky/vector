@@ -18,107 +18,108 @@ import CopyPopup from "./CopyPopup";
 const LandingBody = () => {
     const email = "Vectorcommand6742@gmail.com";
     const phone = "+380 (68) 767 54 20";
-    return (
-    <div className={styles.LandingBodyAll}>
+return (
+    <div>
+        <img src={TopLandingPhoto} alt="Top Landing Photo" className={styles.TopPhoto} />
 
-        <div className={styles.TopLandingPhotoContainer}>
-        <img src={TopLandingPhoto} alt="Top Landing Photo" className={styles.TopLandingPhoto} />
-        </div>
+        <header className={styles.header} id="main"> 
 
-    <header className={styles.LandingHero} id="main"> 
-        <div className={styles.animate}>
-        <div className={styles.LandingHeroContent}>
-            <h1 className={styles.LandingBodyTitle}>Змагайтеся із</h1>
-            <img className={styles.LogoText} src={logotext} alt="Vector" />
-            <img src={HelloS} className={styles.HelloSticker}/>
-            <img src={YouCanS} className={styles.YouCanSticker}/>
-        </div>
-        </div>
-            <p className={styles.UnderTitle}>Завдання, дедлайни, оцінювання, прогрес — все в одному місці.</p>
-            <div className={styles.UnderTitleButtons}>
-            <BlackButton text={"Приєднатися до турніру"} />
-            <WhiteButton text={"Дізнатися більше"} onClick={() => window.location.href = "#info"}/>
+            <div className={styles.animate}>
+                <div className={styles.headerContent}>
+                    <h1 className={styles.title}>Змагайтеся із</h1>
+                    <img className={styles.LogoText} src={logotext} alt="Vector" />
+                    <img src={HelloS} className={styles.HelloS}/>
+                    <img src={YouCanS} className={styles.YouCanS}/>
+                </div>
             </div>
-            <div className={styles.TabletPhotoWrapper}>
-            <img className={styles.TabletPhoto} src={iPad} alt="Tablet Photo" />
-            </div>
-    </header>
-    <main>
-    <section className={styles.LandingBodySection} id="info">
-        <p className={styles.LandingBodyText}>Vector - це платформа для проведення турнірів.</p>
-        <div className={styles.LandingBodyFeatures}>
-            <section className={styles.LandingBodyFeature}>
-                <img className={styles.LandingBodyIcon} src={Cableicon} alt="Cable icon" />
-                <div>
-                    <p className={styles.LandingBodyFeatureTitle}>Створюйте турніри</p>
-                    <p className={styles.LandingBodyFeatureText}>Легко запускайте раунди з дедлайнами, завданнями та автоматичним керуванням етапами.</p>
+
+                <p className={styles.subtitle}>Завдання, дедлайни, оцінювання, прогрес — все в одному місці.</p>
+
+                <div className={styles.buttons}>
+                    <BlackButton text={"Приєднатися до турніру"} />
+                    <WhiteButton text={"Дізнатися більше"} onClick={() => window.location.href = "#info"}/>
+                </div>
+
+                <div className={styles.img1wrapper}>
+                    <img className={styles.img1} src={iPad} alt="photo" />
+                </div>
+
+        </header>
+
+        <main>
+            <section className={styles.featureSec} id="info">
+                <p className={styles.title2}>Vector - це платформа для проведення турнірів.</p>
+                <div className={styles.features}>
+
+                    <section className={styles.feature}>
+                        <img className={styles.icon} src={Cableicon} alt="Cable icon" />
+                        <p className={styles.featureTitle}>Створюйте турніри</p>
+                        <p className={styles.featureText}>Легко запускайте раунди з дедлайнами, завданнями та автоматичним керуванням етапами.</p>
+                    </section>
+
+                    <section className={styles.feature}>
+                        <img className={styles.icon} src={Earthicon} alt="Earth icon" />
+                        <p className={styles.featureTitle}>Відстежуйте прогрес</p>
+                        <p className={styles.featureText}>Переглядайте результати команд у реальному часі. Бали, статуси завдань і дедлайни — все в одному місці.</p>
+                    </section>
+
+                    <section className={styles.feature}>
+                        <img className={styles.icon} src={Accounticon} alt="Account icon" />
+                        <p className={styles.featureTitle}>Перевіряйте роботи</p>
+                        <p className={styles.featureText}>Учасники подають рішення прямо на платформі. Журі оцінює роботи, залишає коментарі та виставляє бали.</p>
+                    </section>
+
+                    <section className={styles.feature}>
+                        <img className={styles.icon} src={Charticon} alt="Chart icon" />
+                        <p className={styles.featureTitle}>Гнучкі ролі та керування</p>
+                        <p className={styles.featureText}>Ролі: учасник, журі, адміністратор. Кожен має свій функціонал і рівень доступу.</p>
+                    </section>
+
+                </div>
+
+                <div className={styles.img2wrapper}>
+                    <img src={HeroImage} alt="Hero Image"/>
                 </div>
             </section>
-            <section className={styles.LandingBodyFeature}>
-                <img className={styles.LandingBodyIcon} src={Earthicon} alt="Earth icon" />
-                <div>
-                    <p className={styles.LandingBodyFeatureTitle}>Відстежуйте прогрес</p>
-                    <p className={styles.LandingBodyFeatureText}>Переглядайте результати команд у реальному часі. Бали, статуси завдань і дедлайни — все в одному місці.</p>
+
+            <section className={styles.howToStart} id="howToStart">
+                <p className={styles.howToStartTitle}>Як почати?</p>
+
+                <div className={styles.steps}>
+                    <section className={styles.step}>
+                        <p className={styles.stepNumber}>01</p>
+                        <p className={styles.stepTitle}>Зареєструйтесь</p>
+                        <p className={styles.stepText}>Створіть акаунт як організатор, учасник або член журі. Це займає менше хвилини.</p>
+                    </section>
+
+                    <section className={styles.step}>
+                        <p className={styles.stepNumber}>02</p>
+                        <p className={styles.stepTitle}>Приєднайтеся до турніру</p>
+                        <p className={styles.stepText}>Організатор створює турнір і додає раунди. Команди приєднуються за запрошенням або кодом.</p>
+                    </section>
+
+                    <section className={styles.step}>
+                        <p className={styles.stepNumber}>03</p>
+                        <p className={styles.stepTitle}>Проводьте та змагайтесь</p>
+                        <p className={styles.stepText}>Завантажуйте завдання, подавайте рішення, виставляйте оцінки та відстежуйте результати в реальному часі.</p>
+                    </section>
+                </div>
+
+                <div className={styles.img3wrapper}>
+                    <img src={HeroImage2} alt="Hero Image 2" className={styles.img3} />
                 </div>
             </section>
-            <section className={styles.LandingBodyFeature}>
-                <img className={styles.LandingBodyIcon} src={Accounticon} alt="Account icon" />
-                <div>
-                    <p className={styles.LandingBodyFeatureTitle}>Перевіряйте роботи</p>
-                    <p className={styles.LandingBodyFeatureText}>Учасники подають рішення прямо на платформі. Журі оцінює роботи, залишає коментарі та виставляє бали.</p>
+
+            <section className={styles.contactUs} id="contactUs">
+                <p className={styles.contactUsTitle}>Зв'язатися з нами</p>
+                <p className={styles.contactUsText}>Маєте питання? Зв'яжіться з нами у будь-яку мить.</p>
+
+                <div className={styles.email}>
+                    <CopyPopup label={email} copyText={email} />
                 </div>
+                <CopyPopup label={phone} copyText={phone} />
             </section>
-            <section className={styles.LandingBodyFeature}>
-                <img className={styles.LandingBodyIcon} src={Charticon} alt="Chart icon" />
-                <div>
-                    <p className={styles.LandingBodyFeatureTitle}>Гнучкі ролі та керування</p>
-                    <p className={styles.LandingBodyFeatureText}>Ролі: учасник, журі, адміністратор. Кожен має свій функціонал і рівень доступу.</p>
-                </div>
-            </section>
-        </div>
-        <div className={styles.HeroImageContainer}>
-            <img src={HeroImage} alt="Hero Image" className={styles.HeroImage} />
-        </div>
-        </section>
-        <section className={styles.LandingBodyHowToStart} id="howToStart">
-            <p className={styles.LandingBodyHowToStartTitle}>Як почати?</p>
-            <div className={styles.LandingBodyHowToStartSteps}>
-                <section className={styles.LandingBodyHowToStartStep}>
-                    <p className={styles.LandingBodyHowToStartStepNumber}>01</p>
-                    <div>
-                        <p className={styles.LandingBodyHowToStartStepTitle}>Зареєструйтесь</p>
-                        <p className={styles.LandingBodyHowToStartStepText}>Створіть акаунт як організатор, учасник або член журі. Це займає менше хвилини.</p>
-                    </div>
-                </section>
-                <section className={styles.LandingBodyHowToStartStep}>
-                    <p className={styles.LandingBodyHowToStartStepNumber}>02</p>
-                    <div>
-                        <p className={styles.LandingBodyHowToStartStepTitle}>Приєднайтеся до турніру</p>
-                        <p className={styles.LandingBodyHowToStartStepText}>Організатор створює турнір і додає раунди. Команди приєднуються за запрошенням або кодом.</p>
-                    </div>
-                </section>
-                <section className={styles.LandingBodyHowToStartStep}>
-                    <p className={styles.LandingBodyHowToStartStepNumber}>03</p>
-                    <div>
-                        <p className={styles.LandingBodyHowToStartStepTitle}>Проводьте та змагайтесь</p>
-                        <p className={styles.LandingBodyHowToStartStepText}>Завантажуйте завдання, подавайте рішення, виставляйте оцінки та відстежуйте результати в реальному часі.</p>
-                    </div>
-                </section>
-            </div>
-            <div className={styles.HeroImage2Container}>
-            <img src={HeroImage2} alt="Hero Image 2" className={styles.HeroImage2} />
-            </div>
-        </section>
-        <section className={styles.LandingBodyContactUs} id="contactUs">
-            <p className={styles.LandingBodyContactUsTitle}>Зв'язатися з нами</p>
-            <p className={styles.LandingBodyContactUsText}>Маєте питання? Зв'яжіться з нами у будь-яку мить.</p>
-            <div className={styles.email}>
-            <CopyPopup label={email} copyText={email} />
-            </div>
-            <CopyPopup label={phone} copyText={phone} />
-        </section>
-    </main>
-    
+        </main>
     </div>
     );
 }

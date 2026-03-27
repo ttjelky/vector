@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import styles from "../components/styles/loginPage.module.css";
-import cross from "../components/static/icons/cross.svg"
-import BlackButton from "../components/blackbutton";
+import cross from "../components/static/icons/cross.svg";
 import { registerUser, loginUser } from '../../api';
 import { useNavigate } from "react-router-dom";
 
 const Login = ({isOpen, onClose, onSwitchToRegister, onSwitchToForgot}) => {
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   const navigate = useNavigate();
+
   const [loginData, setLoginData] = useState({
     email: '',
     password: ''
@@ -50,83 +49,83 @@ const handleSubmit = async (e) => {
     }
 };
 
-    if (!isOpen) return null;
-    return (
-      <form onSubmit={handleSubmit} noValidate>
-      <div className={styles.overlay} onClick={onClose}>
+if (!isOpen) return null;
+
+return (
+  <form onSubmit={handleSubmit} noValidate>
+    <div className={styles.overlay} onClick={onClose}>
       <div className={styles.login} onClick={(e) => e.stopPropagation()}>
 
-        <div className={styles.navbar}>
-            <img src={cross} alt="back" className={styles.cross} onClick={onClose} />
-        </div>
+        <img src={cross} alt="back" className={styles.cross} onClick={onClose} />
 
         <div className={styles.form}>
-        <h1 className={styles.logintitle}>Вхід на сайт</h1>
+          <h1 className={styles.logintitle}>Вхід на сайт</h1>
 
-        <section className={styles.inputform}>
+          <section style={{marginTop: "32px"}}>
 
-          <div className={styles.email}>
-          <p style={{color: "gray"}}>Email</p>
-          <input
-            type="email"
-            className={styles.input}
-            name="email" 
-            placeholder="Електронна пошта" 
-            value={loginData.email}
-            onChange={handleChange}
-            required 
-          />
-          {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
-          </div>
+            <div style={{marginBottom: "20px"}}>
+              <p style={{color: "gray"}}>Email</p>
+              <input
+                type="email"
+                className={styles.input}
+                name="email"
+                placeholder="Електронна пошта" 
+                value={loginData.email}
+                onChange={handleChange}
+                required 
+              />
+              {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
+            </div>
 
-          <div className={styles.password}>
-          <p style={{color: "gray"}}>Пароль</p>
-          <input
-            type="password" 
-            className={styles.input}
-            name="password" 
-            placeholder="Пароль" 
-            value={loginData.password}
-            onChange={handleChange}
-            required
-          />
-          {errors.password && <span className={styles.errorText}>{errors.password[0]}</span>}
-          </div>
+            <div style={{marginBottom: "10px"}}>
+              <p style={{color: "gray"}}>Пароль</p>
+              <input
+                type="password" 
+                className={styles.input}
+                name="password" 
+                placeholder="Пароль" 
+                value={loginData.password}
+                onChange={handleChange}
+                required
+              />
+              {errors.password && <span className={styles.errorText}>{errors.password[0]}</span>}
+            </div>
 
-        </section>
+          </section>
 
-        {errors.detail && (
-        <p className={styles.errorText} style={{margin: '10px 0' }}>
-            {errors.detail}
-        </p>
-    )}
+          {errors.detail && (
+            <p className={styles.errorText} style={{margin: '10px 0' }}>
+              {errors.detail}
+            </p>
+          )}
 
-        <div className={styles.rememberme}>
+          <div className={styles.rememberme}>
             <input type="checkbox" id="remember" name="remember" />
             <label htmlFor="remember">Запам'ятати мене</label>
-        </div>
-
-        <div className={styles.button}>
-          <button type="submit" disabled={!loginData.email || !loginData.password} className={styles.thebutton}>
-            Увійти
-          </button>
-        </div>
-
-        <section className={styles.underform}>
-          <div onClick={onSwitchToRegister} style={{cursor: "pointer"}}>
-            <span>Не маєте акаунту? </span>
-            <a>Зареєструватися</a>
           </div>
 
-        <div onClick={onSwitchToForgot}>
-          <a className={styles.forgot} style={{cursor: "pointer"}}>Забули пароль?</a>
-        </div>
-        </section>
+          <div style={{marginBottom: "20px"}}>
+            <button type="submit" disabled={!loginData.email || !loginData.password} className={styles.thebutton}>
+              Увійти
+            </button>
+          </div>
+
+          <section className={styles.underform}>
+            <div onClick={onSwitchToRegister} style={{cursor: "pointer"}}>
+              <span>Не маєте акаунту? </span>
+              <a>Зареєструватися</a>
+            </div>
+
+          <div onClick={onSwitchToForgot}>
+            <a className={styles.forgot} style={{cursor: "pointer"}}>Забули пароль?</a>
+          </div>
+
+          </section>
         </div>
       </div>
     </div>
   </form>
-    );
+  );
 };
 
 export default Login

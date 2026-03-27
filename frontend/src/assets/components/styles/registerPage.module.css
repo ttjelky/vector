@@ -13,7 +13,7 @@
     z-index: 9999;
 }
 
-.login{
+.register{
     background-color: #f5f5f7;
     border-radius: 28px;
     border: 6px solid white;
@@ -47,16 +47,12 @@
     cursor: pointer;
 }
 
-.arrow:hover {
-    color: lightgray;
-}
-
 .form {
     margin-top: 30px;
     padding: 10px 30px;
 }
 
-.logintitle {
+.title {
     font-family: "Google Sans", sans-serif;
     font-size: 60px;
 }
@@ -79,22 +75,6 @@ input:focus {
   border: 1px solid black;
 }
 
-.inputform {
-    margin-top: 32px;
-}
-
-.name {
-    margin-bottom: 12px;
-}
-
-.email {
-    margin-bottom: 12px;
-}
-
-.password {
-    margin-bottom: 10px;
-}
-
 .rememberme {
     font-size: 16px;
     display: flex;
@@ -113,7 +93,7 @@ a {
     margin-bottom: 20px;
 }
 
-.thebutton {
+.button {
     display: inline-flex;
     align-items: center;
     justify-content: center;

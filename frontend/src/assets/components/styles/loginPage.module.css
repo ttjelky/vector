@@ -47,10 +47,6 @@
     cursor: pointer;
 }
 
-.arrow:hover {
-    color: lightgray;
-}
-
 .form {
     margin-top: 30px;
     padding: 10px 30px;
@@ -74,18 +70,6 @@
     outline: none;
 }
 
-.inputform {
-    margin-top: 32px;
-}
-
-.email {
-    margin-bottom: 20px;
-}
-
-.password {
-    margin-bottom: 10px;
-}
-
 .rememberme {
     font-size: 16px;
     display: flex;
@@ -98,10 +82,6 @@ a {
     text-decoration: none;
     color: black;
     font-weight: 600;
-}
-
-.button {
-    margin-bottom: 20px;
 }
 
 .thebutton {

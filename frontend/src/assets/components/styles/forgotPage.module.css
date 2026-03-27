@@ -13,7 +13,7 @@
     z-index: 9999;
 }
 
-.login{
+.forgot{
     background-color: #f5f5f7;
     border-radius: 28px;
     border: 6px solid white;
@@ -47,16 +47,12 @@
     cursor: pointer;
 }
 
-.arrow:hover {
-    color: lightgray;
-}
-
 .form {
     margin-top: 30px;
     padding: 10px 30px;
 }
 
-.logintitle {
+.title {
     font-family: "Google Sans", sans-serif;
     font-size: 60px;
 }
@@ -72,14 +68,6 @@
     font-size: 16px;
     box-sizing: border-box;
     outline: none;
-}
-
-.inputform {
-    margin-top: 32px;
-}
-
-.email {
-    margin-bottom: 20px;
 }
 
 .backToLogin {
