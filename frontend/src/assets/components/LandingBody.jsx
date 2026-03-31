@@ -14,10 +14,12 @@ import BlackButton from "./blackbutton";
 import WhiteButton from "./WhiteButton";
 import iPad from "./static/Ipad.png";
 import CopyPopup from "./CopyPopup";
+import useEffect from "react";
 
 const LandingBody = () => {
     const email = "Vectorcommand6742@gmail.com";
     const phone = "+380 (68) 767 54 20";
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
     return (
     <div className={styles.LandingBodyAll}>
 
@@ -121,6 +123,28 @@ const LandingBody = () => {
     
     </div>
     );
+
+    useEffect(() => {
+  const reveals = document.querySelectorAll(".reveal");
+
+  function revealOnScroll() {
+    const triggerBottom = window.innerHeight * 0.85;
+
+    reveals.forEach(el => {
+      const boxTop = el.getBoundingClientRect().top;
+
+      if (boxTop < triggerBottom) {
+        el.classList.add("active");
+      }
+    });
+  }
+
+  window.addEventListener("scroll", revealOnScroll);
+
+  return () => {
+    window.removeEventListener("scroll", revealOnScroll);
+  };
+}, []);
 }
 
 export default LandingBody;
