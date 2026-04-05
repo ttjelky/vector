@@ -1,3 +1,4 @@
+/* Стандартна кнопка (ПК) */
 .whitebutton {
     display: inline-flex;
     align-items: center;
@@ -14,11 +15,32 @@
 }
 
 .whitebutton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+/* Мобільна кнопка (прихована на ПК) */
+.whitebuttonMOBILE {
+    display: none; /* Ховаємо на ПК */
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding-inline: 22px;
+    font-size: 16px;
     background: #ffffff;
+    color: #222;
+    border: 1px solid #e5e5e5;
+    border-radius: 1000px;
+    cursor: pointer;
+    width: 100%; /* Для меню */
+}
 
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 6px 14px rgba(0,0,0,0.12),
-    inset 0 1px 0 rgba(255,255,255,1);
+/* ЛОГІКА ПЕРЕМИКАННЯ */
+@media (max-width: 500px) {
+    .whitebutton {
+        display: flex !important; /* Ховаємо десктопну на мобілці */
+    }
+    .whitebuttonMOBILE {
+        display: flex; /* Показуємо мобільну */
+    }
 }

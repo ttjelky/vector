@@ -1,22 +1,17 @@
 import React, { useState } from 'react';
 import styles from "../components/styles/registerPage.module.css";
-import cross from "../components/static/icons/cross.svg"
+import cross from "../components/static/icons/cross.svg";
 import { registerUser, loginUser } from '../../api';
 import { useNavigate } from 'react-router-dom';
 
-const Register = ({isOpen, onClose, onSwitchToLogin}) => {
-
+const Register = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
     email: '',
     password: ''
   });
-
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     
@@ -31,89 +26,76 @@ const Register = ({isOpen, onClose, onSwitchToLogin}) => {
     setErrors({});
     setIsLoading(true);
     try {
-        await registerUser(formData);
-        const response = await loginUser({
-            username: formData.email,
-            password: formData.password
-        });
-        localStorage.setItem('accessToken', response.data.access);
-        onClose();
-        navigate('/dashboard');
+      await registerUser(formData);
+      const response = await loginUser({
+        username: formData.username,
+        password: formData.password
+      });
+      localStorage.setItem('accessToken', response.data.access);
+      localStorage.setItem('refreshToken', response.data.refresh);
+      navigate('/dashboard');
+      onClose();
     } catch (error) {
-        if (error.response && error.response.data) {
-            setErrors(error.response.data); 
-        } else {
-            alert("Щось пішло не так. Перевірте з'єднання.");
-        }
-    } finally {
-        setIsLoading(false);
+      console.error(error.response?.data);
+      alert('Помилка реєстрації.');
     }
     
   };
-  
-if (!isOpen) return null;
 
-return (
-  <form onSubmit={handleSubmit} noValidate>
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.register} onClick={(e) => e.stopPropagation()}>
+  return (
+    <div 
+      className={`${styles.overlay} ${isOpen ? styles.overlayOpen : ""}`} 
+      onClick={onClose}
+    >
+      <div 
+        className={`${styles.login} ${isOpen ? styles.open : styles.closed}`} 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={styles.header}>
+          <h1 className={styles.logintitle}>Реєстрація</h1>
+          <div className={styles.crossContainer} onClick={onClose}>
+            <img src={cross} alt="close" className={styles.crossIcon} />
+          </div>
+        </div>
 
-        <img src={cross} alt="back" className={styles.cross} onClick={onClose} />
-
-        <div className={styles.form}>
-
-          <h1 className={styles.title}>Реєстрація</h1>
-
-          <section style={{marginTop: "32px"}}>
-            <div style={{marginBottom: "12px"}}>
-              <p style={{color: "gray"}}>Ім’я</p>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <section className={styles.inputform}>
+            <div className={styles.name}>
+              <p style={{ color: "gray", margin: "0 0 5px 5px" }}>Ім’я та прізвище</p>
               <input 
-              type="text" 
-              name="first_name"
-              value={formData.first_name}
-              onChange={handleChange}
-              className={styles.input}
-              required
+                type="text" 
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder="Введіть ваше ім'я"
+                required
               />
-              {errors.first_name && <span className={styles.errorText}>{errors.first_name[0]}</span>}
             </div>
 
-            <div style={{marginBottom: "12px"}}>
-              <p style={{color: "gray"}}>Прізвище</p>
-              <input 
-              type="text" 
-              name="last_name"
-              value={formData.last_name}
-              onChange={handleChange}
-              className={styles.input}
-              required
-              />
-              {errors.last_name && <span className={styles.errorText}>{errors.last_name[0]}</span>}
-            </div>
-
-
-            <div style={{marginBottom: "12px"}}>
-              <p style={{color: "gray"}}>Email</p>
+            <div className={styles.email}>
+              <p style={{ color: "gray", margin: "0 0 5px 5px" }}>Email</p>
               <input
-              type="email" 
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={styles.input}
-              required
+                type="email" 
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder="example@mail.com"
+                required
               />
-              {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
             </div>
 
-            <div style={{marginBottom: "10px"}}>
-              <p style={{color: "gray"}}>Пароль</p>
+            <div className={styles.password}>
+              <p style={{ color: "gray", margin: "0 0 5px 5px" }}>Пароль</p>
               <input
-              type="password" 
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={styles.input}
-              required
+                type="password" 
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={styles.input}
+                placeholder="••••••••"
+                required
               />
             </div>
           </section>
@@ -123,24 +105,22 @@ return (
             <label htmlFor="remember">Запам'ятати мене</label>
           </div>
 
-          <div style={{marginBottom: "20px"}}>
-            <button type="submit" disabled={!formData.email || !formData.password || !formData.last_name || !formData.first_name} className={styles.button}>
+          <div className={styles.button}>
+            <button type="submit" className={styles.thebutton}>
               Зареєструватися
             </button>
           </div>
 
           <section className={styles.underform}>
-            <div onClick={onSwitchToLogin} style={{cursor: "pointer"}}>
+            <div>
               <span>Вже маєте акаунт? </span>
-              <a>Увійти</a>
+              <a href="/" onClick={(e) => { e.preventDefault(); onClose(); }}>Увійти</a>
             </div>
           </section>
-
-        </div>
+        </form>
       </div>
     </div>
-  </form>
-    );
+  );
 };
 
-export default Register
+export default Register;
