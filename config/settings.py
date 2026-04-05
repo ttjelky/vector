@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'apps.users',
+    'django_rest_passwordreset',
 
 ]
 
@@ -134,3 +135,13 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = 'users.User'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = 'vectorcommandreset@gmail.com'
+EMAIL_HOST_PASSWORD = 'lcdndlmlbvgoksjk'
+DEFAULT_FROM_EMAIL = 'Vector <vectorcommandreset@gmail.com>'
