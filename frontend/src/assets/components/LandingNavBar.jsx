@@ -5,6 +5,7 @@ import BlackButton from "./blackbutton";
 import WhiteButton from "./WhiteButton";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import Forgot from "../pages/Forgot";
 
 const LandingNavBar = () => {
     const [isLoginOpen, setIsLoginOpen] = useState(false);

@@ -126,6 +126,20 @@
     transform: scale(0.98);
 }
 
+.errorText {
+    color: #ff4d4d;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+    text-align: left;
+}
+
+.thebutton:disabled {
+    background: #555;
+    cursor: unset;
+    opacity: 0.6;
+}
+
 .underform {
     display: flex;
     justify-content: space-between;

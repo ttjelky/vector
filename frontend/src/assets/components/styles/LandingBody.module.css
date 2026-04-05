@@ -32,7 +32,7 @@ body {
   transform: translateY(0);
 }
 
-.TopLandingPhoto {
+.TopPhoto {
     position: absolute;
     left: 50vw;
     transform: translateX(-50%);
@@ -42,7 +42,7 @@ body {
 
 }
 
-.LandingHero {
+.header {
     align-items: center;
     display: flex;
     flex-direction: column;
@@ -51,7 +51,7 @@ body {
     padding-top: 120px;
 }
 
-.LandingHeroContent {
+.headerContent {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -62,7 +62,7 @@ body {
     margin-top: 0.5vw;
 }
 
-.UnderTitle {
+.subtitle {
     font-family: "Google Sans", sans-serif;
     font-size: 22px;
     color: rgb(100, 100, 100);
@@ -71,7 +71,7 @@ body {
     text-align: center;
 }
 
-.UnderTitleButtons {
+.buttons {
     display: flex;
     justify-content: center;
     gap: 20px;
@@ -84,7 +84,7 @@ body {
 
 }
 
-.LandingBodyTitle {
+.title {
     font-family: "Google Sans", sans-serif;
     font-size: 120px;
     padding: 10px;
@@ -99,19 +99,19 @@ body {
     padding: 10px;
 }
 
-.TabletPhotoWrapper {
+.img1wrapper {
     display: flex;
     justify-content: center;
     width: 100%;
     border-bottom: 5px solid rgb(238, 238, 238);
 }
 
-.TabletPhoto {
+.img1 {
     width: 900px;
     margin-top: 20px;
 }
 
-.LandingBodyText {
+.title2 {
     font-family: "Google Sans", sans-serif;
     font-size: 50px;
     padding: 20px;
@@ -121,47 +121,47 @@ body {
     border-radius: 20px;
 }
 
-.LandingBodyFeatures {
+.features {
     display: flex;
     justify-content: space-around;
     padding: 50px;
 }
 
-.LandingBodyFeature {
+.feature {
     padding-top: 40px;
     border-top: 2px solid rgb(237, 237, 237);
     max-width: 250px;
     font-family: "Google Sans", sans-serif;
 }
 
-.LandingBodyIcon {
+.icon {
     width: 24px;
     height: 24px;
     margin-bottom: 24px;
 }
 
-.LandingBodyFeatureTitle {
+.featureTitle {
     font-size: 22px;
     margin-bottom: 20px;
 }
 
-.LandingBodyFeatureText {
+.featureText {
     font-size: 16px;
     color: rgb(100, 100, 100);
 } 
 
-.HeroImageContainer {
+.img2wrapper {
     display: flex;
     justify-content: center;
     margin-top: 60px;
 }
 
-.LandingBodyHowToStart {
+.howToStart {
     margin-top: 120px;
     scroll-margin-top: 100px;
 }
 
-.LandingBodyHowToStartTitle {
+.howToStartTitle {
     font-family: "Google Sans", sans-serif;
     font-size: 60px;
     padding: 20px;
@@ -172,48 +172,48 @@ body {
     border-radius: 20px;
 }
 
-.LandingBodyHowToStartSteps {
+.steps {
     display: flex;
     justify-content: space-around;
     padding: 50px;
     margin-top: 80px;
 }
 
-.LandingBodyHowToStartStep {
+.step {
     max-width: 360px;
     font-family: "Google Sans", sans-serif;
     border-top: 2px solid rgb(237, 237, 237);
     padding-top: 80px;
 }
 
-.LandingBodyHowToStartStepNumber {
+.stepNumber {
     font-size: 80px;
     color: rgb(166, 166, 166);
     margin-bottom: 60px;
 }
 
-.LandingBodyHowToStartStepTitle {
+.stepTitle {
     font-size: 22px;
     margin-bottom: 20px;
 }
 
-.LandingBodyHowToStartStepText {
+.stepText {
     font-size: 18px;
     color: rgb(100, 100, 100);
 }
 
-.HeroImage2 {
+.img3 {
     padding: 10px;
     margin-top: 60px;
 }
 
-.HeroImage2Container {
+.img3wrapper {
     display: flex;
     justify-content: center;
     padding: 10px;
 }
 
-.LandingBodyContactUs {
+.contactUs {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -223,12 +223,12 @@ body {
     margin: 100px 50px 10px 50px;
 }
 
-.LandingBodyContactUsTitle {
+.contactUsTitle {
     font-size: 60px;
     margin-bottom: 10px;
 }
 
-.LandingBodyContactUsText {
+.contactUsText {
     font-size: 15px;
     color: rgb(100, 100, 100);
     margin-bottom: 40px;
@@ -238,23 +238,19 @@ body {
     margin-bottom: 15px;
 }
 
-.LandingBodyContactUsPhone {
-    font-size: 30px;
-}
-
-.LandingBodySection {
+.featureSec {
     position: relative;
     scroll-margin-top: 100px;
 }
 
-.HelloSticker {
+.HelloS {
     position: absolute;
     top: 0%;
     left: 93%;
     width: 20%;
 }
 
-.YouCanSticker {
+.YouCanS {
     position: absolute;
     top: 60%;
     left: -5%;

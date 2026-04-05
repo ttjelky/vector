@@ -7,12 +7,14 @@ import { useNavigate } from 'react-router-dom';
 const Register = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: '',
+    first_name: '',
+    last_name: '',
     email: '',
     password: ''
   });
 
   const handleChange = (e) => {
+    
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -21,6 +23,8 @@ const Register = ({ isOpen, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+    setIsLoading(true);
     try {
       await registerUser(formData);
       const response = await loginUser({
@@ -35,6 +39,7 @@ const Register = ({ isOpen, onClose }) => {
       console.error(error.response?.data);
       alert('Помилка реєстрації.');
     }
+    
   };
 
   return (

@@ -1,0 +1,180 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.vectorApp {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: 'DM Sans', sans-serif;
+  overflow: hidden;
+}
+
+.topNavbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 20px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  z-index: 100;
+}
+
+.search {
+  width: 100%;
+  max-width: 400px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f9fafb;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.searchInput:hover {
+  border-color: #cbd5e1;
+}
+
+.searchInput:focus {
+  border-color: #3b82f6;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.navBarUserActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  line-height: 40px;
+}
+
+.searchInput::placeholder {
+  color: #9ca3af;
+}
+
+.mainWrapper {
+  display: flex;
+  flex: 1;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-right: 15px;
+}
+
+.leftSidebar {
+  width: 200px;
+  background-color: white;
+  border-right: 1px solid #dee2e6;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.primaryNav, .secondaryNav {
+  margin-bottom: 20px;
+}
+
+.logoutSection {
+  margin-top: auto;
+}
+
+.leftSidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.leftSidebar li {
+  margin-bottom: 5px;
+}
+
+.leftSidebar a {
+  text-decoration: none;
+  color: #333;
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border-radius: 8px;
+}
+
+.sidebarEl:hover {
+  background-color: #f0f0f0;
+  border-radius: 15px;
+  transition-duration: 0.2s;
+}
+
+
+.activeLink {
+  background-color: #ececec;
+}
+
+.sidebarText {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(39, 50, 64, 1);
+}
+
+.sidebarIcon {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+}
+
+.sidebarSectionTitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: gray;
+  margin-bottom: 10px;
+  margin-left: 13px;
+}
+
+.logoutSection {
+  background-color: rgb(255, 229, 230);
+  border-radius: 15px;
+}
+
+.logoutSection:hover {
+  background-color: rgb(255, 201, 204);
+  transition-duration: 0.2s;
+}
+
+.logoutIcon {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  fill: rgb(215, 125, 126);
+}
+
+.logoutText {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgb(215, 125, 126);
+}
+
+.notificationIcon {
+  position: relative;
+  width: 18px;
+  height: 18px;
+}
+
+.mainWrapper {
+  display: flex;
+  overflow: hidden;
+}
+
+.contentArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px;
+}
