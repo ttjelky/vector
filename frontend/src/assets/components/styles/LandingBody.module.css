@@ -301,7 +301,7 @@ img {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px); /* Починає на 30px нижче */
+    transform: translateY(75px); /* Починає на 30px нижче */
   }
   to {
     opacity: 1;
@@ -329,11 +329,16 @@ img {
   }
 
   .LandingHeroContent {
-    padding: 20px;
     border-radius: 25px;
+     padding-top: 69px;
+    padding-bottom: 69px;
+    padding-left: 69px;
+    padding-right: 69px;
+    scale: 0.85;
   }
 
   .LandingBodyTitle {
+    scale: 1.5;
     font-size: 36px;
     text-align: center;
   }

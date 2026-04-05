@@ -1,11 +1,7 @@
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 .header {
@@ -15,61 +11,133 @@ html {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 20px;
-    padding-inline: 40px;
-    column-gap: 20px;
-    font-family: "Google Sans", sans-serif;
-    -webkit-font-smoothing: antialiased;
+    padding: 20px 40px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .logoContainer {
     display: flex;
     padding: 3px 10px;
-    background:rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
-    0 4px 30px rgba(0, 0, 0, 0.05),
-    0 1px 1px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
     border-radius: 20px;
-  
-   
 }
 
 .navBarList {
-    background:rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
-        0 4px 30px rgba(0, 0, 0, 0.05),
-        0 1px 1px rgba(0, 0, 0, 0.02);
     border-radius: 75px;
     list-style: none;
     display: flex;
-    column-gap: 30px;
     gap: 27px;
     padding: 20px;
-
 }
 
-
 .navBarLink {
-    display: inline-flex;
-    align-items: center;
     text-decoration: none;
     color: black;
     font-size: 16px;
     font-weight: 700;
-    position: relative;
 }
 
-.buttons {
+.desktopButtons {
     display: flex;
     gap: 20px;
 }
 
-@media (max-width: 1030px) {
+/* БУРГЕР */
+.burger {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
 
+.burger span {
+    width: 24px;
+    height: 2px;
+    background: #1d1d1f;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.burgerActive span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.burgerActive span:nth-child(2) { opacity: 0; }
+.burgerActive span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.mobileContainer {
+    position: relative;
+    display: none;
+}
+
+.dropdown {
+    position: absolute;
+    top: calc(100% + 15px);
+    right: 0;
+    background: white;
+    padding: 20px;
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 240px;
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dropdown.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.mobileLinks {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mobileLinks a {
+    text-decoration: none;
+    color: #1d1d1f;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 5px 0;
+}
+
+.divider {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 5px 0;
+}
+
+.mobileActions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.blackbuttonMOBILE, .whitebuttonMOBILE {
+    width: 100% !important;
+    justify-content: center !important;
+    display: flex !important;
+}
+
+/* МЕДІА ЗАПИТИ */
+@media (max-width: 850px) {
+    .nav, .desktopButtons { display: none !important; }
+    .mobileContainer { display: flex !important; }
+    .header { padding: 15px 20px; }
 }
