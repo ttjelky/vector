@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../components/styles/loginPage.module.css";
 import cross from "../components/static/icons/cross.svg";
 import { registerUser, loginUser } from '../../api';
@@ -34,6 +34,10 @@ const handleSubmit = async (e) => {
         });
         
         localStorage.setItem('accessToken', response.data.access);
+        const firstName = response.data.first_name || '';
+        const lastName = response.data.last_name || '';
+        const fullUserName = `${firstName} ${lastName}`.trim();
+        localStorage.setItem('fullUserName', `${response.data.first_name} ${response.data.last_name}`);
         onClose();
         navigate('/dashboard');
     } catch (error) {
