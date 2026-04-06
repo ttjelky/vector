@@ -1,12 +1,17 @@
+/* Базові стилі */
+.LandingBody {
+    display: flex;
+    flex-direction: column;
+}
 
 .TopPhoto {
     position: absolute;
-    left: 50vw;
+    left: 50%;
     transform: translateX(-50%);
     top: -560px;
     margin: 0;
     max-width: 100%;
-
+    z-index: -1;
 }
 
 .header {
@@ -14,7 +19,7 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    height: 900px;
+    min-height: 900px;
     padding-top: 120px;
 }
 
@@ -27,6 +32,22 @@
     border-radius: 50px;
     padding: 20px 100px 90px 100px;
     margin-top: 50px;
+    background: white;
+}
+
+.title {
+    font-family: "Google Sans", sans-serif;
+    font-size: clamp(40px, 10vw, 120px); /* Адаптивний розмір тексту */
+    padding: 10px;
+    -webkit-font-smoothing: antialiased;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.LogoText {
+    scale: 4;
+    padding: 10px;
+    max-width: 100%;
 }
 
 .subtitle {
@@ -36,6 +57,7 @@
     margin-top: 40px;
     margin-bottom: 30px;
     text-align: center;
+    padding: 0 20px;
 }
 
 .buttons {
@@ -69,35 +91,48 @@
     display: flex;
     justify-content: center;
     width: 100%;
-    border-bottom: 5px solid rgb(238, 238, 238);
+    margin-top: 20px;
 }
 
 .img1 {
     width: 900px;
-    margin-top: 20px;
+    max-width: 95%;
+    height: auto;
 }
 
-.title2 {
+.title2, .howToStartTitle {
     font-family: "Google Sans", sans-serif;
-    font-size: 50px;
+    font-size: clamp(30px, 6vw, 50px);
     padding: 20px;
-    margin: 330px 50px 10px 50px;
+    margin: 20px 50px 10px 50px;
     -webkit-font-smoothing: antialiased;
     border: 5px solid black;
     border-radius: 20px;
+    text-align: center;
 }
 
-.features {
+.howToStartTitle {
+    margin-top: 120px;
+    font-size: clamp(35px, 7vw, 60px);
+}
+
+.features, .steps {
     display: flex;
     justify-content: space-around;
     padding: 50px;
+    gap: 30px;
 }
 
-.feature {
+.feature, .step {
     padding-top: 40px;
     border-top: 2px solid rgb(237, 237, 237);
     max-width: 250px;
     font-family: "Google Sans", sans-serif;
+    transition: transform 0.3s ease;
+}
+
+.feature:hover, .step:hover {
+    transform: translateY(-5px);
 }
 
 .icon {
@@ -106,166 +141,157 @@
     margin-bottom: 24px;
 }
 
-.featureTitle {
+.featureTitle, .stepTitle {
     font-size: 22px;
     margin-bottom: 20px;
+    font-weight: 500;
 }
 
-.featureText {
+.featureText, .stepText {
     font-size: 16px;
     color: rgb(100, 100, 100);
-} 
-
-.img2wrapper {
-    display: flex;
-    justify-content: center;
-    margin-top: 60px;
-}
-
-.howToStart {
-    margin-top: 120px;
-    scroll-margin-top: 100px;
-}
-
-.howToStartTitle {
-    font-family: "Google Sans", sans-serif;
-    font-size: 60px;
-    padding: 20px;
-    -webkit-font-smoothing: antialiased;
-    margin-left: 50px;
-    margin-right: 50px;
-    border: 5px solid black;
-    border-radius: 20px;
-}
-
-.steps {
-    display: flex;
-    justify-content: space-around;
-    padding: 50px;
-    margin-top: 80px;
-}
-
-.step {
-    max-width: 360px;
-    font-family: "Google Sans", sans-serif;
-    border-top: 2px solid rgb(237, 237, 237);
-    padding-top: 80px;
+    line-height: 1.5;
 }
 
 .stepNumber {
     font-size: 80px;
     color: rgb(166, 166, 166);
-    margin-bottom: 60px;
+    margin-bottom: 40px;
 }
 
-.stepTitle {
-    font-size: 22px;
-    margin-bottom: 20px;
-}
-
-.stepText {
-    font-size: 18px;
-    color: rgb(100, 100, 100);
-}
-
-.img3 {
-    padding: 10px;
-    margin-top: 60px;
-}
-
-.img3wrapper {
+.img2wrapper, .img3wrapper {
     display: flex;
     justify-content: center;
-    padding: 10px;
+    margin-top: 20px;
+    padding: 0 20px;
+}
+
+.img2wrapper img, .img3 {
+    max-width: 100%;
+    height: auto;
 }
 
 .contactUs {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 50px;
+    padding: 50px 20px;
     font-family: "Google Sans", sans-serif;
     border: 5px solid black;
-    margin: 100px 50px 10px 50px;
+    margin: 100px 50px 50px 50px;
+    text-align: center;
 }
 
 .contactUsTitle {
-    font-size: 60px;
+    font-size: clamp(30px, 8vw, 60px);
     margin-bottom: 10px;
 }
 
-.contactUsText {
-    font-size: 15px;
-    color: rgb(100, 100, 100);
-    margin-bottom: 40px;
-}
-
-.email {
-    margin-bottom: 15px;
-}
-
-.featureSec {
-    position: relative;
-    scroll-margin-top: 100px;
-}
-
+/* Стікери */
 .HelloS {
     position: absolute;
     top: 0%;
-    left: 93%;
-    width: 20%;
+    left: 90%;
+    width: 120px;
 }
 
 .YouCanS {
     position: absolute;
     top: 60%;
     left: -5%;
-    width: 17%;
+    width: 100px;
     transform: rotate(-10deg);
 }
 
-@media (max-width: 1030px) {
-.LandingBodyTitle {
+/* --- Адаптація під мобілки --- */
+@media (max-width: 768px) {
+    .TopPhoto {
+        display: none;
+    }
+
+    .header {
+        padding-top: 40px;
+        height: 50px;
+    }
+
+    .headerContent {
+        padding: 20px 10px;
+        border-radius: 50px;
+    }
+
+    .LogoText {
+        scale: 2; /* Зменшуємо scale, щоб не вилазило */
+        margin: 0px 0px;
+    }
+
+    .HelloS {
+        display: none;
+    }
+
+    .YouCanS {
+       display: none;
+    }
+    .title {
     font-family: "Google Sans", sans-serif;
-    font-size: 100px;
-    padding: 5px;
+    font-size: 50px;
+    padding: 10px;
     -webkit-font-smoothing: antialiased;
-    margin-bottom: 5px;
-    
+    margin-bottom: 10px;
+    }
+    .buttons {
+        flex-direction: column;
+        width: 100%;
+        padding: 0 40px;
+    }
+
+    .title2, .howToStartTitle, .contactUs {
+        margin: 80px 20px 10px 20px;
+    }
+
+    .features, .steps {
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .feature, .step {
+        max-width: 100%;
+        width: 100%;
+        text-align: center;
+    }
+
+    .stepNumber {
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
+    .emailBreak {
+    display: block;
+    width: 100%;
+    word-break: break-all;      
+    overflow-wrap: break-word;  
+    hyphens: auto;       
+    text-align: center;
+}
 }
 
-.LogoText {
-    scale: 3;
-    padding: 5px;
-}
-
-.LandingHeroContent {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 5px solid rgb(238, 238, 238);
-    border-radius: 50px;
-    padding: 20px 80px 60px 80px;
-    margin-top: 50px;
-}
-}
-
+/* Анімації */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px); /* Починає на 30px нижче */
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);    /* Стає у звичне положення */
-  }
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .animate {
-  /* Назва анімації, тривалість 0.8с, м'який старт/фініш */
-  animation: fadeInUp 0.8s ease-out forwards;
-  
-  /* Початковий стан, щоб заголовок не "блимнув" перед анімацією */
-  opacity: 0; 
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+}
+
+/* Незначна анімація для секцій при появі (можна додати через JS або просто на ховер) */
+.featureSec, .howToStart {
+    animation: fadeInUp 1s ease-out;
 }
