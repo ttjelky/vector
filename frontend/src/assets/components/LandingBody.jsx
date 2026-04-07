@@ -111,13 +111,15 @@ const LandingBody = () => {
 
                 <section className={styles.contactUs} id="contactUs">
                     <p className={styles.contactUsTitle}>Зв'язатися з нами</p>
-                    <p className={styles.contactUsText}>Маєте питання? Зв'яжіться з нами у будь-яку мить.</p>
-<div className={styles.emailBreak}>
-                    <div className={styles.email}>
-                        <CopyPopup label={email} copyText={email} />
+                    <p className={styles.contactUsText}>Маєте питання? Ми на зв'язку.</p>
+                    <div className={styles.contactContainer}>
+                        <div className={styles.contactItem}>
+                            <CopyPopup label={email} copyText={email} />
+                        </div>
+                        <div className={styles.contactItem}>
+                            <CopyPopup label={phone} copyText={phone} />
+                        </div>
                     </div>
-                    </div>
-                    <CopyPopup label={phone} copyText={phone} />
                 </section>
             </main>
         </div>

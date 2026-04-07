@@ -75,8 +75,7 @@
 .navLinks a {
     text-decoration: none;
     color: #000;
-    /* Шрифт Apple */
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    font-family: -google sans-serif;
     font-weight: 700;
     font-size: 14px;
     letter-spacing: -0.01em;
