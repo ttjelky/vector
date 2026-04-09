@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./assets/pages/Landing";
-import Dashboard from "./assets/pages/Dashboard";
+import AdminDashboard from "./assets/pages/AdminDashboard";
 import Help from "./assets/pages/Help";
 import Profile from "./assets/pages/Profile";
 import Settings from "./assets/pages/Settings";
@@ -16,10 +16,18 @@ const App = () => {
         <Route path="/" element={<Landing />} />
 
         <Route 
-          path="/dashboard" 
+          path="/admin" element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route 
+          path="/AdminDashboard" 
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <AdminDashboard />
             </ProtectedRoute>
           } 
         />

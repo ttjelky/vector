@@ -1,8 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import logo from "./static/VectorLogo.svg";
 import styles from "./styles/landingNavBar.module.css";
+import LandingBody from "./LandingBody";
 import BlackButton from "./blackbutton";
 import WhiteButton from "./WhiteButton";
+import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Forgot from "../pages/Forgot";
@@ -10,92 +13,75 @@ import Forgot from "../pages/Forgot";
 const LandingNavBar = () => {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-    const [open, setOpen] = useState(false);
-    const menuRef = useRef(null);
+    const [isForgotOpen, setIsForgotOpen] = useState(false);
+    const navigate = useNavigate();
 
-    // Функція для плавного скролу
-    const scrollToSection = (e, id) => {
-        e.preventDefault();
-        const element = document.getElementById(id);
-        if (element) {
-            element.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-            });
-        }
-        setOpen(false); // Закриваємо бургер після кліку
+    const backToLogin = () => {
+    setIsForgotOpen(false);
+    setIsLoginOpen(true);
     };
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+    const switchToLogin = () => {
+    setIsRegisterOpen(false);
+    setIsLoginOpen(true);
+  };
+
+    const switchToRegister = () => {
+    setIsLoginOpen(false);
+    setIsRegisterOpen(true);
+  };
+
+  const switchToForgot = () => {
+    setIsLoginOpen(false);
+    setIsForgotOpen(true);
+  };
 
     return (
-        <header className={styles.header}>
-            <div className={styles.logoContainer}>
-                <a href="#main" onClick={(e) => scrollToSection(e, "main")}>
-                    <img src={logo} alt="Logo" />
-                </a>
-            </div>
+    <header className={styles.header}>
+    
+    <div className={styles.logoContainer}>
+        <a className="landingNavLogo" href="#main">
+        <img src={logo} alt="Logo" />
+        </a>
+    </div>
+        <nav>
+        <ul className={styles.navBarList}>
+            <li className={styles.navBarItem}>
+                <a href="#info" className={styles.navBarLink}>Інфо</a>
+            </li>
+            <li className={styles.navBarItem}>
+                <a href="#howToStart" className={styles.navBarLink}>Як почати?</a>
+            </li>
+            <li className={styles.navBarItem}>
+                <a href="#contactUs" className={styles.navBarLink}>Зв’язатися з нами</a>
+            </li>
+        </ul>
+        </nav>  
 
-            <nav className={styles.nav}>
-                <ul className={styles.navBarList}>
-                    <li><a href="#info" className={styles.navBarLink} onClick={(e) => scrollToSection(e, "info")}>Інфо</a></li>
-                    <li><a href="#howToStart" className={styles.navBarLink} onClick={(e) => scrollToSection(e, "howToStart")}>Як почати?</a></li>
-                    <li><a href="#contactUs" className={styles.navBarLink} onClick={(e) => scrollToSection(e, "contactUs")}>Зв’язатися з нами</a></li>
-                </ul>
-            </nav>
+        <div className={styles.buttons}> 
+            <WhiteButton text={"Реєстрація"} onClick={() => setIsRegisterOpen(true)}/>
+            <BlackButton text={"Вхід"} onClick={() => setIsLoginOpen(true)}/>
+        </div>
+        <Login 
+        isOpen={isLoginOpen} 
+        onClose={() => setIsLoginOpen(false)} 
+        onSwitchToRegister={switchToRegister}
+        onSwitchToForgot={switchToForgot}
+        />
 
-            <div className={styles.desktopButtons}>
-                <WhiteButton text="Реєстрація" onClick={() => setIsRegisterOpen(true)} />
-                <BlackButton text="Вхід" onClick={() => setIsLoginOpen(true)} />
-            </div>
+        <Register
+        isOpen={isRegisterOpen}
+        onClose={() => setIsRegisterOpen(false)}
+        onSwitchToLogin={switchToLogin}
+        />
 
-            <div className={styles.mobileContainer} ref={menuRef}>
-                <div 
-                    className={`${styles.burger} ${open ? styles.burgerActive : ""}`} 
-                    onClick={() => setOpen(!open)}
-                >
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-
-                <div className={`${styles.dropdown} ${open ? styles.open : styles.closed}`}>
-                    <div className={styles.mobileLinks}>
-                        {/* Плавний скролл для мобілки */}
-                        <a href="#info" onClick={(e) => scrollToSection(e, "info")}>Інфо</a>
-                        <a href="#howToStart" onClick={(e) => scrollToSection(e, "howToStart")}>Як почати?</a>
-                        <a href="#contactUs" onClick={(e) => scrollToSection(e, "contactUs")}>Зв’язатися з нами</a>
-                    </div>
-                    
-                    <hr className={styles.divider} />
-
-                    <div className={styles.mobileActions}>
-                        <BlackButton 
-                            className={styles.blackbuttonMOBILE} 
-                            text="Вхід" 
-                            onClick={() => {setIsLoginOpen(true); setOpen(false);}} 
-                        />
-                        <WhiteButton 
-                            className={styles.whitebuttonMOBILE} 
-                            text="Реєстрація" 
-                            onClick={() => {setIsRegisterOpen(true); setOpen(false);}} 
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <Login isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
-            <Register isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
-        </header>
+        <Forgot 
+        isOpen={isForgotOpen} 
+        onClose={() => setIsForgotOpen(false)}
+        onBackToLogin={backToLogin}
+        />
+    </header>
     );
-};
+}
 
 export default LandingNavBar;

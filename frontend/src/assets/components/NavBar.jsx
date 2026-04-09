@@ -33,9 +33,8 @@ const NavBar = ({children}) => {
       
       <header className={styles.topNavbar}>
         <div className={styles.navbarLogo}>
-          <a href="/dashboard">
+          <Link to="/AdminDashboard">AdminDashboard</Link>
           <img src={Logo} alt="Vector" style={{scale: 0.85}} />
-          </a>
         </div>
 
         {/* Пошук */}

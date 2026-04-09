@@ -1,17 +1,12 @@
 import React from "react";
-import styles from "./styles/blackbutton.module.css";
+import styles from "./styles/blackbutton.module.css"
 
-// Додаємо className у деструктуризацію пропсів
-function BlackButton({ text, onClick, className }) {
+function BlackButton({text, onClick}) {
     return (
-        /* Об'єднуємо базовий стиль зі стилем, який передаємо (наприклад, MOBILE) */
-        <button 
-            onClick={onClick} 
-            className={`${styles.blackbutton} ${className || ""}`}
-        >
+        <button onClick={onClick} className={styles.blackbutton}>
             {text}
         </button>
-    );
+    )
 }
 
-export default BlackButton;
+export default BlackButton

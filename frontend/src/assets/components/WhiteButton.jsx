@@ -1,17 +1,12 @@
 import React from "react";
-import styles from "./styles/whitebutton.module.css";
+import styles from "./styles/whitebutton.module.css"
 
-// Додаємо className у деструктуризацію пропсів
-function WhiteButton({ text, onClick, className }) {
+function WhiteButton({text, onClick}) {
     return (
-        /* Об'єднуємо базовий стиль зі стилем, який передаємо (наприклад, MOBILE) */
-        <button 
-            onClick={onClick} 
-            className={`${styles.whitebutton} ${className || ""}`}
-        >
+        <button onClick={onClick} className={styles.whitebutton}>
             {text}
         </button>
-    );
+    )
 }
 
-export default WhiteButton;
+export default WhiteButton
