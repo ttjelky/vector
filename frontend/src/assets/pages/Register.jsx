@@ -44,7 +44,7 @@ const Register = ({isOpen, onClose, onSwitchToLogin}) => {
         localStorage.setItem('accessToken', response.data.access);
         localStorage.setItem('role', response.data.role);
         onClose();
-        navigate('/dashboard');
+        navigate('/admindashboard');
     } catch (error) {
         if (error.response && error.response.data) {
             setErrors(error.response.data); 

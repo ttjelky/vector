@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { getProfile } from "../../api";
+import React from "react";
+import NavBar from "../components/NavBar";
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -15,8 +17,9 @@ const Dashboard = () => {
     }, []);
 
     return (
+        <NavBar>
         <div style={styles.dashboard}>
-            <div style={styles.card}>
+        <div style={styles.card}>
             <h3 style={styles.title}>Загальна кількість користувачів</h3>
             <p style={styles.value}>{stats.total_users}</p>
         </div>
@@ -28,7 +31,8 @@ const Dashboard = () => {
             <h3 style={styles.title}>Нові користувачі</h3>
             <p style={styles.value}>{stats.new_users}</p>
         </div>
-    </div>
+        </div>
+        </NavBar>
   );
 };
 

@@ -39,7 +39,7 @@ const handleSubmit = async (e) => {
         const fullUserName = `${firstName} ${lastName}`.trim();
         localStorage.setItem('fullUserName', `${response.data.first_name} ${response.data.last_name}`);
         onClose();
-        navigate('/dashboard');
+        navigate('/admindashboard');
     } catch (error) {
         const serverMessage = error.response?.data?.detail;
         

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { href, useNavigate } from 'react-router-dom';
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from 'react-router-dom';
 import styles from './styles/NavBar.module.css';
 import HomeIcon from './static/icons/Home.svg?react';
 import TournamentsIcon from './static/icons/Tournaments.svg?react';
@@ -33,7 +33,6 @@ const NavBar = ({children}) => {
       
       <header className={styles.topNavbar}>
         <div className={styles.navbarLogo}>
-          <Link to="/AdminDashboard">AdminDashboard</Link>
           <img src={Logo} alt="Vector" style={{scale: 0.85}} />
         </div>
 
