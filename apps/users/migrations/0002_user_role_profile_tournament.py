@@ -17,7 +17,6 @@ class Migration(migrations.Migration):
             model_name='user',
             name='role',
             field=models.CharField(choices=[('admin', 'Admin'), ('team', 'Team'), ('jury', 'Jury')], default='user', max_length=10),
-            field=models.CharField(choices=[('admin', 'Admin'), ('team', 'Team'), ('jury', 'Jury')], default='team', max_length=10),
             preserve_default=False,
         ),
         migrations.CreateModel(
