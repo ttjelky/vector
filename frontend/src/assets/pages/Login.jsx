@@ -73,7 +73,6 @@ return (
                 type="email"
                 className={styles.input}
                 name="email"
-                placeholder="Електронна пошта" 
                 value={loginData.email}
                 onChange={handleChange}
                 required 
@@ -86,8 +85,7 @@ return (
               <input
                 type="password" 
                 className={styles.input}
-                name="password" 
-                placeholder="Пароль" 
+                name="password"
                 value={loginData.password}
                 onChange={handleChange}
                 required

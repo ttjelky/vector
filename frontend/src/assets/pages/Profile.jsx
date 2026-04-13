@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { fetchProfile, updateProfile } from "../../api/profile";
 import styles from "../components/styles/profile.module.css";
+import NavBar from "../components/NavBar";
 
 const Profile = () => {
     const [profile, setProfile] = useState(null);
@@ -45,10 +46,16 @@ const Profile = () => {
         }
     };
 
-    if (loading) return <p className={styles.loading}>Завантаження...</p>;
+    if (loading)
+    return (
+    <NavBar>
+    <p className={styles.loading}>Завантаження...</p>
+    </NavBar>   
+    );
     if (!profile) return <p className={styles.error}>Не вдалося завантажити профіль</p>;
 
     return (
+        <NavBar>
         <div className={styles.profileContainer}>
             <h1>Профіль користувача</h1>
 
@@ -86,6 +93,7 @@ const Profile = () => {
                 )}
             </div>
         </div>
+        </NavBar>
     );
 };
 

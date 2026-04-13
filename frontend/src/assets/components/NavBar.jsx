@@ -59,7 +59,7 @@ const NavBar = ({children}) => {
             <h3 className={styles.sidebarSectionTitle}>Меню</h3>
             <ul>
               <li className={styles.sidebarEl}>
-                <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>
+                <NavLink to="/admindashboard" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>
                   <HomeIcon className={styles.sidebarIcon}/> <span className={styles.sidebarText}>Головна</span>
                 </NavLink>
               </li>

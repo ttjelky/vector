@@ -52,9 +52,16 @@
     padding: 10px 30px;
 }
 
+.namecontainer {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
 .title {
     font-family: "Google Sans", sans-serif;
     font-size: 60px;
+    margin-bottom: 10px;
 }
 
 .input {
@@ -69,6 +76,10 @@
     box-sizing: border-box;
     outline: none;
     transition-duration: 0.08s;
+}
+
+.rolecontainer {
+    margin: 10px 0px;
 }
 
 input:focus {
@@ -142,6 +153,7 @@ a {
 .underform {
     display: flex;
     justify-content: space-between;
+    margin-top: 10px;
 }
 
 a:hover {
