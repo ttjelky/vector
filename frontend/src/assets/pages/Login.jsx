@@ -1,32 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styles from "../components/styles/loginPage.module.css";
 import cross from "../components/static/icons/cross.svg";
-import { registerUser, loginUser } from '../../api';
+import { loginUser } from '../../api';
 import { useNavigate } from "react-router-dom";
 
 const Login = ({isOpen, onClose, onSwitchToRegister, onSwitchToForgot}) => {
-
   const navigate = useNavigate();
+  const [isClosing, setIsClosing] = useState(false);
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState({});
 
-  const [loginData, setLoginData] = useState({
-    email: '',
-    password: ''
-});
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 300);
+  };
 
-const [errors, setErrors] = useState({});
-
-const handleChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setLoginData((prev) => ({
-        ...prev,
-        [name]: value,
-    }));
-};
+    setLoginData((prev) => ({ ...prev, [name]: value }));
+  };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
-
     try {
         const response = await loginUser({
             username: loginData.email,
@@ -34,41 +33,32 @@ const handleSubmit = async (e) => {
         });
         
         localStorage.setItem('accessToken', response.data.access);
-        const firstName = response.data.first_name || '';
-        const lastName = response.data.last_name || '';
-        const fullUserName = `${firstName} ${lastName}`.trim();
         localStorage.setItem('fullUserName', `${response.data.first_name} ${response.data.last_name}`);
         onClose();
         navigate('/admindashboard');
     } catch (error) {
         const serverMessage = error.response?.data?.detail;
-        
         const translations = {
             "No active account found with the given credentials": "Невірна пошта або пароль",
             "User is inactive": "Акаунт не активовано"
         };
-
-        const finalMessage = translations[serverMessage] || "Помилка підключення до сервера";
-        setErrors({ detail: finalMessage });
+        setErrors({ detail: translations[serverMessage] || "Помилка підключення" });
     }
-};
+  };
 
-if (!isOpen) return null;
+  if (!isOpen && !isClosing) return null;
 
-return (
-  <form onSubmit={handleSubmit} noValidate>
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.login} onClick={(e) => e.stopPropagation()}>
+  return (
+    <div className={`${styles.overlay} ${isClosing ? styles.fadeOut : ''}`} onClick={handleClose}>
+      <div className={`${styles.login} ${isClosing ? styles.modalOut : ''}`} onClick={(e) => e.stopPropagation()}>
+        <img src={cross} alt="close" className={styles.cross} onClick={handleClose} />
 
-        <img src={cross} alt="back" className={styles.cross} onClick={onClose} />
+        <form onSubmit={handleSubmit} noValidate className={styles.form}>
+          <h1 className={styles.logintitle}>Вхід</h1>
 
-        <div className={styles.form}>
-          <h1 className={styles.logintitle}>Вхід на сайт</h1>
-
-          <section style={{marginTop: "32px"}}>
-
-            <div style={{marginBottom: "20px"}}>
-              <p style={{color: "gray"}}>Email</p>
+          <div className={styles.inputGroups}>
+            <div className={styles.fieldWrapper} style={{ animationDelay: '0.1s' }}>
+              <p className={styles.label}>Email</p>
               <input
                 type="email"
                 className={styles.input}
@@ -77,11 +67,10 @@ return (
                 onChange={handleChange}
                 required 
               />
-              {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
             </div>
 
-            <div style={{marginBottom: "10px"}}>
-              <p style={{color: "gray"}}>Пароль</p>
+            <div className={styles.fieldWrapper} style={{ animationDelay: '0.2s' }}>
+              <p className={styles.label}>Пароль</p>
               <input
                 type="password" 
                 className={styles.input}
@@ -90,44 +79,33 @@ return (
                 onChange={handleChange}
                 required
               />
-              {errors.password && <span className={styles.errorText}>{errors.password[0]}</span>}
             </div>
+          </div>
 
-          </section>
-
-          {errors.detail && (
-            <p className={styles.errorText} style={{margin: '10px 0' }}>
-              {errors.detail}
-            </p>
-          )}
+          {errors.detail && <p className={styles.errorTextDetail}>{errors.detail}</p>}
 
           <div className={styles.rememberme}>
             <input type="checkbox" id="remember" name="remember" />
             <label htmlFor="remember">Запам'ятати мене</label>
           </div>
 
-          <div style={{marginBottom: "20px"}}>
-            <button type="submit" disabled={!loginData.email || !loginData.password} className={styles.thebutton}>
-              Увійти
-            </button>
-          </div>
+          <button type="submit" disabled={!loginData.email || !loginData.password} className={styles.thebutton}>
+            Увійти
+          </button>
 
           <section className={styles.underform}>
-            <div onClick={onSwitchToRegister} style={{cursor: "pointer"}}>
+            <div onClick={onSwitchToRegister} className={styles.switchText}>
               <span>Не маєте акаунту? </span>
-              <a>Зареєструватися</a>
+              <span className={styles.link}>Зареєструватися</span>
             </div>
-
-          <div onClick={onSwitchToForgot}>
-            <a className={styles.forgot} style={{cursor: "pointer"}}>Забули пароль?</a>
-          </div>
-
+            <div onClick={onSwitchToForgot} className={styles.forgotWrapper}>
+              <span className={styles.link}>Забули пароль?</span>
+            </div>
           </section>
-        </div>
+        </form>
       </div>
     </div>
-  </form>
   );
 };
 
-export default Login
+export default Login;
