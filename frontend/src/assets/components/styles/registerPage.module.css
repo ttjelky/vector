@@ -2,11 +2,10 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(7px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -54,31 +53,20 @@
 .cross:active { transform: scale(0.95); }
 
 .form {
-    padding: 35px 24px;
+    margin-top: 30px;
+    padding: 10px 30px;
+}
+
+.namecontainer {
     display: flex;
-    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 10px;
 }
 
 .title {
-    font-size: clamp(28px, 8vw, 42px);
-    font-weight: 700;
-    margin: 0;
-    letter-spacing: -1px;
-}
-
-.inputGroups { margin-top: 20px; }
-
-.fieldWrapper {
-    margin-bottom: 12px;
-    animation: slideUp 0.6s ease forwards;
-    opacity: 0;
-}
-
-.label {
-    color: #86868b;
-    font-size: 13px;
-    margin-bottom: 4px;
-    margin-left: 4px;
+    font-family: "Google Sans", sans-serif;
+    font-size: 60px;
+    margin-bottom: 10px;
 }
 
 .input {
@@ -94,7 +82,13 @@
     transition: all 0.2s ease;
 }
 
-.input:focus { border-color: #000; box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05); }
+.rolecontainer {
+    margin: 10px 0px;
+}
+
+input:focus {
+  border: 1px solid black;
+}
 
 .rememberme {
     font-size: 14px;
@@ -105,34 +99,64 @@
     color: #424245;
 }
 
-.button {
-    width: 100%;
-    min-height: 50px;
-    font-size: 16px;
-    font-weight: 600;
-    background: #1d1d1f;
-    color: white;
-    border: none;
-    border-radius: 1000px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.thebutton:hover:not(:disabled) {
+    background: linear-gradient(180deg, #444, #242424);
+    transform: translateY(-1px);
+    box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.2),
+    inset 0 -2px 5px rgba(0,0,0,0.7),
+    0 12px 20px rgba(0,0,0,0.25);
+    transition-duration: 0.2s;
 }
 
-.button:hover:not(:disabled) { background: #000; transform: translateY(-1px); }
-.button:active:not(:disabled) { transform: translateY(0); scale: 0.98; }
-.button:disabled { background: #d2d2d7; color: #86868b; cursor: not-allowed; }
+.thebutton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
-.underform { margin-top: 15px; text-align: center; }
-.switchText { cursor: pointer; font-size: 14px; color: #424245; }
-.link { color: #1d1d1f; font-weight: 600; margin-left: 3px; }
-.link:hover { text-decoration: underline; }
+    width: 100%;
+    height: 48px;
 
-.errorText { color: #ff3b30; font-size: 11px; margin: 4px 0 0 4px; display: block; }
+    font-size: 16px;
+    color: white;
 
-/* Анімації такі ж як у входу для консистентності */
-@keyframes modalIn {
-    from { opacity: 0; transform: scale(0.95) translateY(15px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+    background: linear-gradient(180deg, #3a3a3a, #1f1f1f);
+
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 1000px;
+
+    cursor: pointer;
+
+    box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.15),
+        inset 0 -2px 4px rgba(0,0,0,0.6),
+        0 6px 12px rgba(0,0,0,0.15);
+
+    transition: 0.2s;
+}
+
+.thebutton:disabled {
+    background: #555;
+    cursor: unset;
+    opacity: 0.6;
+}
+
+.errorText {
+    color: #ff4d4d;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+    text-align: left;
+}
+
+.underform {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 @keyframes modalOut {

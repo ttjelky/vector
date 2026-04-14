@@ -34,8 +34,8 @@ const Login = ({isOpen, onClose, onSwitchToRegister, onSwitchToForgot}) => {
         
         localStorage.setItem('accessToken', response.data.access);
         localStorage.setItem('fullUserName', `${response.data.first_name} ${response.data.last_name}`);
-        handleClose();
-        navigate('/dashboard');
+        onClose();
+        navigate('/admindashboard');
     } catch (error) {
         const serverMessage = error.response?.data?.detail;
         const translations = {
@@ -74,7 +74,7 @@ const Login = ({isOpen, onClose, onSwitchToRegister, onSwitchToForgot}) => {
               <input
                 type="password" 
                 className={styles.input}
-                name="password" 
+                name="password"
                 value={loginData.password}
                 onChange={handleChange}
                 required

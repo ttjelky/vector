@@ -6,7 +6,9 @@ import { useNavigate } from 'react-router-dom';
 
 const Register = ({isOpen, onClose, onSwitchToLogin}) => {
   const navigate = useNavigate();
-  const [isClosing, setIsClosing] = useState(false);
+
+  const [role, setRole] = useState("");
+
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -35,14 +37,18 @@ const Register = ({isOpen, onClose, onSwitchToLogin}) => {
     setErrors({});
     setIsLoading(true);
     try {
-        await registerUser(formData);
+        await registerUser({
+          ...formData,
+          role: role
+        });
         const response = await loginUser({
             username: formData.email,
             password: formData.password
         });
         localStorage.setItem('accessToken', response.data.access);
-        handleClose();
-        navigate('/dashboard');
+        localStorage.setItem('role', response.data.role);
+        onClose();
+        navigate('/admindashboard');
     } catch (error) {
         if (error.response && error.response.data) {
             setErrors(error.response.data); 
@@ -52,63 +58,117 @@ const Register = ({isOpen, onClose, onSwitchToLogin}) => {
     } finally {
         setIsLoading(false);
     }
-  };
+};
   
   if (!isOpen && !isClosing) return null;
 
-  return (
-    <div className={`${styles.overlay} ${isClosing ? styles.fadeOut : ''}`} onClick={handleClose}>
-      <div className={`${styles.register} ${isClosing ? styles.modalOut : ''}`} onClick={(e) => e.stopPropagation()}>
-        <img src={cross} alt="close" className={styles.cross} onClick={handleClose} />
-        
-        <form onSubmit={handleSubmit} noValidate className={styles.form}>
-          <h1 className={styles.title}>Реєстрація</h1>
+    return (
+      <form onSubmit={handleSubmit} noValidate>
+      <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.register} onClick={(e) => e.stopPropagation()}>
 
-          <div className={styles.inputGroups}>
-            {[
-              { label: "Ім’я", name: "first_name", type: "text" },
-              { label: "Прізвище", name: "last_name", type: "text" },
-              { label: "Email", name: "email", type: "email" },
-              { label: "Пароль", name: "password", type: "password" }
-            ].map((field, idx) => (
-              <div key={field.name} className={styles.fieldWrapper} style={{ animationDelay: `${idx * 0.1}s` }}>
-                <p className={styles.label}>{field.label}</p>
-                <input 
-                  type={field.type} 
-                  name={field.name}
-                  value={formData[field.name]}
-                  onChange={handleChange}
-                  className={styles.input}
-                  required
-                />
-                {errors[field.name] && <span className={styles.errorText}>{errors[field.name][0]}</span>}
-              </div>
-            ))}
+        <div className={styles.navbar}>
+            <img src={cross} alt="back" className={styles.cross} onClick={onClose} />
+        </div>
+
+        <div className={styles.form}>
+        <h1 className={styles.title}>Реєстрація</h1>
+
+        <section className={styles.inputform}>
+          <div className={styles.namecontainer}>
+            <div className={styles.name}>
+            <p style={{color: "gray"}}>Ім’я</p>
+            <input 
+            type="text" 
+            name="first_name"
+            value={formData.first_name}
+            onChange={handleChange}
+            className={styles.input}
+            required
+            />
+            {errors.first_name && <span className={styles.errorText}>{errors.first_name[0]}</span>}
+            </div>
+
+            <div className={styles.name}>
+            <p style={{color: "gray"}}>Прізвище</p>
+            <input 
+            type="text" 
+            name="last_name"
+            value={formData.last_name}
+            onChange={handleChange}
+            className={styles.input}
+            required
+            />
+            {errors.last_name && <span className={styles.errorText}>{errors.last_name[0]}</span>}
+            </div>
           </div>
 
-          <div className={styles.rememberme}>
+          <div className={styles.email}>
+          <div style={{marginBottom: "12px"}}>
+          <p style={{color: "gray"}}>Email</p>
+          <input
+          type="email" 
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          className={styles.input}
+          required
+          />
+          {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
+          </div>
+        </div>
+
+          <div className={styles.password}>
+          <p style={{color: "gray"}}>Пароль</p>
+          <input
+          type="password" 
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          className={styles.input}
+          required
+          />
+          </div>
+
+          <div className={styles.rolecontainer}>
+            <p style={{color: "gray"}}>Роль</p>
+            <select
+              value={role} 
+              onChange={(e) => setRole(e.target.value)}
+              className={styles.input}
+              required
+            >
+              <option value="">Оберіть роль</option>
+              <option value="admin">Адміністратор</option>
+              <option value="team">Учасник</option>
+              <option value="jury">Журі</option>
+            </select>
+          </div>
+        </section>
+
+        <div className={styles.rememberme}>
             <input type="checkbox" id="remember" name="remember" />
             <label htmlFor="remember">Запам'ятати мене</label>
-          </div>
+        </div>
 
-          <button 
-            type="submit" 
-            disabled={isLoading || !formData.email || !formData.password || !formData.last_name || !formData.first_name} 
-            className={styles.button}
-          >
-            {isLoading ? "Завантаження..." : "Зареєструватися"}
+        <div className={styles.button}>
+          <button type="submit" disabled={!formData.email || !formData.password || !formData.last_name || !formData.first_name || !role} className={styles.thebutton}>
+            Зареєструватися
           </button>
+        </div>
 
-          <section className={styles.underform}>
-            <div onClick={onSwitchToLogin} className={styles.switchText}>
-              <span>Вже маєте акаунт? </span>
-              <span className={styles.link}>Увійти</span>
-            </div>
-          </section>
-        </form>
+        <section className={styles.underform}>
+
+          <div onClick={onSwitchToLogin} style={{cursor: "pointer"}}>
+            <span>Вже маєте акаунт? </span>
+            <a>Увійти</a>
+          </div>
+        </section>
+        </div>
       </div>
     </div>
-  );
+    </form>
+    );
 };
 
 export default Register;

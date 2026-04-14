@@ -1,0 +1,49 @@
+.profileContainer {
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 30px;
+  background: #fff;
+  border: 1px solid #000;
+  color: #000;
+  font-family: Arial, sans-serif;
+}
+
+.avatarWrapper {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #000;
+}
+
+.info p {
+  font-size: 16px;
+  margin: 10px 0;
+}
+
+.editButton, .saveButton, .cancelButton {
+  margin-top: 15px;
+  padding: 8px 16px;
+  border: 1px solid #000;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+}
+
+.saveButton { margin-right: 10px; }
+
+.input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #000;
+  background: #fff;
+  color: #000;
+}
+
+.loading, .error { text-align: center; margin-top: 50px; color: #000; }
