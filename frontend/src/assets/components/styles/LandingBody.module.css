@@ -1,10 +1,20 @@
+.LandingBody {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+    font-family: "Google Sans", sans-serif;
+}
+
 .TopPhoto {
     position: absolute;
-    left: 50vw;
+    top: -780px;
+    left: 50%;
     transform: translateX(-50%);
-    top: -560px;
-    margin: 0;
-    max-width: 100%;
+    width: 40%;
+    min-width: 1200px;
+    z-index: -1;
+    pointer-events: none;
 }
 
 .header {
@@ -12,8 +22,9 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    height: 900px;
-    padding-top: 120px;
+    min-height: 800px;
+    padding-top: 100px;
+    font-family: "Google Sans", sans-serif;
 }
 
 .headerContent {
@@ -23,313 +34,159 @@
     align-items: center;
     border: 5px solid rgb(238, 238, 238);
     border-radius: 50px;
-    padding: 20px 100px 90px 100px;
+    padding: 20px 100px 80px 100px;
     margin-top: 50px;
+    background: white;
+}
+
+.title {
+    font-family: "Google Sans", sans-serif;
+    font-size: clamp(40px, 8vw, 100px);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.LogoText {
+    width: clamp(200px, 40vw, 450px);
+    height: auto;
 }
 
 .subtitle {
     font-family: "Google Sans", sans-serif;
-    font-size: 22px;
+    font-size: clamp(16px, 2vw, 22px);
     color: rgb(100, 100, 100);
-    margin-top: 40px;
-    margin-bottom: 30px;
+    margin: 40px 0 30px 0;
     text-align: center;
+    max-width: 700px;
 }
 
 .buttons {
     display: flex;
     justify-content: center;
     gap: 20px;
-}
-
-.LandingBody {
-    display: flex;
-    flex-direction: column;
-}
-
-.title {
+    margin: 20px auto;
+    padding: 0 20px;
+    width: 100%;   
+    box-sizing: border-box;
     font-family: "Google Sans", sans-serif;
-    font-size: 120px;
-    padding: 10px;
-    -webkit-font-smoothing: antialiased;
-    margin-bottom: 10px;
-}
-
-.LogoText {
-    scale: 4;
-    padding: 10px;
 }
 
 .img1wrapper {
     display: flex;
     justify-content: center;
+    align-items: center;
     width: 100%;
-    border-bottom: 5px solid rgb(238, 238, 238);
+    margin-top: 40px;
 }
 
 .img1 {
-    width: 900px;
-    margin-top: 20px;
-}
-
-.title2 {
-    font-family: "Google Sans", sans-serif;
-    font-size: 50px;
-    padding: 20px;
-    margin: 330px 50px 10px 50px;
-    -webkit-font-smoothing: antialiased;
-    border: 5px solid black;
-    border-radius: 20px;
-}
-
-.features {
-    display: flex;
-    justify-content: space-around;
-    padding: 50px;
-}
-
-.feature {
-    padding-top: 40px;
-    border-top: 2px solid rgb(237, 237, 237);
-    max-width: 250px;
-    font-family: "Google Sans", sans-serif;
-}
-
-.icon {
-    width: 24px;
-    height: 24px;
-    margin-bottom: 24px;
-}
-
-.featureTitle {
-    font-size: 22px;
-    margin-bottom: 20px;
-}
-
-.featureText {
-    font-size: 16px;
-    color: rgb(100, 100, 100);
-} 
-
-.img2wrapper {
-    display: flex;
-    justify-content: center;
-    margin-top: 60px;
-}
-
-.img2wrapper img, .img3wrapper img {
-    max-width: 100%;
+    width: 1000px;
+    max-width: 95%;
     height: auto;
 }
 
-.howToStart {
-    margin-top: 120px;
-    scroll-margin-top: 100px;
+.contactContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    font-family: "Google Sans", sans-serif;
 }
 
-.howToStartTitle {
+.contactItem {
     font-family: "Google Sans", sans-serif;
-    font-size: 60px;
+    font-size: clamp(12px, 3vw, 18px);
+    word-break: break-all;
+    overflow-wrap: break-word;
+    text-align: center;
+    max-width: 90%;
+}
+
+.title2, .howToStartTitle {
+    font-family: "Google Sans", sans-serif;
+    font-size: clamp(28px, 5vw, 45px);
     padding: 20px;
-    -webkit-font-smoothing: antialiased;
-    margin-left: 50px;
-    margin-right: 50px;
+    margin: 100px 50px 40px 50px;
     border: 5px solid black;
     border-radius: 20px;
+    text-align: center;
 }
 
-.steps {
-    display: flex;
-    justify-content: space-around;
-    padding: 50px;
-    margin-top: 80px;
-}
-
-.step {
-    max-width: 360px;
-    font-family: "Google Sans", sans-serif;
-    border-top: 2px solid rgb(237, 237, 237);
-    padding-top: 80px;
-}
-
-.stepNumber {
-    font-size: 80px;
-    color: rgb(166, 166, 166);
-    margin-bottom: 60px;
-}
-
-.stepTitle {
-    font-size: 22px;
-    margin-bottom: 20px;
-}
-
-.stepText {
-    font-size: 18px;
-    color: rgb(100, 100, 100);
-}
-
-.img3 {
-    padding: 10px;
-    margin-top: 60px;
-}
-
-.img3wrapper {
+.features, .steps {
     display: flex;
     justify-content: center;
-    padding: 10px;
+    padding: 50px;
+    gap: 40px;
+    flex-wrap: wrap;
+    font-family: "Google Sans", sans-serif;
+}
+
+.feature, .step {
+    padding-top: 40px;
+    border-top: 2px solid rgb(237, 237, 237);
+    flex: 1;
+    min-width: 250px;
+    max-width: 300px;
+    font-family: "Google Sans", sans-serif;
 }
 
 .contactUs {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 50px;
-    font-family: "Google Sans", sans-serif;
+    padding: 80px 20px;
     border: 5px solid black;
-    margin: 100px 50px 10px 50px;
+    margin: 120px 50px 60px 50px;
+    border-radius: 30px;
+    font-family: "Google Sans", sans-serif;
 }
 
 .contactUsTitle {
-    font-size: 60px;
-    margin-bottom: 10px;
-    text-align: center;
+    font-family: "Google Sans", sans-serif;
+    font-size: clamp(32px, 6vw, 60px);
 }
 
-.contactUsText {
-    font-size: 15px;
-    color: rgb(100, 100, 100);
-    margin-bottom: 40px;
-    text-align: center;
-}
-
-.email {
-    margin-bottom: 15px;
-    width: 100%;
+.img2wrapper, .img3wrapper {
     display: flex;
     justify-content: center;
-}
-
-.email span, .email div {
-    word-break: break-all;
-    text-align: center;
-}
-
-.featureSec {
-    position: relative;
-    scroll-margin-top: 100px;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
 }
 
 .HelloS {
     position: absolute;
-    top: 0%;
-    left: 93%;
-    width: 20%;
+    top: -20px;
+    right: -50px;
+    width: 120px;
 }
 
 .YouCanS {
     position: absolute;
-    top: 60%;
-    left: -5%;
-    width: 17%;
+    bottom: 20px;
+    left: -60px;
+    width: 110px;
     transform: rotate(-10deg);
 }
 
-@media (max-width: 768px) {
-    .TopPhoto, .HelloS, .YouCanS {
-        display: none;
-    }
-
-    .header {
-        height: auto;
-        padding-top: 60px;
-        padding-bottom: 40px;
-    }
-
-    .headerContent {
-        padding: 20px 20px 40px 20px;
-        border-radius: 30px;
-        width: 90%;
-    }
-
-    .title {
-        font-size: 48px;
-        text-align: center;
-    }
-
-    .LogoText {
-        scale: 1.5;
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
-
-    .subtitle {
-        font-size: 18px;
-        padding: 0 20px;
-    }
-
-    .buttons {
-        flex-direction: column;
-        width: 80%;
-    }
-
-    .img1 {
-        width: 100%;
-    }
-
-    .title2, .howToStartTitle, .contactUs {
-        font-size: 28px;
-        margin: 60px 20px 10px 20px;
-        padding: 15px;
-    }
-
-    .features, .steps {
-        flex-direction: column;
-        padding: 40px 20px;
-        gap: 40px;
-        margin-top: 40px;
-    }
-
-    .feature, .step {
-        max-width: 100%;
-        padding-top: 20px;
-    }
-
-    .stepNumber {
-        font-size: 50px;
-        margin-bottom: 20px;
-    }
-
-    .contactUsTitle {
-        font-size: 32px;
-    }
+@media (max-width: 1024px) {
+    .HelloS, .YouCanS { display: none; }
 }
 
-@media (max-width: 1030px) and (min-width: 769px) {
-    .title {
-        font-size: 100px;
-    }
-
-    .LogoText {
-        scale: 3;
-    }
-
-    .headerContent {
-        padding: 20px 80px 60px 80px;
-    }
+@media (max-width: 768px) {
+    .TopPhoto { display: none; }
+    .headerContent { padding: 30px 20px; border-radius: 40px; }
+    .buttons { flex-direction: column; align-items: center;  padding: 0 40px; }
+    .title2, .howToStartTitle, .contactUs { margin: 60px 20px; }
+    .contactItem { white-space: normal; }
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .animate {
-  animation: fadeInUp 0.8s ease-out forwards;
-  opacity: 0; 
+    animation: fadeInUp 0.8s ease-out forwards;
 }
