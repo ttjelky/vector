@@ -1,75 +1,181 @@
+html {
+  scroll-behavior: smooth;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 .header {
-    position: fixed;
-    z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 20px;
-    padding-inline: 40px;
-    column-gap: 20px;
-    font-family: "Google Sans", sans-serif;
-    -webkit-font-smoothing: antialiased;
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 20px 40px;
+  font-family: "Google Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 .logoContainer {
-    display: flex;
-    padding: 3px 10px;
-    background:rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
-    0 4px 30px rgba(0, 0, 0, 0.05),
-    0 1px 1px rgba(0, 0, 0, 0.02);
-    border-radius: 20px;
-  
-   
+  display: flex;
+  padding: 3px 10px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  z-index: 1010;
+}
+
+.logoImg {
+  height: 40px;
+  width: auto;
+  transition: 0.3s;
+}
+
+.navWrapper {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  z-index: 1005;
 }
 
 .navBarList {
-    background:rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
-        0 4px 30px rgba(0, 0, 0, 0.05),
-        0 1px 1px rgba(0, 0, 0, 0.02);
-    border-radius: 75px;
-    list-style: none;
-    display: flex;
-    column-gap: 30px;
-    gap: 27px;
-    padding: 20px;
-
+  display: flex;
+  gap: 27px;
+  padding: 15px 25px;
+  list-style: none;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  border-radius: 75px;
 }
 
-
 .navBarLink {
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-    color: black;
-    font-size: 16px;
-    font-weight: 700;
-    position: relative;
+  text-decoration: none;
+  color: black;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .buttons {
-    display: flex;
-    gap: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.desktopButtons {
+  z-index: 1010;
+}
+
+.mobileButtons {
+  display: none; 
+}
+
+.burgerBtn {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 25px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1100;
+}
+
+.burgerBtn span {
+  width: 100%;
+  height: 3px;
+  background: black;
+  border-radius: 10px;
+  transition: 0.3s;
 }
 
 @media (max-width: 1030px) {
+  .header {
+    scale: 1.1;
+    padding: 15px 30px;
+  }
 
+  .logoImg {
+    height: 30px;
+  }
+
+  .desktopButtons {
+    display: none;
+  }
+
+  .mobileButtons {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .burgerBtn {
+    display: flex;
+    padding: 8px;
+    width: 42px;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+  }
+
+  .navWrapper {
+    position: absolute;
+    top: 95px;
+    right: 25px;
+    left: auto;
+    transform: none;
+    width: 280px;
+    background: #f8fafd;
+    border-radius: 28px;
+    box-shadow: 0 4px 40px rgba(0, 0, 0, 0.15);
+    padding: 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+  }
+
+  .navWrapper.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .navBarList {
+    flex-direction: column;
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    width: 100%;
+    gap: 15px;
+  }
+
+  .navBarItem {
+    width: 100%;
+    border-bottom: 1px solid #e1e3e8;
+    padding-bottom: 10px;
+  }
+
+  .burgerBtn.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 4.5px); }
+  .burgerBtn.active span:nth-child(2) { opacity: 0; }
+  .burgerBtn.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -4.5px); }
 }
