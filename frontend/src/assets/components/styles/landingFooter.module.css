@@ -1,15 +1,13 @@
 .LandingFooter {
-    font-family: Google Sans, sans-serif;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    background: #fff;
-    padding-bottom: 40px;
+    font-family: "Google Sans", sans-serif;
+    width: 100%;
 }
 
 .LandingFooterLinks {
     display: flex;
     flex-wrap: wrap;
     font-size: 14px;
-    margin: 60px 35px 30px 35px;
+    margin: 60px 35px;
     font-weight: bold;
 }
 
@@ -47,33 +45,47 @@
 }
 
 .LandingFooterSFLU {
-    text-align: left;
-    line-height: 1.4;
-    color: #86868b;
-    font-size: 13px;
+    margin-top: 10px;
 }
 
-.LandingFooterSFLU p {
-    margin: 0;
-}
-
-@media (max-width: 768px) {
-    
+/* Мобільна адаптація */
+@media (max-width: 1030px) {
     .LandingFooterLinks {
-    display: none;
+        display: none; /* Ховаємо посилання на мобільних */
+    }
+
+    @media (max-width: 1030px) {
+    .LandingFooterLinks {
+        display: none; /* Прибираємо лінки за твоїм проханням */
     }
 
     .LandingFooterBottom {
-        padding: 0 20px;
+        flex-direction: column;
+        align-items: center; /* Центруємо весь блок на екрані */
+        padding: 30px 20px;
     }
 
     .LandingFooterLogoEmail {
-        align-items: center; 
-        flex-direction: row;
-        margin: 0px, 10px,;
+        display: flex;
+        flex-direction: row; /* Лого і пошта в один рядок */
+        align-items: center;
+        justify-content: center;
+        gap: 15px; 
+        width: 100%;
+        margin-bottom: 20px;
     }
 
-    .LandingFooter {
-    padding-bottom: 15px;
+    .LandingFooterEmail {
+        margin-top: 0; /* Прибираємо зайвий відступ, щоб було в лінію з лого */
+        font-size: 14px;
+        word-break: break-all;
+    }
+
+    .LandingFooterSFLU {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 12px;
+        line-height: 1.4;
+    }
 }
 }

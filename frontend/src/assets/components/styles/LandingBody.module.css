@@ -175,11 +175,106 @@
 }
 
 @media (max-width: 768px) {
-    .TopPhoto { display: none; }
-    .headerContent { padding: 30px 20px; border-radius: 40px; }
-    .buttons { flex-direction: column; align-items: center;  padding: 0 40px; }
-    .title2, .howToStartTitle, .contactUs { margin: 60px 20px; }
-    .contactItem { white-space: normal; }
+    .TopPhoto, .HelloS, .YouCanS {
+        display: none;
+    }
+
+    .header {
+        height: auto;
+        padding-top: 60px;
+        padding-bottom: 40px;
+    }
+
+    .headerContent {
+        padding: 20px 20px 40px 20px;
+        margin: 20px;
+        border-radius: 30px;
+        width: 90%;
+    }
+
+    .title {
+        font-size: 48px;
+        text-align: center;
+    }
+
+    .LogoText {
+        scale: 1.5;
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+
+    .subtitle {
+        font-size: 18px;
+        padding: 0 20px;
+    }
+
+    .features, .steps {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Це вирівняє картки по центру */
+        padding: 40px 20px;
+        gap: 40px;
+    }
+
+    .feature, .step {
+        max-width: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Центруємо текст і іконки всередині карток */
+        text-align: center;
+    }
+
+
+    .buttons {
+        flex-direction: column;
+        width: 80%;
+    }
+
+    .img1 {
+        width: 100%;
+    }
+
+    .title2, .howToStartTitle, .contactUs {
+        font-size: 28px;
+        margin: 60px 20px 10px 20px;
+        padding: 15px;
+    }
+
+    .features, .steps {
+        flex-direction: column;
+        padding: 40px 20px;
+        gap: 40px;
+        margin-top: 40px;
+    }
+
+    .feature, .step {
+        max-width: 100%;
+        padding-top: 20px;
+    }
+
+    .stepNumber {
+        font-size: 50px;
+        margin-bottom: 20px;
+    }
+
+    .contactUsTitle {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 1030px) and (min-width: 769px) {
+    .title {
+        font-size: 100px;
+    }
+
+    .LogoText {
+        scale: 3;
+    }
+
+    .headerContent {
+        padding: 20px 80px 60px 80px;
+    }
 }
 
 @keyframes fadeInUp {
