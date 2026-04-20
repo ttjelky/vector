@@ -23,5 +23,5 @@ API.interceptors.request.use((req) => {
         req.headers.Authorization = `Bearer ${token}`;
     }
 
-    return reg;
+    return req;
 });

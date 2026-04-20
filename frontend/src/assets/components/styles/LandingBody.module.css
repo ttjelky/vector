@@ -1,4 +1,8 @@
 
+html, body {
+   overscroll-behavior: none;
+}
+
 .TopPhoto {
     position: absolute;
     left: 50vw;

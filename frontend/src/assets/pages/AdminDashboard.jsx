@@ -3,6 +3,7 @@ import { getProfile } from "../../api";
 import React from "react";
 import NavBar from "../components/NavBar";
 import styles from "../components/styles/admindashboard.module.css";
+import CreateTournamentModal from "../components/CreateTournamentModal";
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -17,24 +18,24 @@ const Dashboard = () => {
             .catch(err => console.error(err)); 
     }, []);
 
+    const [open, setOpen] = useState(false);
+
     return (
         <NavBar>
-            <div>
-                <div className={styles.statscontainer}>
-                    <div className={styles.infocard}>
-                        <h3 className={styles.infotitle}>Загальна кількість користувачів</h3>
-                        <p className={styles.infovalue}>{stats.total_users}</p>
-                    </div>
-                    <div className={styles.infocard}>
-                        <h3 className={styles.infotitle}>Активні користувачі</h3>
-                        <p className={styles.infovalue}>{stats.active_users}</p>
-                    </div>
-                    <div className={styles.infocard}>
-                        <h3 className={styles.infotitle}>Нові користувачі</h3>
-                        <p className={styles.infovalue}>{stats.new_users}</p>
-                    </div>
-                </div>
+            <div className={styles.createBtnContainer}>
+                <button onClick={() => setOpen(true)} className={styles.createBtn}>
+                    + Створити турнір
+                </button>
             </div>
+            {open && (
+            <CreateTournamentModal
+                onClose={() => setOpen(false)}
+                onSubmit={(data) => {
+                console.log(data); // відправляй на Django API
+                setOpen(false);
+                }}
+            />
+            )}
         </NavBar>
   );
 };
