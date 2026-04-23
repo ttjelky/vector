@@ -6,6 +6,14 @@ const API = axios.create({
     baseURL: "http://127.0.0.1:8000/api",
 });
 
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('accessToken'); 
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export const registerUser = (userData) => {
     return axios.post(`${API_URL}register/`, userData);
 };
@@ -17,7 +25,7 @@ export const loginUser = (credentials) => {
 export const getProfile = () => API.get("/users/profile/");
 
 API.interceptors.request.use((req) => {
-    const token = localStorage.getItem("accesToken");
+    const token = localStorage.getItem("accessToken");
 
     if (token) {
         req.headers.Authorization = `Bearer ${token}`;
@@ -25,3 +33,5 @@ API.interceptors.request.use((req) => {
 
     return req;
 });
+
+export default API;

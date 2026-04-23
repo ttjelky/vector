@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import styles from "./styles/CreateTournamentModal.module.css";
 import cross from "./static/icons/cross.svg";
+import api from "../../api";
+import TournamentCard from "./TournamentCard";
 
 const STOCK_IMAGES = [
   { id: "arena", label: "", color: "#B5D4F4" },
@@ -72,33 +74,48 @@ function RichTextArea({ id, rows = 4, placeholder, value, onChange }) {
   );
 }
 
-export default function CreateTournamentModal({ onClose, onSubmit }) {
+export default function CreateTournamentModal({ onClose, onSubmit, onCreate }) {
   const [imageMode, setImageMode] = useState("stock");
   const [selectedStock, setSelectedStock] = useState(null);
   const [accentColor, setAccentColor] = useState("#378ADD");
   const [customColor, setCustomColor] = useState("#378ADD");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
     const data = {
-      name: form.name.value,
-      imageMode,
-      stockImage: selectedStock,
-      accentColor,
-      rules: form.rules.value,
-      description: form.description.value,
-      startDate: form.startDate.value || null,
-      registrationStart: form.registrationStart.value,
-      registrationEnd: form.registrationEnd.value,
-      maxTeams: form.maxTeams.value ? Number(form.maxTeams.value) : null,
+      name: tournamentName,
+      image_mode: imageMode,
+      stock_image: selectedStock,
+      accent_color: accentColor,
+      rules: tournamentRules,
+      description: tournamentInfo,
+      start_date: form.startDate.value || null,
+      registration_start: form.registrationStart.value,
+      registration_end: form.registrationEnd.value,
+      max_teams: form.maxTeams.value ? Number(form.maxTeams.value) : null,
       format: form.format.value,
     };
-    onSubmit?.(data);
+
+    try {
+    
+    const response = await api.post('/tournaments/', data);
+    if (response.status === 201) {
+    onCreate(response.data);
+    onClose();
+    }
+    
+    onSubmit?.(response.data); 
+    
+    onClose();
+  } catch (error) {
+    console.error("Помилка при створенні:", error);
+  }
   };
 
   const [tournamentName, setTournamentName] = useState("");
   const [tournamentInfo, setTournamentInfo] = useState("");
+  const [tournamentRules, setTournamentRules] = useState("");
   const [startDate, setStartDate] = useState("");
   
   const formatDate = (dateValue) => {
@@ -127,39 +144,15 @@ export default function CreateTournamentModal({ onClose, onSubmit }) {
 
             <div className={styles.previewContainer}>
               <span className={styles.previewLabel}>Передогляд картки</span>
-      
-              <div 
-                className={styles.previewCard}
-                style={{ '--accent': accentColor }}
-              >
-              <div className={styles.previewImage}>
-                {imageMode === "none" && <div className={styles.imagePlaceholder}>Зображення турніру</div>}
-                {/* Тут буде логіка для стокових або завантажених фото */}
-              </div>
-        
-              <div className={styles.previewContent}>
-                <div className={styles.previewHeader}>
-                  <h3 className={styles.previewName}>
-                    {tournamentName || "Назва вашого турніру"}
-                  </h3>
-                  <div className={styles.previewBadge}>Реєстрація відкрита</div>
-                </div>
-                <p className={styles.previewInfo}>
-                  {tournamentInfo 
-                  ? (tournamentInfo.length > 100 
-                  ? tournamentInfo.substring(0, 100) + "..." 
-                  : tournamentInfo)
-                  : "Детальний опис вашого турніру, який буде видно учасникам. Можете розповісти про призи, умови або просто привітатися!"
-                  }
-                </p>
-                <div className={styles.previewFooter}>
-                  <span className={styles.previewDate}>
-                    {formatDate(startDate)}
-                  </span>
-                </div>
-              </div>
+              <TournamentCard
+                name={tournamentName}
+                info={tournamentInfo}
+                date={startDate}
+                accentColor={accentColor}
+                imageMode={selectedStock ? "stock" : "none"}
+              />
+              
             </div>
-          </div>
 
             {/* Назва */}
             <div className={styles.field}>

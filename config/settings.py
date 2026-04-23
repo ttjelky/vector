@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'apps.users',
+    'apps.tournaments',
     'django_rest_passwordreset',
 
 ]

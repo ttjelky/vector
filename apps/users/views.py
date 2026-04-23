@@ -15,6 +15,7 @@ from .models import Profile
 from .models import IsAdmin
 from .models import Tournament
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 User = get_user_model()
 
