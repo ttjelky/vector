@@ -52,9 +52,22 @@
     padding: 10px 30px;
 }
 
+<<<<<<< HEAD
 .title {
     font-family: "Google Sans", sans-serif;
     font-size: 60px;
+=======
+.namecontainer {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.title {
+    font-family: "Google Sans", sans-serif;
+    font-size: 60px;
+    margin-bottom: 10px;
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
 }
 
 .input {
@@ -71,6 +84,13 @@
     transition-duration: 0.08s;
 }
 
+<<<<<<< HEAD
+=======
+.rolecontainer {
+    margin: 10px 0px;
+}
+
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
 input:focus {
   border: 1px solid black;
 }
@@ -142,6 +162,10 @@ a {
 .underform {
     display: flex;
     justify-content: space-between;
+<<<<<<< HEAD
+=======
+    margin-top: 10px;
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
 }
 
 a:hover {

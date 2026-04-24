@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
@@ -56,6 +57,29 @@ def profile(request):
         "email": user.email,
     })
 
+=======
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
+from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import ProfileSerializer
+from .serializers import RegisterSerializer
+from .serializers import MyTokenObtainPairSerializer
+from .models import IsAdmin
+from .models import Tournament
+from .models import Profile
+
+User = get_user_model()
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
 def dashboard_data(request):
     data = {
         "total_users": User.objects.count(),
@@ -64,7 +88,11 @@ def dashboard_data(request):
     }
     return JsonResponse(data)
 
+<<<<<<< HEAD
 @api_view(['POST'])
+=======
+@api_view (['POST'])
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
 @permission_classes([IsAdmin])
 def create_tournament(request):
     data = request.data
@@ -87,5 +115,33 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
+<<<<<<< HEAD
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
+=======
+    permission_classes = [AllowAny]
+    serializer_class = RegisterSerializer
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get(self, request):
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        print("DATA:", request.data)
+        print("FILES:", request.FILES)
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+
+        serializer = ProfileSerializer(
+            profile,
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)

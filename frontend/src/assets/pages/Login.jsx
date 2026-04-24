@@ -24,6 +24,7 @@ const handleChange = (e) => {
 };
 
 const handleSubmit = async (e) => {
+<<<<<<< HEAD
     e.preventDefault();
     setErrors({});
 
@@ -51,6 +52,56 @@ const handleSubmit = async (e) => {
         const finalMessage = translations[serverMessage] || "Помилка підключення до сервера";
         setErrors({ detail: finalMessage });
     }
+=======
+  e.preventDefault();
+  setErrors({});
+
+  try {
+    const response = await loginUser({
+      username: loginData.email,
+      password: loginData.password,
+    });
+
+    console.log("RESPONSE:", response.data);
+
+    const access = response.data.access;
+    const refresh = response.data.refresh;
+
+    if (!access) {
+      throw new Error("No access token");
+    }
+
+    localStorage.setItem("accessToken", access);
+    localStorage.setItem("refreshToken", refresh);
+
+    localStorage.setItem("username", response.data.username);
+    localStorage.setItem(
+      "fullUserName",
+      `${response.data.first_name} ${response.data.last_name}`.trim()
+    );
+    localStorage.setItem("email", response.data.email);
+
+    console.log("LOGIN SUCCESS:", access);
+
+    onClose();
+    navigate("/admindashboard");
+
+  } catch (error) {
+    console.error("LOGIN ERROR:", error);
+
+    const serverMessage = error.response?.data?.detail;
+
+    const translations = {
+      "No active account found with the given credentials":
+        "Невірна пошта або пароль",
+      "User is inactive": "Акаунт не активовано",
+    };
+
+    setErrors({
+      detail: translations[serverMessage] || "Помилка підключення до сервера",
+    });
+  }
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
 };
 
 if (!isOpen) return null;
@@ -73,7 +124,10 @@ return (
                 type="email"
                 className={styles.input}
                 name="email"
+<<<<<<< HEAD
                 placeholder="Електронна пошта" 
+=======
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
                 value={loginData.email}
                 onChange={handleChange}
                 required 
@@ -86,8 +140,12 @@ return (
               <input
                 type="password" 
                 className={styles.input}
+<<<<<<< HEAD
                 name="password" 
                 placeholder="Пароль" 
+=======
+                name="password"
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
                 value={loginData.password}
                 onChange={handleChange}
                 required

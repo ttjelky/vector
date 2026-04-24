@@ -68,6 +68,7 @@ if (!isOpen) return null;
         </div>
 
         <div className={styles.form}>
+<<<<<<< HEAD
         <h1 className={styles.logintitle}>Реєстрація</h1>
 
         <section className={styles.inputform}>
@@ -96,6 +97,37 @@ if (!isOpen) return null;
           required
           />
           {errors.last_name && <span className={styles.errorText}>{errors.last_name[0]}</span>}
+=======
+        <h1 className={styles.title}>Реєстрація</h1>
+
+        <section className={styles.inputform}>
+          <div className={styles.namecontainer}>
+            <div className={styles.name}>
+            <p style={{color: "gray"}}>Ім’я</p>
+            <input 
+            type="text" 
+            name="first_name"
+            value={formData.first_name}
+            onChange={handleChange}
+            className={styles.input}
+            required
+            />
+            {errors.first_name && <span className={styles.errorText}>{errors.first_name[0]}</span>}
+            </div>
+
+            <div className={styles.name}>
+            <p style={{color: "gray"}}>Прізвище</p>
+            <input 
+            type="text" 
+            name="last_name"
+            value={formData.last_name}
+            onChange={handleChange}
+            className={styles.input}
+            required
+            />
+            {errors.last_name && <span className={styles.errorText}>{errors.last_name[0]}</span>}
+            </div>
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
           </div>
 
           <div className={styles.email}>
@@ -125,9 +157,15 @@ if (!isOpen) return null;
           />
           </div>
 
+<<<<<<< HEAD
           <div className={styles.name}>
             <p style={{color: "gray"}}>Роль</p>
             <select 
+=======
+          <div className={styles.rolecontainer}>
+            <p style={{color: "gray"}}>Роль</p>
+            <select
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
               value={role} 
               onChange={(e) => setRole(e.target.value)}
               className={styles.input}
@@ -135,7 +173,11 @@ if (!isOpen) return null;
             >
               <option value="">Оберіть роль</option>
               <option value="admin">Адміністратор</option>
+<<<<<<< HEAD
               <option value="team">Команда</option>
+=======
+              <option value="team">Учасник</option>
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
               <option value="jury">Журі</option>
             </select>
           </div>

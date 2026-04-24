@@ -59,7 +59,11 @@ const NavBar = ({children}) => {
             <h3 className={styles.sidebarSectionTitle}>Меню</h3>
             <ul>
               <li className={styles.sidebarEl}>
+<<<<<<< HEAD
                 <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>
+=======
+                <NavLink to="/admindashboard" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>
+>>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
                   <HomeIcon className={styles.sidebarIcon}/> <span className={styles.sidebarText}>Головна</span>
                 </NavLink>
               </li>
