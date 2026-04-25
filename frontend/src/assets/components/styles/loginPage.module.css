@@ -11,13 +11,19 @@
     align-items: center;
     padding: 20px;
     z-index: 9999;
+    animation: overlayIn 0.3s ease forwards;
 }
 
-.login{
+.overlayClosing {
+    animation: overlayOut 0.3s ease forwards;
+}
+
+.login {
+    font-family: "Google Sans", sans-serif;
     background-color: #f5f5f7;
     border-radius: 28px;
     border: 6px solid white;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px #dcdcdc,
         0 10px 30px rgba(0, 0, 0, 0.05);
     width: 90%;
@@ -26,25 +32,35 @@
     overflow-y: auto;
     padding: 20px;
     position: relative;
-    animation: modalIn 0.4s ease;
+    animation: modalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.modalClosing {
+    animation: modalOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 .cross {
     position: absolute;
     top: 2%;
-    right:3%;
+    right: 3%;
     padding: 5px;
     z-index: 1000;
     width: 30px;
-    background:rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
+    box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.1),
         0 1px 2px rgba(0, 0, 0, 0.05);
     border-radius: 1000px;
     cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.cross:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
 }
 
 .form {
@@ -68,6 +84,11 @@
     font-size: 16px;
     box-sizing: border-box;
     outline: none;
+    transition: border 0.08s;
+}
+
+.input:focus {
+    border: 1px solid black;
 }
 
 .rememberme {
@@ -84,33 +105,42 @@ a {
     font-weight: 600;
 }
 
+a:hover {
+    text-decoration: underline;
+}
+
 .thebutton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 48px;
-    min-width: 490px;
-    padding-inline: 22px;
+    width: 100%;
+    height: 48px;
     font-size: 16px;
     background: linear-gradient(180deg, #3a3a3a, #1f1f1f);
     box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.15),
-    inset 0 -2px 4px rgba(0,0,0,0.6),
-    0 6px 12px rgba(0,0,0,0.15);
+        inset 0 1px 1px rgba(255,255,255,0.15),
+        inset 0 -2px 4px rgba(0,0,0,0.6),
+        0 6px 12px rgba(0,0,0,0.15);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.8);
     cursor: pointer;
     border-radius: 1000px;
+    transition: 0.2s;
 }
 
 .thebutton:hover:not(:disabled) {
     background: linear-gradient(180deg, #444, #242424);
     transform: translateY(-1px);
     box-shadow:
-    inset 0 1px 2px rgba(255,255,255,0.2),
-    inset 0 -2px 5px rgba(0,0,0,0.7),
-    0 12px 20px rgba(0,0,0,0.25);
-    transition-duration: 0.2s;
+        inset 0 1px 2px rgba(255,255,255,0.2),
+        inset 0 -2px 5px rgba(0,0,0,0.7),
+        0 12px 20px rgba(0,0,0,0.25);
+}
+
+.thebutton:disabled {
+    background: #555;
+    cursor: unset;
+    opacity: 0.6;
 }
 
 .errorText {
@@ -121,24 +151,72 @@ a {
     text-align: left;
 }
 
-.thebutton:disabled {
-    background: #555;
-    cursor: unset;
-    opacity: 0.6;
-}
-
 .underform {
     display: flex;
     justify-content: space-between;
 }
 
+/* ── Анімації ── */
+@keyframes overlayIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes overlayOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
 @keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: scale(0.92) translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes modalOut {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.92) translateY(16px);
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .overlay {
+        padding: 12px;
+        align-items: flex;
+    }
+
+    .login {
+        width: 100%;
+        max-width: 100%;
+        min-height: unset;
+        max-height: 92vh;
+        border-radius: 28px 28px 20px 20px;
+        border: 4px solid white;
+        padding: 16px;
+    }
+
+    .form {
+        margin-top: 20px;
+        padding: 8px 16px;
+    }
+
+    .logintitle {
+        font-size: 36px;
+    }
+
+    .thebutton {
+        min-width: unset;
+        width: 100%;
+    }
 }

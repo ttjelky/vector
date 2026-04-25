@@ -4,7 +4,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(7px);
     display: flex;
     justify-content: center;
@@ -13,130 +13,178 @@
     z-index: 9999;
 }
 
-.forgot{
+.forgot {
+     font-family: "Google Sans", sans-serif;
     background-color: #f5f5f7;
-    font-family: 'DM Sans', sans-serif;
-    border-radius: 28px;
+    border-radius: 40px;
     border: 6px solid white;
     box-shadow: 
         inset 0 0 0 1px #dcdcdc,
-        0 10px 30px rgba(0, 0, 0, 0.05);
+        0 20px 40px rgba(0, 0, 0, 0.1);
     width: 90%;
-    max-width: 600px;
-    min-height: 90vh;
-    overflow-y: auto;
-    padding: 20px;
+    max-width: 550px;
+    padding: 40px;
     position: relative;
     animation: modalIn 0.4s ease;
+    box-sizing: border-box;
 }
 
 .cross {
     position: absolute;
     top: 2%;
-    right:3%;
+    right: 3%;
     padding: 5px;
     z-index: 1000;
     width: 30px;
-    background:rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
+    box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.1),
         0 1px 2px rgba(0, 0, 0, 0.05);
     border-radius: 1000px;
     cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.cross:hover {
+    opacity: 0.6;
 }
 
 .form {
-    margin-top: 30px;
-    padding: 10px 30px;
+    margin-top: 20px;
+    width: 100%;
 }
 
 .title {
-    font-size: 60px;
+    font-family: "Google Sans", sans-serif;
+    font-size: 56px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #000;
+    letter-spacing: -1px;
 }
 
 .input {
     display: block;
     width: 100%;
-    height: 48px;
-    margin: 10px 0 5px;
-    padding: 0 16px;
-    border: 1px solid #d1d1d1;
-    border-radius: 12px;
-    font-size: 16px;
+    height: 52px;
+    margin: 10px 0 20px;
+    padding: 0 20px;
+    border: 1px solid #d2d2d7;
+    border-radius: 14px;
+    font-size: 17px;
+    background: white;
     box-sizing: border-box;
     outline: none;
+    transition: all 0.2s ease;
 }
 
-.backToLogin {
-    text-decoration: none;
-    color: gray;
-    cursor: pointer;
-    font-weight: 500;
+.input:focus {
+    border: 1px solid black;
 }
 
 .thebutton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 48px;
-    min-width: 490px;
-    padding-inline: 22px;
-    font-size: 16px;
+    min-height: 52px;
+    width: 100%; /* Тепер на всю ширину як у логіні */
+    font-size: 17px;
+    font-weight: 600;
     background: linear-gradient(180deg, #3a3a3a, #1f1f1f);
     box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.15),
-    inset 0 -2px 4px rgba(0,0,0,0.6),
-    0 6px 12px rgba(0,0,0,0.15);
+        inset 0 1px 1px rgba(255,255,255,0.15),
+        inset 0 -2px 4px rgba(0,0,0,0.6),
+        0 6px 12px rgba(0,0,0,0.15);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.8);
     cursor: pointer;
     border-radius: 1000px;
+    transition: all 0.2s ease-in-out;
+    box-sizing: border-box;
 }
 
 .thebutton:hover:not(:disabled) {
     background: linear-gradient(180deg, #444, #242424);
     transform: translateY(-1px);
     box-shadow:
-    inset 0 1px 2px rgba(255,255,255,0.2),
-    inset 0 -2px 5px rgba(0,0,0,0.7),
-    0 12px 20px rgba(0,0,0,0.25);
-    transition-duration: 0.2s;
+        inset 0 1px 2px rgba(255,255,255,0.2),
+        inset 0 -2px 5px rgba(0,0,0,0.7),
+        0 12px 20px rgba(0,0,0,0.25);
 }
 
 .thebutton:disabled {
-    background: #555;
-    cursor: unset;
-    opacity: 0.6;
+    background: #444;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .bottom {
-    padding: 15px 0px;
-    margin-top: 50px;
-    border-top: 2px solid lightgray;
+    padding-top: 20px;
+    margin-top: 30px;
+    border-top: 1px solid #dcdcdc;
+    display: flex;
+    justify-content: center;
+}
+
+.backToLogin {
+    text-decoration: none;
+    color: #000;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.backToLogin:hover {
+    text-decoration: underline;
 }
 
 .successText {
-    color: green;
-    margin-top: 20px;
+    color: #28a745;
+    font-size: 14px;
+    margin-top: 10px;
     font-weight: 500;
 }
 
 .errorText {
-    color: red;
-    margin-top: 20px;
+    color: #ff4d4d;
+    font-size: 14px;
+    margin-top: 10px;
     font-weight: 500;
 }
 
 @keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Адаптація під мобілки */
+@media (max-width: 768px) {
+    .forgot {
+        padding: 30px 20px;
+        border-radius: 30px;
+        width: 92%;
+    }
+    
+    .title {
+        font-size: 32px;
+        text-align: left;
+    }
+
+    .form {
+        padding: 10px 15px;
+        margin-top: 0;
+    }
+
+    .cross {
+        top: 20px;
+        right: 20px;
+    }
 }

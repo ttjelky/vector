@@ -11,162 +11,253 @@
     align-items: center;
     padding: 20px;
     z-index: 9999;
+    animation: overlayIn 0.3s ease forwards;
 }
 
-.register{
+.overlayClosing {
+    animation: overlayOut 0.3s ease forwards;
+}
+
+.register {
+    font-family: "Google Sans", sans-serif;
     background-color: #f5f5f7;
-    border-radius: 28px;
+    border-radius: 40px; /* Збільшив для Apple стилю */
     border: 6px solid white;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px #dcdcdc,
-        0 10px 30px rgba(0, 0, 0, 0.05);
+        0 20px 40px rgba(0, 0, 0, 0.1);
     width: 90%;
     max-width: 600px;
-    min-height: 90vh;
+    max-height: 95vh;
     overflow-y: auto;
-    padding: 20px;
+    padding: 40px;
     position: relative;
-    animation: modalIn 0.4s ease;
+    animation: modalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    box-sizing: border-box;
+}
+
+.modalClosing {
+    animation: modalOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 .cross {
     position: absolute;
     top: 2%;
-    right:3%;
+    right: 3%;
     padding: 5px;
     z-index: 1000;
     width: 30px;
-    background:rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
+    box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.1),
         0 1px 2px rgba(0, 0, 0, 0.05);
     border-radius: 1000px;
     cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.cross:hover {
+    opacity: 0.6;
 }
 
 .form {
-    margin-top: 30px;
-    padding: 10px 30px;
+    margin-top: 10px;
+    width: 100%;
 }
 
 .namecontainer {
     display: flex;
     gap: 15px;
-    margin-bottom: 10px;
+    margin-bottom: 5px; 
+    align-items: flex-start;
 }
+
 
 .title {
     font-family: "Google Sans", sans-serif;
-    font-size: 60px;
-    margin-bottom: 10px;
+    font-size: 56px;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+    color: #000;
+    letter-spacing: -1.5px;
+    line-height: 1;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    color: #86868b;
+    margin-bottom: 4px;
+    margin-left: 4px;
 }
 
 .input {
     display: block;
     width: 100%;
-    height: 48px;
-    margin: 10px 0 5px;
-    padding: 0 16px;
-    border: 1px solid #d1d1d1;
-    border-radius: 12px;
-    font-size: 16px;
+    height: 52px;
+    margin-bottom: 20px;
+    padding: 0 20px;
+    border: 1px solid #d2d2d7;
+    border-radius: 14px;
+    font-size: 17px;
+    background: white;
     box-sizing: border-box;
     outline: none;
-    transition-duration: 0.08s;
+    transition: all 0.2s ease;
+}
+
+.input:focus {
+    border: 1px solid black;
 }
 
 .rolecontainer {
-    margin: 10px 0px;
-}
-
-input:focus {
-  border: 1px solid black;
+    margin-bottom: 20px;
 }
 
 .rememberme {
-    font-size: 16px;
+    font-size: 15px;
     display: flex;
-    gap: 5px;
-    margin-bottom: 20px;
-    color: gray;
-}
-
-a {
-    text-decoration: none;
-    color: black;
-    font-weight: 600;
-}
-
-.thebutton:hover:not(:disabled) {
-    background: linear-gradient(180deg, #444, #242424);
-    transform: translateY(-1px);
-    box-shadow:
-    inset 0 1px 2px rgba(255,255,255,0.2),
-    inset 0 -2px 5px rgba(0,0,0,0.7),
-    0 12px 20px rgba(0,0,0,0.25);
-    transition-duration: 0.2s;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    color: #424245;
+    cursor: pointer;
 }
 
 .thebutton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
+    height: 52px;
     width: 100%;
-    height: 48px;
-
-    font-size: 16px;
+    font-size: 17px;
+    font-weight: 600;
     color: white;
-
     background: linear-gradient(180deg, #3a3a3a, #1f1f1f);
-
     border: 1px solid rgba(255, 255, 255, 0.8);
     border-radius: 1000px;
-
     cursor: pointer;
-
     box-shadow:
         inset 0 1px 1px rgba(255,255,255,0.15),
         inset 0 -2px 4px rgba(0,0,0,0.6),
         0 6px 12px rgba(0,0,0,0.15);
-
-    transition: 0.2s;
+    transition: all 0.2s ease;
 }
 
-.thebutton:disabled {
-    background: #555;
-    cursor: unset;
-    opacity: 0.6;
-}
-
-.errorText {
-    color: #ff4d4d;
-    font-size: 12px;
-    margin-top: 5px;
-    display: block;
-    text-align: left;
+.thebutton:hover:not(:disabled) {
+    background: linear-gradient(180deg, #444, #242424);
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 2px rgba(255,255,255,0.2),
+        inset 0 -2px 5px rgba(0,0,0,0.7),
+        0 12px 20px rgba(0,0,0,0.25);
 }
 
 .underform {
     display: flex;
     justify-content: space-between;
-    margin-top: 10px;
+    margin-top: 25px;
+    font-size: 15px;
 }
 
-a:hover {
-  text-decoration: underline;
+.underform a {
+    color: #000;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.underform a:hover {
+    text-decoration: underline;
+}
+
+/* ── Анімації ── */
+@keyframes overlayIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes overlayOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
 }
 
 @keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes modalOut {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 765px) {
+    .overlay{
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .register {
+        padding: 30px 20px;
+        border-radius: 30px;
+        max-height: 90vh;
+    }
+
+    .input {
+    display: block;
+    width: 100%;
+    height: 38px;
+    margin-bottom: 5px;
+    padding: 0 20px;
+    border: 1px solid #d2d2d7;
+    border-radius: 14px;
+    font-size: 17px;
+    background: white;
+    box-sizing: border-box;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+    .title {
+        position: relative; 
+        margin-bottom:9px ;
+        font-size: 36px;
+    }
+
+    .rememberme{
+        margin-bottom: 15px;
+    }
+
+    .namecontainer {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .cross {
+        top: 20px;
+        right: 20px;
+    }
+
+    .underform {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    font-size: 15px;
+}
 }
