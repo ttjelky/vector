@@ -66,7 +66,8 @@ const Dashboard = () => {
                     date={tournament.start_date}
                     accentColor={tournament.accent_color}
                     imageMode={tournament.image_mode}
-                    // Передай інші потрібні пропси
+                    stockImage={tournament.stock_image}
+                    customImage={tournament.custom_image ?? null}
                 />
                 </div>
                 ))}

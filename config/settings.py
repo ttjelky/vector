@@ -152,3 +152,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'vectorcommandreset@gmail.com'
 EMAIL_HOST_PASSWORD = 'lcdndlmlbvgoksjk'
 DEFAULT_FROM_EMAIL = 'Vector <vectorcommandreset@gmail.com>'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
