@@ -1,91 +1,38 @@
 .LandingFooter {
-    font-family: "Google Sans", sans-serif;
-    width: 100%;
+    font-family: Google Sans, sans-serif;
 }
 
 .LandingFooterLinks {
-    display: flex;
-    flex-wrap: wrap;
     font-size: 14px;
     margin: 60px 35px;
+    margin-bottom: 60px;
     font-weight: bold;
+    
 }
 
 .LandingFooterLinks a {
-    color: #000;
+    color: inherit;
     text-decoration: none;
-    margin-right: 30px;
+    margin: 0 15px;
 }
 
 .LandingFooterBottom {
     display: flex;
-    flex-direction: column; 
-    align-items: flex-start;
-    padding: 0 35px;
-    gap: 12px; 
+    justify-content: space-between;
+    padding: 20px 35px;
+    font-size: 12px;
 }
 
 .LandingFooterLogoEmail {
     display: flex;
-    align-items: center; 
-    gap: 12px; 
+    align-items: center;
+    gap: 27px;
 }
 
-.FooterLogo {
-    height: 28px;
-    width: auto;
-    display: block;
-}
 .LandingFooterEmail {
-    margin: 0; 
-    font-size: 14px;
-    color: #5f6368;
-    font-weight: normal;
-    line-height: 1; 
+    margin-top: 20px;
 }
 
 .LandingFooterSFLU {
     margin-top: 10px;
-}
-
-/* Мобільна адаптація */
-@media (max-width: 1030px) {
-    .LandingFooterLinks {
-        display: none; /* Ховаємо посилання на мобільних */
-    }
-
-    @media (max-width: 1030px) {
-    .LandingFooterLinks {
-        display: none; /* Прибираємо лінки за твоїм проханням */
-    }
-
-    .LandingFooterBottom {
-        flex-direction: column;
-        align-items: center; /* Центруємо весь блок на екрані */
-        padding: 30px 20px;
-    }
-
-    .LandingFooterLogoEmail {
-        display: flex;
-        flex-direction: row; /* Лого і пошта в один рядок */
-        align-items: center;
-        justify-content: center;
-        gap: 15px; 
-        width: 100%;
-        margin-bottom: 20px;
-    }
-
-    .LandingFooterEmail {
-        margin-top: 0; /* Прибираємо зайвий відступ, щоб було в лінію з лого */
-        font-size: 14px;
-        word-break: break-all;
-    }
-
-    .LandingFooterSFLU {
-        text-align: center;
-        margin-top: 10px;
-        font-size: 12px;
-        line-height: 1.4;
-    }
-}
 }

@@ -1,10 +1,38 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getProfile } from "../../api";
+import { useTabs } from "../../TabsContext";
+import API from "../../api";
 import React from "react";
 import NavBar from "../components/NavBar";
 import styles from "../components/styles/admindashboard.module.css";
+import CreateTournamentModal from "../components/CreateTournamentModal";
+import TournamentCard from "../components/TournamentCard";
 
 const Dashboard = () => {
+
+    const navigate = useNavigate();
+    const [tournaments, setTournaments] = useState([]);
+    const { addTab } = useTabs();
+
+    const addTournament = (newTournament) => {
+        setTournaments((prev) => [...prev, newTournament]);
+    };
+
+    const fetchTournaments = async () => {
+        try {
+            const response = await API.get('/tournaments/');
+            setTournaments(response.data);
+        } catch (error) {
+            console.error("Помилка при завантаженні турнірів:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchTournaments();
+    }, []);
+
+
     const [stats, setStats] = useState({
         total_users: 0,
         active_users: 0,
@@ -17,27 +45,56 @@ const Dashboard = () => {
             .catch(err => console.error(err)); 
     }, []);
 
+    const [open, setOpen] = useState(false);
+
     return (
         <NavBar>
-            <div>
-                <div className={styles.statscontainer}>
-                    <div className={styles.infocard}>
-                        <h3 className={styles.infotitle}>Загальна кількість користувачів</h3>
-                        <p className={styles.infovalue}>{stats.total_users}</p>
-                    </div>
-                    <div className={styles.infocard}>
-                        <h3 className={styles.infotitle}>Активні користувачі</h3>
-                        <p className={styles.infovalue}>{stats.active_users}</p>
-                    </div>
-                    <div className={styles.infocard}>
-                        <h3 className={styles.infotitle}>Нові користувачі</h3>
-                        <p className={styles.infovalue}>{stats.new_users}</p>
-                    </div>
+            <div className={styles.contentArea}>
+            <div className={styles.tournamentGrid}>
+                {tournaments.map((tournament) => (
+                <div 
+                    className={styles.tournamentCard} 
+                    key={tournament.id} 
+                    onClick={() => {
+                        addTab({ id: tournament.id, name: tournament.name });
+                        navigate(`/tournament/${tournament.id}`);
+                    }}>
+                <TournamentCard 
+                    key={tournament.id}
+                    name={tournament.name}
+                    info={tournament.description}
+                    date={tournament.start_date}
+                    accentColor={tournament.accent_color}
+                    imageMode={tournament.image_mode}
+                    stockImage={tournament.stock_image}
+                    customImage={tournament.custom_image ?? null}
+                />
                 </div>
+                ))}
+            </div>
+            <div className={styles.createBtnContainer}>
+                <button 
+                    onClick={() => 
+                    setOpen(true)} 
+                    className={styles.createBtn}
+                    onSubmit={addTournament}
+                >
+                    + Створити турнір
+                </button>
+            </div>
+            {open && (
+            <CreateTournamentModal
+                onClose={() => setOpen(false)}
+                onCreate={addTournament}
+                onSubmit={(data) => {
+                console.log(data); // відправляй на Django API
+                setOpen(false);
+                }}
+            />
+            )}
             </div>
         </NavBar>
   );
 };
-
 
 export default Dashboard

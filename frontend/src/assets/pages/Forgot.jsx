@@ -1,85 +1,85 @@
-import React, { useState } from "react";
+import React, { useState} from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../components/styles/forgotPage.module.css";
-import cross from "../components/static/icons/cross.svg";
+import cross from "../components/static/icons/cross.svg"
 
-const Forgot = ({ isOpen, onClose, onBackToLogin }) => {
-  const [isClosing, setIsClosing] = useState(false);
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsClosing(false);
-      onClose();
-    }, 300);
-  };
+const Forgot = ({isOpen, onClose, onBackToLogin}) => {
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage("");
-    setError("");
+    const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+    if (!isOpen) return null;
 
-    try {
-      const response = await fetch("http://127.0.0.1:8000/api/password_reset/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email }),
-      });
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setMessage('');
+        setError('');
 
-      if (response.ok) {
-        setMessage("Посилання для скидання пароля відправлено!");
-      } else {
-        setError("Користувача з таким email не знайдено.");
-      }
-    } catch (err) {
-      setError("Помилка з'єднання з сервером.");
-    }
-  };
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/password_reset/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email }),
+            });
 
-  if (!isOpen && !isClosing) return null;
+            if (response.ok) {
+                setMessage('Посилання для скидання пароля відправлено на вашу пошту!');
+            } else {
+                setError('Користувача з таким email не знайдено.');
+            }
+        } catch (err) {
+            setError('Помилка з\'єднання з сервером.');
+        }
+    };
 
-  return (
-    <div className={`${styles.overlay} ${isClosing ? styles.fadeOut : ""}`} onClick={handleClose}>
-      <div className={`${styles.forgot} ${isClosing ? styles.modalOut : ""}`} onClick={(e) => e.stopPropagation()}>
-        <img src={cross} alt="close" className={styles.cross} onClick={handleClose} />
+return (
+    <div className={styles.overlay} onClick={onClose}>
+        <div className={styles.forgot} onClick={(e) => e.stopPropagation()}>
 
-        <form onSubmit={handleSubmit} noValidate className={styles.form}>
-          <h1 className={styles.title}>Забули пароль?</h1>
-          <p className={styles.description}>
-            Вкажіть електронну пошту вашого акаунта, щоб скинути пароль.
-          </p>
+            <img src={cross} alt="back" className={styles.cross} onClick={onClose} />
 
-          <div className={styles.inputGroups}>
-            <div className={styles.fieldWrapper}>
-              <p className={styles.label}>Email</p>
-              <input
-                type="email"
-                className={styles.input}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-          </div>
+            <form className={styles.form}> 
 
-          {message && <p className={styles.successText}>{message}</p>}
-          {error && <p className={styles.errorTextDetail}>{error}</p>}
+                <h1 className={styles.title}>Забули пароль?</h1>
+                <p style={{color: "gray", marginTop: "10px", marginBottom: "20px"}}>Вкажіть електронну пошту, пов’язану з вашим акаунтом, щоб скинути пароль.</p>
 
-          <button type="submit" disabled={!email} className={styles.thebutton}>
-            Скинути пароль
-          </button>
+                <section style={{marginTop: "32px"}}>
 
-          <div className={styles.bottom}>
-            <span className={styles.backToLogin} onClick={onBackToLogin}>
-              Повернутися до входу
-            </span>
-          </div>
-        </form>
-      </div>
+                <div style={{marginBottom: "20px"}}>
+                    <p style={{color: "gray"}}>Email</p>
+                    <input
+                        type="email"
+                        className={styles.input}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className={styles.button}>
+                    <button type="submit" disabled={!email} className={styles.thebutton}>
+                        Скинути пароль
+                    </button>
+                </div>
+
+                </section>
+
+                <div className={styles.bottom}>
+                    <a className={styles.backToLogin} onClick={onBackToLogin}>Повернутися до входу</a>
+                </div>
+
+                {message && <p className={styles.successText}>{message}</p>}
+                {error && <p className={styles.errorText}>{error}</p>}
+
+            </form>
+        </div>
     </div>
-  );
-};
+)
 
-export default Forgot;
+}
+
+export default Forgot

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from "../components/styles/registerPage.module.css";
 import cross from "../components/static/icons/cross.svg"
 import { registerUser, loginUser } from '../../api';
 import { useNavigate } from 'react-router-dom';
 
 const Register = ({isOpen, onClose, onSwitchToLogin}) => {
+
   const navigate = useNavigate();
 
   const [role, setRole] = useState("");
@@ -19,17 +20,12 @@ const Register = ({isOpen, onClose, onSwitchToLogin}) => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // Спеціальний закриватор з анімацією
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsClosing(false);
-      onClose();
-    }, 300); // Час має збігатися з CSS анімацією
-  };
-
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -53,14 +49,14 @@ const Register = ({isOpen, onClose, onSwitchToLogin}) => {
         if (error.response && error.response.data) {
             setErrors(error.response.data); 
         } else {
-            alert("Щось пішло не так.");
+            alert("Щось пішло не так. Перевірте з'єднання.");
         }
     } finally {
         setIsLoading(false);
     }
 };
   
-  if (!isOpen && !isClosing) return null;
+if (!isOpen) return null;
 
     return (
       <form onSubmit={handleSubmit} noValidate>
@@ -171,4 +167,4 @@ const Register = ({isOpen, onClose, onSwitchToLogin}) => {
     );
 };
 
-export default Register;
+export default Register
