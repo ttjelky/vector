@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "../components/styles/TournamentPage.module.css";
 import NavBar from "../components/NavBar";
+import { useParams } from "react-router-dom";
+import API from "../../api";
 
 // Mock data
 const mockTournament = {
@@ -245,7 +247,27 @@ function RoundsTab({ rounds }) {
 
 export default function TournamentPage() {
   const [activeTab, setActiveTab] = useState("overview");
-  const tournament = mockTournament;
+
+ const { id } = useParams();
+    const [tournament, setTournament] = useState(null); 
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchTournament = async () => {
+            try {
+                const response = await API.get(`/tournaments/${id}/`);
+                setTournament(response.data);
+            } catch (error) {
+                console.error("Помилка:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTournament();
+    }, [id]);
+
+    if (loading) return <div>Завантаження...</div>;
+    if (!tournament) return <div>Турнір не знайдено</div>;
 
   const tabs = [
     { id: "overview", label: "Основна сторінка" },
