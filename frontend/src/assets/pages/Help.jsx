@@ -72,7 +72,7 @@ const Help = () => {
     
     return (
       <NavBar>
-        <div>
+        <div className={styles.contentArea}>
           <div className={styles.faqSection}>
             <h2 className={styles.faqtitle}>Найпоширеніші питання</h2>
             <div className={styles.faqContainer}>

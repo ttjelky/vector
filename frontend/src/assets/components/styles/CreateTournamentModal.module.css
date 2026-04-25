@@ -440,7 +440,7 @@
 .previewContainer {
   margin-bottom: 24px;
   padding: 16px;
-  background: #f8f8fa; /* Світлий фон підкладки */
+  background: #f8f8fa;
   border-radius: 18px;
   border: 1px dashed #e0e0e0;
 }
@@ -456,6 +456,7 @@
 
 .previewCard {
   background: white;
+  width: 100%;
   position: relative;
   border-radius: 14px;
   overflow: hidden;

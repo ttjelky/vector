@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { TabsProvider } from "./TabsContext";
 import Landing from "./assets/pages/Landing";
 import AdminDashboard from "./assets/pages/AdminDashboard";
 import Help from "./assets/pages/Help";
@@ -7,16 +8,18 @@ import Settings from "./assets/pages/Settings";
 import Works from "./assets/pages/Works";
 import Tournaments from "./assets/pages/Tournaments";
 import ResetPassword from "./assets/pages/ResetPassword";
+import TournamentPage from "./assets/pages/TournamentPage";
 import ProtectedRoute from "./assets/components/ProtectedRoute";
 
 const App = () => {
   return (
+    <TabsProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
 
         <Route 
-          path="/admin" element={
+          path="/admindashboard" element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminDashboard />
             </ProtectedRoute>
@@ -24,10 +27,10 @@ const App = () => {
         />
 
         <Route 
-          path="/AdminDashboard" 
+          path="/tournament/:id" 
           element={
             <ProtectedRoute>
-              <AdminDashboard />
+              <TournamentPage />
             </ProtectedRoute>
           } 
         />
@@ -81,7 +84,7 @@ const App = () => {
         
       </Routes>
     </BrowserRouter>
-
+  </TabsProvider>
   );
 };
 

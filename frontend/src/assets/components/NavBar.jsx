@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { href, useNavigate } from 'react-router-dom';
 import { Link, NavLink } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
+import { useTabs } from "../../TabsContext";
+import TournamentCard from './TournamentCard';
 import styles from './styles/NavBar.module.css';
 import HomeIcon from './static/icons/Home.svg?react';
 import TournamentsIcon from './static/icons/Tournaments.svg?react';
@@ -11,10 +14,19 @@ import InfoIcon from './static/icons/Info.svg?react';
 import LogoutIcon from './static/icons/Logout.svg?react';
 import BellIcon from './static/icons/Bell.svg?react';
 import Logo from './static/VectorLogo.svg';
+import cross from './static/icons/cross.svg';
 
 const NavBar = ({children}) => {
+
+  const { openTabs, closeTab } = useTabs();
   const navigate = useNavigate();
   const [fullUserName, setFullUserName] = useState('');
+
+  const location = useLocation();
+  const { id } = useParams();
+
+  const isTournamentOpen = location.pathname.includes('/tournament/');
+  const tournamentName = location.state?.tournamentName || `Турнір #${id}`;
 
   useEffect(() => {
         const storedName = localStorage.getItem('fullUserName');
@@ -62,6 +74,30 @@ const NavBar = ({children}) => {
                 <NavLink to="/admindashboard" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>
                   <HomeIcon className={styles.sidebarIcon}/> <span className={styles.sidebarText}>Головна</span>
                 </NavLink>
+
+                <div className={styles.openedList}>
+                {openTabs.map((tab) => (
+                  <div key={tab.id} className={styles.nestedTournament}>
+                    <div className={styles.treeLine}></div>
+                    <NavLink 
+                      to={`/tournament/${tab.id}`} 
+                      className={({ isActive }) => isActive ? styles.activeNestedLink : styles.nestedLink}
+                    >
+                      <span className={styles.tabName}>└ {tab.name}</span>
+                      <span
+                        className={styles.closeIconWrapper} 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          closeTab(tab.id);
+                        }}
+                      >
+                        <img src={cross} className={styles.closeIcon}/>
+                      </span>
+                    </NavLink>
+                  </div>
+                ))}
+                </div>
+
               </li>
               <li className={styles.sidebarEl}>
                 <NavLink to="/tournaments" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>

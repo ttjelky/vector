@@ -222,7 +222,13 @@ export default function CreateTournamentModal({ onClose, onSubmit, onCreate }) {
             {/* Правила */}
             <div className={styles.field}>
               <label htmlFor="rules" className={styles.label}>Правила</label>
-              <RichTextArea id="rules" rows={3} placeholder="Правила проведення турніру..." />
+              <RichTextArea 
+                id="rules" 
+                rows={3} 
+                placeholder="Правила проведення турніру..."
+                value={tournamentRules}
+                onChange={(e) => setTournamentRules(e.target.value)}
+               />
               <textarea name="rules" id="rules-hidden" hidden readOnly />
             </div>
 

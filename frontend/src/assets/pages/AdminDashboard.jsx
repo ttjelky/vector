@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getProfile } from "../../api";
+import { useTabs } from "../../TabsContext";
 import API from "../../api";
 import React from "react";
 import NavBar from "../components/NavBar";
@@ -9,7 +11,9 @@ import TournamentCard from "../components/TournamentCard";
 
 const Dashboard = () => {
 
+    const navigate = useNavigate();
     const [tournaments, setTournaments] = useState([]);
+    const { addTab } = useTabs();
 
     const addTournament = (newTournament) => {
         setTournaments((prev) => [...prev, newTournament]);
@@ -45,8 +49,16 @@ const Dashboard = () => {
 
     return (
         <NavBar>
+            <div className={styles.contentArea}>
             <div className={styles.tournamentGrid}>
                 {tournaments.map((tournament) => (
+                <div 
+                    className={styles.tournamentCard} 
+                    key={tournament.id} 
+                    onClick={() => {
+                        addTab({ id: tournament.id, name: tournament.name });
+                        navigate(`/tournament/${tournament.id}`);
+                    }}>
                 <TournamentCard 
                     key={tournament.id}
                     name={tournament.name}
@@ -56,6 +68,7 @@ const Dashboard = () => {
                     imageMode={tournament.image_mode}
                     // Передай інші потрібні пропси
                 />
+                </div>
                 ))}
             </div>
             <div className={styles.createBtnContainer}>
@@ -78,6 +91,7 @@ const Dashboard = () => {
                 }}
             />
             )}
+            </div>
         </NavBar>
   );
 };

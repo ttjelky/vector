@@ -1,4 +1,14 @@
 
+:global(body) {
+    background-color: #fbfbfb;
+    margin: 0;
+    padding: 0;
+}
+
+.contentArea {
+    padding: 40px;
+}
+
 .statscontainer {
     display: flex;
     gap: 20px;
@@ -54,6 +64,27 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
     margin: 20px 0;
+}
+
+.tournamentGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.tournamentCard {
+  flex: 1 1 400px;
+  max-width: 100%;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tournamentCard:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  transform: translateY(-3px);
+ 
 }
 
 .createBtn:hover {
