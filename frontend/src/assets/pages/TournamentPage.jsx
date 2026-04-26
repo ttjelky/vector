@@ -4,6 +4,7 @@ import NavBar from "../components/NavBar";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../../api";
 import { STOCK_IMAGES } from "../components/TournamentCard";
+import { RichTextArea } from "../components/CreateTournamentModal";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -50,6 +51,17 @@ const roundStatus = (round) => {
   if (end   && now > end)    return "Завершено";
   if (start && now >= start) return "Триває";
   return "Очікується";
+};
+
+const fileIcon = (filename) => {
+  const ext = (filename || "").split(".").pop().toLowerCase();
+  if (["pdf"].includes(ext))                         return "📄";
+  if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return "🖼️";
+  if (["zip", "rar", "7z", "tar", "gz"].includes(ext))     return "🗜️";
+  if (["doc", "docx"].includes(ext))                 return "📝";
+  if (["xls", "xlsx"].includes(ext))                 return "📊";
+  if (["mp4", "mov", "avi"].includes(ext))           return "🎬";
+  return "📎";
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -130,7 +142,6 @@ function OverviewTab({ tournament, status, onSave }) {
     if (!form.name.trim()) { setError("Назва турніру обов'язкова."); return; }
     setSaving(true);
     try {
-      // Очищаємо порожні рядки → null для необов'язкових полів
       const payload = {
         name:               form.name.trim(),
         description:        form.description.trim(),
@@ -159,12 +170,12 @@ function OverviewTab({ tournament, status, onSave }) {
           <h2 className={styles.sectionTitle}>Редагування</h2>
           <div className={styles.editForm}>
             <label className={styles.editLabel}>
-              Назва <span className={styles.editRequired}>*</span>
+              Назва
               <input className={styles.editInput} name="name" value={form.name} onChange={handleChange} />
             </label>
             <label className={styles.editLabel}>
               Опис
-              <textarea className={styles.editTextarea} name="description" value={form.description} onChange={handleChange} rows={4} />
+              <RichTextArea name="description" value={form.description} onChange={(e) => handleChange({ target: { name: 'description', value: e.target.value } })} rows={4} />
             </label>
             <label className={styles.editLabel}>
               Формат
@@ -187,8 +198,8 @@ function OverviewTab({ tournament, status, onSave }) {
               <input className={styles.editInput} type="number" name="max_teams" value={form.max_teams} onChange={handleChange} min={1} />
             </label>
             <label className={styles.editLabel}>
-              Правила <span className={styles.editHint}>(кожне правило з нового рядка)</span>
-              <textarea className={styles.editTextarea} name="rules" value={form.rules} onChange={handleChange} rows={5} />
+              Правила
+              <RichTextArea name="rules" value={form.rules} onChange={(e) => handleChange({ target: { name: 'rules', value: e.target.value } })} rows={5} />
             </label>
             {error && <p className={styles.formError}>{error}</p>}
           </div>
@@ -210,7 +221,7 @@ function OverviewTab({ tournament, status, onSave }) {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Про турнір</h2>
-          <button className={styles.editBtn} onClick={() => setEditing(true)}>✏️ Редагувати</button>
+          <button className={styles.editBtn} onClick={() => setEditing(true)}>Редагувати</button>
         </div>
         <p className={styles.description}>{tournament.description || "Опис відсутній."}</p>
       </section>
@@ -283,19 +294,459 @@ function ParticipantsTab({ teams, loading }) {
   );
 }
 
+// ─── Task Form ────────────────────────────────────────────────────────────────
+
+function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
+  const [form, setForm] = useState({ title: "", description: "" });
+  const [links, setLinks] = useState([]);
+  const [linkForm, setLinkForm] = useState({ label: "", url: "" });
+  const [files, setFiles] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [fileInputKey, setFileInputKey] = useState(0);
+
+  const handleChange = (e) => {
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    setError("");
+  };
+
+  const addLink = () => {
+    if (!linkForm.url.trim()) return;
+    setLinks((l) => [...l, { ...linkForm, id: Date.now() }]);
+    setLinkForm({ label: "", url: "" });
+  };
+
+  const removeLink = (id) => setLinks((l) => l.filter((x) => x.id !== id));
+
+  const handleFiles = (e) => {
+    const picked = Array.from(e.target.files);
+    if (picked.length > 0) setFiles((f) => [...f, ...picked]);
+    setFileInputKey((k) => k + 1);
+  };
+
+  const removeFile = (idx) => setFiles((f) => f.filter((_, i) => i !== idx));
+
+  const handleCreate = async () => {
+    if (!form.title.trim()) { setError("Назва завдання обов'язкова."); return; }
+    setSaving(true);
+    try {
+      const taskRes = await API.post(
+        `/tournaments/${tournamentId}/rounds/${roundId}/tasks/`,
+        { title: form.title.trim(), description: form.description.trim() || null }
+      );
+      const task = taskRes.data;
+
+      // Upload links
+      for (const link of links) {
+        await API.post(
+          `/tournaments/${tournamentId}/rounds/${roundId}/tasks/${task.id}/links/`,
+          { label: link.label || link.url, url: link.url }
+        );
+      }
+
+      // Upload files
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append("file", file);
+        await API.post(
+          `/tournaments/${tournamentId}/rounds/${roundId}/tasks/${task.id}/attachments/`,
+          fd,
+        );
+      }
+
+      // Fetch updated task with links and attachments
+      const updated = await API.get(
+        `/tournaments/${tournamentId}/rounds/${roundId}/tasks/${task.id}/`
+      );
+      onCreated(updated.data);
+    } catch (err) {
+      console.error(err);
+      setError("Помилка при створенні завдання.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className={styles.taskFormCard}>
+      <h4 className={styles.taskFormTitle}>Нове завдання</h4>
+      <div className={styles.editForm}>
+        <label className={styles.editLabel}>
+          Назва <span className={styles.editRequired}>*</span>
+          <input
+            className={styles.editInput}
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder="Назва завдання"
+            autoFocus
+          />
+        </label>
+        <label className={styles.editLabel}>
+          Опис
+          <textarea
+            className={styles.editTextarea}
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            rows={3}
+            placeholder="Детальний опис завдання…"
+          />
+        </label>
+
+        {/* Links section */}
+        <div className={styles.attachSection}>
+          <span className={styles.attachSectionLabel}>🔗 Посилання</span>
+          {links.map((link) => (
+            <div key={link.id} className={styles.attachItem}>
+              <span className={styles.attachItemIcon}>🔗</span>
+              <span className={styles.attachItemName}>{link.label || link.url}</span>
+              <span className={styles.attachItemMeta}>{link.url}</span>
+              <button className={styles.attachRemove} onClick={() => removeLink(link.id)}>✕</button>
+            </div>
+          ))}
+          <div className={styles.linkInputRow}>
+            <input
+              className={styles.editInput}
+              placeholder="URL посилання"
+              value={linkForm.url}
+              onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && addLink()}
+            />
+            <input
+              className={styles.editInput}
+              placeholder="Підпис (необов'язково)"
+              value={linkForm.label}
+              onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && addLink()}
+            />
+            <button className={styles.addLinkBtn} onClick={addLink}>Додати</button>
+          </div>
+        </div>
+
+        {/* Files section */}
+        <div className={styles.attachSection}>
+          <span className={styles.attachSectionLabel}>📎 Файли</span>
+          {files.map((f, i) => (
+            <div key={i} className={styles.attachItem}>
+              <span className={styles.attachItemIcon}>{fileIcon(f.name)}</span>
+              <span className={styles.attachItemName}>{f.name}</span>
+              <span className={styles.attachItemMeta}>{(f.size / 1024).toFixed(0)} KB</span>
+              <button className={styles.attachRemove} onClick={() => removeFile(i)}>✕</button>
+            </div>
+          ))}
+          <label className={styles.filePickBtn}>
+            + Прикріпити файл
+            <input key={fileInputKey} type="file" multiple hidden accept="*/*" onChange={handleFiles} />
+          </label>
+        </div>
+
+        {error && <p className={styles.formError}>{error}</p>}
+      </div>
+      <div className={styles.editActions}>
+        <button className={styles.cancelBtn} onClick={onCancel} disabled={saving}>Скасувати</button>
+        <button className={styles.saveBtn} onClick={handleCreate} disabled={saving}>
+          {saving ? "Створення…" : "Додати завдання"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Task Card ────────────────────────────────────────────────────────────────
+
+function TaskCard({ task, tournamentId, roundId, onDeleted }) {
+  const [expanded, setExpanded] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async (e) => {
+    e.stopPropagation();
+    if (!window.confirm(`Видалити завдання «${task.title}»?`)) return;
+    setDeleting(true);
+    try {
+      await API.delete(`/tournaments/${tournamentId}/rounds/${roundId}/tasks/${task.id}/`);
+      onDeleted(task.id);
+    } catch (err) {
+      console.error(err);
+      setDeleting(false);
+    }
+  };
+
+  const hasExtras = (task.links?.length > 0) || (task.attachments?.length > 0) || task.description;
+
+  return (
+    <div className={`${styles.taskCard} ${expanded ? styles.taskCardExpanded : ""}`}>
+      <div className={styles.taskCardHeader} onClick={() => hasExtras && setExpanded((v) => !v)}>
+        <div className={styles.taskCardLeft}>
+          <span className={styles.taskTitle}>{task.title}</span>
+          {!expanded && task.description && (
+            <p className={styles.taskDesc}>{task.description.length > 80 ? task.description.slice(0, 80) + "…" : task.description}</p>
+          )}
+        </div>
+        <div className={styles.taskCardActions}>
+          {hasExtras && (
+            <span className={styles.taskChevron}>{expanded ? "▲" : "▼"}</span>
+          )}
+          <button
+            className={styles.taskDeleteBtn}
+            onClick={handleDelete}
+            disabled={deleting}
+            title="Видалити завдання"
+          >
+            {deleting ? "…" : "✕"}
+          </button>
+        </div>
+      </div>
+      {expanded && (
+        <div className={styles.taskCardBody}>
+          {task.description && (
+            <p className={styles.taskDescFull}>{task.description}</p>
+          )}
+          {task.links?.length > 0 && (
+            <div className={styles.taskExtras}>
+              <span className={styles.taskExtrasLabel}>Посилання</span>
+              <div className={styles.taskLinkList}>
+                {task.links.map((link) => (
+                  <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.taskLink}>
+                    🔗 {link.label || link.url}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+          {task.attachments?.length > 0 && (
+            <div className={styles.taskExtras}>
+              <span className={styles.taskExtrasLabel}>Файли</span>
+              <div className={styles.taskFileList}>
+                {task.attachments.map((att) => (
+                  <a key={att.id} href={att.file} target="_blank" rel="noopener noreferrer" className={styles.taskFile}>
+                    {fileIcon(att.name)} {att.name}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Round Edit Form ──────────────────────────────────────────────────────────
+
+function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
+  const [form, setForm] = useState({
+    title:       round.title       || "",
+    description: round.description || "",
+    start_date:  toInputDatetime(round.start_date),
+    end_date:    toInputDatetime(round.end_date),
+  });
+  const [links, setLinks] = useState(round.links || []);
+  const [attachments, setAttachments] = useState(round.attachments || []);
+  const [linkForm, setLinkForm] = useState({ label: "", url: "" });
+  const [newFiles, setNewFiles] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [fileInputKey, setFileInputKey] = useState(0);
+
+  const handleChange = (e) => {
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    setError("");
+  };
+
+  const addLink = () => {
+    if (!linkForm.url.trim()) return;
+    setLinks((l) => [...l, { ...linkForm, _new: true, id: Date.now() }]);
+    setLinkForm({ label: "", url: "" });
+  };
+
+  const removeLink = async (link) => {
+    if (!link._new) {
+      try {
+        await API.delete(`/tournaments/${tournamentId}/rounds/${round.id}/links/${link.id}/`);
+      } catch (err) { console.error(err); }
+    }
+    setLinks((l) => l.filter((x) => x.id !== link.id));
+  };
+
+  const removeAttachment = async (att) => {
+    if (!att._new) {
+      try {
+        await API.delete(`/tournaments/${tournamentId}/rounds/${round.id}/attachments/${att.id}/`);
+      } catch (err) { console.error(err); }
+    }
+    setAttachments((a) => a.filter((x) => x.id !== att.id));
+  };
+
+  const handleFiles = (e) => {
+    const picked = Array.from(e.target.files);
+    if (picked.length > 0) setNewFiles((f) => [...f, ...picked]);
+    setFileInputKey((k) => k + 1);
+  };
+
+  const removeNewFile = (idx) => setNewFiles((f) => f.filter((_, i) => i !== idx));
+
+  const handleSave = async () => {
+    if (!form.title.trim()) { setError("Назва раунду обов'язкова."); return; }
+    setSaving(true);
+    try {
+      const payload = {
+        title:       form.title.trim(),
+        description: form.description.trim() || null,
+        start_date:  form.start_date || null,
+        end_date:    form.end_date   || null,
+      };
+      const res = await API.patch(`/tournaments/${tournamentId}/rounds/${round.id}/`, payload);
+      let updatedRound = res.data;
+
+      // Upload new links
+      for (const link of links.filter((l) => l._new)) {
+        await API.post(
+          `/tournaments/${tournamentId}/rounds/${round.id}/links/`,
+          { label: link.label || link.url, url: link.url }
+        );
+      }
+
+      // Upload new files
+      for (const file of newFiles) {
+        const fd = new FormData();
+        fd.append("file", file);
+        await API.post(
+          `/tournaments/${tournamentId}/rounds/${round.id}/attachments/`,
+          fd,
+        );
+      }
+
+      // Re-fetch round to get updated links/attachments
+      const fresh = await API.get(`/tournaments/${tournamentId}/rounds/`);
+      const freshRound = fresh.data.find((r) => r.id === round.id) || updatedRound;
+      onSaved(freshRound);
+    } catch (err) {
+      console.error(err);
+      setError("Помилка збереження. Спробуйте ще раз.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className={styles.roundEditForm}>
+      <h4 className={styles.roundEditTitle}>Редагування раунду</h4>
+      <div className={styles.editForm}>
+        <label className={styles.editLabel}>
+          Назва <span className={styles.editRequired}>*</span>
+          <input className={styles.editInput} name="title" value={form.title} onChange={handleChange} />
+        </label>
+        <label className={styles.editLabel}>
+          Опис
+          <textarea
+            className={styles.editTextarea}
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            rows={3}
+            placeholder="Опис раунду…"
+          />
+        </label>
+        <div className={styles.editRow}>
+          <label className={styles.editLabel}>
+            Початок
+            <input className={styles.editInput} type="datetime-local" name="start_date" value={form.start_date} onChange={handleChange} />
+          </label>
+          <label className={styles.editLabel}>
+            Кінець
+            <input className={styles.editInput} type="datetime-local" name="end_date" value={form.end_date} onChange={handleChange} />
+          </label>
+        </div>
+
+        {/* Round links */}
+        <div className={styles.attachSection}>
+          <span className={styles.attachSectionLabel}>🔗 Посилання до раунду</span>
+          {links.map((link) => (
+            <div key={link.id} className={styles.attachItem}>
+              <span className={styles.attachItemIcon}>🔗</span>
+              <span className={styles.attachItemName}>{link.label || link.url}</span>
+              <span className={styles.attachItemMeta}>{link.url}</span>
+              <button className={styles.attachRemove} onClick={() => removeLink(link)}>✕</button>
+            </div>
+          ))}
+          <div className={styles.linkInputRow}>
+            <input
+              className={styles.editInput}
+              placeholder="URL посилання"
+              value={linkForm.url}
+              onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && addLink()}
+            />
+            <input
+              className={styles.editInput}
+              placeholder="Підпис (необов'язково)"
+              value={linkForm.label}
+              onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && addLink()}
+            />
+            <button className={styles.addLinkBtn} onClick={addLink}>Додати</button>
+          </div>
+        </div>
+
+        {/* Round attachments */}
+        <div className={styles.attachSection}>
+          <span className={styles.attachSectionLabel}>📎 Файли до раунду</span>
+          {attachments.map((att) => (
+            <div key={att.id} className={styles.attachItem}>
+              <span className={styles.attachItemIcon}>{fileIcon(att.name)}</span>
+              <span className={styles.attachItemName}>{att.name}</span>
+              <button className={styles.attachRemove} onClick={() => removeAttachment(att)}>✕</button>
+            </div>
+          ))}
+          {newFiles.map((f, i) => (
+            <div key={i} className={styles.attachItem}>
+              <span className={styles.attachItemIcon}>{fileIcon(f.name)}</span>
+              <span className={styles.attachItemName}>{f.name}</span>
+              <span className={styles.attachItemMeta}>{(f.size / 1024).toFixed(0)} KB</span>
+              <button className={styles.attachRemove} onClick={() => removeNewFile(i)}>✕</button>
+            </div>
+          ))}
+          <label className={styles.filePickBtn}>
+            + Прикріпити файл
+            <input key={fileInputKey} type="file" multiple hidden accept="*/*" onChange={handleFiles} />
+          </label>
+        </div>
+
+        {error && <p className={styles.formError}>{error}</p>}
+      </div>
+      <div className={styles.editActions}>
+        <button className={styles.cancelBtn} onClick={onCancel} disabled={saving}>Скасувати</button>
+        <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
+          {saving ? "Збереження…" : "Зберегти"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Rounds Tab ───────────────────────────────────────────────────────────────
 
 const EMPTY_ROUND_FORM = { title: "", description: "", start_date: "", end_date: "" };
 
-function RoundsTab({ rounds, loading, tournamentId, onRoundCreated }) {
+function RoundsTab({ rounds: initialRounds, loading, tournamentId, onRoundCreated }) {
+  const [rounds,        setRounds]        = useState(initialRounds);
   const [openRound,     setOpenRound]     = useState(null);
   const [activeSection, setActiveSection] = useState({});
+  const [editingRound,  setEditingRound]  = useState(null);
+  const [showTaskForm,  setShowTaskForm]  = useState(null); // roundId
   const [showForm,      setShowForm]      = useState(false);
   const [form,          setForm]          = useState(EMPTY_ROUND_FORM);
   const [saving,        setSaving]        = useState(false);
   const [formError,     setFormError]     = useState("");
 
+  // Sync when parent updates rounds (e.g. initial load)
+  useEffect(() => {
+    setRounds(initialRounds);
+  }, [initialRounds]);
+
   const toggleRound = (id) => {
+    if (editingRound === id) return;
     setOpenRound(openRound === id ? null : id);
     setActiveSection((s) => ({ ...s, [id]: s[id] || "tasks" }));
   };
@@ -320,6 +771,7 @@ function RoundsTab({ rounds, loading, tournamentId, onRoundCreated }) {
       };
       const r = await API.post(`/tournaments/${tournamentId}/rounds/`, payload);
       onRoundCreated(r.data);
+      setRounds((prev) => [...prev, r.data]);
       setForm(EMPTY_ROUND_FORM);
       setShowForm(false);
     } catch (err) {
@@ -328,6 +780,37 @@ function RoundsTab({ rounds, loading, tournamentId, onRoundCreated }) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleRoundSaved = (updatedRound) => {
+    setRounds((prev) => prev.map((r) => r.id === updatedRound.id ? updatedRound : r));
+    setEditingRound(null);
+  };
+
+  const handleDeleteRound = async (roundId) => {
+    if (!window.confirm("Видалити цей раунд?")) return;
+    try {
+      await API.delete(`/tournaments/${tournamentId}/rounds/${roundId}/`);
+      setRounds((prev) => prev.filter((r) => r.id !== roundId));
+      if (openRound === roundId) setOpenRound(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleTaskCreated = (roundId, task) => {
+    setRounds((prev) => prev.map((r) => {
+      if (r.id !== roundId) return r;
+      return { ...r, tasks: [...(r.tasks || []), task] };
+    }));
+    setShowTaskForm(null);
+  };
+
+  const handleTaskDeleted = (roundId, taskId) => {
+    setRounds((prev) => prev.map((r) => {
+      if (r.id !== roundId) return r;
+      return { ...r, tasks: (r.tasks || []).filter((t) => t.id !== taskId) };
+    }));
   };
 
   if (loading) return <div className={styles.tabContent}><p className={styles.empty}>Завантаження...</p></div>;
@@ -392,24 +875,89 @@ function RoundsTab({ rounds, loading, tournamentId, onRoundCreated }) {
       ) : (
         <div className={styles.roundList}>
           {rounds.map((round) => {
-            const isOpen  = openRound === round.id;
-            const section = activeSection[round.id] || "tasks";
+            const isOpen    = openRound === round.id;
+            const isEditing = editingRound === round.id;
+            const section   = activeSection[round.id] || "tasks";
+
             return (
-              <div key={round.id} className={`${styles.roundCard} ${isOpen ? styles.roundCardOpen : ""}`}>
-                <button className={styles.roundHeader} onClick={() => toggleRound(round.id)}>
+              <div key={round.id} className={`${styles.roundCard} ${isOpen || isEditing ? styles.roundCardOpen : ""}`}>
+                <div className={styles.roundHeader} onClick={() => !isEditing && toggleRound(round.id)}>
                   <div className={styles.roundHeaderLeft}>
                     <span className={styles.roundTitle}>{round.title}</span>
                     <span className={styles.roundDate}>{formatRoundDateRange(round.start_date, round.end_date)}</span>
                   </div>
                   <div className={styles.roundHeaderRight}>
                     <span className={styles.roundStatus}>{roundStatus(round)}</span>
-                    <span className={styles.roundChevron}>{isOpen ? "▲" : "▼"}</span>
+                    {/* Round action buttons */}
+                    <button
+                      className={styles.roundActionBtn}
+                      onClick={(e) => { e.stopPropagation(); setEditingRound(isEditing ? null : round.id); setOpenRound(null); }}
+                      title="Редагувати раунд"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className={`${styles.roundActionBtn} ${styles.roundActionBtnDanger}`}
+                      onClick={(e) => { e.stopPropagation(); handleDeleteRound(round.id); }}
+                      title="Видалити раунд"
+                    >
+                      🗑️
+                    </button>
+                    {!isEditing && (
+                      <span className={styles.roundChevron}>{isOpen ? "▲" : "▼"}</span>
+                    )}
                   </div>
-                </button>
+                </div>
 
-                {isOpen && (
+                {/* Inline edit form */}
+                {isEditing && (
                   <div className={styles.roundBody}>
-                    <p className={styles.roundDescription}>{round.description || "Опис відсутній."}</p>
+                    <RoundEditForm
+                      round={round}
+                      tournamentId={tournamentId}
+                      onSaved={handleRoundSaved}
+                      onCancel={() => setEditingRound(null)}
+                    />
+                  </div>
+                )}
+
+                {/* Round body (expanded view) */}
+                {isOpen && !isEditing && (
+                  <div className={styles.roundBody}>
+                    {/* Description */}
+                    {round.description && (
+                      <p className={styles.roundDescription}>{round.description}</p>
+                    )}
+
+                    {/* Round-level links */}
+                    {round.links?.length > 0 && (
+                      <div className={styles.roundMeta}>
+                        <span className={styles.roundMetaLabel}>Посилання</span>
+                        <div className={styles.roundLinkList}>
+                          {round.links.map((link) => (
+                            <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.roundLink}>
+                              🔗 {link.label || link.url}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Round-level attachments */}
+                    {round.attachments?.length > 0 && (
+                      <div className={styles.roundMeta}>
+                        <span className={styles.roundMetaLabel}>Файли</span>
+                        <div className={styles.roundFileList}>
+                          {round.attachments.map((att) => (
+                            <a key={att.id} href={att.file} target="_blank" rel="noopener noreferrer" className={styles.roundFile}>
+                              {fileIcon(att.name)} {att.name}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Internal tabs: Tasks / Submissions */}
                     <div className={styles.roundTabs}>
                       {["tasks", "submissions"].map((s) => (
                         <button
@@ -417,23 +965,43 @@ function RoundsTab({ rounds, loading, tournamentId, onRoundCreated }) {
                           className={`${styles.roundTab} ${section === s ? styles.roundTabActive : ""}`}
                           onClick={() => setSection(round.id, s)}
                         >
-                          {s === "tasks" ? "Завдання" : "Здані роботи"}
+                          {s === "tasks" ? `Завдання (${(round.tasks || []).length})` : "Здані роботи"}
                         </button>
                       ))}
                     </div>
+
                     {section === "tasks" && (
                       <div className={styles.taskList}>
-                        {(round.tasks || []).length === 0
-                          ? <p className={styles.empty}>Завдання ще не додані.</p>
-                          : round.tasks.map((task) => (
-                            <div key={task.id} className={styles.taskCard}>
-                              <span className={styles.taskTitle}>{task.title}</span>
-                              <p className={styles.taskDesc}>{task.description}</p>
-                            </div>
-                          ))
-                        }
+                        {(round.tasks || []).length === 0 && showTaskForm !== round.id && (
+                          <p className={styles.empty}>Завдання ще не додані.</p>
+                        )}
+                        {(round.tasks || []).map((task) => (
+                          <TaskCard
+                            key={task.id}
+                            task={task}
+                            tournamentId={tournamentId}
+                            roundId={round.id}
+                            onDeleted={(taskId) => handleTaskDeleted(round.id, taskId)}
+                          />
+                        ))}
+                        {showTaskForm === round.id ? (
+                          <TaskForm
+                            roundId={round.id}
+                            tournamentId={tournamentId}
+                            onCreated={(task) => handleTaskCreated(round.id, task)}
+                            onCancel={() => setShowTaskForm(null)}
+                          />
+                        ) : (
+                          <button
+                            className={styles.addTaskBtn}
+                            onClick={() => setShowTaskForm(round.id)}
+                          >
+                            + Додати завдання
+                          </button>
+                        )}
                       </div>
                     )}
+
                     {section === "submissions" && (
                       <div className={styles.submissionList}>
                         {(round.submissions || []).length === 0
@@ -491,8 +1059,6 @@ export default function TournamentPage() {
       .catch(err => console.error(err))
       .finally(() => setRoundsLoading(false));
 
-    // Підключи коли буде готовий ендпоінт teams:
-    // API.get(`/tournaments/${id}/teams/`).then(r => setTeams(r.data)).finally(() => setTeamsLoading(false));
     setTeamsLoading(false);
   }, [id]);
 

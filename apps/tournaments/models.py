@@ -41,3 +41,77 @@ class Round(models.Model):
 
     def __str__(self):
         return f"{self.tournament.name} — {self.title}"
+
+
+class RoundLink(models.Model):
+    """Посилання, прикріплені до раунду."""
+    round = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="links")
+    label = models.CharField(max_length=255, verbose_name="Підпис посилання")
+    url   = models.URLField(max_length=2048, verbose_name="URL")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.round.title} — {self.label}"
+
+
+class RoundAttachment(models.Model):
+    """Файли, прикріплені до раунду."""
+    round      = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="attachments")
+    file       = models.FileField(upload_to="rounds/attachments/", verbose_name="Файл")
+    name       = models.CharField(max_length=255, verbose_name="Назва файлу", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def save(self, *args, **kwargs):
+        if not self.name and self.file:
+            self.name = self.file.name.split("/")[-1]
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.round.title} — {self.name}"
+
+
+class Task(models.Model):
+    """Завдання всередині раунду."""
+    round       = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="tasks")
+    title       = models.CharField(max_length=255, verbose_name="Назва завдання")
+    description = models.TextField(null=True, blank=True, verbose_name="Опис завдання")
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.round.title} — {self.title}"
+
+
+class TaskLink(models.Model):
+    """Посилання, прикріплені до завдання."""
+    task  = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="links")
+    label = models.CharField(max_length=255, verbose_name="Підпис")
+    url   = models.URLField(max_length=2048, verbose_name="URL")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+
+class TaskAttachment(models.Model):
+    """Файли, прикріплені до завдання."""
+    task       = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="attachments")
+    file       = models.FileField(upload_to="tasks/attachments/", verbose_name="Файл")
+    name       = models.CharField(max_length=255, verbose_name="Назва файлу", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def save(self, *args, **kwargs):
+        if not self.name and self.file:
+            self.name = self.file.name.split("/")[-1]
+        super().save(*args, **kwargs)

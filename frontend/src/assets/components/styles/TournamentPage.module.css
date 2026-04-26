@@ -118,7 +118,7 @@
 /* ─── Content wrapper ─────────────────────────────────────────────────────── */
 
 .content {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 28px 28px 60px;
 }
@@ -168,9 +168,9 @@
   font-size: 13px;
   font-weight: 500;
   color: #555;
-  background: #f0f0f2;
+  background: #eaeaea;
   border: none;
-  border-radius: 8px;
+  border-radius: 100px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
@@ -185,7 +185,7 @@
 .editForm {
   background: #fff;
   border: 1px solid #ebebeb;
-  border-radius: 12px;
+  border-radius: 15px;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -202,7 +202,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 500;
   color: #888;
   letter-spacing: 0.01em;
@@ -268,9 +268,9 @@
   font-size: 13px;
   font-weight: 500;
   color: #666;
-  background: #f0f0f2;
+  background: #e7e7e7;
   border: none;
-  border-radius: 8px;
+  border-radius: 100px;
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -291,7 +291,7 @@
   color: #fff;
   background: #111;
   border: none;
-  border-radius: 8px;
+  border-radius: 100px;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
 }
@@ -324,7 +324,7 @@
 .infoGrid {
   background: #fff;
   border: 1px solid #ebebeb;
-  border-radius: 12px;
+  border-radius: 15px;
   overflow: hidden;
 }
 
@@ -359,7 +359,7 @@
 .rulesBox {
   background: #fff;
   border: 1px solid #ebebeb;
-  border-radius: 12px;
+  border-radius: 15px;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -394,7 +394,7 @@
   font-size: 13px;
   font-weight: 500;
   border: none;
-  border-radius: 8px;
+  border-radius: 100px;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
 }
@@ -481,7 +481,7 @@
   color: #fff;
   background: #111;
   border: none;
-  border-radius: 9px;
+  border-radius: 100px;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
 }
@@ -521,7 +521,7 @@
 .roundCard {
   background: #fff;
   border: 1px solid #ebebeb;
-  border-radius: 12px;
+  border-radius: 15px;
   overflow: hidden;
   transition: box-shadow 0.15s;
 }
@@ -606,7 +606,7 @@
   display: flex;
   gap: 4px;
   background: #f3f3f5;
-  border-radius: 8px;
+  border-radius: 15px;
   padding: 3px;
   width: fit-content;
 }
@@ -643,7 +643,7 @@
 
 .taskCard {
   background: #f7f7f9;
-  border-radius: 8px;
+  border-radius: 15px;
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
@@ -676,7 +676,7 @@
   align-items: center;
   justify-content: space-between;
   background: #f7f7f9;
-  border-radius: 8px;
+  border-radius: 15px;
   padding: 11px 14px;
   gap: 12px;
 }
@@ -738,7 +738,7 @@
   padding: 16px 20px;
   background: #fff;
   border: 1.5px solid #fde8e8;
-  border-radius: 12px;
+  border-radius: 15px;
   gap: 16px;
 }
 
@@ -899,4 +899,359 @@
 .modalConfirm:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+.roundHeader:hover {
+  background: #fafafa;
+}
+
+.roundActionBtn {
+  padding: 4px 7px;
+  font-size: 13px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.roundActionBtn:hover {
+  background: #f0f0f2;
+  border-color: #e0e0e4;
+}
+
+.roundActionBtnDanger:hover {
+  background: #fff0f0;
+  border-color: #fcd7d7;
+}
+
+/* ─── Round edit form ─────────────────────────────────────────────────────── */
+
+.roundEditForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.roundEditTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+/* ─── Round meta (links/files in view mode) ───────────────────────────────── */
+
+.roundMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.roundMetaLabel {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #aaa;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.roundLinkList,
+.roundFileList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.roundLink,
+.roundFile {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  background: #f3f3f5;
+  border: 1px solid #e8e8ec;
+  border-radius: 20px;
+  font-size: 12.5px;
+  color: #444;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.roundLink:hover,
+.roundFile:hover {
+  background: #e8e8ec;
+  color: #111;
+}
+
+/* ─── Attach sections (inside forms) ─────────────────────────────────────── */
+
+.attachSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attachSectionLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  letter-spacing: 0.02em;
+}
+
+.attachItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  background: #f7f7f9;
+  border: 1px solid #ebebec;
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+.attachItemIcon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.attachItemName {
+  flex: 1;
+  font-weight: 500;
+  color: #222;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachItemMeta {
+  font-size: 11.5px;
+  color: #bbb;
+  flex-shrink: 0;
+}
+
+.attachRemove {
+  padding: 2px 6px;
+  font-size: 11px;
+  color: #aaa;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.attachRemove:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.linkInputRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.addLinkBtn {
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  background: #555;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.addLinkBtn:hover {
+  background: #333;
+}
+
+.filePickBtn {
+  align-self: flex-start;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #555;
+  background: #f0f0f2;
+  border: 1px dashed #d0d0d4;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.filePickBtn:hover {
+  background: #e8e8ec;
+  border-color: #bbb;
+}
+
+/* ─── Task card ───────────────────────────────────────────────────────────── */
+
+.taskCard {
+  background: #f7f7f9;
+  border: 1px solid #ebebec;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.taskCard:hover {
+  border-color: #d8d8dc;
+}
+
+.taskCardExpanded {
+  border-color: #d8d8dc;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+
+.taskCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 11px 13px;
+  cursor: pointer;
+  gap: 10px;
+}
+
+.taskCardLeft {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.taskCardActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.taskChevron {
+  font-size: 9px;
+  color: #ccc;
+}
+
+.taskDeleteBtn {
+  padding: 3px 7px;
+  font-size: 11px;
+  color: #ccc;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.taskDeleteBtn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.taskCardBody {
+  border-top: 1px solid #e8e8ec;
+  padding: 12px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.taskDescFull {
+  font-size: 13.5px;
+  color: #444;
+  line-height: 1.65;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.taskExtras {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.taskExtrasLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #bbb;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.taskLinkList,
+.taskFileList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.taskLink,
+.taskFile {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #fff;
+  border: 1px solid #e0e0e4;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #444;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.taskLink:hover,
+.taskFile:hover {
+  background: #f0f0f2;
+  color: #111;
+}
+
+/* ─── Task form card ──────────────────────────────────────────────────────── */
+
+.taskFormCard {
+  background: #fff;
+  border: 1px solid #e0e0e8;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+}
+
+.taskFormTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+/* ─── Add task button ─────────────────────────────────────────────────────── */
+
+.addTaskBtn {
+  align-self: flex-start;
+  padding: 7px 15px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #555;
+  background: #f0f0f2;
+  border: 1px dashed #ccc;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  margin-top: 2px;
+}
+
+.addTaskBtn:hover {
+  background: #e8e8ec;
+  border-color: #aaa;
+  color: #111;
 }

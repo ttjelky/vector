@@ -17,7 +17,7 @@ const FORMATS = [
 
 // ── RichTextArea ─────────────────────────────────────────────────────────────
 
-function RichTextArea({ id, rows = 4, placeholder, value, onChange }) {
+export function RichTextArea({ id, rows = 4, placeholder, value, onChange }) {
   const ref = useRef(null);
 
   const insert = (text) => {
