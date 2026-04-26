@@ -1,11 +1,29 @@
 import { useEffect } from "react";
 import styles from "./styles/TournamentShared.module.css";
 import { useEscape } from "./tournamentHelpers";
+import { getStatusStyle, getRoundStatusStyle } from "./tournamentHelpers";
 
 // ─── StatusBadge ──────────────────────────────────────────────────────────────
 
-export function StatusBadge({ status }) {
-  return <span className={styles.badge}>{status}</span>;
+export function StatusBadge({ status, variant = "tournament" }) {
+  const style = variant === "round"
+    ? getRoundStatusStyle(status)
+    : getStatusStyle(status);
+
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        padding: "3px 10px",
+        borderRadius: "20px",
+        fontSize: "12px",
+        fontWeight: 500,
+        ...style,
+      }}
+    >
+      {status}
+    </span>
+  );
 }
 
 // ─── InfoRow ──────────────────────────────────────────────────────────────────

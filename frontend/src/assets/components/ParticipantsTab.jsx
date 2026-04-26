@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import styles from "./styles/ParticipantsTab.module.css";
 import API from "../../api";
-import cross from "./static/icons/cross.svg";
 import { X } from "lucide-react";
+import { ConfirmDeleteModal } from "./TournamentShared";
 
 
 /**
@@ -19,7 +19,9 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
   const [invitePin,        setInvitePin]        = useState(null);
   const [showPin,          setShowPin]          = useState(false);
   const [regenLoading,     setRegenLoading]     = useState(false);
-  const [regenConfirm,     setRegenConfirm]     = useState(false); // підтвердження перед перегенерацією
+  const [regenConfirm,     setRegenConfirm]     = useState(false);
+  const [deletingMember,   setDeletingMember]   = useState(false);
+  const [memberToDelete,   setMemberToDelete]   = useState(null); // об'єкт member або null
 
   const isOwner = myRole === "owner";
 
@@ -92,14 +94,22 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
     }
   };
 
-  // Видалити учасника
-  const handleRemoveMember = async (memberId) => {
-    if (!window.confirm("Видалити цього учасника?")) return;
+  // Видалити учасника — відкриває модальне вікно
+  const handleRemoveMember = (member) => {
+    setMemberToDelete(member);
+  };
+
+  const confirmRemoveMember = async () => {
+    if (!memberToDelete) return;
+    setDeletingMember(true);
     try {
-      await API.delete(`/tournaments/${tournamentId}/members/${memberId}/`);
-      setMembers(prev => prev.filter(m => m.id !== memberId));
+      await API.delete(`/tournaments/${tournamentId}/members/${memberToDelete.id}/`);
+      setMembers(prev => prev.filter(m => m.id !== memberToDelete.id));
+      setMemberToDelete(null);
     } catch (err) {
       console.error("Помилка видалення:", err);
+    } finally {
+      setDeletingMember(false);
     }
   };
 
@@ -185,7 +195,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
               {isOwner && member.role !== "owner" && (
                 <button
                   className={styles.removeBtn}
-                  onClick={() => handleRemoveMember(member.id)}
+                  onClick={() => handleRemoveMember(member)}
                   title="Видалити учасника"
                 >
                   ✕
@@ -200,6 +210,18 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
           ))
         )}
       </div>
+
+      {memberToDelete && (
+        <ConfirmDeleteModal
+          icon="👤"
+          title="Видалити учасника?"
+          description={<>Учасник <strong>{memberToDelete.username}</strong> буде видалений з турніру. Він зможе приєднатися знову за інвайт-посиланням.</>}
+          confirmLabel="Так, видалити"
+          onConfirm={confirmRemoveMember}
+          onCancel={() => setMemberToDelete(null)}
+          loading={deletingMember}
+        />
+      )}
     </div>
   );
 }

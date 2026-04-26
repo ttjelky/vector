@@ -1,17 +1,44 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./styles/OverviewTab.module.css";
-import { RichTextArea } from "./CreateTournamentModal";
+import { RichTextArea, ImagePicker } from "./CreateTournamentModal";
 import { StatusBadge, InfoRow } from "./TournamentShared";
 import { formatDate, toInputDatetime } from "./tournamentHelpers";
+import { STOCK_IMAGES } from "./TournamentCard";
+import API from "../../api";
 
-export default function OverviewTab({ tournament, status, onSave }) {
+// ─── Константи ────────────────────────────────────────────────────────────────
+
+const ACCENT_COLORS = ["#5da3ea", "#4ad4a9", "#d83030", "#da83a0", "#928be1", "#e4ba80"];
+
+// ─── Компонент ────────────────────────────────────────────────────────────────
+
+/**
+ * Props:
+ *  - tournament  {object}
+ *  - status      {string}
+ *  - onSave      {function}
+ *  - readOnly    {boolean}  — якщо true, кнопка "Редагувати" прихована
+ */
+export default function OverviewTab({ tournament, status, onSave, readOnly = false }) {
   const [editing, setEditing] = useState(false);
   const [saving,  setSaving]  = useState(false);
   const [error,   setError]   = useState("");
   const [form,    setForm]    = useState(buildForm(tournament));
 
+  // Стан картинки в режимі редагування
+  const [imageMode,     setImageMode]     = useState(tournament.image_mode  || "stock");
+  const [stockImage,    setStockImage]    = useState(tournament.stock_image || STOCK_IMAGES[0].id);
+  const [customFile,    setCustomFile]    = useState(null);
+  const [customPreview, setCustomPreview] = useState(
+    tournament.image_mode === "custom" ? tournament.custom_image : null
+  );
+
   useEffect(() => {
     setForm(buildForm(tournament));
+    setImageMode(tournament.image_mode  || "stock");
+    setStockImage(tournament.stock_image || STOCK_IMAGES[0].id);
+    setCustomPreview(tournament.image_mode === "custom" ? tournament.custom_image : null);
+    setCustomFile(null);
   }, [tournament]);
 
   const handleChange = (e) => {
@@ -20,20 +47,36 @@ export default function OverviewTab({ tournament, status, onSave }) {
     setError("");
   };
 
+  const handleCustomUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setCustomFile(file);
+    setCustomPreview(URL.createObjectURL(file));
+  };
+
   const handleSave = async () => {
     if (!form.name.trim()) { setError("Назва турніру обов'язкова."); return; }
     setSaving(true);
     try {
-      const payload = {
-        name:               form.name.trim(),
-        description:        form.description.trim(),
-        format:             form.format.trim()       || null,
-        start_date:         form.start_date          || null,
-        registration_start: form.registration_start  || null,
-        registration_end:   form.registration_end    || null,
-        max_teams:          form.max_teams !== "" ? Number(form.max_teams) : null,
-        rules:              form.rules.trim()        || null,
-      };
+      // Використовуємо FormData щоб передати файл якщо є
+      const payload = new FormData();
+      payload.append("name",               form.name.trim());
+      payload.append("description",        form.description.trim());
+      payload.append("format",             form.format.trim()      || "");
+      payload.append("start_date",         form.start_date         || "");
+      payload.append("registration_start", form.registration_start || "");
+      payload.append("registration_end",   form.registration_end   || "");
+      payload.append("max_teams",          form.max_teams !== "" ? Number(form.max_teams) : "");
+      payload.append("rules",              form.rules.trim()       || "");
+      payload.append("image_mode",         imageMode);
+
+      if (imageMode === "stock") {
+        payload.append("stock_image", stockImage);
+      }
+      if (imageMode === "custom" && customFile) {
+        payload.append("custom_image", customFile);
+      }
+
       await onSave(payload);
       setEditing(false);
     } catch {
@@ -44,6 +87,8 @@ export default function OverviewTab({ tournament, status, onSave }) {
   };
 
   const rules = tournament.rules || "";
+
+  // ── Режим редагування ───────────────────────────────────────────────────────
 
   if (editing) {
     return (
@@ -64,6 +109,14 @@ export default function OverviewTab({ tournament, status, onSave }) {
                 rows={4}
               />
             </label>
+
+            {/* ── Картинка турніру ── */}
+            <ImagePicker
+              imageMode={imageMode}       setImageMode={setImageMode}
+              stockImage={stockImage}     setStockImage={setStockImage}
+              customImage={customPreview} onCustomUpload={handleCustomUpload}
+            />
+
             <label className={styles.editLabel}>
               Формат
               <input className={styles.editInput} name="format" value={form.format} onChange={handleChange} />
@@ -108,12 +161,17 @@ export default function OverviewTab({ tournament, status, onSave }) {
     );
   }
 
+  // ── Режим перегляду ─────────────────────────────────────────────────────────
+
   return (
     <div className={styles.tabContent}>
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Про турнір</h2>
-          <button className={styles.editBtn} onClick={() => setEditing(true)}>Редагувати</button>
+          {/* Кнопка редагування — тільки власнику */}
+          {!readOnly && (
+            <button className={styles.editBtn} onClick={() => setEditing(true)}>Редагувати</button>
+          )}
         </div>
         <p className={styles.description}>{tournament.description || "Опис відсутній."}</p>
       </section>

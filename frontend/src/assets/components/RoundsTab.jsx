@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import styles from "./styles/RoundsTab.module.css";
 import API from "../../api";
 import { ConfirmDeleteModal, Toast } from "./TournamentShared";
-import { fileIcon, toInputDatetime, formatRoundDateRange, roundStatus } from "./tournamentHelpers";
+import { fileIcon, toInputDatetime, formatRoundDateRange, roundStatus, getRoundStatusStyle } from "./tournamentHelpers";
 
 // ─── TaskForm ─────────────────────────────────────────────────────────────────
 
@@ -160,7 +160,7 @@ function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
 
 // ─── TaskCard ─────────────────────────────────────────────────────────────────
 
-function TaskCard({ task, tournamentId, roundId, onDeleted }) {
+function TaskCard({ task, tournamentId, roundId, onDeleted, readOnly = false }) {
   const [expanded,    setExpanded]    = useState(false);
   const [deleting,    setDeleting]    = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -195,6 +195,7 @@ function TaskCard({ task, tournamentId, roundId, onDeleted }) {
             {hasExtras && (
               <span className={styles.taskChevron}>{expanded ? "▲" : "▼"}</span>
             )}
+            {!readOnly && (
             <button
               className={styles.taskDeleteBtn}
               onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
@@ -203,6 +204,7 @@ function TaskCard({ task, tournamentId, roundId, onDeleted }) {
             >
               {deleting ? "…" : "✕"}
             </button>
+            )}
           </div>
         </div>
 
@@ -440,7 +442,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
 
 const EMPTY_ROUND_FORM = { title: "", description: "", start_date: "", end_date: "" };
 
-export default function RoundsTab({ rounds: initialRounds, loading, tournamentId, onRoundCreated }) {
+export default function RoundsTab({ rounds: initialRounds, loading, tournamentId, onRoundCreated, readOnly = false }) {
   const [rounds,        setRounds]        = useState(initialRounds);
   const [openRound,     setOpenRound]     = useState(null);
   const [activeSection, setActiveSection] = useState({});
@@ -535,7 +537,7 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
 
   return (
     <div className={styles.tabContent}>
-      {!showForm ? (
+      {!readOnly && (!showForm ? (
         <button className={styles.createRoundBtn} onClick={() => setShowForm(true)}>
           + Новий раунд
         </button>
@@ -590,7 +592,7 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
             </button>
           </div>
         </div>
-      )}
+      ))}
 
       {rounds.length === 0 ? (
         <p className={styles.empty}>Раунди ще не створені.</p>
@@ -609,7 +611,8 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                     <span className={styles.roundDate}>{formatRoundDateRange(round.start_date, round.end_date)}</span>
                   </div>
                   <div className={styles.roundHeaderRight}>
-                    <span className={styles.roundStatus}>{roundStatus(round)}</span>
+                    <span className={styles.roundStatus} style={getRoundStatusStyle(roundStatus(round))}>{roundStatus(round)}</span>
+                    {!readOnly && (
                     <button
                       className={styles.roundActionBtn}
                       onClick={(e) => { e.stopPropagation(); setEditingRound(isEditing ? null : round.id); setOpenRound(null); }}
@@ -617,6 +620,8 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                     >
                       ✏️
                     </button>
+                    )}
+                    {!readOnly && (
                     <button
                       className={`${styles.roundActionBtn} ${styles.roundActionBtnDanger}`}
                       onClick={(e) => { e.stopPropagation(); setDeleteRound(round); }}
@@ -624,6 +629,7 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                     >
                       🗑️
                     </button>
+                    )}
                     {!isEditing && (
                       <span className={styles.roundChevron}>{isOpen ? "▲" : "▼"}</span>
                     )}
@@ -695,9 +701,10 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                             tournamentId={tournamentId}
                             roundId={round.id}
                             onDeleted={(taskId) => handleTaskDeleted(round.id, taskId)}
+                            readOnly={readOnly}
                           />
                         ))}
-                        {showTaskForm === round.id ? (
+                        {!readOnly && (showTaskForm === round.id ? (
                           <TaskForm
                             roundId={round.id}
                             tournamentId={tournamentId}
@@ -708,7 +715,7 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                           <button className={styles.addTaskBtn} onClick={() => setShowTaskForm(round.id)}>
                             + Додати завдання
                           </button>
-                        )}
+                        ))}
                       </div>
                     )}
 

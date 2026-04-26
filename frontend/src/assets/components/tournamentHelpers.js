@@ -40,12 +40,31 @@ export const computeStatus = (t) => {
   return "Очікується";
 };
 
+// Повертає inline-стилі для бейджу статусу турніру
 export const getStatusStyle = (status) => {
   switch (status) {
-    case "Триває":               return { label: status, className: "status-active" };
-    case "Реєстрація відкрита":  return { label: status, className: "status-open" };
-    case "Реєстрація закрита":   return { label: status, className: "status-closed" };
-    default:                     return { label: status, className: "status-waiting" };
+    case "Триває":
+      return { background: "#e6f4ed", color: "#2a7a4b", border: "1px solid #b7e0ca" };
+    case "Реєстрація відкрита":
+      return { background: "#e6f4ed", color: "#2a7a4b", border: "1px solid #b7e0ca" };
+    case "Реєстрація закрита":
+      return { background: "#fef9e6", color: "#92700a", border: "1px solid #f0dc9a" };
+    case "Завершено":
+      return { background: "#f2f2f4", color: "#888", border: "1px solid #ddd" };
+    default: // "Очікується"
+      return { background: "#eef3ff", color: "#3a5cbf", border: "1px solid #c4d0f5" };
+  }
+};
+
+// Повертає inline-стилі для бейджу статусу раунду
+export const getRoundStatusStyle = (status) => {
+  switch (status) {
+    case "Триває":
+      return { background: "#e6f4ed", color: "#2a7a4b", border: "1px solid #b7e0ca" };
+    case "Завершено":
+      return { background: "#f2f2f4", color: "#888", border: "1px solid #ddd" };
+    default: // "Очікується"
+      return { background: "#eef3ff", color: "#3a5cbf", border: "1px solid #c4d0f5" };
   }
 };
 
