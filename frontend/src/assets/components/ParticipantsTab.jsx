@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import styles from "./styles/ParticipantsTab.module.css";
 import API from "../../api";
+import cross from "./static/icons/cross.svg";
+import { X } from "lucide-react";
+
 
 /**
  * Props:
@@ -9,12 +12,14 @@ import API from "../../api";
  *  - loading       {boolean}
  */
 export default function ParticipantsTab({ tournamentId, myRole, loading }) {
-  const [members,        setMembers]        = useState([]);
-  const [membersLoading, setMembersLoading] = useState(true);
-  const [copied,         setCopied]         = useState(false);
-  const [inviteUrl,      setInviteUrl]      = useState(null);
-  const [invitePin,      setInvitePin]      = useState(null);
-  const [showPin,        setShowPin]        = useState(false);  // чи показати PIN у UI
+  const [members,          setMembers]          = useState([]);
+  const [membersLoading,   setMembersLoading]   = useState(true);
+  const [copied,           setCopied]           = useState(false);
+  const [inviteUrl,        setInviteUrl]        = useState(null);
+  const [invitePin,        setInvitePin]        = useState(null);
+  const [showPin,          setShowPin]          = useState(false);
+  const [regenLoading,     setRegenLoading]     = useState(false);
+  const [regenConfirm,     setRegenConfirm]     = useState(false); // підтвердження перед перегенерацією
 
   const isOwner = myRole === "owner";
 
@@ -27,7 +32,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
       .finally(() => setMembersLoading(false));
   }, [tournamentId]);
 
-  // Завантажити invite URL і PIN заздалегідь (тільки для власника)
+  // Завантажити invite URL і PIN (тільки для власника)
   useEffect(() => {
     if (!tournamentId || !isOwner) return;
     API.get(`/tournaments/${tournamentId}/invite-link/`)
@@ -38,7 +43,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
       .catch(err => console.error("Помилка отримання invite-link:", err));
   }, [tournamentId, isOwner]);
 
-  // Скопіювати інвайт-посилання — без await перед clipboard (Safari fix)
+  // Скопіювати посилання (Safari-safe — без await перед clipboard)
   const handleInvite = () => {
     if (!inviteUrl) return;
 
@@ -50,11 +55,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
       document.body.appendChild(el);
       el.focus();
       el.select();
-      try {
-        document.execCommand("copy");
-      } catch {
-        window.prompt("Скопіюйте посилання вручну:", inviteUrl);
-      }
+      try { document.execCommand("copy"); } catch { window.prompt("Скопіюйте вручну:", inviteUrl); }
       document.body.removeChild(el);
     };
 
@@ -65,11 +66,33 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
     }
 
     setCopied(true);
-    setShowPin(true);   // після копіювання показати PIN власнику
+    setShowPin(true);
     setTimeout(() => setCopied(false), 2500);
   };
 
-  // Видалити учасника (тільки власник)
+  // Перегенерувати PIN
+  const handleRegenerate = async () => {
+    if (!regenConfirm) {
+      // Перший клік — показати попередження
+      setRegenConfirm(true);
+      setTimeout(() => setRegenConfirm(false), 4000); // скидає через 4с якщо не підтвердив
+      return;
+    }
+    // Другий клік — виконати
+    setRegenLoading(true);
+    setRegenConfirm(false);
+    try {
+      const res = await API.post(`/tournaments/${tournamentId}/regenerate-pin/`);
+      setInvitePin(res.data.invite_pin);
+      setShowPin(true);
+    } catch (err) {
+      console.error("Помилка перегенерації PIN:", err);
+    } finally {
+      setRegenLoading(false);
+    }
+  };
+
+  // Видалити учасника
   const handleRemoveMember = async (memberId) => {
     if (!window.confirm("Видалити цього учасника?")) return;
     try {
@@ -91,7 +114,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
   return (
     <div className={styles.tabContent}>
       <div className={styles.participantsHeader}>
-        <span className={styles.teamCount}>{members.length} учасників</span>
+        <span className={styles.teamCount}>Учасники: {members.length}</span>
 
         {isOwner && (
           <button
@@ -108,48 +131,40 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
         )}
       </div>
 
-      {/* PIN-підказка для власника — з'являється після натискання кнопки */}
       {isOwner && showPin && invitePin && (
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          background: "#f0f7ff",
-          border: "1px solid #b3d4f5",
-          borderRadius: 10,
-          padding: "12px 16px",
-          marginBottom: 16,
-          fontSize: 14,
-          color: "#1a1a2e",
-        }}>
-          <span style={{ fontSize: 20 }}>🔐</span>
-          <span>
-            Передайте учаснику також <strong>PIN-код:</strong>&nbsp;
-            <span style={{
-              fontFamily: "monospace",
-              fontSize: 18,
-              fontWeight: 700,
-              letterSpacing: "0.2em",
-              color: "#378ADD",
-            }}>
-              {invitePin}
+        <div className={styles.pinSection}>
+
+          <div className={styles.pinInfo}>
+            <span className={styles.pinText}>
+              Також надайте учасникам <strong>PIN-код:</strong>
             </span>
-          </span>
+              <div className={styles.pinCode}>
+                {invitePin}
+              </div>
+            </div>
+
           <button
-            onClick={() => setShowPin(false)}
-            style={{
-              marginLeft: "auto",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#888",
-              fontSize: 16,
-              lineHeight: 1,
-            }}
-            title="Сховати PIN"
+            onClick={handleRegenerate}
+            disabled={regenLoading}
+            title="Змінити PIN-код (старий стане недійсним)"
+            className={`${styles.regenBtn} ${regenConfirm ? styles.regenConfirm : ""}`}
           >
-            ✕
+            {regenLoading
+              ? "Оновлення…"
+              : regenConfirm
+              ? "Підтвердити?"
+              : "Змінити PIN"}
           </button>
+
+          <div className={styles.crossIcon} onClick={() => { setShowPin(false); setRegenConfirm(false); }}>
+            <X size={20} />
+          </div>
+
+          {regenConfirm && (
+            <p style={{ width: "100%", margin: "4px 0 0", fontSize: 12, color: "#e53e3e" }}>
+              Старий PIN стане недійсним. Натисніть «Натисніть ще раз» для підтвердження.
+            </p>
+          )}
         </div>
       )}
 

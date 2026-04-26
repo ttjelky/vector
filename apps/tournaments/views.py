@@ -1,10 +1,11 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Tournament, TournamentMember, Round, RoundLink, RoundAttachment, Task, TaskLink, TaskAttachment
+from .models import generate_invite_pin
 from .serializers import (
     TournamentSerializer, TournamentMemberSerializer, JoinByTokenSerializer,
     RoundSerializer,
@@ -17,10 +18,6 @@ from .permissions import IsTournamentOwner, IsTournamentMemberOrOwner
 # ── Tournament views ──────────────────────────────────────────────────────────
 
 class TournamentCreateView(generics.ListCreateAPIView):
-    """
-    GET  /api/tournaments/  — тільки турніри де поточний юзер є членом
-    POST /api/tournaments/  — створити турнір (автоматично стає owner)
-    """
     serializer_class   = TournamentSerializer
     permission_classes = [IsAuthenticated]
 
@@ -37,11 +34,6 @@ class TournamentCreateView(generics.ListCreateAPIView):
 
 
 class TournamentDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """
-    GET    /api/tournaments/{id}/   — отримати турнір (власник або учасник)
-    PATCH  /api/tournaments/{id}/   — редагувати (тільки власник)
-    DELETE /api/tournaments/{id}/   — видалити (тільки власник)
-    """
     queryset           = Tournament.objects.all()
     serializer_class   = TournamentSerializer
     permission_classes = [IsAuthenticated, IsTournamentMemberOrOwner]
@@ -50,9 +42,6 @@ class TournamentDetailView(generics.RetrieveUpdateDestroyAPIView):
 # ── My role in tournament ─────────────────────────────────────────────────────
 
 class MyTournamentRoleView(APIView):
-    """
-    GET /api/tournaments/{tournament_pk}/my-role/
-    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, tournament_pk):
@@ -60,7 +49,6 @@ class MyTournamentRoleView(APIView):
             tournament_id=tournament_pk,
             user=request.user,
         ).first()
-
         role = membership.role if membership else None
         return Response({'role': role})
 
@@ -70,7 +58,7 @@ class MyTournamentRoleView(APIView):
 class TournamentInviteLinkView(APIView):
     """
     GET /api/tournaments/{tournament_pk}/invite-link/
-    Повертає invite_token і invite_pin (тільки власник).
+    Повертає invite_url і invite_pin (тільки власник).
     """
     permission_classes = [IsAuthenticated, IsTournamentOwner]
 
@@ -83,18 +71,36 @@ class TournamentInviteLinkView(APIView):
         return Response({
             'invite_token': str(tournament.invite_token),
             'invite_url':   f"http://localhost:5173/join/{tournament.invite_token}",
-            'invite_pin':   tournament.invite_pin,  # PIN для додаткової перевірки
+            'invite_pin':   tournament.invite_pin,
         })
+
+
+class RegeneratePinView(APIView):
+    """
+    POST /api/tournaments/{tournament_pk}/regenerate-pin/
+    Генерує новий PIN і зберігає його. Тільки власник.
+    Повертає { "invite_pin": "xxxxxx" }.
+    """
+    permission_classes = [IsAuthenticated, IsTournamentOwner]
+
+    def post(self, request, tournament_pk):
+        try:
+            tournament = Tournament.objects.get(pk=tournament_pk)
+        except Tournament.DoesNotExist:
+            return Response({'detail': 'Турнір не знайдено.'}, status=status.HTTP_404_NOT_FOUND)
+
+        tournament.invite_pin = generate_invite_pin()
+        tournament.save(update_fields=['invite_pin'])
+
+        return Response({'invite_pin': tournament.invite_pin})
 
 
 class VerifyInvitePinView(APIView):
     """
     POST /api/tournaments/join/{token}/verify-pin/
-    Body: { "pin": "123456" }
-    Публічний endpoint — перевіряє PIN без авторизації.
-    Повертає { "valid": true } або 400 з помилкою.
+    Публічний — перевіряє PIN без авторизації.
     """
-    permission_classes = []  # публічний
+    permission_classes = []
 
     def post(self, request, token):
         pin = request.data.get('pin', '').strip()
@@ -123,10 +129,6 @@ class VerifyInvitePinView(APIView):
 
 
 class JoinByTokenView(APIView):
-    """
-    POST /api/tournaments/join/
-    Body: { "token": "<uuid>" }
-    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -159,10 +161,6 @@ class JoinByTokenView(APIView):
 
 
 class TournamentPreviewByTokenView(APIView):
-    """
-    GET /api/tournaments/join/{token}/preview/
-    Публічний — повертає базову інфо для сторінки /join/:token.
-    """
     permission_classes = []
 
     def get(self, request, token):
@@ -225,7 +223,7 @@ class RoundDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Round.objects.filter(tournament_id=self.kwargs['tournament_pk'])
 
 
-# ── Round links views ─────────────────────────────────────────────────────────
+# ── Round links ───────────────────────────────────────────────────────────────
 
 class RoundLinkListCreateView(generics.ListCreateAPIView):
     serializer_class   = RoundLinkSerializer
@@ -247,7 +245,7 @@ class RoundLinkDeleteView(generics.DestroyAPIView):
         return RoundLink.objects.filter(round_id=self.kwargs['round_pk'])
 
 
-# ── Round attachments views ───────────────────────────────────────────────────
+# ── Round attachments ─────────────────────────────────────────────────────────
 
 class RoundAttachmentListCreateView(generics.ListCreateAPIView):
     serializer_class   = RoundAttachmentSerializer
@@ -270,7 +268,7 @@ class RoundAttachmentDeleteView(generics.DestroyAPIView):
         return RoundAttachment.objects.filter(round_id=self.kwargs['round_pk'])
 
 
-# ── Task views ────────────────────────────────────────────────────────────────
+# ── Tasks ─────────────────────────────────────────────────────────────────────
 
 class TaskListCreateView(generics.ListCreateAPIView):
     serializer_class   = TaskSerializer
@@ -292,7 +290,7 @@ class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Task.objects.filter(round_id=self.kwargs['round_pk'])
 
 
-# ── Task links views ──────────────────────────────────────────────────────────
+# ── Task links ────────────────────────────────────────────────────────────────
 
 class TaskLinkListCreateView(generics.ListCreateAPIView):
     serializer_class   = TaskLinkSerializer
@@ -314,7 +312,7 @@ class TaskLinkDeleteView(generics.DestroyAPIView):
         return TaskLink.objects.filter(task_id=self.kwargs['task_pk'])
 
 
-# ── Task attachments views ────────────────────────────────────────────────────
+# ── Task attachments ──────────────────────────────────────────────────────────
 
 class TaskAttachmentListCreateView(generics.ListCreateAPIView):
     serializer_class   = TaskAttachmentSerializer

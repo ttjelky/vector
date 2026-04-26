@@ -1,11 +1,9 @@
 from django.urls import path
-from django.conf import settings
-from django.conf.urls.static import static
 from .views import (
     TournamentCreateView, TournamentDetailView,
     MyTournamentRoleView,
-    TournamentInviteLinkView, JoinByTokenView,
-    TournamentPreviewByTokenView, VerifyInvitePinView,
+    TournamentInviteLinkView, RegeneratePinView,
+    JoinByTokenView, TournamentPreviewByTokenView, VerifyInvitePinView,
     TournamentMemberListView, TournamentMemberDeleteView,
     RoundListCreateView, RoundDetailView,
     RoundLinkListCreateView, RoundLinkDeleteView,
@@ -22,9 +20,10 @@ urlpatterns = [
 
     # ── Invite & Join ──────────────────────────────────────────────────────────
     path('<int:tournament_pk>/invite-link/', TournamentInviteLinkView.as_view(), name='tournament-invite-link'),
+    path('<int:tournament_pk>/regenerate-pin/', RegeneratePinView.as_view(), name='tournament-regenerate-pin'),  # ← новий
     path('join/', JoinByTokenView.as_view(), name='tournament-join'),
     path('join/<uuid:token>/preview/', TournamentPreviewByTokenView.as_view(), name='tournament-join-preview'),
-    path('join/<uuid:token>/verify-pin/', VerifyInvitePinView.as_view(), name='tournament-verify-pin'),  # ← новий
+    path('join/<uuid:token>/verify-pin/', VerifyInvitePinView.as_view(), name='tournament-verify-pin'),
 
     # ── My role ────────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/my-role/', MyTournamentRoleView.as_view(), name='my-tournament-role'),
