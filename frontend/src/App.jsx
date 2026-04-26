@@ -10,81 +10,90 @@ import Tournaments from "./assets/pages/Tournaments";
 import ResetPassword from "./assets/pages/ResetPassword";
 import TournamentPage from "./assets/pages/TournamentPage";
 import ProtectedRoute from "./assets/components/ProtectedRoute";
+import JoinTournamentPage from "./assets/pages/JoinTournamentPage";
 
 const App = () => {
   return (
     <TabsProvider>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Landing />} />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Landing />} />
 
-        <Route 
-          path="/admindashboard" element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
+          {/*
+            /join/:token — публічний маршрут.
+            ProtectedRoute прибрано навмисно: неавторизований користувач
+            повинен бачити сторінку, ввести PIN, а потім пройти логін
+            прямо всередині JoinTournamentPage.
+          */}
+          <Route path="/join/:token" element={<JoinTournamentPage />} />
 
-        <Route 
-          path="/tournament/:id" 
-          element={
-            <ProtectedRoute>
-              <TournamentPage />
-            </ProtectedRoute>
-          } 
-        />
+          <Route
+            path="/admindashboard"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route 
-          path="/help" 
-          element={
-            <ProtectedRoute>
-              <Help />
-            </ProtectedRoute>
-          } 
-        />
+          <Route
+            path="/tournament/:id"
+            element={
+              <ProtectedRoute>
+                <TournamentPage />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route 
-          path="/profile" 
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } 
-        />
+          <Route
+            path="/help"
+            element={
+              <ProtectedRoute>
+                <Help />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route 
-          path="/settings" 
-          element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          } 
-        />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route 
-          path="/works" 
-          element={
-            <ProtectedRoute>
-              <Works />
-            </ProtectedRoute>
-          } 
-        />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route 
-          path="/tournaments" 
-          element={
-            <ProtectedRoute>
-              <Tournaments />
-            </ProtectedRoute>
-          } 
-        />
+          <Route
+            path="/works"
+            element={
+              <ProtectedRoute>
+                <Works />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/reset-password" element={<ResetPassword />} />
-        
-      </Routes>
-    </BrowserRouter>
-  </TabsProvider>
+          <Route
+            path="/tournaments"
+            element={
+              <ProtectedRoute>
+                <Tournaments />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/reset-password" element={<ResetPassword />} />
+        </Routes>
+      </BrowserRouter>
+    </TabsProvider>
   );
 };
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Tournament, Round, RoundLink, RoundAttachment, Task, TaskLink, TaskAttachment
+from .models import Tournament, TournamentMember, Round, RoundLink, RoundAttachment, Task, TaskLink, TaskAttachment
 
 
 class TournamentSerializer(serializers.ModelSerializer):
@@ -8,13 +8,34 @@ class TournamentSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    # Тільки для читання — повертає invite_token щоб фронт міг будувати посилання
+    invite_token = serializers.UUIDField(read_only=True)
 
     class Meta:
         model  = Tournament
         fields = '__all__'
 
 
-# ─── Task serializers ──────────────────────────────────────────────────────────
+# ── TournamentMember serializers ──────────────────────────────────────────────
+
+class TournamentMemberSerializer(serializers.ModelSerializer):
+    """Серіалайзер для відображення учасників турніру."""
+    username   = serializers.CharField(source='user.username', read_only=True)
+    email      = serializers.EmailField(source='user.email', read_only=True)
+    user_role  = serializers.CharField(source='user.role', read_only=True)  # глобальна роль (admin/team/jury)
+
+    class Meta:
+        model  = TournamentMember
+        fields = ['id', 'user', 'username', 'email', 'user_role', 'role', 'joined_at']
+        read_only_fields = ['joined_at']
+
+
+class JoinByTokenSerializer(serializers.Serializer):
+    """Серіалайзер для приєднання до турніру за токеном."""
+    token = serializers.UUIDField()
+
+
+# ── Task serializers ──────────────────────────────────────────────────────────
 
 class TaskLinkSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,7 +62,7 @@ class TaskSerializer(serializers.ModelSerializer):
         read_only_fields = ['round', 'created_at']
 
 
-# ─── Round serializers ─────────────────────────────────────────────────────────
+# ── Round serializers ─────────────────────────────────────────────────────────
 
 class RoundLinkSerializer(serializers.ModelSerializer):
     class Meta:

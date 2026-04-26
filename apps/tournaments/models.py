@@ -1,4 +1,11 @@
+import uuid
+import random
 from django.db import models
+
+
+def generate_invite_pin():
+    """Генерує випадковий 6-значний PIN для запрошення."""
+    return str(random.randint(100000, 999999))
 
 
 class Tournament(models.Model):
@@ -24,9 +31,65 @@ class Tournament(models.Model):
     # Числові значення
     max_teams = models.IntegerField(null=True, blank=True)
 
+    # ── Інвайт-токен ──────────────────────────────────────────────────────────
+    invite_token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        verbose_name="Інвайт-токен",
+    )
+
+    # ── PIN-код для додаткової перевірки при приєднанні ───────────────────────
+    invite_pin = models.CharField(
+        max_length=6,
+        default=generate_invite_pin,
+        verbose_name="PIN-код запрошення",
+    )
+
     def __str__(self):
         return self.name
 
+
+# ── TournamentMember ──────────────────────────────────────────────────────────
+
+TOURNAMENT_ROLE_CHOICES = [
+    ('owner',       'Власник'),
+    ('participant', 'Учасник'),
+]
+
+
+class TournamentMember(models.Model):
+    tournament = models.ForeignKey(
+        Tournament,
+        on_delete=models.CASCADE,
+        related_name='members',
+        verbose_name="Турнір",
+    )
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name='tournament_memberships',
+        verbose_name="Користувач",
+    )
+    role = models.CharField(
+        max_length=20,
+        choices=TOURNAMENT_ROLE_CHOICES,
+        default='participant',
+        verbose_name="Роль",
+    )
+    joined_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата приєднання")
+
+    class Meta:
+        unique_together = ('tournament', 'user')
+        ordering = ['joined_at']
+        verbose_name = "Учасник турніру"
+        verbose_name_plural = "Учасники турніру"
+
+    def __str__(self):
+        return f"{self.user} — {self.tournament} [{self.role}]"
+
+
+# ── Round ─────────────────────────────────────────────────────────────────────
 
 class Round(models.Model):
     tournament  = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name="rounds")
@@ -44,7 +107,6 @@ class Round(models.Model):
 
 
 class RoundLink(models.Model):
-    """Посилання, прикріплені до раунду."""
     round = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="links")
     label = models.CharField(max_length=255, verbose_name="Підпис посилання")
     url   = models.URLField(max_length=2048, verbose_name="URL")
@@ -58,7 +120,6 @@ class RoundLink(models.Model):
 
 
 class RoundAttachment(models.Model):
-    """Файли, прикріплені до раунду."""
     round      = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="attachments")
     file       = models.FileField(upload_to="rounds/attachments/", verbose_name="Файл")
     name       = models.CharField(max_length=255, verbose_name="Назва файлу", blank=True)
@@ -77,7 +138,6 @@ class RoundAttachment(models.Model):
 
 
 class Task(models.Model):
-    """Завдання всередині раунду."""
     round       = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="tasks")
     title       = models.CharField(max_length=255, verbose_name="Назва завдання")
     description = models.TextField(null=True, blank=True, verbose_name="Опис завдання")
@@ -91,7 +151,6 @@ class Task(models.Model):
 
 
 class TaskLink(models.Model):
-    """Посилання, прикріплені до завдання."""
     task  = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="links")
     label = models.CharField(max_length=255, verbose_name="Підпис")
     url   = models.URLField(max_length=2048, verbose_name="URL")
@@ -102,7 +161,6 @@ class TaskLink(models.Model):
 
 
 class TaskAttachment(models.Model):
-    """Файли, прикріплені до завдання."""
     task       = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="attachments")
     file       = models.FileField(upload_to="tasks/attachments/", verbose_name="Файл")
     name       = models.CharField(max_length=255, verbose_name="Назва файлу", blank=True)
