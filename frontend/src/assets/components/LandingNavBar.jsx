@@ -41,7 +41,7 @@ const LandingNavBar = () => {
     
     <div className={styles.logoContainer}>
         <a className="landingNavLogo" href="#main">
-        <img src={logo} alt="Logo" />
+        <img src={logo} className={styles.logo} />
         </a>
     </div>
         <nav>

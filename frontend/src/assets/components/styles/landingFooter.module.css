@@ -29,6 +29,10 @@
     gap: 27px;
 }
 
+.FooterLogo {
+    width: 50px;
+}
+
 .LandingFooterEmail {
     margin-top: 20px;
 }

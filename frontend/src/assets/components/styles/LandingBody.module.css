@@ -29,7 +29,7 @@ html, body {
     align-items: center;
     border: 5px solid rgb(238, 238, 238);
     border-radius: 50px;
-    padding: 20px 100px 90px 100px;
+    padding: 20px 100px 140px 100px;
     margin-top: 50px;
 }
 
@@ -65,8 +65,9 @@ html, body {
 }
 
 .LogoText {
-    scale: 4;
-    padding: 10px;
+    scale: 1.1;
+    position: absolute;
+    margin-top: 140px;
 }
 
 .img1wrapper {

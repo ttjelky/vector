@@ -45,7 +45,7 @@ const NavBar = ({children}) => {
       
       <header className={styles.topNavbar}>
         <div className={styles.navbarLogo}>
-          <img src={Logo} alt="Vector" style={{scale: 0.85}} />
+          <img src={Logo} alt="Vector" className={styles.logo} />
         </div>
 
         {/* Пошук */}
