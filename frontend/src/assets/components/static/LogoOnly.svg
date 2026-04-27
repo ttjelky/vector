@@ -1,19 +1,8 @@
-<svg width="48" height="49" viewBox="0 0 48 49" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M13.0303 0.75H34.9697C41.7519 0.75 47.25 6.24813 47.25 13.0303V34.9697C47.25 41.7519 41.7519 47.25 34.9697 47.25H13.0303C6.24813 47.25 0.75 41.7519 0.75 34.9697V13.0303L0.753906 12.7129C0.919511 6.18281 6.18281 0.919511 12.7129 0.753906L13.0303 0.75Z" fill="white" stroke="black" stroke-width="1.5"/>
-<g filter="url(#filter0_d_21_37)">
-<path d="M17.0869 11.1273H13.056L21.1179 40.2239H26.5715L33.5664 14.6114L29.7726 13.9522L23.8447 37.2107L17.0869 11.1273Z" fill="#1E1E1E"/>
-<path d="M32.9021 9.39888C33.0868 9.18265 33.4399 9.28116 33.4859 9.56174L34.7307 17.1499C34.7702 17.3908 34.5464 17.5914 34.3112 17.5258L28.0734 15.7856C27.8382 15.72 27.7505 15.4325 27.9091 15.2468L32.9021 9.39888Z" fill="#1E1E1E"/>
-</g>
-<defs>
-<filter id="filter0_d_21_37" x="9.05597" y="9.2814" width="29.6793" height="38.9426" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="4"/>
-<feGaussianBlur stdDeviation="2"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_21_37"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_21_37" result="shape"/>
-</filter>
-</defs>
+<svg width="243" height="243" viewBox="0 0 243 243" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.5 67.565C3.5 32.1829 32.1829 3.5 67.565 3.5H175.435C210.817 3.5 239.5 32.1829 239.5 67.565V175.435C239.5 210.817 210.817 239.5 175.435 239.5H67.565C32.1829 239.5 3.5 210.817 3.5 175.435V67.565Z" fill="white" stroke="#BEBEBE" stroke-width="7"/>
+<path d="M116.826 191.915L162.768 60.1193H185.15L127.428 215.5H111.471L116.826 191.915ZM73.8821 60.1193L119.396 191.915L125.072 215.5H109.115L51.5 60.1193H73.8821Z" fill="black"/>
+<path d="M186.566 26.5L191.369 87.4538L143.273 69.6764L186.566 26.5Z" fill="black"/>
+<path d="M116.826 191.915L162.768 60.1193H185.15L127.428 215.5H111.471L116.826 191.915ZM73.8821 60.1193L119.396 191.915L125.072 215.5H109.115L51.5 60.1193H73.8821Z" fill="black"/>
+<path d="M116.826 191.915L162.768 60.1193H185.15L127.428 215.5H111.471L116.826 191.915ZM73.8821 60.1193L119.396 191.915L125.072 215.5H109.115L51.5 60.1193H73.8821Z" fill="black"/>
+<path d="M116.826 191.915L162.768 60.1193H185.15L127.428 215.5H111.471L116.826 191.915ZM73.8821 60.1193L119.396 191.915L125.072 215.5H109.115L51.5 60.1193H73.8821Z" fill="black"/>
 </svg>

@@ -1,60 +1,50 @@
-from django.shortcuts import render
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
-from .serializers import RegisterSerializer
-from .models import User
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import MyTokenObtainPairSerializer
-from django.http import JsonResponse
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.response import Response
-import json
-from .models import Profile
-from .models import IsAdmin
-from .models import Tournament
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
+from django.contrib.auth import get_user_model
+from django.http import JsonResponse
+
+from .serializers import RegisterSerializer, MyTokenObtainPairSerializer
+from .models import Profile, IsAdmin
 
 User = get_user_model()
 
-@csrf_exempt
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def profile(request):
     user = request.user
 
-    if not user.is_authenticated:
-        return JsonResponse({"error": "Not authenticated"}, status=401)
-    
-    profile = Profile.objects.get(user=user)
-
     if request.method == "GET":
-        return JsonResponse({
+        try:
+            profile_obj = Profile.objects.get(user=user)
+            avatar_url = profile_obj.avatar.url if profile_obj.avatar else None
+        except Profile.DoesNotExist:
+            avatar_url = None
+
+        return Response({
             "username": user.username,
             "email": user.email,
-            "avatar": user.avatar.url if profile.avatar else None,
+            "avatar": avatar_url,
         })
-    
+
     if request.method == "POST":
         user.username = request.POST.get("username", user.username)
         user.email = request.POST.get("email", user.email)
-
-        if 'avatar' in request.FILES:
-            profile.avatar = request.FILES['avatar']
-
         user.save()
-        profile.save()
 
-        return JsonResponse({"status": "updated"})
+        try:
+            profile_obj = Profile.objects.get(user=user)
+            if 'avatar' in request.FILES:
+                profile_obj.avatar = request.FILES['avatar']
+            profile_obj.save()
+        except Profile.DoesNotExist:
+            pass
 
+        return Response({"status": "updated"})
 
-@api_view(['GET'])
-def profile(request):
-    user = request.user
-
-    return Response({
-        "username": user.username,
-        "email": user.email,
-    })
 
 def dashboard_data(request):
     data = {
@@ -64,26 +54,10 @@ def dashboard_data(request):
     }
     return JsonResponse(data)
 
-@api_view(['POST'])
-@permission_classes([IsAdmin])
-def create_tournament(request):
-    data = request.data
-
-    tournament = Tournament.objects.create(
-        name=data.get('name'),
-        description=data.get('description'),
-        start_date=data.get('start_date'),
-        registration_start=data.get('registration_start'),
-        registration_end=data.get('registration_end'),
-        max_teams=data.get('max_teams'),
-        format=data.get('format'),
-        created_by=request.user
-    )
-
-    return Response({"message": "Tournament created"})
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()

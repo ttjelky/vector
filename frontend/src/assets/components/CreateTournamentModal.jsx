@@ -55,7 +55,7 @@ export function RichTextArea({ id, rows = 4, placeholder, value, onChange }) {
 
 // ── ImagePicker ──────────────────────────────────────────────────────────────
 
-function ImagePicker({ imageMode, setImageMode, stockImage, setStockImage, customImage, onCustomUpload }) {
+export function ImagePicker({ imageMode, setImageMode, stockImage, setStockImage, customImage, onCustomUpload }) {
   return (
     <div className={styles.field}>
       <label className={styles.label}>Картинка турніру</label>

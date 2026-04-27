@@ -1,0 +1,516 @@
+/* ─── Tab content ─────────────────────────────────────────────────────────── */
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ─── Empty ───────────────────────────────────────────────────────────────── */
+
+.empty {
+  font-size: 13px;
+  color: #bbb;
+  margin: 0;
+  padding: 8px 0;
+  text-align: center;
+}
+
+/* ─── Shared form inputs ──────────────────────────────────────────────────── */
+
+.editLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #888;
+  letter-spacing: 0.01em;
+}
+
+.editRequired { color: #e53e3e; }
+
+.editInput {
+  padding: 10px 13px;
+  font-size: 14px;
+  color: #111;
+  background: #f7f7f9;
+  border: 1px solid #e4e4e8;
+  border-radius: 10px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.editInput:focus {
+  border-color: #bbb;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+  background: #fff;
+}
+
+.editTextarea {
+  padding: 10px 13px;
+  font-size: 14px;
+  color: #111;
+  background: #f7f7f9;
+  border: 1px solid #e4e4e8;
+  border-radius: 10px;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.6;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.editTextarea:focus {
+  border-color: #bbb;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+  background: #fff;
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.editActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.cancelBtn {
+  padding: 10px 20px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #555;
+  background: #f0f0f2;
+  border: 1px solid #e4e4e8;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cancelBtn:hover    { background: #e4e4e8; }
+.cancelBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.saveBtn {
+  padding: 10px 22px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff;
+  background: #111;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.saveBtn:hover    { background: #2a2a2a; }
+.saveBtn:active   { transform: scale(0.97); }
+.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.formError {
+  font-size: 12.5px;
+  color: #c53030;
+  margin: 0;
+  padding: 8px 12px;
+  background: #fff5f5;
+  border: 1px solid #fed7d7;
+  border-radius: 7px;
+}
+
+/* ─── Create round button ─────────────────────────────────────────────────── */
+
+.createRoundBtn {
+  align-self: flex-start;
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #fff;
+  background: #111;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.createRoundBtn:hover  { background: #333; }
+.createRoundBtn:active { transform: scale(0.97); }
+
+/* ─── Round form card ─────────────────────────────────────────────────────── */
+
+.roundFormCard {
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.roundFormTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+/* ─── Round list & card ───────────────────────────────────────────────────── */
+
+.roundList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.roundCard {
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+
+.roundCardOpen { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); }
+
+/* ─── Round header ────────────────────────────────────────────────────────── */
+
+.roundHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 12px;
+  transition: background 0.1s;
+}
+
+.roundHeader:hover { background: #fafafa; }
+
+.roundHeaderLeft  { display: flex; flex-direction: column; gap: 3px; }
+.roundTitle       { font-size: 14px; font-weight: 600; color: #111; }
+.roundDate        { font-size: 12px; color: #999; }
+
+.roundHeaderRight { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+.roundStatus {
+  font-size: 12px;
+  color: #888;
+  background: #f0f0f2;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+.roundChevron { font-size: 10px; color: #bbb; }
+
+/* ─── Round action buttons ────────────────────────────────────────────────── */
+
+.roundActionBtn {
+  padding: 4px 7px;
+  font-size: 13px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.roundActionBtn:hover       { background: #f0f0f2; border-color: #e0e0e4; }
+.roundActionBtnDanger:hover { background: #fff0f0; border-color: #fcd7d7; }
+
+/* ─── Round body ──────────────────────────────────────────────────────────── */
+
+.roundBody {
+  border-top: 1px solid #f2f2f4;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.roundDescription { font-size: 13.5px; color: #555; line-height: 1.6; margin: 0; }
+
+/* ─── Round edit form ─────────────────────────────────────────────────────── */
+
+.roundEditForm  { display: flex; flex-direction: column; gap: 16px; }
+.roundEditTitle { font-size: 14px; font-weight: 600; color: #111; margin: 0; }
+
+/* ─── Round internal tabs ─────────────────────────────────────────────────── */
+
+.roundTabs {
+  display: flex;
+  gap: 4px;
+  background: #f3f3f5;
+  border-radius: 15px;
+  padding: 3px;
+  width: fit-content;
+}
+
+.roundTab {
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #888;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.roundTab:hover   { color: #333; }
+.roundTabActive   { background: #fff; color: #111; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+
+/* ─── Round meta (links/files) ────────────────────────────────────────────── */
+
+.roundMeta      { display: flex; flex-direction: column; gap: 6px; }
+.roundMetaLabel { font-size: 11.5px; font-weight: 600; color: #aaa; letter-spacing: 0.04em; text-transform: uppercase; }
+
+.roundLinkList,
+.roundFileList  { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.roundLink,
+.roundFile {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  background: #f3f3f5;
+  border: 1px solid #e8e8ec;
+  border-radius: 20px;
+  font-size: 12.5px;
+  color: #444;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.roundLink:hover,
+.roundFile:hover { background: #e8e8ec; color: #111; }
+
+/* ─── Attach sections ─────────────────────────────────────────────────────── */
+
+.attachSection      { display: flex; flex-direction: column; gap: 8px; }
+.attachSectionLabel { font-size: 12px; font-weight: 600; color: #888; letter-spacing: 0.02em; }
+
+.attachItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  background: #f7f7f9;
+  border: 1px solid #ebebec;
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+.attachItemIcon { font-size: 15px; flex-shrink: 0; }
+
+.attachItemName {
+  flex: 1;
+  font-weight: 500;
+  color: #222;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachItemMeta { font-size: 11.5px; color: #bbb; flex-shrink: 0; }
+
+.attachRemove {
+  padding: 2px 6px;
+  font-size: 11px;
+  color: #aaa;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.attachRemove:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+
+.linkInputRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.addLinkBtn {
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  background: #555;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.addLinkBtn:hover { background: #333; }
+
+.filePickBtn {
+  align-self: flex-start;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #555;
+  background: #f0f0f2;
+  border: 1px dashed #d0d0d4;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.filePickBtn:hover { background: #e8e8ec; border-color: #bbb; }
+
+/* ─── Tasks ───────────────────────────────────────────────────────────────── */
+
+.taskList { display: flex; flex-direction: column; gap: 8px; }
+
+.taskCard {
+  background: #f7f7f9;
+  border: 1px solid #ebebec;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.taskCard:hover    { border-color: #dcdce0; }
+.taskCardExpanded  { border-color: #dcdce0; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04); }
+
+.taskCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 11px 13px;
+  cursor: pointer;
+  gap: 10px;
+}
+
+.taskCardLeft    { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.taskCardActions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.taskChevron     { font-size: 9px; color: #ccc; }
+.taskTitle       { font-size: 13px; font-weight: 600; color: #111; }
+.taskDesc        { font-size: 13px; color: #666; margin: 0; line-height: 1.5; }
+
+.taskDeleteBtn {
+  padding: 3px 7px;
+  font-size: 11px;
+  color: #ccc;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.taskDeleteBtn:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+
+.taskCardBody {
+  border-top: 1px solid #eeeeef;
+  padding: 12px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.taskDescFull    { font-size: 13.5px; color: #444; line-height: 1.65; margin: 0; white-space: pre-wrap; }
+.taskExtras      { display: flex; flex-direction: column; gap: 6px; }
+.taskExtrasLabel { font-size: 11px; font-weight: 600; color: #bbb; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.taskLinkList,
+.taskFileList { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.taskLink,
+.taskFile {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #fff;
+  border: 1px solid #e0e0e4;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #444;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.taskLink:hover,
+.taskFile:hover { background: #f0f0f2; color: #111; }
+
+/* ─── Task form card ──────────────────────────────────────────────────────── */
+
+.taskFormCard {
+  background: #fff;
+  border: 1px solid #e4e4e8;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+}
+
+.taskFormTitle { font-size: 13.5px; font-weight: 600; color: #111; margin: 0; }
+
+.addTaskBtn {
+  align-self: flex-start;
+  padding: 7px 15px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #555;
+  background: #f0f0f2;
+  border: 1px dashed #ccc;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  margin-top: 2px;
+}
+
+.addTaskBtn:hover { background: #e8e8ec; border-color: #aaa; color: #111; }
+
+/* ─── Submissions ─────────────────────────────────────────────────────────── */
+
+.submissionList { display: flex; flex-direction: column; gap: 8px; }
+
+.submissionCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f7f7f9;
+  border-radius: 15px;
+  padding: 11px 14px;
+  gap: 12px;
+}
+
+.submissionInfo  { display: flex; flex-direction: column; gap: 3px; }
+.submissionTeam  { font-size: 13px; font-weight: 600; color: #111; }
+.submissionFile  { font-size: 12px; color: #666; }
+.submissionDate  { font-size: 11.5px; color: #aaa; }
+
+.submissionStatus {
+  font-size: 12px;
+  font-weight: 500;
+  color: #888;
+  background: #ebebec;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.submissionStatusDone { background: #e6f4ed; color: #2a7a4b; }

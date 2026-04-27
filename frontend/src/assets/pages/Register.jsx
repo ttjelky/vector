@@ -3,44 +3,56 @@ import styles from "../components/styles/registerPage.module.css";
 import cross from "../components/static/icons/cross.svg";
 import { registerUser, loginUser } from '../../api';
 import { useNavigate } from 'react-router-dom';
+import { ROLE_HOME } from '../../navConfig';
 
-const Register = ({isOpen, onClose, onSwitchToLogin}) => {
+const ROLES = [
+  {
+    value: "admin",
+    label: "Адміністратор",
+    desc: "Створюю та керую турнірами",
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+    ),
+  },
+  {
+    value: "participant",
+    label: "Учасник",
+    desc: "Беру участь у турнірах та змагаюся",
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    ),
+  },
+  {
+    value: "jury",
+    label: "Журі",
+    desc: "Оцінюю роботи та виставляю бали",
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <path d="M8 21h8M12 17v4"/>
+        <path d="M7 8l3 3 5-5"/>
+      </svg>
+    ),
+  },
+];
 
+const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
   const navigate = useNavigate();
-  const [closing, setClosing] = useState(false);
-
+  const [step, setStep] = useState(1);
   const [role, setRole] = useState("");
-  const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-    password: ''
-  });
-
+  const [formData, setFormData] = useState({ first_name: '', last_name: '', email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleClose = () => {
-    setClosing(true);
-    setTimeout(() => {
-      setClosing(false);
-      onClose();
-    }, 300);
-  };
-
-  const handleSwitchToLogin = () => {
-    setClosing(true);
-    setTimeout(() => {
-      setClosing(false);
-      onSwitchToLogin();
-    }, 300);
-  };
-
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -49,17 +61,27 @@ const Register = ({isOpen, onClose, onSwitchToLogin}) => {
     setIsLoading(true);
     try {
       await registerUser({ ...formData, role });
-      const response = await loginUser({
-        username: formData.email,
-        password: formData.password
-      });
-      localStorage.setItem('accessToken', response.data.access);
-      localStorage.setItem('role', response.data.role);
-      handleClose();
-      navigate('/admindashboard');
+
+      const response = await loginUser({ username: formData.email, password: formData.password });
+      const { access, first_name, last_name, role: returnedRole = "participant" } = response.data;
+
+      // ── Зберігаємо так само як Login.jsx ──────────────────────
+      localStorage.setItem("accessToken", access);
+      localStorage.setItem("userRole", returnedRole);               // був 'role' — БАГ
+      localStorage.setItem(
+        "fullUserName",
+        `${first_name || formData.first_name} ${last_name || formData.last_name}`.trim()
+      );
+
+      onClose();
+
+      // ── Редірект на основі ролі, як у Login.jsx ───────────────
+      navigate(ROLE_HOME[returnedRole] ?? ROLE_HOME.participant);  // був хардкод '/admindashboard' — БАГ
+
     } catch (error) {
-      if (error.response && error.response.data) {
+      if (error.response?.data) {
         setErrors(error.response.data);
+        if (error.response.data.email || error.response.data.first_name) setStep(1);
       } else {
         alert("Щось пішло не так. Перевірте з'єднання.");
       }
@@ -68,122 +90,143 @@ const Register = ({isOpen, onClose, onSwitchToLogin}) => {
     }
   };
 
+  const handleClose = () => {
+    setStep(1);
+    setRole("");
+    setFormData({ first_name: '', last_name: '', email: '', password: '' });
+    setErrors({});
+    onClose();
+  };
+
+  const step1Valid = formData.first_name && formData.last_name && formData.email && formData.password;
+
   if (!isOpen) return null;
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
-      <div
-        className={`${styles.overlay} ${closing ? styles.overlayClosing : ""}`}
-        onClick={handleClose}
-      >
-        <div
-          className={`${styles.register} ${closing ? styles.modalClosing : ""}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className={styles.navbar}>
-            <img src={cross} alt="back" className={styles.cross} onClick={handleClose} />
+    <div className={styles.overlay} onClick={handleClose}>
+      <div className={styles.register} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+
+        {/* Floating header */}
+        <div className={styles.header}>
+          <div className={styles.stepIndicator}>
+            <div className={`${styles.stepDot} ${step >= 1 ? styles.stepDotActive : ''}`} />
+            <div className={`${styles.stepLine} ${step >= 2 ? styles.stepLineActive : ''}`} />
+            <div className={`${styles.stepDot} ${step >= 2 ? styles.stepDotActive : ''}`} />
           </div>
+          <img src={cross} alt="Закрити" className={styles.cross} onClick={handleClose} />
+        </div>
 
-          <div className={styles.form}>
-            <h1 className={styles.title}>Реєстрація</h1>
+        <form onSubmit={handleSubmit} noValidate className={styles.form}>
 
-            <section className={styles.inputform}>
-              <div className={styles.namecontainer}>
-                <div className={styles.name}>
-                  <p style={{color: "gray"}}>Ім'я</p>
-                  <input
-                    type="text"
-                    name="first_name"
-                    value={formData.first_name}
-                    onChange={handleChange}
-                    className={styles.input}
-                    required
-                  />
+          {/* ── STEP 1 ── */}
+          {step === 1 && (
+            <div className={styles.stepContent}>
+              <div className={styles.stepMeta}>
+                <span className={styles.stepNum}>Крок 1 з 2</span>
+                <h2 className={styles.stepTitle}>Ваші дані</h2>
+                <p className={styles.stepSub}>Введіть основну інформацію для створення акаунту</p>
+              </div>
+
+              <div className={styles.twoCol}>
+                <div className={styles.field}>
+                  <label className={styles.fieldLabel}>Ім'я</label>
+                  <input type="text" name="first_name" value={formData.first_name}
+                    onChange={handleChange} className={styles.input} placeholder="Іван" required />
                   {errors.first_name && <span className={styles.errorText}>{errors.first_name[0]}</span>}
                 </div>
-
-                <div className={styles.name}>
-                  <p style={{color: "gray"}}>Прізвище</p>
-                  <input
-                    type="text"
-                    name="last_name"
-                    value={formData.last_name}
-                    onChange={handleChange}
-                    className={styles.input}
-                    required
-                  />
+                <div className={styles.field}>
+                  <label className={styles.fieldLabel}>Прізвище</label>
+                  <input type="text" name="last_name" value={formData.last_name}
+                    onChange={handleChange} className={styles.input} placeholder="Шевченко" required />
                   {errors.last_name && <span className={styles.errorText}>{errors.last_name[0]}</span>}
                 </div>
               </div>
 
-              <div className={styles.email}>
-                <div style={{marginBottom: "12px"}}>
-                  <p style={{color: "gray"}}>Email</p>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={styles.input}
-                    required
-                  />
-                  {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
+              <div className={styles.field}>
+                <label className={styles.fieldLabel}>Email</label>
+                <input type="email" name="email" value={formData.email}
+                  onChange={handleChange} className={styles.input} placeholder="ivan@example.com" required />
+                {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.fieldLabel}>Пароль</label>
+                <input type="password" name="password" value={formData.password}
+                  onChange={handleChange} className={styles.input} placeholder="Мінімум 8 символів" required />
+                {errors.password && <span className={styles.errorText}>{errors.password[0]}</span>}
+              </div>
+
+              <hr className={styles.divider} />
+
+              <div className={styles.underform}>
+                <div onClick={onSwitchToLogin} style={{ cursor: "pointer" }}>
+                  <span>Вже маєте акаунт? </span>
+                  <a>Увійти</a>
                 </div>
               </div>
-
-              <div className={styles.password}>
-                <p style={{color: "gray"}}>Пароль</p>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={styles.input}
-                  required
-                />
-              </div>
-
-              <div className={styles.rolecontainer}>
-                <p style={{color: "gray"}}>Роль</p>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className={styles.input}
-                  required
-                >
-                  <option value="">Оберіть роль</option>
-                  <option value="admin">Адміністратор</option>
-                  <option value="team">Учасник</option>
-                  <option value="jury">Журі</option>
-                </select>
-              </div>
-            </section>
-
-            <div className={styles.rememberme}>
-              <input type="checkbox" id="remember" name="remember" />
-              <label htmlFor="remember">Запам'ятати мене</label>
             </div>
+          )}
 
-            <div className={styles.button}>
-              <button
-                type="submit"
-                disabled={!formData.email || !formData.password || !formData.last_name || !formData.first_name || !role}
-                className={styles.thebutton}
-              >
-                Зареєструватися
-              </button>
-            </div>
-
-            <section className={styles.underform}>
-              <div onClick={handleSwitchToLogin} style={{cursor: "pointer"}}>
-                <span>Вже маєте акаунт? </span>
-                <a>Увійти</a>
+          {/* ── STEP 2 ── */}
+          {step === 2 && (
+            <div className={styles.stepContent}>
+              <div className={styles.stepMeta}>
+                <span className={styles.stepNum}>Крок 2 з 2</span>
+                <h2 className={styles.stepTitle}>Ваша роль</h2>
+                <p className={styles.stepSub}>Оберіть як ви плануєте використовувати платформу</p>
               </div>
-            </section>
+
+              <div className={styles.roleGrid}>
+                {ROLES.map(({ value, label, desc, icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`${styles.roleCard} ${role === value ? styles.roleCardActive : ''}`}
+                    onClick={() => setRole(value)}
+                  >
+                    <div className={`${styles.roleIcon} ${role === value ? styles.roleIconActive : ''}`}>
+                      {icon}
+                    </div>
+                    <span className={styles.roleLabel}>{label}</span>
+                    <span className={styles.roleDesc}>{desc}</span>
+                    {role === value && (
+                      <div className={styles.roleCheck}>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {errors.detail && <p className={styles.errorText}>{errors.detail}</p>}
+            </div>
+          )}
+
+          {/* Floating footer */}
+          <div className={styles.footer}>
+            {step === 1 ? (
+              <>
+                <button type="button" className={styles.btnCancel} onClick={handleClose}>Скасувати</button>
+                <button type="button" className={styles.btnSubmit} disabled={!step1Valid}
+                  onClick={() => setStep(2)}>
+                  Далі →
+                </button>
+              </>
+            ) : (
+              <>
+                <button type="button" className={styles.btnCancel} onClick={() => setStep(1)}>← Назад</button>
+                <button type="submit" className={styles.btnSubmit} disabled={!role || isLoading}>
+                  {isLoading ? "Завантаження..." : "Зареєструватися"}
+                </button>
+              </>
+            )}
           </div>
-        </div>
+
+        </form>
       </div>
-    </form>
+    </div>
   );
 };
 
