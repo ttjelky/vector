@@ -9,7 +9,6 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='api_register'),
     path('login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api_create=tournament/', views.create_tournament),
     path('profile/', profile),
     path('chart/', dashboard_data),
 ]

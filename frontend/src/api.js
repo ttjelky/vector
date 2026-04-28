@@ -7,7 +7,7 @@ const API = axios.create({
 });
 
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken'); 
+  const token = localStorage.getItem('accessToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -23,15 +23,5 @@ export const loginUser = (credentials) => {
 };
 
 export const getProfile = () => API.get("/users/profile/");
-
-API.interceptors.request.use((req) => {
-    const token = localStorage.getItem("accessToken");
-
-    if (token) {
-        req.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return req;
-});
 
 export default API;

@@ -3,6 +3,7 @@ import styles from "../components/styles/loginPage.module.css";
 import cross from "../components/static/icons/cross.svg";
 import { loginUser } from '../../api';
 import { useNavigate } from "react-router-dom";
+import { ROLE_HOME } from "../../navConfig";
 
 /**
  * Props:
@@ -17,7 +18,7 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
   const navigate = useNavigate();
 
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState({});
+  const [errors,    setErrors]    = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,14 +35,19 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
         password: loginData.password,
       });
 
-      localStorage.setItem("accessToken", response.data.access);
+      const { access, first_name, last_name, role = "participant" } = response.data;
+
+      // ── Зберігаємо дані у localStorage ──────────────────────────
+      localStorage.setItem("accessToken", access);
+      localStorage.setItem("userRole", role);
       localStorage.setItem(
         "fullUserName",
-        `${response.data.first_name || ""} ${response.data.last_name || ""}`.trim()
+        `${first_name || ""} ${last_name || ""}`.trim()
       );
 
       onClose();
 
+      // ── Redirect ─────────────────────────────────────────────────
       if (onLoginSuccess) {
         onLoginSuccess();
         return;
@@ -51,9 +57,12 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
       if (pendingToken) {
         localStorage.removeItem("pendingJoinToken");
         navigate(`/join/${pendingToken}`);
-      } else {
-        navigate("/admindashboard");
+        return;
       }
+
+      // Редіректимо на головну сторінку відповідної ролі
+      navigate(ROLE_HOME[role] ?? ROLE_HOME.participant);
+
     } catch (error) {
       const serverMessage = error.response?.data?.detail;
       const translations = {
@@ -68,8 +77,13 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.login} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="login-title">
-
+      <div
+        className={styles.login}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-title"
+      >
         {/* Floating header */}
         <div className={styles.header}>
           <h2 id="login-title" className={styles.logintitle}>Вхід на сайт</h2>
@@ -124,7 +138,7 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
             <a className={styles.forgot} onClick={onSwitchToForgot}>Забули пароль?</a>
           </div>
 
-          {/* Floating footer with buttons */}
+          {/* Floating footer */}
           <div className={styles.footer}>
             <button type="button" className={styles.btnCancel} onClick={onClose}>
               Скасувати

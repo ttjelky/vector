@@ -3,6 +3,7 @@ import styles from "../components/styles/registerPage.module.css";
 import cross from "../components/static/icons/cross.svg";
 import { registerUser, loginUser } from '../../api';
 import { useNavigate } from 'react-router-dom';
+import { ROLE_HOME } from '../../navConfig';
 
 const ROLES = [
   {
@@ -16,7 +17,7 @@ const ROLES = [
     ),
   },
   {
-    value: "team",
+    value: "participant",
     label: "Учасник",
     desc: "Беру участь у турнірах та змагаюся",
     icon: (
@@ -60,11 +61,23 @@ const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
     setIsLoading(true);
     try {
       await registerUser({ ...formData, role });
+
       const response = await loginUser({ username: formData.email, password: formData.password });
-      localStorage.setItem('accessToken', response.data.access);
-      localStorage.setItem('role', response.data.role);
+      const { access, first_name, last_name, role: returnedRole = "participant" } = response.data;
+
+      // ── Зберігаємо так само як Login.jsx ──────────────────────
+      localStorage.setItem("accessToken", access);
+      localStorage.setItem("userRole", returnedRole);               // був 'role' — БАГ
+      localStorage.setItem(
+        "fullUserName",
+        `${first_name || formData.first_name} ${last_name || formData.last_name}`.trim()
+      );
+
       onClose();
-      navigate('/admindashboard');
+
+      // ── Редірект на основі ролі, як у Login.jsx ───────────────
+      navigate(ROLE_HOME[returnedRole] ?? ROLE_HOME.participant);  // був хардкод '/admindashboard' — БАГ
+
     } catch (error) {
       if (error.response?.data) {
         setErrors(error.response.data);

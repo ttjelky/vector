@@ -1,100 +1,134 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TabsProvider } from "./TabsContext";
-import Landing from "./assets/pages/Landing";
-import AdminDashboard from "./assets/pages/AdminDashboard";
-import Help from "./assets/pages/Help";
-import Profile from "./assets/pages/Profile";
-import Settings from "./assets/pages/Settings";
-import Works from "./assets/pages/Works";
-import Tournaments from "./assets/pages/Tournaments";
-import ResetPassword from "./assets/pages/ResetPassword";
-import TournamentPage from "./assets/pages/TournamentPage";
-import ProtectedRoute from "./assets/components/ProtectedRoute";
+
+// Pages
+import Landing            from "./assets/pages/Landing";
+import AdminDashboard     from "./assets/pages/AdminDashboard";
+import ParticipantDashboard from "./assets/pages/ParticipantDashboard";
+import JuryDashboard      from "./assets/pages/JuryDashboard";
+import Help               from "./assets/pages/Help";
+import Profile            from "./assets/pages/Profile";
+import Settings           from "./assets/pages/Settings";
+import Works              from "./assets/pages/Works";
+import Tournaments        from "./assets/pages/Tournaments";
+import Stats              from "./assets/pages/Stats";
+import ResetPassword      from "./assets/pages/ResetPassword";
+import TournamentPage     from "./assets/pages/TournamentPage";
 import JoinTournamentPage from "./assets/pages/JoinTournamentPage";
+import ProtectedRoute     from "./assets/components/ProtectedRoute";
 
-const App = () => {
-  return (
-    <TabsProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
+const App = () => (
+  <TabsProvider>
+    <BrowserRouter>
+      <Routes>
 
-          {/*
-            /join/:token — публічний маршрут.
-            ProtectedRoute прибрано навмисно: неавторизований користувач
-            повинен бачити сторінку, ввести PIN, а потім пройти логін
-            прямо всередині JoinTournamentPage.
-          */}
-          <Route path="/join/:token" element={<JoinTournamentPage />} />
+        {/* ── Публічні ──────────────────────────────────────────── */}
+        <Route path="/"               element={<Landing />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-          <Route
-            path="/admindashboard"
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
+        {/*
+          /join/:token — публічний: неавторизований користувач бачить
+          сторінку, вводить PIN, потім логіниться всередині компонента.
+        */}
+        <Route path="/join/:token" element={<JoinTournamentPage />} />
 
-          <Route
-            path="/tournament/:id"
-            element={
-              <ProtectedRoute>
-                <TournamentPage />
-              </ProtectedRoute>
-            }
-          />
+        {/* ── Адмін ─────────────────────────────────────────────── */}
+        <Route
+          path="/admindashboard"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-          <Route
-            path="/help"
-            element={
-              <ProtectedRoute>
-                <Help />
-              </ProtectedRoute>
-            }
-          />
+        <Route
+          path="/stats"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <Stats />
+            </ProtectedRoute>
+          }
+        />
 
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
+        {/* ── Журі ──────────────────────────────────────────────── */}
+        <Route
+          path="/jury"
+          element={
+            <ProtectedRoute allowedRoles={["jury"]}>
+              <JuryDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            }
-          />
+        {/* ── Учасник ───────────────────────────────────────────── */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["participant"]}>
+              <ParticipantDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-          <Route
-            path="/works"
-            element={
-              <ProtectedRoute>
-                <Works />
-              </ProtectedRoute>
-            }
-          />
+        {/* ── Спільні (будь-яка авторизована роль) ──────────────── */}
+        <Route
+          path="/tournaments"
+          element={
+            <ProtectedRoute>
+              <Tournaments />
+            </ProtectedRoute>
+          }
+        />
 
-          <Route
-            path="/tournaments"
-            element={
-              <ProtectedRoute>
-                <Tournaments />
-              </ProtectedRoute>
-            }
-          />
+        <Route
+          path="/tournament/:id"
+          element={
+            <ProtectedRoute>
+              <TournamentPage />
+            </ProtectedRoute>
+          }
+        />
 
-          <Route path="/reset-password" element={<ResetPassword />} />
-        </Routes>
-      </BrowserRouter>
-    </TabsProvider>
-  );
-};
+        <Route
+          path="/works"
+          element={
+            <ProtectedRoute>
+              <Works />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/help"
+          element={
+            <ProtectedRoute>
+              <Help />
+            </ProtectedRoute>
+          }
+        />
+
+      </Routes>
+    </BrowserRouter>
+  </TabsProvider>
+);
 
 export default App;
