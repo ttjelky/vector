@@ -514,3 +514,287 @@
 }
 
 .submissionStatusDone { background: #e6f4ed; color: #2a7a4b; }
+
+/* ─── Task inner tabs ─────────────────────────────────────────────────────── */
+
+.taskInnerTabs {
+  display: flex;
+  gap: 2px;
+  background: #eeeeef;
+  border-radius: 10px;
+  padding: 3px;
+  width: fit-content;
+}
+
+.taskInnerTab {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #999;
+  background: none;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.taskInnerTab:hover      { color: #444; }
+.taskInnerTabActive      { background: #fff; color: #111; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.09); }
+
+/* ─── Task submissions block (allSubmissions section) ─────────────────────── */
+
+.taskSubmissionsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.taskSubmissionsBlockTitle {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #777;
+  padding: 6px 10px;
+  background: #f3f3f5;
+  border-radius: 8px;
+  letter-spacing: 0.01em;
+}
+
+/* ─── Submission form ─────────────────────────────────────────────────────── */
+
+.submissionForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #f8f9ff;
+  border: 1px solid #dde3f5;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.submissionFormTitle {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* ─── My submission panel ─────────────────────────────────────────────────── */
+
+.mySubmissionEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.submitWorkBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: #111;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.submitWorkBtn:hover  { background: #333; }
+.submitWorkBtn:active { transform: scale(0.97); }
+
+.mySubmissionCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f5fbf7;
+  border: 1px solid #c6e8d3;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.mySubmissionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mySubmissionLabel {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #2a7a4b;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+}
+
+.mySubmissionDate {
+  font-size: 12px;
+  color: #999;
+  flex: 1;
+}
+
+.mySubmissionActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.editSubmissionBtn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.editSubmissionBtn:hover { background: #f0f0f2; border-color: #bbb; }
+
+.deleteSubmissionBtn {
+  padding: 5px 9px;
+  font-size: 13px;
+  color: #bbb;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  line-height: 1;
+}
+
+.deleteSubmissionBtn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.submissionText {
+  font-size: 13.5px;
+  color: #333;
+  line-height: 1.65;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.submissionExtras {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.submissionExtrasLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ─── All submissions list ────────────────────────────────────────────────── */
+
+.allSubmissionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.submissionCard {
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.submissionCardExpanded {
+  border-color: #d4d4d8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.submissionCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 13px;
+  cursor: pointer;
+  gap: 10px;
+  transition: background 0.1s;
+}
+
+.submissionCardHeader:hover { background: #fafafa; }
+
+.submissionParticipantInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.submissionParticipantName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.submissionParticipantEmail {
+  font-size: 11.5px;
+  color: #aaa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.submissionCardMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.submissionDate {
+  font-size: 11.5px;
+  color: #bbb;
+  white-space: nowrap;
+}
+
+.submissionBadges {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.subBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #666;
+  background: #f0f0f2;
+  border: 1px solid #e4e4e8;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.submissionCardBody {
+  border-top: 1px solid #f2f2f4;
+  padding: 12px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
