@@ -104,7 +104,6 @@ body, html {
   border-radius: 4px;
 }
 
-/* Назва турніру, що обрізається */
 .tournamentTitle {
   white-space: nowrap;
   overflow: hidden;
@@ -227,6 +226,7 @@ body, html {
 .logoutSection {
   background-color: rgb(255, 229, 230);
   border-radius: 15px;
+  cursor: pointer;
 }
 
 .logoutSection:hover {
@@ -245,6 +245,13 @@ body, html {
   font-size: 12px;
   font-weight: 400;
   color: rgb(215, 125, 126);
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-radius: 15px;
 }
 
 .notificationIcon {
