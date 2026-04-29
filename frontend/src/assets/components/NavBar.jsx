@@ -8,7 +8,7 @@ import styles from './styles/NavBar.module.css';
 import HomeIcon       from './static/icons/Home.svg?react';
 import TournamentsIcon from './static/icons/Tournaments.svg?react';
 import WorksIcon      from './static/icons/Works.svg?react';
-import StatsIcon      from './static/icons/Works.svg?react';
+import StatsIcon      from './static/icons/Stats.svg?react';
 import SettingsIcon   from './static/icons/Settings.svg?react';
 import ProfileIcon    from './static/icons/Profile.svg?react';
 import InfoIcon       from './static/icons/Info.svg?react';
