@@ -219,7 +219,7 @@ function MySubmissionPanel({ taskId, roundId, tournamentId }) {
     }
   };
 
-  if (loading) return <p className={styles.empty}>Завантаження здачі…</p>;
+  if (loading) return <p className={styles.empty}>⏳ Завантаження здачі…</p>;
 
   if (showForm) {
     return (
@@ -237,7 +237,7 @@ function MySubmissionPanel({ taskId, roundId, tournamentId }) {
   if (!submission) {
     return (
       <div className={styles.mySubmissionEmpty}>
-        <p className={styles.empty}>Ви ще не здали роботу по цьому завданню.</p>
+      <p className={styles.empty}>Ви ще не здали роботу по цьому завданню.</p>
         <button className={styles.submitWorkBtn} onClick={() => setShowForm(true)}>
           📤 Здати роботу
         </button>
@@ -319,8 +319,8 @@ function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
       .finally(() => setLoading(false));
   }, [taskId]);
 
-  if (loading) return <p className={styles.empty}>Завантаження здач…</p>;
-  if (submissions.length === 0) return <p className={styles.empty}>Жодних здач ще немає.</p>;
+  if (loading) return <p className={styles.empty}>⏳ Завантаження здач…</p>;
+  if (submissions.length === 0) return <p className={styles.empty}>📭 Жодних здач ще немає.</p>;
 
   return (
     <div className={styles.allSubmissionsList}>
@@ -959,14 +959,18 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
   };
 
   if (loading) {
-    return <div className={styles.tabContent}><p className={styles.empty}>Завантаження...</p></div>;
+    return (
+      <div className={styles.tabContent}>
+        <p className={styles.empty}>⏳ Завантаження раундів…</p>
+      </div>
+    );
   }
 
   return (
     <div className={styles.tabContent}>
       {!readOnly && (!showForm ? (
         <button className={styles.createRoundBtn} onClick={() => setShowForm(true)}>
-          + Новий раунд
+          ＋ Новий раунд
         </button>
       ) : (
         <div className={styles.roundFormCard}>
@@ -1022,7 +1026,10 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
       ))}
 
       {rounds.length === 0 ? (
-        <p className={styles.empty}>Раунди ще не створені.</p>
+        <div className={styles.emptyBlock}>
+          <p>🏁 Раунди ще не створені.</p>
+          {!readOnly && <p style={{ fontSize: 12, marginTop: -4 }}>Натисніть «Новий раунд», щоб розпочати.</p>}
+        </div>
       ) : (
         <div className={styles.roundList}>
           {rounds.map((round) => {
@@ -1110,14 +1117,14 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                         className={`${styles.roundTab} ${section === "tasks" ? styles.roundTabActive : ""}`}
                         onClick={() => setSection(round.id, "tasks")}
                       >
-                        Завдання ({(round.tasks || []).length})
+                        Завдання {(round.tasks || []).length > 0 && `(${(round.tasks || []).length})`}
                       </button>
                       {!readOnly && (
                         <button
                           className={`${styles.roundTab} ${section === "allSubmissions" ? styles.roundTabActive : ""}`}
                           onClick={() => setSection(round.id, "allSubmissions")}
                         >
-                          📋 Усі здачі
+                          Усі здачі
                         </button>
                       )}
                     </div>
@@ -1125,7 +1132,7 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                     {section === "tasks" && (
                       <div className={styles.taskList}>
                         {(round.tasks || []).length === 0 && showTaskForm !== round.id && (
-                          <p className={styles.empty}>Завдання ще не додані.</p>
+                          <p className={styles.empty}>📋 Завдання ще не додані.</p>
                         )}
                         {(round.tasks || []).map((task) => (
                           <TaskCard
