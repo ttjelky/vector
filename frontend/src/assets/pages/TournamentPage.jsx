@@ -23,25 +23,22 @@ export default function TournamentPage() {
   const [deleting,      setDeleting]      = useState(false);
 
   // Роль поточного юзера в цьому турнірі: "owner" | "participant" | null
-  const [myRole, setMyRole] = useState(null);
+  const [myRole,      setMyRole]      = useState(null);
   const [roleLoading, setRoleLoading] = useState(true);
 
   const isOwner = myRole === "owner";
 
   useEffect(() => {
-    // Завантажити турнір
     API.get(`/tournaments/${id}/`)
       .then(r => setTournament(r.data))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
 
-    // Завантажити раунди
     API.get(`/tournaments/${id}/rounds/`)
       .then(r => setRounds(r.data))
       .catch(err => console.error(err))
       .finally(() => setRoundsLoading(false));
 
-    // Завантажити роль поточного юзера
     API.get(`/tournaments/${id}/my-role/`)
       .then(r => setMyRole(r.data.role))
       .catch(err => console.error(err))
@@ -126,7 +123,6 @@ export default function TournamentPage() {
         <div className={styles.content}>
           {activeTab === "overview" && (
             <>
-              {/* Передаємо isOwner в OverviewTab — він має сховати кнопки редагування для учасників */}
               <OverviewTab
                 tournament={tournament}
                 status={status}
@@ -134,7 +130,6 @@ export default function TournamentPage() {
                 readOnly={!isOwner}
               />
 
-              {/* Небезпечна зона — тільки власник */}
               {isOwner && (
                 <div className={styles.dangerZone}>
                   <div className={styles.dangerInfo}>
@@ -156,6 +151,7 @@ export default function TournamentPage() {
               tournamentId={id}
               onRoundCreated={handleRoundCreated}
               readOnly={!isOwner}
+              myRole={myRole}
             />
           )}
 

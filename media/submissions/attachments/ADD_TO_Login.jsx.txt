@@ -1,0 +1,10 @@
+// У Login.jsx після успішного логіну додай цей код
+// (замість або після navigate("/tournaments")):
+
+const pendingToken = localStorage.getItem("pendingJoinToken");
+if (pendingToken) {
+  localStorage.removeItem("pendingJoinToken");
+  navigate(`/join/${pendingToken}`);
+} else {
+  navigate("/tournaments"); // або куди редиректиш зараз
+}

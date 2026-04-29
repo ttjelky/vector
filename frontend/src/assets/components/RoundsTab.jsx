@@ -1,8 +1,531 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import styles from "./styles/RoundsTab.module.css";
 import API from "../../api";
 import { ConfirmDeleteModal, Toast } from "./TournamentShared";
 import { fileIcon, toInputDatetime, formatRoundDateRange, roundStatus, getRoundStatusStyle } from "./tournamentHelpers";
+
+// ─── SubmissionForm ───────────────────────────────────────────────────────────
+// Форма для учасника: здати або оновити роботу по завданню
+
+function SubmissionForm({ taskId, roundId, tournamentId, existingSubmission, onSaved, onCancel }) {
+  const [text,         setText]         = useState(existingSubmission?.text || "");
+  const [links,        setLinks]        = useState(existingSubmission?.links || []);
+  const [linkForm,     setLinkForm]     = useState({ label: "", url: "" });
+  const [files,        setFiles]        = useState([]);
+  const [saving,       setSaving]       = useState(false);
+  const [error,        setError]        = useState("");
+  const [fileInputKey, setFileInputKey] = useState(0);
+
+  const isEdit = !!existingSubmission;
+
+  const addLink = () => {
+    if (!linkForm.url.trim()) return;
+    setLinks((l) => [...l, { ...linkForm, _new: true, id: Date.now() }]);
+    setLinkForm({ label: "", url: "" });
+  };
+
+  const removeLink = async (link) => {
+    if (!link._new && existingSubmission) {
+      try {
+        await API.delete(
+          `/tournaments/${tournamentId}/rounds/${roundId}/tasks/${taskId}/submissions/${existingSubmission.id}/links/${link.id}/`
+        );
+      } catch (err) { console.error(err); }
+    }
+    setLinks((l) => l.filter((x) => x.id !== link.id));
+  };
+
+  const handleFiles = (e) => {
+    const picked = Array.from(e.target.files);
+    if (picked.length > 0) setFiles((f) => [...f, ...picked]);
+    setFileInputKey((k) => k + 1);
+  };
+
+  const removeNewFile = (idx) => setFiles((f) => f.filter((_, i) => i !== idx));
+
+  const handleSubmit = async () => {
+    const hasContent = text.trim() || links.length > 0 || files.length > 0 ||
+      (existingSubmission?.attachments?.length > 0);
+    if (!hasContent) {
+      setError("Додайте текст, посилання або файл перед здачею.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      let submission;
+      const basePath = `/tournaments/${tournamentId}/rounds/${roundId}/tasks/${taskId}/submissions/`;
+
+      if (isEdit) {
+        const r = await API.patch(`${basePath}${existingSubmission.id}/`, { text: text.trim() || null });
+        submission = r.data;
+      } else {
+        const r = await API.post(basePath, { text: text.trim() || null });
+        submission = r.data;
+      }
+
+      // Нові посилання
+      for (const link of links.filter((l) => l._new)) {
+        await API.post(
+          `${basePath}${submission.id}/links/`,
+          { label: link.label || link.url, url: link.url }
+        );
+      }
+
+      // Нові файли
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append("file", file);
+        await API.post(`${basePath}${submission.id}/attachments/`, fd);
+      }
+
+      // Отримати оновлену здачу
+      const fresh = await API.get(`${basePath}${submission.id}/`);
+      onSaved(fresh.data);
+    } catch (err) {
+      console.error(err);
+      const msg = err.response?.data?.detail
+        || err.response?.data?.[0]
+        || "Помилка при збереженні. Спробуйте ще раз.";
+      setError(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className={styles.submissionForm}>
+      <h4 className={styles.submissionFormTitle}>
+        {isEdit ? "✏️ Редагувати здачу" : "📤 Здати роботу"}
+      </h4>
+
+      <div className={styles.editForm}>
+        <label className={styles.editLabel}>
+          Текст відповіді
+          <textarea
+            className={styles.editTextarea}
+            value={text}
+            onChange={(e) => { setText(e.target.value); setError(""); }}
+            rows={4}
+            placeholder="Введіть текст вашої відповіді…"
+          />
+        </label>
+
+        <div className={styles.attachSection}>
+          <span className={styles.attachSectionLabel}>🔗 Посилання</span>
+          {links.map((link) => (
+            <div key={link.id} className={styles.attachItem}>
+              <span className={styles.attachItemIcon}>🔗</span>
+              <span className={styles.attachItemName}>{link.label || link.url}</span>
+              <span className={styles.attachItemMeta}>{link.url}</span>
+              <button className={styles.attachRemove} onClick={() => removeLink(link)}>✕</button>
+            </div>
+          ))}
+          <div className={styles.linkInputRow}>
+            <input
+              className={styles.editInput}
+              placeholder="URL посилання"
+              value={linkForm.url}
+              onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && addLink()}
+            />
+            <input
+              className={styles.editInput}
+              placeholder="Підпис (необов'язково)"
+              value={linkForm.label}
+              onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && addLink()}
+            />
+            <button className={styles.addLinkBtn} onClick={addLink}>Додати</button>
+          </div>
+        </div>
+
+        <div className={styles.attachSection}>
+          <span className={styles.attachSectionLabel}>📎 Файли</span>
+          {/* Вже збережені файли (при редагуванні) */}
+          {isEdit && existingSubmission?.attachments?.map((att) => (
+            <div key={att.id} className={styles.attachItem}>
+              <span className={styles.attachItemIcon}>{fileIcon(att.name)}</span>
+              <span className={styles.attachItemName}>{att.name}</span>
+              <span className={styles.attachItemMeta}>збережено</span>
+            </div>
+          ))}
+          {/* Нові файли */}
+          {files.map((f, i) => (
+            <div key={i} className={styles.attachItem}>
+              <span className={styles.attachItemIcon}>{fileIcon(f.name)}</span>
+              <span className={styles.attachItemName}>{f.name}</span>
+              <span className={styles.attachItemMeta}>{(f.size / 1024).toFixed(0)} KB</span>
+              <button className={styles.attachRemove} onClick={() => removeNewFile(i)}>✕</button>
+            </div>
+          ))}
+          <label className={styles.filePickBtn}>
+            + Прикріпити файл
+            <input key={fileInputKey} type="file" multiple hidden accept="*/*" onChange={handleFiles} />
+          </label>
+        </div>
+
+        {error && <p className={styles.formError}>{error}</p>}
+      </div>
+
+      <div className={styles.editActions}>
+        <button className={styles.cancelBtn} onClick={onCancel} disabled={saving}>Скасувати</button>
+        <button className={styles.saveBtn} onClick={handleSubmit} disabled={saving}>
+          {saving ? "Збереження…" : isEdit ? "Зберегти зміни" : "Здати роботу"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── MySubmissionPanel ────────────────────────────────────────────────────────
+// Блок учасника: показує його здачу або форму першої здачі
+
+function MySubmissionPanel({ taskId, roundId, tournamentId }) {
+  const [submission,  setSubmission]  = useState(undefined); // undefined = ще не завантажено
+  const [loading,     setLoading]     = useState(true);
+  const [showForm,    setShowForm]    = useState(false);
+  const [deleting,    setDeleting]    = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const basePath = `/tournaments/${tournamentId}/rounds/${roundId}/tasks/${taskId}/submissions/`;
+
+  useEffect(() => {
+    setLoading(true);
+    API.get(basePath)
+      .then((r) => {
+        // учасник отримає масив з 0 або 1 елементом (своя здача)
+        setSubmission(r.data.length > 0 ? r.data[0] : null);
+      })
+      .catch(() => setSubmission(null))
+      .finally(() => setLoading(false));
+  }, [taskId]);
+
+  const handleSaved = (sub) => {
+    setSubmission(sub);
+    setShowForm(false);
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await API.delete(`${basePath}${submission.id}/`);
+      setSubmission(null);
+      setShowConfirm(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  if (loading) return <p className={styles.empty}>Завантаження здачі…</p>;
+
+  if (showForm) {
+    return (
+      <SubmissionForm
+        taskId={taskId}
+        roundId={roundId}
+        tournamentId={tournamentId}
+        existingSubmission={submission || undefined}
+        onSaved={handleSaved}
+        onCancel={() => setShowForm(false)}
+      />
+    );
+  }
+
+  if (!submission) {
+    return (
+      <div className={styles.mySubmissionEmpty}>
+        <p className={styles.empty}>Ви ще не здали роботу по цьому завданню.</p>
+        <button className={styles.submitWorkBtn} onClick={() => setShowForm(true)}>
+          📤 Здати роботу
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.mySubmissionCard}>
+      <div className={styles.mySubmissionHeader}>
+        <span className={styles.mySubmissionLabel}>✅ Ваша здача</span>
+        <span className={styles.mySubmissionDate}>
+          {new Date(submission.submitted_at).toLocaleString("uk-UA")}
+        </span>
+        <div className={styles.mySubmissionActions}>
+          <button className={styles.editSubmissionBtn} onClick={() => setShowForm(true)}>✏️ Редагувати</button>
+          <button className={styles.deleteSubmissionBtn} onClick={() => setShowConfirm(true)}>🗑️</button>
+        </div>
+      </div>
+
+      {submission.text && (
+        <p className={styles.submissionText}>{submission.text}</p>
+      )}
+
+      {submission.links?.length > 0 && (
+        <div className={styles.submissionExtras}>
+          <span className={styles.submissionExtrasLabel}>Посилання</span>
+          <div className={styles.taskLinkList}>
+            {submission.links.map((link) => (
+              <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.taskLink}>
+                🔗 {link.label || link.url}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {submission.attachments?.length > 0 && (
+        <div className={styles.submissionExtras}>
+          <span className={styles.submissionExtrasLabel}>Файли</span>
+          <div className={styles.taskFileList}>
+            {submission.attachments.map((att) => (
+              <a key={att.id} href={att.file} target="_blank" rel="noopener noreferrer" className={styles.taskFile}>
+                {fileIcon(att.name)} {att.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {showConfirm && (
+        <ConfirmDeleteModal
+          icon="📤"
+          title="Видалити здачу?"
+          description="Ваша здана робота буде видалена. Ви зможете здати знову."
+          confirmLabel="Так, видалити"
+          onConfirm={handleDelete}
+          onCancel={() => setShowConfirm(false)}
+          loading={deleting}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─── AllSubmissionsPanel ──────────────────────────────────────────────────────
+// Для власника / журі / адміна: всі здачі з іменами учасників
+
+function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
+  const [submissions, setSubmissions] = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [expanded,    setExpanded]    = useState(null);
+
+  useEffect(() => {
+    setLoading(true);
+    API.get(`/tournaments/${tournamentId}/rounds/${roundId}/tasks/${taskId}/submissions/`)
+      .then((r) => setSubmissions(r.data))
+      .catch(() => setSubmissions([]))
+      .finally(() => setLoading(false));
+  }, [taskId]);
+
+  if (loading) return <p className={styles.empty}>Завантаження здач…</p>;
+  if (submissions.length === 0) return <p className={styles.empty}>Жодних здач ще немає.</p>;
+
+  return (
+    <div className={styles.allSubmissionsList}>
+      {submissions.map((sub) => (
+        <div
+          key={sub.id}
+          className={`${styles.submissionCard} ${expanded === sub.id ? styles.submissionCardExpanded : ""}`}
+        >
+          <div
+            className={styles.submissionCardHeader}
+            onClick={() => setExpanded(expanded === sub.id ? null : sub.id)}
+          >
+            <div className={styles.submissionParticipantInfo}>
+              <span className={styles.submissionParticipantName}>
+                👤 {sub.participant_username}
+              </span>
+              <span className={styles.submissionParticipantEmail}>
+                {sub.participant_email}
+              </span>
+            </div>
+            <div className={styles.submissionCardMeta}>
+              <span className={styles.submissionDate}>
+                {new Date(sub.submitted_at).toLocaleString("uk-UA")}
+              </span>
+              <div className={styles.submissionBadges}>
+                {sub.text && <span className={styles.subBadge}>📝</span>}
+                {sub.links?.length > 0 && <span className={styles.subBadge}>🔗 {sub.links.length}</span>}
+                {sub.attachments?.length > 0 && <span className={styles.subBadge}>📎 {sub.attachments.length}</span>}
+              </div>
+              <span className={styles.roundChevron}>{expanded === sub.id ? "▲" : "▼"}</span>
+            </div>
+          </div>
+
+          {expanded === sub.id && (
+            <div className={styles.submissionCardBody}>
+              {sub.text && <p className={styles.submissionText}>{sub.text}</p>}
+
+              {sub.links?.length > 0 && (
+                <div className={styles.submissionExtras}>
+                  <span className={styles.submissionExtrasLabel}>Посилання</span>
+                  <div className={styles.taskLinkList}>
+                    {sub.links.map((link) => (
+                      <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.taskLink}>
+                        🔗 {link.label || link.url}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {sub.attachments?.length > 0 && (
+                <div className={styles.submissionExtras}>
+                  <span className={styles.submissionExtrasLabel}>Файли</span>
+                  <div className={styles.taskFileList}>
+                    {sub.attachments.map((att) => (
+                      <a key={att.id} href={att.file} target="_blank" rel="noopener noreferrer" className={styles.taskFile}>
+                        {fileIcon(att.name)} {att.name}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── TaskCard ─────────────────────────────────────────────────────────────────
+
+function TaskCard({ task, tournamentId, roundId, onDeleted, readOnly = false, myRole }) {
+  const [expanded,    setExpanded]    = useState(false);
+  const [activeTab,   setActiveTab]   = useState("details"); // "details" | "submit" | "allSubs"
+  const [deleting,    setDeleting]    = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await API.delete(`/tournaments/${tournamentId}/rounds/${roundId}/tasks/${task.id}/`);
+      onDeleted(task.id);
+    } catch (err) {
+      console.error(err);
+      setDeleting(false);
+      setShowConfirm(false);
+    }
+  };
+
+  const hasExtras = (task.links?.length > 0) || (task.attachments?.length > 0) || task.description;
+  const isOwnerOrJury = !readOnly || myRole === "jury" || myRole === "admin";
+
+  // Визначення доступних вкладок всередині завдання
+  const innerTabs = [];
+  if (hasExtras) innerTabs.push({ id: "details", label: "Деталі" });
+  if (readOnly) innerTabs.push({ id: "submit", label: "📤 Моя здача" });
+  if (isOwnerOrJury) innerTabs.push({ id: "allSubs", label: "📋 Здачі учасників" });
+
+  return (
+    <>
+      <div className={`${styles.taskCard} ${expanded ? styles.taskCardExpanded : ""}`}>
+        <div className={styles.taskCardHeader} onClick={() => setExpanded((v) => !v)}>
+          <div className={styles.taskCardLeft}>
+            <span className={styles.taskTitle}>{task.title}</span>
+            {!expanded && task.description && (
+              <p className={styles.taskDesc}>
+                {task.description.length > 80 ? task.description.slice(0, 80) + "…" : task.description}
+              </p>
+            )}
+          </div>
+          <div className={styles.taskCardActions}>
+            <span className={styles.taskChevron}>{expanded ? "▲" : "▼"}</span>
+            {!readOnly && (
+              <button
+                className={styles.taskDeleteBtn}
+                onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
+                disabled={deleting}
+                title="Видалити завдання"
+              >
+                {deleting ? "…" : "✕"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {expanded && (
+          <div className={styles.taskCardBody}>
+            {innerTabs.length > 1 && (
+              <div className={styles.taskInnerTabs}>
+                {innerTabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    className={`${styles.taskInnerTab} ${activeTab === tab.id ? styles.taskInnerTabActive : ""}`}
+                    onClick={(e) => { e.stopPropagation(); setActiveTab(tab.id); }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {(activeTab === "details" || innerTabs.length === 1) && (
+              <>
+                {task.description && <p className={styles.taskDescFull}>{task.description}</p>}
+                {task.links?.length > 0 && (
+                  <div className={styles.taskExtras}>
+                    <span className={styles.taskExtrasLabel}>Посилання</span>
+                    <div className={styles.taskLinkList}>
+                      {task.links.map((link) => (
+                        <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.taskLink}>
+                          🔗 {link.label || link.url}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {task.attachments?.length > 0 && (
+                  <div className={styles.taskExtras}>
+                    <span className={styles.taskExtrasLabel}>Файли</span>
+                    <div className={styles.taskFileList}>
+                      {task.attachments.map((att) => (
+                        <a key={att.id} href={att.file} target="_blank" rel="noopener noreferrer" className={styles.taskFile}>
+                          {fileIcon(att.name)} {att.name}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {activeTab === "submit" && readOnly && (
+              <MySubmissionPanel
+                taskId={task.id}
+                roundId={roundId}
+                tournamentId={tournamentId}
+              />
+            )}
+
+            {activeTab === "allSubs" && isOwnerOrJury && (
+              <AllSubmissionsPanel
+                taskId={task.id}
+                roundId={roundId}
+                tournamentId={tournamentId}
+              />
+            )}
+          </div>
+        )}
+      </div>
+
+      {showConfirm && (
+        <ConfirmDeleteModal
+          icon="📋"
+          title="Видалити завдання?"
+          description={<>Завдання <strong>«{task.title}»</strong> буде видалено разом з усіма вкладеннями та здачами. Цю дію не можна скасувати.</>}
+          confirmLabel="Видалити завдання"
+          onConfirm={handleDelete}
+          onCancel={() => setShowConfirm(false)}
+          loading={deleting}
+        />
+      )}
+    </>
+  );
+}
 
 // ─── TaskForm ─────────────────────────────────────────────────────────────────
 
@@ -155,102 +678,6 @@ function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
         </button>
       </div>
     </div>
-  );
-}
-
-// ─── TaskCard ─────────────────────────────────────────────────────────────────
-
-function TaskCard({ task, tournamentId, roundId, onDeleted, readOnly = false }) {
-  const [expanded,    setExpanded]    = useState(false);
-  const [deleting,    setDeleting]    = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-
-  const handleDelete = async () => {
-    setDeleting(true);
-    try {
-      await API.delete(`/tournaments/${tournamentId}/rounds/${roundId}/tasks/${task.id}/`);
-      onDeleted(task.id);
-    } catch (err) {
-      console.error(err);
-      setDeleting(false);
-      setShowConfirm(false);
-    }
-  };
-
-  const hasExtras = (task.links?.length > 0) || (task.attachments?.length > 0) || task.description;
-
-  return (
-    <>
-      <div className={`${styles.taskCard} ${expanded ? styles.taskCardExpanded : ""}`}>
-        <div className={styles.taskCardHeader} onClick={() => hasExtras && setExpanded((v) => !v)}>
-          <div className={styles.taskCardLeft}>
-            <span className={styles.taskTitle}>{task.title}</span>
-            {!expanded && task.description && (
-              <p className={styles.taskDesc}>
-                {task.description.length > 80 ? task.description.slice(0, 80) + "…" : task.description}
-              </p>
-            )}
-          </div>
-          <div className={styles.taskCardActions}>
-            {hasExtras && (
-              <span className={styles.taskChevron}>{expanded ? "▲" : "▼"}</span>
-            )}
-            {!readOnly && (
-            <button
-              className={styles.taskDeleteBtn}
-              onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
-              disabled={deleting}
-              title="Видалити завдання"
-            >
-              {deleting ? "…" : "✕"}
-            </button>
-            )}
-          </div>
-        </div>
-
-        {expanded && (
-          <div className={styles.taskCardBody}>
-            {task.description && <p className={styles.taskDescFull}>{task.description}</p>}
-            {task.links?.length > 0 && (
-              <div className={styles.taskExtras}>
-                <span className={styles.taskExtrasLabel}>Посилання</span>
-                <div className={styles.taskLinkList}>
-                  {task.links.map((link) => (
-                    <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.taskLink}>
-                      🔗 {link.label || link.url}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-            {task.attachments?.length > 0 && (
-              <div className={styles.taskExtras}>
-                <span className={styles.taskExtrasLabel}>Файли</span>
-                <div className={styles.taskFileList}>
-                  {task.attachments.map((att) => (
-                    <a key={att.id} href={att.file} target="_blank" rel="noopener noreferrer" className={styles.taskFile}>
-                      {fileIcon(att.name)} {att.name}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {showConfirm && (
-        <ConfirmDeleteModal
-          icon="📋"
-          title="Видалити завдання?"
-          description={<>Завдання <strong>«{task.title}»</strong> буде видалено разом з усіма вкладеннями. Цю дію не можна скасувати.</>}
-          confirmLabel="Видалити завдання"
-          onConfirm={handleDelete}
-          onCancel={() => setShowConfirm(false)}
-          loading={deleting}
-        />
-      )}
-    </>
   );
 }
 
@@ -442,7 +869,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
 
 const EMPTY_ROUND_FORM = { title: "", description: "", start_date: "", end_date: "" };
 
-export default function RoundsTab({ rounds: initialRounds, loading, tournamentId, onRoundCreated, readOnly = false }) {
+export default function RoundsTab({ rounds: initialRounds, loading, tournamentId, onRoundCreated, readOnly = false, myRole }) {
   const [rounds,        setRounds]        = useState(initialRounds);
   const [openRound,     setOpenRound]     = useState(null);
   const [activeSection, setActiveSection] = useState({});
@@ -613,22 +1040,22 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                   <div className={styles.roundHeaderRight}>
                     <span className={styles.roundStatus} style={getRoundStatusStyle(roundStatus(round))}>{roundStatus(round)}</span>
                     {!readOnly && (
-                    <button
-                      className={styles.roundActionBtn}
-                      onClick={(e) => { e.stopPropagation(); setEditingRound(isEditing ? null : round.id); setOpenRound(null); }}
-                      title="Редагувати раунд"
-                    >
-                      ✏️
-                    </button>
+                      <button
+                        className={styles.roundActionBtn}
+                        onClick={(e) => { e.stopPropagation(); setEditingRound(isEditing ? null : round.id); setOpenRound(null); }}
+                        title="Редагувати раунд"
+                      >
+                        ✏️
+                      </button>
                     )}
                     {!readOnly && (
-                    <button
-                      className={`${styles.roundActionBtn} ${styles.roundActionBtnDanger}`}
-                      onClick={(e) => { e.stopPropagation(); setDeleteRound(round); }}
-                      title="Видалити раунд"
-                    >
-                      🗑️
-                    </button>
+                      <button
+                        className={`${styles.roundActionBtn} ${styles.roundActionBtnDanger}`}
+                        onClick={(e) => { e.stopPropagation(); setDeleteRound(round); }}
+                        title="Видалити раунд"
+                      >
+                        🗑️
+                      </button>
                     )}
                     {!isEditing && (
                       <span className={styles.roundChevron}>{isOpen ? "▲" : "▼"}</span>
@@ -677,16 +1104,22 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                       </div>
                     )}
 
+                    {/* Вкладки раунду: Завдання / Всі здачі (тільки для власника/журі) */}
                     <div className={styles.roundTabs}>
-                      {["tasks", "submissions"].map((s) => (
+                      <button
+                        className={`${styles.roundTab} ${section === "tasks" ? styles.roundTabActive : ""}`}
+                        onClick={() => setSection(round.id, "tasks")}
+                      >
+                        Завдання ({(round.tasks || []).length})
+                      </button>
+                      {!readOnly && (
                         <button
-                          key={s}
-                          className={`${styles.roundTab} ${section === s ? styles.roundTabActive : ""}`}
-                          onClick={() => setSection(round.id, s)}
+                          className={`${styles.roundTab} ${section === "allSubmissions" ? styles.roundTabActive : ""}`}
+                          onClick={() => setSection(round.id, "allSubmissions")}
                         >
-                          {s === "tasks" ? `Завдання (${(round.tasks || []).length})` : "Здані роботи"}
+                          📋 Усі здачі
                         </button>
-                      ))}
+                      )}
                     </div>
 
                     {section === "tasks" && (
@@ -702,6 +1135,7 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                             roundId={round.id}
                             onDeleted={(taskId) => handleTaskDeleted(round.id, taskId)}
                             readOnly={readOnly}
+                            myRole={myRole}
                           />
                         ))}
                         {!readOnly && (showTaskForm === round.id ? (
@@ -719,23 +1153,25 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                       </div>
                     )}
 
-                    {section === "submissions" && (
-                      <div className={styles.submissionList}>
-                        {(round.submissions || []).length === 0
-                          ? <p className={styles.empty}>Жодних здач ще немає.</p>
-                          : round.submissions.map((sub, i) => (
-                            <div key={i} className={styles.submissionCard}>
-                              <div className={styles.submissionInfo}>
-                                <span className={styles.submissionTeam}>{sub.team}</span>
-                                <span className={styles.submissionFile}>📎 {sub.file}</span>
-                                <span className={styles.submissionDate}>{sub.submittedAt}</span>
+                    {/* Зведений список усіх здач по всіх завданнях раунду — для власника/журі */}
+                    {section === "allSubmissions" && !readOnly && (
+                      <div className={styles.taskList}>
+                        {(round.tasks || []).length === 0 ? (
+                          <p className={styles.empty}>У цьому раунді немає завдань.</p>
+                        ) : (
+                          (round.tasks || []).map((task) => (
+                            <div key={task.id} className={styles.taskSubmissionsBlock}>
+                              <div className={styles.taskSubmissionsBlockTitle}>
+                                📋 {task.title}
                               </div>
-                              <span className={`${styles.submissionStatus} ${sub.status === "Перевірено" ? styles.submissionStatusDone : ""}`}>
-                                {sub.status}
-                              </span>
+                              <AllSubmissionsPanel
+                                taskId={task.id}
+                                roundId={round.id}
+                                tournamentId={tournamentId}
+                              />
                             </div>
                           ))
-                        }
+                        )}
                       </div>
                     )}
                   </div>

@@ -3,16 +3,22 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import ValidationError, PermissionDenied
 
-from .models import Tournament, TournamentMember, Round, RoundLink, RoundAttachment, Task, TaskLink, TaskAttachment
-from .models import generate_invite_pin
+from .models import (
+    Tournament, TournamentMember,
+    Round, RoundLink, RoundAttachment,
+    Task, TaskLink, TaskAttachment,
+    Submission, SubmissionLink, SubmissionAttachment,
+    generate_invite_pin,
+)
 from .serializers import (
     TournamentSerializer, TournamentMemberSerializer, JoinByTokenSerializer,
-    RoundSerializer,
-    RoundLinkSerializer, RoundAttachmentSerializer,
+    RoundSerializer, RoundLinkSerializer, RoundAttachmentSerializer,
     TaskSerializer, TaskLinkSerializer, TaskAttachmentSerializer,
+    SubmissionSerializer, SubmissionLinkSerializer, SubmissionAttachmentSerializer,
 )
-from .permissions import IsTournamentOwner, IsTournamentMemberOrOwner
+from .permissions import IsTournamentOwner, IsTournamentMemberOrOwner, IsTournamentParticipant
 
 
 # ── Tournament views ──────────────────────────────────────────────────────────
@@ -56,10 +62,6 @@ class MyTournamentRoleView(APIView):
 # ── Invite / Join views ───────────────────────────────────────────────────────
 
 class TournamentInviteLinkView(APIView):
-    """
-    GET /api/tournaments/{tournament_pk}/invite-link/
-    Повертає invite_url і invite_pin (тільки власник).
-    """
     permission_classes = [IsAuthenticated, IsTournamentOwner]
 
     def get(self, request, tournament_pk):
@@ -76,11 +78,6 @@ class TournamentInviteLinkView(APIView):
 
 
 class RegeneratePinView(APIView):
-    """
-    POST /api/tournaments/{tournament_pk}/regenerate-pin/
-    Генерує новий PIN і зберігає його. Тільки власник.
-    Повертає { "invite_pin": "xxxxxx" }.
-    """
     permission_classes = [IsAuthenticated, IsTournamentOwner]
 
     def post(self, request, tournament_pk):
@@ -96,10 +93,6 @@ class RegeneratePinView(APIView):
 
 
 class VerifyInvitePinView(APIView):
-    """
-    POST /api/tournaments/join/{token}/verify-pin/
-    Публічний — перевіряє PIN без авторизації.
-    """
     permission_classes = []
 
     def post(self, request, token):
@@ -333,3 +326,113 @@ class TaskAttachmentDeleteView(generics.DestroyAPIView):
 
     def get_queryset(self):
         return TaskAttachment.objects.filter(task_id=self.kwargs['task_pk'])
+
+
+# ── Submissions ───────────────────────────────────────────────────────────────
+
+def _is_owner_or_staff(request, tournament_pk):
+    """Повертає True якщо юзер є власником турніру або має роль admin/jury."""
+    if request.user.role in ('admin', 'jury'):
+        return True
+    membership = TournamentMember.objects.filter(
+        tournament_id=tournament_pk,
+        user=request.user,
+    ).first()
+    return membership and membership.role == 'owner'
+
+
+class SubmissionListCreateView(generics.ListCreateAPIView):
+    """
+    GET  — учасник бачить тільки свою здачу; власник/журі/адмін — усі.
+    POST — учасник турніру здає роботу (одна здача на завдання).
+    """
+    serializer_class   = SubmissionSerializer
+    permission_classes = [IsAuthenticated, IsTournamentParticipant]
+
+    def get_queryset(self):
+        base = (
+            Submission.objects
+            .filter(task_id=self.kwargs['task_pk'])
+            .select_related('participant')
+            .prefetch_related('links', 'attachments')
+        )
+        if _is_owner_or_staff(self.request, self.kwargs['tournament_pk']):
+            return base
+        return base.filter(participant=self.request.user)
+
+    def perform_create(self, serializer):
+        task = Task.objects.get(pk=self.kwargs['task_pk'])
+        if Submission.objects.filter(task=task, participant=self.request.user).exists():
+            raise ValidationError("Ви вже здали роботу по цьому завданню.")
+        serializer.save(task=task, participant=self.request.user)
+
+
+class SubmissionDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    GET    — власник/журі/адмін або сам учасник.
+    PATCH  — тільки учасник (автор здачі).
+    DELETE — тільки учасник (автор здачі).
+    """
+    serializer_class   = SubmissionSerializer
+    permission_classes = [IsAuthenticated, IsTournamentParticipant]
+
+    def get_queryset(self):
+        return Submission.objects.filter(task_id=self.kwargs['task_pk'])
+
+    def get_object(self):
+        obj = super().get_object()
+        if self.request.method in ('PATCH', 'PUT', 'DELETE'):
+            if obj.participant != self.request.user:
+                raise PermissionDenied("Ви можете редагувати лише свою здачу.")
+        return obj
+
+
+class SubmissionLinkCreateView(generics.CreateAPIView):
+    serializer_class   = SubmissionLinkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        submission = Submission.objects.get(pk=self.kwargs['submission_pk'])
+        if submission.participant != self.request.user:
+            raise PermissionDenied("Ви можете редагувати лише свою здачу.")
+        serializer.save(submission=submission)
+
+
+class SubmissionLinkDeleteView(generics.DestroyAPIView):
+    serializer_class   = SubmissionLinkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return SubmissionLink.objects.filter(submission_id=self.kwargs['submission_pk'])
+
+    def get_object(self):
+        obj = super().get_object()
+        if obj.submission.participant != self.request.user:
+            raise PermissionDenied("Ви можете редагувати лише свою здачу.")
+        return obj
+
+
+class SubmissionAttachmentCreateView(generics.CreateAPIView):
+    serializer_class   = SubmissionAttachmentSerializer
+    parser_classes     = [MultiPartParser, FormParser]
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        submission = Submission.objects.get(pk=self.kwargs['submission_pk'])
+        if submission.participant != self.request.user:
+            raise PermissionDenied("Ви можете редагувати лише свою здачу.")
+        serializer.save(submission=submission)
+
+
+class SubmissionAttachmentDeleteView(generics.DestroyAPIView):
+    serializer_class   = SubmissionAttachmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return SubmissionAttachment.objects.filter(submission_id=self.kwargs['submission_pk'])
+
+    def get_object(self):
+        obj = super().get_object()
+        if obj.submission.participant != self.request.user:
+            raise PermissionDenied("Ви можете редагувати лише свою здачу.")
+        return obj

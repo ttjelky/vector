@@ -1,0 +1,12 @@
+// Додай цей імпорт у App.jsx:
+import JoinTournamentPage from "./assets/pages/JoinTournamentPage";
+
+// І цей маршрут у <Routes>:
+// <Route path="/join/:token" element={<JoinTournamentPage />} />
+//
+// Приклад як має виглядати блок Routes (фрагмент):
+//
+// <Routes>
+//   ...твої існуючі маршрути...
+//   <Route path="/join/:token" element={<JoinTournamentPage />} />
+// </Routes>

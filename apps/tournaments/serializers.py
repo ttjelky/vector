@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from .models import Tournament, TournamentMember, Round, RoundLink, RoundAttachment, Task, TaskLink, TaskAttachment
+from .models import (
+    Tournament, TournamentMember,
+    Round, RoundLink, RoundAttachment,
+    Task, TaskLink, TaskAttachment,
+    Submission, SubmissionLink, SubmissionAttachment,
+)
 
 
 class TournamentSerializer(serializers.ModelSerializer):
@@ -8,7 +13,6 @@ class TournamentSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
-    # Тільки для читання — повертає invite_token щоб фронт міг будувати посилання
     invite_token = serializers.UUIDField(read_only=True)
 
     class Meta:
@@ -19,10 +23,9 @@ class TournamentSerializer(serializers.ModelSerializer):
 # ── TournamentMember serializers ──────────────────────────────────────────────
 
 class TournamentMemberSerializer(serializers.ModelSerializer):
-    """Серіалайзер для відображення учасників турніру."""
     username   = serializers.CharField(source='user.username', read_only=True)
-    email      = serializers.EmailField(source='user.email', read_only=True)
-    user_role  = serializers.CharField(source='user.role', read_only=True)  # глобальна роль (admin/team/jury)
+    email      = serializers.EmailField(source='user.email',   read_only=True)
+    user_role  = serializers.CharField(source='user.role',     read_only=True)
 
     class Meta:
         model  = TournamentMember
@@ -31,7 +34,6 @@ class TournamentMemberSerializer(serializers.ModelSerializer):
 
 
 class JoinByTokenSerializer(serializers.Serializer):
-    """Серіалайзер для приєднання до турніру за токеном."""
     token = serializers.UUIDField()
 
 
@@ -92,3 +94,40 @@ class RoundSerializer(serializers.ModelSerializer):
             'tasks', 'links', 'attachments',
         ]
         read_only_fields = ['tournament', 'created_at']
+
+
+# ── Submission serializers ────────────────────────────────────────────────────
+
+class SubmissionLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = SubmissionLink
+        fields = ['id', 'label', 'url']
+
+
+class SubmissionAttachmentSerializer(serializers.ModelSerializer):
+    file = serializers.FileField(use_url=True)
+
+    class Meta:
+        model  = SubmissionAttachment
+        fields = ['id', 'file', 'name', 'created_at']
+        read_only_fields = ['name', 'created_at']
+
+
+class SubmissionSerializer(serializers.ModelSerializer):
+    links       = SubmissionLinkSerializer(many=True, read_only=True)
+    attachments = SubmissionAttachmentSerializer(many=True, read_only=True)
+
+    participant_id       = serializers.IntegerField(source='participant.id',       read_only=True)
+    participant_username = serializers.CharField(source='participant.username',    read_only=True)
+    participant_email    = serializers.EmailField(source='participant.email',      read_only=True)
+
+    class Meta:
+        model  = Submission
+        fields = [
+            'id', 'task',
+            'participant_id', 'participant_username', 'participant_email',
+            'text',
+            'submitted_at', 'updated_at',
+            'links', 'attachments',
+        ]
+        read_only_fields = ['task', 'submitted_at', 'updated_at']

@@ -173,3 +173,64 @@ class TaskAttachment(models.Model):
         if not self.name and self.file:
             self.name = self.file.name.split("/")[-1]
         super().save(*args, **kwargs)
+
+
+# ── Submission ────────────────────────────────────────────────────────────────
+
+class Submission(models.Model):
+    """Здача роботи учасником по конкретному завданню."""
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        related_name="submissions",
+        verbose_name="Завдання",
+    )
+    participant = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name="submissions",
+        verbose_name="Учасник",
+    )
+    text         = models.TextField(null=True, blank=True, verbose_name="Текст відповіді")
+    submitted_at = models.DateTimeField(auto_now_add=True, verbose_name="Час здачі")
+    updated_at   = models.DateTimeField(auto_now=True,     verbose_name="Час оновлення")
+
+    class Meta:
+        unique_together = ('task', 'participant')
+        ordering = ['-submitted_at']
+        verbose_name = "Здача роботи"
+        verbose_name_plural = "Здачі робіт"
+
+    def __str__(self):
+        return f"{self.participant.username} → {self.task.title}"
+
+
+class SubmissionLink(models.Model):
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name="links")
+    label      = models.CharField(max_length=255, blank=True, verbose_name="Підпис")
+    url        = models.URLField(max_length=2048, verbose_name="URL")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.submission} — {self.label or self.url}"
+
+
+class SubmissionAttachment(models.Model):
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name="attachments")
+    file       = models.FileField(upload_to="submissions/attachments/", verbose_name="Файл")
+    name       = models.CharField(max_length=255, blank=True, verbose_name="Назва файлу")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def save(self, *args, **kwargs):
+        if not self.name and self.file:
+            self.name = self.file.name.split("/")[-1]
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.submission} — {self.name}"

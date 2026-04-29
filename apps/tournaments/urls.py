@@ -11,6 +11,9 @@ from .views import (
     TaskListCreateView, TaskDetailView,
     TaskLinkListCreateView, TaskLinkDeleteView,
     TaskAttachmentListCreateView, TaskAttachmentDeleteView,
+    SubmissionListCreateView, SubmissionDetailView,
+    SubmissionLinkCreateView, SubmissionLinkDeleteView,
+    SubmissionAttachmentCreateView, SubmissionAttachmentDeleteView,
 )
 
 urlpatterns = [
@@ -20,7 +23,7 @@ urlpatterns = [
 
     # ── Invite & Join ──────────────────────────────────────────────────────────
     path('<int:tournament_pk>/invite-link/', TournamentInviteLinkView.as_view(), name='tournament-invite-link'),
-    path('<int:tournament_pk>/regenerate-pin/', RegeneratePinView.as_view(), name='tournament-regenerate-pin'),  # ← новий
+    path('<int:tournament_pk>/regenerate-pin/', RegeneratePinView.as_view(), name='tournament-regenerate-pin'),
     path('join/', JoinByTokenView.as_view(), name='tournament-join'),
     path('join/<uuid:token>/preview/', TournamentPreviewByTokenView.as_view(), name='tournament-join-preview'),
     path('join/<uuid:token>/verify-pin/', VerifyInvitePinView.as_view(), name='tournament-verify-pin'),
@@ -55,4 +58,16 @@ urlpatterns = [
     # ── Task attachments ──────────────────────────────────────────────────────
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/attachments/', TaskAttachmentListCreateView.as_view(), name='task-attachment-list-create'),
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/attachments/<int:pk>/', TaskAttachmentDeleteView.as_view(), name='task-attachment-delete'),
+
+    # ── Submissions ───────────────────────────────────────────────────────────
+    path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/', SubmissionListCreateView.as_view(), name='submission-list-create'),
+    path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:pk>/', SubmissionDetailView.as_view(), name='submission-detail'),
+
+    # ── Submission links ──────────────────────────────────────────────────────
+    path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/links/', SubmissionLinkCreateView.as_view(), name='submission-link-create'),
+    path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/links/<int:pk>/', SubmissionLinkDeleteView.as_view(), name='submission-link-delete'),
+
+    # ── Submission attachments ────────────────────────────────────────────────
+    path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/attachments/', SubmissionAttachmentCreateView.as_view(), name='submission-attachment-create'),
+    path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/attachments/<int:pk>/', SubmissionAttachmentDeleteView.as_view(), name='submission-attachment-delete'),
 ]

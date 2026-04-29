@@ -58,3 +58,25 @@ class IsTournamentMemberOrOwner(BasePermission):
             user=request.user,
             role='owner',
         ).exists()
+
+
+class IsTournamentParticipant(BasePermission):
+    """
+    Дозволяє будь-який метод (GET, POST, PATCH, DELETE) будь-якому
+    учаснику турніру — і власнику, і participant-у.
+    Використовується для submissions: учасник здає роботу (POST),
+    власник/журі переглядають (GET).
+    """
+    message = "Ви не є учасником цього турніру."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        tournament_id = get_tournament_id(view)
+        if not tournament_id:
+            return False
+
+        return TournamentMember.objects.filter(
+            tournament_id=tournament_id,
+            user=request.user,
+        ).exists()
