@@ -2,20 +2,22 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { TabsProvider } from "./TabsContext";
 
 // Pages
-import Landing            from "./assets/pages/Landing";
-import AdminDashboard     from "./assets/pages/AdminDashboard";
+import Landing              from "./assets/pages/Landing";
+import AdminDashboard       from "./assets/pages/AdminDashboard";
 import ParticipantDashboard from "./assets/pages/ParticipantDashboard";
-import JuryDashboard      from "./assets/pages/JuryDashboard";
-import Help               from "./assets/pages/Help";
-import Profile            from "./assets/pages/Profile";
-import Settings           from "./assets/pages/Settings";
-import Works              from "./assets/pages/Works";
-import Tournaments        from "./assets/pages/Tournaments";
-import Stats              from "./assets/pages/Stats";
-import ResetPassword      from "./assets/pages/ResetPassword";
-import TournamentPage     from "./assets/pages/TournamentPage";
-import JoinTournamentPage from "./assets/pages/JoinTournamentPage";
-import ProtectedRoute     from "./assets/components/ProtectedRoute";
+import AdminTournaments     from "./assets/pages/AdminTournaments";
+import ParticipantTournaments from "./assets/pages/ParticipantTournaments";
+import JuryDashboard        from "./assets/pages/JuryDashboard";
+import Help                 from "./assets/pages/Help";
+import Profile              from "./assets/pages/Profile";
+import Settings             from "./assets/pages/Settings";
+import Works                from "./assets/pages/Works";
+import Tournaments          from "./assets/pages/Tournaments";
+import Stats                from "./assets/pages/Stats";
+import ResetPassword        from "./assets/pages/ResetPassword";
+import TournamentPage       from "./assets/pages/TournamentPage";
+import JoinTournamentPage   from "./assets/pages/JoinTournamentPage";
+import ProtectedRoute       from "./assets/components/ProtectedRoute";
 
 const App = () => (
   <TabsProvider>
@@ -25,12 +27,7 @@ const App = () => (
         {/* ── Публічні ──────────────────────────────────────────── */}
         <Route path="/"               element={<Landing />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-
-        {/*
-          /join/:token — публічний: неавторизований користувач бачить
-          сторінку, вводить PIN, потім логіниться всередині компонента.
-        */}
-        <Route path="/join/:token" element={<JoinTournamentPage />} />
+        <Route path="/join/:token"    element={<JoinTournamentPage />} />
 
         {/* ── Адмін ─────────────────────────────────────────────── */}
         <Route
@@ -38,6 +35,15 @@ const App = () => (
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/tournaments"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminTournaments />
             </ProtectedRoute>
           }
         />
@@ -71,7 +77,20 @@ const App = () => (
           }
         />
 
+        <Route
+          path="/participant/tournaments"
+          element={
+            <ProtectedRoute allowedRoles={["participant"]}>
+              <ParticipantTournaments />
+            </ProtectedRoute>
+          }
+        />
+
         {/* ── Спільні (будь-яка авторизована роль) ──────────────── */}
+        {/*
+          /tournaments — універсальний маршрут: Tournaments.jsx сам визначає
+          який компонент рендерити на основі ролі з localStorage.
+        */}
         <Route
           path="/tournaments"
           element={

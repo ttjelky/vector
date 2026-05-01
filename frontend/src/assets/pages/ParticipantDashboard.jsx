@@ -1,61 +1,90 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useTabs } from "../../TabsContext";
-import API from "../../api";
+import React from "react";
 import NavBar from "../components/NavBar";
-import TournamentCard from "../components/TournamentCard";
-import JoinByCodeModal from "../components/JoinByCodeModal";
 import styles from "../components/styles/admindashboard.module.css";
 
+const placeholders = [
+  {
+    icon: "🏆",
+    title: "Мої досягнення",
+    description: "Відзнаки та нагороди за участь у турнірах — у розробці.",
+  },
+  {
+    icon: "📁",
+    title: "Мої роботи",
+    description: "Швидкий доступ до завантажених та оцінених робіт — у розробці.",
+  },
+  {
+    icon: "📅",
+    title: "Розклад",
+    description: "Найближчі події та дедлайни турнірів — у розробці.",
+  },
+  {
+    icon: "💬",
+    title: "Повідомлення від журі",
+    description: "Коментарі та фідбек до ваших робіт — у розробці.",
+  },
+];
+
 const ParticipantDashboard = () => {
-  const navigate = useNavigate();
-  const { addTab } = useTabs();
-  const [tournaments, setTournaments] = useState([]);
-  const [showJoin, setShowJoin] = useState(false);
-
-  useEffect(() => {
-    API.get("/tournaments/")
-      .then((res) => setTournaments(res.data))
-      .catch((err) => console.error("Помилка завантаження турнірів:", err));
-  }, []);
-
   return (
     <NavBar>
       <div className={styles.contentArea}>
-        <div className={styles.tournamentGrid}>
-          {tournaments.map((tournament) => (
+        <div style={{ marginBottom: "2rem" }}>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "0.5rem" }}>
+            Особистий кабінет учасника
+          </h2>
+          <p style={{ color: "var(--color-text-muted, #888)", fontSize: "0.95rem" }}>
+            Цей розділ зараз у розробці. Нижче — майбутні блоки функціональності.
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+            gap: "1.25rem",
+          }}
+        >
+          {placeholders.map((item) => (
             <div
-              key={tournament.id}
-              className={styles.tournamentCard}
-              onClick={() => {
-                addTab({ id: tournament.id, name: tournament.name });
-                navigate(`/tournament/${tournament.id}`);
+              key={item.title}
+              style={{
+                border: "2px dashed var(--color-border, #d1d5db)",
+                borderRadius: "12px",
+                padding: "1.5rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.75rem",
+                opacity: 0.7,
+                background: "var(--color-surface, #f9fafb)",
               }}
             >
-              <TournamentCard
-                name={tournament.name}
-                info={tournament.description}
-                date={tournament.start_date}
-                accentColor={tournament.accent_color}
-                imageMode={tournament.image_mode}
-                stockImage={tournament.stock_image}
-                customImage={tournament.custom_image ?? null}
-              />
+              <span style={{ fontSize: "2rem" }}>{item.icon}</span>
+              <strong style={{ fontSize: "1rem" }}>{item.title}</strong>
+              <p style={{ fontSize: "0.85rem", color: "var(--color-text-muted, #888)", margin: 0 }}>
+                {item.description}
+              </p>
+              <span
+                style={{
+                  display: "inline-block",
+                  marginTop: "auto",
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  color: "var(--color-text-muted, #aaa)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  border: "1px solid currentColor",
+                  borderRadius: "4px",
+                  padding: "2px 8px",
+                  width: "fit-content",
+                }}
+              >
+                Незабаром
+              </span>
             </div>
           ))}
         </div>
-
-        <div className={styles.createBtnContainer}>
-          <button
-            className={styles.createBtn}
-            onClick={() => setShowJoin(true)}
-          >
-            + Приєднатися до турніру
-          </button>
-        </div>
       </div>
-
-      {showJoin && <JoinByCodeModal onClose={() => setShowJoin(false)} />}
     </NavBar>
   );
 };

@@ -1,10 +1,14 @@
 import React from "react";
-import NavBar from "../components/NavBar";
+import AdminTournaments from "./AdminTournaments";
+import ParticipantTournaments from "./ParticipantTournaments";
 
 const Tournaments = () => {
-    return(
-        <NavBar />
-    )
-}
+  const role = localStorage.getItem("userRole") ?? "participant";
 
-export default Tournaments
+  if (role === "admin") return <AdminTournaments />;
+  if (role === "participant") return <ParticipantTournaments />;
+
+  return <ParticipantTournaments />;
+};
+
+export default Tournaments;

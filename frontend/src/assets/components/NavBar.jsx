@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, NavLink } from 'react-router-dom';
-import { useTabs } from "../../TabsContext";
-import { getTabsForRole, COMMON_TABS } from "../../navConfig";
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, NavLink, useParams } from 'react-router-dom';
+import { useTabs } from '../../TabsContext';
+import { getTabsForRole, COMMON_TABS } from '../../navConfig';
 import styles from './styles/NavBar.module.css';
 
-// Імпорти іконок
-import HomeIcon       from './static/icons/Home.svg?react';
+import HomeIcon        from './static/icons/Home.svg?react';
 import TournamentsIcon from './static/icons/Tournaments.svg?react';
-import WorksIcon      from './static/icons/Works.svg?react';
-import StatsIcon      from './static/icons/Stats.svg?react';
-import SettingsIcon   from './static/icons/Settings.svg?react';
-import ProfileIcon    from './static/icons/Profile.svg?react';
-import InfoIcon       from './static/icons/Info.svg?react';
-import LogoutIcon     from './static/icons/Logout.svg?react';
-import BellIcon       from './static/icons/Bell.svg?react';
-import Logo           from './static/VectorLogo.svg';
-import cross          from './static/icons/cross.svg';
+import WorksIcon       from './static/icons/Works.svg?react';
+import StatsIcon       from './static/icons/Stats.svg?react';
+import SettingsIcon    from './static/icons/Settings.svg?react';
+import ProfileIcon     from './static/icons/Profile.svg?react';
+import InfoIcon        from './static/icons/Info.svg?react';
+import LogoutIcon      from './static/icons/Logout.svg?react';
+import BellIcon        from './static/icons/Bell.svg?react';
+import Logo            from './static/VectorLogo.svg';
+import cross           from './static/icons/cross.svg';
 
 const ICON_MAP = {
   home:        HomeIcon,
@@ -32,6 +31,7 @@ const renderIcon = (key) => {
   return <Icon className={styles.sidebarIcon} />;
 };
 
+/* ─── Один пункт меню ─── */
 const NavItem = ({ tabKey, label, path, children }) => (
   <li className={styles.sidebarEl}>
     <NavLink
@@ -45,12 +45,54 @@ const NavItem = ({ tabKey, label, path, children }) => (
   </li>
 );
 
+/* ─── Вкладка турніру з анімацією ─── */
+const TournamentTab = ({ tab, onClose }) => {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    // Невелика затримка, щоб CSS-transition спрацював
+    const id = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  const handleClose = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setVisible(false);
+    // Чекаємо завершення анімації зникнення перед видаленням зі стану
+    setTimeout(() => onClose(tab.id), 200);
+  };
+
+  return (
+    <div className={`${styles.nestedTournament} ${visible ? styles.tabVisible : styles.tabHidden}`}>
+      <NavLink
+        to={`/tournament/${tab.id}`}
+        className={({ isActive }) =>
+          isActive ? styles.activeNestedLink : styles.nestedLink
+        }
+        title={tab.name}
+      >
+        <span className={styles.tabName}>└ {tab.name}</span>
+        <button
+          className={styles.closeIconWrapper}
+          onClick={handleClose}
+          aria-label={`Закрити ${tab.name}`}
+          type="button"
+        >
+          <img src={cross} className={styles.closeIcon} alt="" />
+        </button>
+      </NavLink>
+    </div>
+  );
+};
+
+/* ─── Головний компонент ─── */
 const NavBar = ({ children }) => {
   const { openTabs, closeTab } = useTabs();
   const navigate = useNavigate();
   const [fullUserName, setFullUserName] = useState('');
 
-  const role = localStorage.getItem("userRole") ?? "participant";
+  const role = localStorage.getItem('userRole') ?? 'participant';
   const roleTabs = getTabsForRole(role);
 
   useEffect(() => {
@@ -75,7 +117,11 @@ const NavBar = ({ children }) => {
           <img src={Logo} alt="Vector" className={styles.logo} />
         </div>
         <div className={styles.search}>
-          <input type="search" placeholder="Пошук..." className={styles.searchInput} />
+          <input
+            type="search"
+            placeholder="Пошук..."
+            className={styles.searchInput}
+          />
         </div>
         <div className={styles.navbarUserActions}>
           <span className={styles.userName}>{fullUserName}</span>
@@ -93,29 +139,14 @@ const NavBar = ({ children }) => {
             <ul>
               {roleTabs.map(({ key, label, path }) => (
                 <NavItem key={key} tabKey={key} label={label} path={path}>
-                  {key === 'home' && openTabs.length > 0 && (
+                  {key === 'tournaments' && openTabs.length > 0 && (
                     <div className={styles.openedList}>
                       {openTabs.map((tab) => (
-                        <div key={tab.id} className={styles.nestedTournament}>
-                          <div className={styles.treeLine} />
-                          <NavLink
-                            to={`/tournament/${tab.id}`}
-                            className={({ isActive }) =>
-                              isActive ? styles.activeNestedLink : styles.nestedLink
-                            }
-                          >
-                            <span className={styles.tabName}>└ {tab.name}</span>
-                            <span
-                              className={styles.closeIconWrapper}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                closeTab(tab.id);
-                              }}
-                            >
-                              <img src={cross} className={styles.closeIcon} alt="закрити" />
-                            </span>
-                          </NavLink>
-                        </div>
+                        <TournamentTab
+                          key={tab.id}
+                          tab={tab}
+                          onClose={closeTab}
+                        />
                       ))}
                     </div>
                   )}
@@ -137,7 +168,7 @@ const NavBar = ({ children }) => {
             <button
               onClick={handleLogout}
               className={styles.logoutBtn}
-              style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+              type="button"
             >
               <LogoutIcon className={styles.logoutIcon} />
               <span className={styles.logoutText}>Вийти</span>
@@ -149,7 +180,6 @@ const NavBar = ({ children }) => {
         <main className={styles.contentArea}>
           {children}
         </main>
-
       </div>
     </div>
   );

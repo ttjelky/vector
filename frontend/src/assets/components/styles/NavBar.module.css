@@ -1,8 +1,17 @@
-body, html {
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body,
+html {
   margin: 0;
   padding: 0;
   height: 100%;
 }
+
+/* ─── App shell ─────────────────────────────────────────────── */
 
 .vectorApp {
   display: flex;
@@ -11,6 +20,8 @@ body, html {
   font-family: 'DM Sans', sans-serif;
   overflow: hidden;
 }
+
+/* ─── Top navbar ─────────────────────────────────────────────── */
 
 .topNavbar {
   display: flex;
@@ -21,6 +32,7 @@ body, html {
   background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
   z-index: 100;
+  flex-shrink: 0;
 }
 
 .logo {
@@ -40,7 +52,11 @@ body, html {
   background: #f9fafb;
   font-size: 14px;
   outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.searchInput::placeholder {
+  color: #9ca3af;
 }
 
 .searchInput:hover {
@@ -57,28 +73,38 @@ body, html {
   display: flex;
   align-items: center;
   gap: 16px;
-  line-height: 40px;
-}
-
-.searchInput::placeholder {
-  color: #9ca3af;
-}
-
-.mainWrapper {
-  display: flex;
-  flex: 1;
 }
 
 .userName {
   font-size: 14px;
   font-weight: 500;
   color: #333;
-  margin-right: 15px;
 }
+
+.notificationIcon {
+  position: relative;
+  width: 18px;
+  height: 18px;
+}
+
+/* ─── Main layout ────────────────────────────────────────────── */
+
+.mainWrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.contentArea {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ─── Left sidebar ───────────────────────────────────────────── */
 
 .leftSidebar {
   width: 200px;
-  background-color: white;
+  background-color: #fff;
   border-right: 1px solid #dee2e6;
   padding: 20px;
   display: flex;
@@ -86,47 +112,30 @@ body, html {
   flex-shrink: 0;
 }
 
-.nestedTournament {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding-left: 20px;
-}
-
-.nestedLink {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 4px 8px 4px 15px;
-  color: #888;
-  text-decoration: none;
-  border-radius: 4px;
-}
-
-.tournamentTitle {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
-}
-
-.primaryNav, .secondaryNav {
-  margin-bottom: 20px;
-}
-
-.logoutSection {
-  margin-top: auto;
-}
-
 .leftSidebar ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .leftSidebar li {
   margin-bottom: 5px;
 }
+
+.primaryNav,
+.secondaryNav {
+  margin-bottom: 20px;
+}
+
+.sidebarSectionTitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: gray;
+  margin-bottom: 10px;
+  margin-left: 13px;
+}
+
+/* ─── Sidebar links ──────────────────────────────────────────── */
 
 .leftSidebar a {
   text-decoration: none;
@@ -137,25 +146,71 @@ body, html {
   border-radius: 8px;
 }
 
-.closeIcon {
-  width: 10px;
-  height: 10px;
-  fill: #888;
+.sidebarIcon {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  flex-shrink: 0;
 }
 
-.closeIconWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  margin-left: 10px;
-  border-radius: 50%;
+.sidebarText {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(39, 50, 64, 1);
+}
+
+.inactiveLink {
+  border-radius: 20px !important;
   transition: background-color 0.2s ease;
 }
 
-.closeIconWrapper:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+.inactiveLink:hover {
+  background-color: #f0f0f0;
+}
+
+.activeLink {
+  background-color: #ececec;
+  border-radius: 20px !important;
+}
+
+/* ─── Nested tournament links ────────────────────────────────── */
+
+.nestedTournament {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+}
+
+.nestedLink,
+.activeNestedLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: fit-content;
+  min-width: 0;
+  padding: 5px 10px;
+  margin: 3px 0;
+  gap: 8px;
+  color: #888;
+  text-decoration: none;
+  border-radius: 20px !important;
+  transition: background-color 0.2s ease;
+}
+
+.nestedLink:hover {
+  background-color: #f0f0f0;
+}
+
+.activeNestedLink {
+  background-color: #ececec;
+}
+
+.tournamentTitle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 }
 
 .tabName {
@@ -168,76 +223,68 @@ body, html {
   flex: 1;
 }
 
-.nestedLink:hover {
-  background-color: #f0f0f0;
-  border-radius: 15px;
-  transition-duration: 0.2s;
-}
+.closeIconWrapper {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
 
-.activeNestedLink {
-  background-color: #ececec;
-  border-radius: 15px !important;
-}
-
-.nestedLink, .activeNestedLink {
-  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 6px 10px !important;
-  margin: 3px 0;
-  width: fit-content;
-  min-width: 0;
-  gap: 8px;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
 }
 
-.inactiveLink:hover {
-  background-color: #f0f0f0;
-  border-radius: 15px;
-  transition-duration: 0.2s;
+.closeIconWrapper:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
-
-.activeLink {
-  background-color: #ececec;
-  border-radius: 15px !important;
+.closeIcon {
+  width: 10px;
+  height: 10px;
+  fill: #888;
+  pointer-events: none;
 }
 
-.sidebarText {
-  font-size: 12px;
-  font-weight: 400;
-  color: rgba(39, 50, 64, 1);
-}
-
-.sidebarIcon {
-  width: 18px;
-  height: 18px;
-  margin-right: 12px;
-}
-
-.sidebarSectionTitle {
-  font-size: 14px;
-  font-weight: 400;
-  color: gray;
-  margin-bottom: 10px;
-  margin-left: 13px;
-}
+/* ─── Logout ─────────────────────────────────────────────────── */
 
 .logoutSection {
-  background-color: rgb(255, 229, 230);
-  border-radius: 15px;
-  cursor: pointer;
+  margin-top: auto;
 }
 
-.logoutSection:hover {
+.logoutBtn {
+  /* reset <button> defaults */
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: rgb(255, 229, 230);
+  border-radius: 15px;
+  transition: background-color 0.2s ease;
+}
+
+.logoutBtn:hover {
   background-color: rgb(255, 201, 204);
-  transition-duration: 0.2s;
 }
 
 .logoutIcon {
   width: 18px;
   height: 18px;
   margin-right: 12px;
+  flex-shrink: 0;
   fill: rgb(215, 125, 126);
 }
 
@@ -245,27 +292,4 @@ body, html {
   font-size: 12px;
   font-weight: 400;
   color: rgb(215, 125, 126);
-}
-
-.logoutBtn {
-  display: flex;
-  align-items: center;
-  padding: 10px 20px;
-  border-radius: 15px;
-}
-
-.notificationIcon {
-  position: relative;
-  width: 18px;
-  height: 18px;
-}
-
-.mainWrapper {
-  display: flex;
-  overflow: hidden;
-}
-
-.contentArea {
-  flex: 1;
-  overflow-y: auto;
 }

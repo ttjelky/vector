@@ -9,10 +9,13 @@ import { computeStatus } from "../components/tournamentHelpers";
 import OverviewTab from "../components/OverviewTab";
 import ParticipantsTab from "../components/ParticipantsTab";
 import RoundsTab from "../components/RoundsTab";
+import { useTabs } from "../../TabsContext";
+import useTournamentTabGuard from "../../useTournamentTabGuard";
 
 export default function TournamentPage() {
   const { id }   = useParams();
   const navigate = useNavigate();
+  const { addTab, removeTabById } = useTabs();
 
   const [tournament,    setTournament]    = useState(null);
   const [rounds,        setRounds]        = useState([]);
@@ -22,16 +25,20 @@ export default function TournamentPage() {
   const [showDelete,    setShowDelete]    = useState(false);
   const [deleting,      setDeleting]      = useState(false);
 
-  // Роль поточного юзера в цьому турнірі: "owner" | "participant" | null
   const [myRole,      setMyRole]      = useState(null);
   const [roleLoading, setRoleLoading] = useState(true);
+  const [error,       setError]       = useState(null); // { status: number }
 
   const isOwner = myRole === "owner";
 
   useEffect(() => {
     API.get(`/tournaments/${id}/`)
-      .then(r => setTournament(r.data))
-      .catch(err => console.error(err))
+      .then(r => {
+        setTournament(r.data);
+        // Відкриваємо вкладку в NavBar одразу як отримали дані
+        addTab({ id: r.data.id, name: r.data.name });
+      })
+      .catch(err => setError({ status: err?.response?.status ?? 0 }))
       .finally(() => setLoading(false));
 
     API.get(`/tournaments/${id}/rounds/`)
@@ -41,9 +48,21 @@ export default function TournamentPage() {
 
     API.get(`/tournaments/${id}/my-role/`)
       .then(r => setMyRole(r.data.role))
-      .catch(err => console.error(err))
+      .catch(err => {
+        // 403 = виключено з турніру
+        if (err?.response?.status === 403) setError({ status: 403 });
+        else console.error(err);
+      })
       .finally(() => setRoleLoading(false));
   }, [id]);
+
+  // Автоматично закриває вкладку і редіректить якщо:
+  // - 404: турнір видалено
+  // - 403: користувача виключено
+  useTournamentTabGuard(id, {
+    isDeleted: error?.status === 404,
+    isKicked:  error?.status === 403,
+  });
 
   const handleSave = async (formData) => {
     const r = await API.patch(`/tournaments/${id}/`, formData);
@@ -54,6 +73,8 @@ export default function TournamentPage() {
     setDeleting(true);
     try {
       await API.delete(`/tournaments/${id}/`);
+      // Закриваємо вкладку перед переходом
+      removeTabById(id);
       navigate("/tournaments");
     } catch (err) {
       console.error(err);
