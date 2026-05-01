@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import styles from "./styles/OverviewTab.module.css";
-import { RichTextArea, ImagePicker } from "./CreateTournamentModal";
+import { RichTextArea } from "./CreateTournamentModal";
 import { StatusBadge, InfoRow } from "./TournamentShared";
 import { formatDate, toInputDatetime } from "./tournamentHelpers";
 import { STOCK_IMAGES } from "./TournamentCard";
