@@ -4,12 +4,14 @@ import { useTabs } from "../../TabsContext";
 import API from "../../api";
 import NavBar from "../components/NavBar";
 import TournamentCard from "../components/TournamentCard";
+import JoinByCodeModal from "../components/JoinByCodeModal";
 import styles from "../components/styles/admindashboard.module.css";
 
 const ParticipantDashboard = () => {
   const navigate = useNavigate();
   const { addTab } = useTabs();
   const [tournaments, setTournaments] = useState([]);
+  const [showJoin, setShowJoin] = useState(false);
 
   useEffect(() => {
     API.get("/tournaments/")
@@ -42,7 +44,18 @@ const ParticipantDashboard = () => {
             </div>
           ))}
         </div>
+
+        <div className={styles.createBtnContainer}>
+          <button
+            className={styles.createBtn}
+            onClick={() => setShowJoin(true)}
+          >
+            + Приєднатися до турніру
+          </button>
+        </div>
       </div>
+
+      {showJoin && <JoinByCodeModal onClose={() => setShowJoin(false)} />}
     </NavBar>
   );
 };
