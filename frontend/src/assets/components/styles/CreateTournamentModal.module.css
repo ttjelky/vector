@@ -263,11 +263,11 @@
 }
 
 .sideLabel {
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #b8b8b8;
+  color: #a0a0a0;
 }
 
 /* ═══════════════════════════════════════════
@@ -407,78 +407,127 @@
 }
 
 /* ═══════════════════════════════════════════
-   TYPE CARDS
+   TYPE CARDS — rich side-by-side cards
 ═══════════════════════════════════════════ */
 .typeCards {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
 .typeCard {
   display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 11px;
-  border: 1px solid #ebebeb;
-  border-radius: 9px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding: 0;
+  border: 1.5px solid #ebebeb;
+  border-radius: 14px;
   background: #fafafa;
   cursor: pointer;
-  transition: border-color 0.13s, background 0.13s, box-shadow 0.13s;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s, transform 0.18s;
   text-align: left;
   position: relative;
+  overflow: hidden;
 }
 
 .typeCard:hover {
-  border-color: #d5d5d5;
-  background: #f4f4f4;
+  background: #f5f5f7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.07);
 }
 
 .typeCardActive {
   border-color: #1a1a1a;
   background: #fff;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
 }
 
-.typeIcon {
-  font-size: 17px;
-  line-height: 1;
+.typeIllustration {
+  width: 100%;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f0f0 0%, #e8e8ea 100%);
+  transition: background 0.18s;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
 }
 
+.typeIllustration::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.03) 100%);
+}
+
+.typeCardActive .typeIllustration {
+  background: linear-gradient(135deg, #e8eef5 0%, #dce8f2 100%);
+}
+
+.typeIllustrationSvg {
+  width: 52px;
+  height: 52px;
+  opacity: 0.55;
+  transition: opacity 0.18s, transform 0.18s;
+}
+
+.typeCard:hover,
+.typeCardActive .typeIllustrationSvg {
+  opacity: 0.8;
+  transform: scale(1.02);
+}
+
+.typeCardActive .typeIllustrationSvg {
+  opacity: 1;
+}
+
+/* Text content */
 .typeInfo {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   flex: 1;
   min-width: 0;
+  padding: 9px 11px 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .typeName {
   font-size: 12.5px;
-  font-weight: 600;
-  color: #111;
+  font-weight: 650;
+  color: #1a1a1a;
   line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 .typeDesc {
-  font-size: 10.5px;
+  font-size: 10px;
   color: #aaa;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
+/* Check badge — top-right corner */
 .typeCheck {
-  width: 15px;
-  height: 15px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: #111;
+  background: #1a1a1a;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   opacity: 0;
-  transform: scale(0.4);
-  transition: opacity 0.13s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.3);
+  transition: opacity 0.15s, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 2;
 }
 
 .typeCardActive .typeCheck {
@@ -494,34 +543,85 @@
   fill: none;
 }
 
+/* Hide the old emoji icon span — we use SVG illustrations now */
+.typeIcon { display: none; }
+
+/* ═══════════════════════════════════════════
+   ERROR STATES
+═══════════════════════════════════════════ */
+.fieldError {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #e05252;
+  margin-top: 2px;
+  animation: errorIn 0.2s ease;
+}
+
+.fieldError::before {
+  content: "!";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e05252;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.typeCardsError .typeCards {
+  outline: 1.5px solid rgba(224, 82, 82, 0.4);
+  border-radius: 14px;
+}
+
+@keyframes errorIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ═══════════════════════════════════════════
    FORM FIELDS
 ═══════════════════════════════════════════ */
 .field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
   margin-bottom: 14px;
 }
 
 .label {
-  font-size: 14px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: #3a3a3a;
-  letter-spacing: 0.01em;
+  color: #6b6b6b;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
   display: flex;
   align-items: center;
   gap: 5px;
 }
 
 .optional {
-  font-weight: 400;
-  color: #c8c8c8;
-  font-size: 10px;
-  padding: 1px 6px;
-  background: #f5f5f5;
+  font-weight: 500;
+  color: #b0b0b0;
+  font-size: 9.5px;
+  padding: 2px 7px;
+  background: #f2f2f2;
   border-radius: 999px;
-  letter-spacing: 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.required {
+  color: #e05252;
+  font-size: 14px;
+  line-height: 1;
+  margin-left: 1px;
 }
 
 .input {
@@ -536,6 +636,12 @@
   background: #fff;
   box-sizing: border-box;
   outline: none;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.inputError {
+  border-color: #e05252 !important;
+  box-shadow: 0 0 0 2px rgba(224, 82, 82, 0.15) !important;
 }
 
 .input::-webkit-datetime-edit {
@@ -604,46 +710,73 @@
 }
 
 /* ═══════════════════════════════════════════
-   RICH TEXT TOOLBAR
+   RICH TEXT TOOLBAR — integrated header bar
 ═══════════════════════════════════════════ */
+.richEditor {
+  border: 0.5px solid rgba(0, 0, 0, 0.2);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.richEditor:focus-within {
+  box-shadow: 0 0 0 2px #378ADD55;
+  border-color: #378ADD;
+}
+
 .toolbar {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 3px 4px;
-  background: #fafafa;
-  border: 1px solid #f5f5f5;
-  border-radius: 20px;
+  gap: 1px;
+  padding: 5px 8px;
+  background: #f7f7f8;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.09);
   width: 100%;
-  margin-bottom: 5px;
+  box-sizing: border-box;
 }
 
 .tbBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 32px;
-  padding: 0 6px;
+  height: 26px;
+  padding: 0 7px;
   background: transparent;
   border: none;
-  border-radius: 8px;
-  color: #777;
+  border-radius: 6px;
+  color: #666;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.1s, color 0.1s;
   font-family: inherit;
   white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
-.tbBtn:hover { background: #e6e6e6; color: #111; }
+.tbBtn:hover {
+  background: rgba(0,0,0,0.07);
+  color: #111;
+}
 
 .tbDivider {
   width: 1px;
-  height: 13px;
-  background: #e2e2e2;
-  margin: 0 2px;
+  height: 14px;
+  background: rgba(0,0,0,0.1);
+  margin: 0 3px;
   flex-shrink: 0;
+}
+
+/* textarea inside richEditor — no own border */
+.richEditor .textarea {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ═══════════════════════════════════════════
@@ -657,11 +790,11 @@
 }
 
 .sectionTitle {
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #c0c0c0;
+  color: #a8a8a8;
   white-space: nowrap;
 }
 
@@ -739,7 +872,7 @@
 .footerActions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   pointer-events: auto;
 }
 
@@ -752,12 +885,12 @@
   cursor: pointer;
   border: 1px solid lightgray;
   color: #999;
-  transition: color 0.13s, background 0.13s;
+  transition-duration: 0.13s;
 }
 
 .btnCancel:hover {
-  color: #333;
-  background: #d4d4d4;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1), 0 5px 14px rgba(0,0,0,0.1);
 }
 
 .btnCreate {

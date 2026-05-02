@@ -3,8 +3,8 @@ import styles from "./styles/CreateTournamentModal.module.css";
 import cross from "./static/icons/cross.svg";
 import api from "../../api";
 import TournamentCard, { STOCK_IMAGES } from "./TournamentCard";
-
-// ── Constants ────────────────────────────────────────────────────────────────
+import User from "./static/icons/Profile.svg?react"
+import Users from "./static/icons/Users.svg?react"
 
 const ACCENT_COLORS = ["#82b3e4", "#4ad44c", "#ca7979", "#c76db0", "#8e5edf", "#eccb5c"];
 
@@ -12,18 +12,20 @@ const TOURNAMENT_TYPES = [
   {
     value: "solo",
     label: "Одиночний",
-    icon: "🧍",
     desc: "Гравці змагаються самостійно",
+    illustration: (
+      <User className={styles.typeIllustrationSvg}/>
+    ),
   },
   {
     value: "team",
     label: "Командний",
-    icon: "👥",
     desc: "Учасники об'єднані в команди",
+    illustration: (
+      <Users className={styles.typeIllustrationSvg}/>
+    ),
   },
 ];
-
-// ── RichTextArea ─────────────────────────────────────────────────────────────
 
 export function RichTextArea({ id, rows = 4, placeholder, value, onChange }) {
   const ref = useRef(null);
@@ -35,7 +37,7 @@ export function RichTextArea({ id, rows = 4, placeholder, value, onChange }) {
   };
 
   return (
-    <div>
+    <div className={styles.richEditor}>
       <div className={styles.toolbar}>
         <button type="button" className={styles.tbBtn} onClick={() => document.execCommand("bold")}><b>B</b></button>
         <button type="button" className={styles.tbBtn} onClick={() => document.execCommand("italic")}><i>I</i></button>
@@ -64,6 +66,59 @@ export function RichTextArea({ id, rows = 4, placeholder, value, onChange }) {
   );
 }
 
+// ── ImagePicker ──────────────────────────────────────────────────────────────
+
+export function ImagePicker({
+  imageMode, setImageMode,
+  stockImage, setStockImage,
+  customImage, onCustomUpload,
+}) {
+  return (
+    <div className={styles.sideSection}>
+      <span className={styles.sideLabel}>Зображення</span>
+
+      <div className={styles.imgTabs}>
+        {[{ value: "stock", label: "Стокові" }, { value: "custom", label: "Власне" }].map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            className={`${styles.imgTab} ${imageMode === value ? styles.imgTabActive : ""}`}
+            onClick={() => setImageMode(value)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {imageMode === "stock" && (
+        <div className={styles.stockGrid}>
+          {STOCK_IMAGES.map(({ id, gradient }) => (
+            <div
+              key={id}
+              className={`${styles.stockItem} ${stockImage === id ? styles.stockItemActive : ""}`}
+              style={{ background: gradient }}
+              onClick={() => setStockImage(id)}
+            />
+          ))}
+        </div>
+      )}
+
+      {imageMode === "custom" && (
+        <label className={styles.uploadZone}>
+          {customImage
+            ? <img src={customImage} alt="preview" className={styles.uploadPreview} />
+            : <>
+                <span className={styles.uploadIcon}>↑</span>
+                <span className={styles.uploadPrompt}>Натисніть або перетягніть файл</span>
+              </>
+          }
+          <input type="file" accept="image/*" onChange={onCustomUpload} className={styles.fileInputHidden} />
+        </label>
+      )}
+    </div>
+  );
+}
+
 // ── Main Modal ───────────────────────────────────────────────────────────────
 
 export default function CreateTournamentModal({ onClose, onCreate }) {
@@ -88,6 +143,10 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!tournamentType) {
+      document.getElementById("tournamentTypeError")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     const form = e.target;
     const body = new FormData();
 
@@ -99,6 +158,7 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
     body.append("start_date",         startDate);
     body.append("max_teams",          form.maxTeams?.value          ?? "");
     body.append("tournament_type",    tournamentType);
+    body.append("format",             tournamentType);
     body.append("registration_start", form.registrationStart?.value ?? "");
     body.append("registration_end",   form.registrationEnd?.value   ?? "");
 
@@ -146,48 +206,11 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
               </div>
 
               {/* Image picker */}
-              <div className={styles.sideSection}>
-                <span className={styles.sideLabel}>Зображення</span>
-
-                <div className={styles.imgTabs}>
-                  {[{ value: "stock", label: "Стокові" }, { value: "custom", label: "Власне" }].map(({ value, label }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      className={`${styles.imgTab} ${imageMode === value ? styles.imgTabActive : ""}`}
-                      onClick={() => setImageMode(value)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-
-                {imageMode === "stock" && (
-                  <div className={styles.stockGrid}>
-                    {STOCK_IMAGES.map(({ id, gradient }) => (
-                      <div
-                        key={id}
-                        className={`${styles.stockItem} ${stockImage === id ? styles.stockItemActive : ""}`}
-                        style={{ background: gradient }}
-                        onClick={() => setStockImage(id)}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {imageMode === "custom" && (
-                  <label className={styles.uploadZone}>
-                    {customPreview
-                      ? <img src={customPreview} alt="preview" className={styles.uploadPreview} />
-                      : <>
-                          <span className={styles.uploadIcon}>↑</span>
-                          <span className={styles.uploadPrompt}>Натисніть або перетягніть файл</span>
-                        </>
-                    }
-                    <input type="file" accept="image/*" onChange={handleCustomUpload} className={styles.fileInputHidden} />
-                  </label>
-                )}
-              </div>
+              <ImagePicker
+                imageMode={imageMode}       setImageMode={setImageMode}
+                stockImage={stockImage}     setStockImage={setStockImage}
+                customImage={customPreview} onCustomUpload={handleCustomUpload}
+              />
 
               {/* Accent color */}
               <div className={styles.sideSection}>
@@ -249,7 +272,9 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
               </div>
 
               <div className={styles.sideSection}>
-                <span className={styles.label}>Тип турніру</span>
+                <span className={styles.label}>
+                  Тип турніру
+                </span>
                 <div className={styles.typeCards}>
                   {TOURNAMENT_TYPES.map((type) => {
                     const isActive = tournamentType === type.value;
@@ -260,7 +285,9 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                         className={`${styles.typeCard} ${isActive ? styles.typeCardActive : ""}`}
                         onClick={() => setTournamentType(type.value)}
                       >
-                        <span className={styles.typeIcon}>{type.icon}</span>
+                        <div className={styles.typeIllustration}>
+                          {type.illustration}
+                        </div>
                         <span className={styles.typeInfo}>
                           <span className={styles.typeName}>{type.label}</span>
                           <span className={styles.typeDesc}>{type.desc}</span>
@@ -274,6 +301,11 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                     );
                   })}
                 </div>
+                {!tournamentType && (
+                  <p id="tournamentTypeError" className={styles.fieldError}>
+                    Оберіть тип турніру
+                  </p>
+                )}
               </div>
 
               {/* Правила */}

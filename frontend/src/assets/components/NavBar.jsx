@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, NavLink, useParams } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
 import { useTabs } from '../../TabsContext';
 import { getTabsForRole, COMMON_TABS } from '../../navConfig';
 import styles from './styles/NavBar.module.css';
@@ -46,21 +46,25 @@ const NavItem = ({ tabKey, label, path, children }) => (
 );
 
 /* ─── Вкладка турніру з анімацією ─── */
-const TournamentTab = ({ tab, onClose }) => {
-  const [visible, setVisible] = useState(false);
+// isNew=true  → вкладка щойно додана, програємо анімацію появи
+// isNew=false → вкладка вже існувала (навігація між сторінками), одразу visible
+const TournamentTab = ({ tab, onClose, isNew }) => {
+  const [visible, setVisible] = useState(!isNew);
 
   useEffect(() => {
-    // Невелика затримка, щоб CSS-transition спрацював
-    const id = requestAnimationFrame(() => setVisible(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
+    if (!isNew) return;
+    // Подвійний rAF: браузер фіксує initial tabHidden, потім застосовує transition
+    const raf = requestAnimationFrame(() =>
+      requestAnimationFrame(() => setVisible(true))
+    );
+    return () => cancelAnimationFrame(raf);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClose = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setVisible(false);
-    // Чекаємо завершення анімації зникнення перед видаленням зі стану
-    setTimeout(() => onClose(tab.id), 200);
+    setTimeout(() => onClose(tab.id), 250);
   };
 
   return (
@@ -94,6 +98,19 @@ const NavBar = ({ children }) => {
 
   const role = localStorage.getItem('userRole') ?? 'participant';
   const roleTabs = getTabsForRole(role);
+
+  // Зберігаємо Set id-шників з ПОПЕРЕДНЬОГО рендеру.
+  // Якщо id є в prevIds → вкладка вже існувала → isNew=false (без анімації).
+  // Якщо id нема в prevIds → щойно додана → isNew=true (з анімацією).
+  // Після рендеру оновлюємо ref поточним станом.
+  const prevTabIdsRef = useRef(new Set());
+
+  const currentIds = new Set(openTabs.map((t) => String(t.id)));
+  const newTabIds  = new Set(
+    [...currentIds].filter((id) => !prevTabIdsRef.current.has(id))
+  );
+  // Синхронізуємо ref після визначення нових — до наступного рендеру
+  prevTabIdsRef.current = currentIds;
 
   useEffect(() => {
     const storedName = localStorage.getItem('fullUserName');
@@ -146,6 +163,7 @@ const NavBar = ({ children }) => {
                           key={tab.id}
                           tab={tab}
                           onClose={closeTab}
+                          isNew={newTabIds.has(String(tab.id))}
                         />
                       ))}
                     </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import styles from "./styles/OverviewTab.module.css";
-import { RichTextArea } from "./CreateTournamentModal";
+import { RichTextArea, ImagePicker } from "./CreateTournamentModal";
 import { StatusBadge, InfoRow } from "./TournamentShared";
 import { formatDate, toInputDatetime } from "./tournamentHelpers";
 import { STOCK_IMAGES } from "./TournamentCard";
@@ -9,6 +9,8 @@ import API from "../../api";
 // ─── Константи ────────────────────────────────────────────────────────────────
 
 const ACCENT_COLORS = ["#5da3ea", "#4ad4a9", "#d83030", "#da83a0", "#928be1", "#e4ba80"];
+
+const FORMAT_LABELS = { solo: "Одиночний", team: "Командний" };
 
 // ─── Компонент ────────────────────────────────────────────────────────────────
 
@@ -179,7 +181,7 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Деталі</h2>
         <div className={styles.infoGrid}>
-          <InfoRow label="Формат"             value={tournament.format || "Не вказано"} />
+          <InfoRow label="Формат"             value={FORMAT_LABELS[tournament.format] || "Не вказано"} />
           <InfoRow label="Статус"             value={<StatusBadge status={status} />} />
           <InfoRow label="Початок турніру"    value={formatDate(tournament.start_date)} />
           <InfoRow label="Початок реєстрації" value={formatDate(tournament.registration_start)} />

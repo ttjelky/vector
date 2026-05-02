@@ -8,12 +8,21 @@ const EMPTY_FORM = { title: "", description: "", start_date: "", end_date: "" };
 
 // ─── RoundsTab ────────────────────────────────────────────────────────────────
 
-export default function RoundsTab({ rounds: initialRounds, loading, tournamentId, onRoundCreated, readOnly = false, myRole }) {
+export default function RoundsTab({
+  rounds: initialRounds,
+  loading,
+  tournamentId,
+  onRoundCreated,
+  readOnly = false,
+  myRole,
+}) {
   const [rounds,        setRounds]        = useState(initialRounds);
   const [openRound,     setOpenRound]     = useState(null);
   const [editingRound,  setEditingRound]  = useState(null);
   const [activeSection, setActiveSection] = useState({});
   const [openTask,      setOpenTask]      = useState({});
+  // taskForms: set of roundIds that have the task form open (moved to header level)
+  const [taskForms,     setTaskForms]     = useState(new Set());
   const [showForm,      setShowForm]      = useState(false);
   const [form,          setForm]          = useState(EMPTY_FORM);
   const [saving,        setSaving]        = useState(false);
@@ -42,6 +51,23 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
 
   const setSection = (roundId, section) =>
     setActiveSection((s) => ({ ...s, [roundId]: section }));
+
+  // ── Форма завдання (відкривається з заголовка раунду) ─────────────────────
+
+  const openTaskForm = (roundId) => {
+    // Ensure the round is open and on tasks tab
+    setOpenRound(roundId);
+    setActiveSection((s) => ({ ...s, [roundId]: "tasks" }));
+    setTaskForms((prev) => new Set(prev).add(roundId));
+  };
+
+  const closeTaskForm = (roundId) => {
+    setTaskForms((prev) => {
+      const next = new Set(prev);
+      next.delete(roundId);
+      return next;
+    });
+  };
 
   // ── Створення раунду ───────────────────────────────────────────────────────
 
@@ -94,10 +120,12 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
 
   // ── Завдання ───────────────────────────────────────────────────────────────
 
-  const handleTaskCreated = (roundId, task) =>
+  const handleTaskCreated = (roundId, task) => {
     setRounds((prev) => prev.map((r) =>
       r.id !== roundId ? r : { ...r, tasks: [...(r.tasks || []), task] }
     ));
+    closeTaskForm(roundId);
+  };
 
   const handleTaskDeleted = (roundId, taskId) =>
     setRounds((prev) => prev.map((r) =>
@@ -107,20 +135,44 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
   // ── Рендер ─────────────────────────────────────────────────────────────────
 
   if (loading) {
-    return <div className={styles.tabContent}><p className={styles.empty}>⏳ Завантаження раундів…</p></div>;
+    return (
+      <div className={styles.tabContent}>
+        <p className={styles.empty}>⏳ Завантаження раундів…</p>
+      </div>
+    );
   }
 
   return (
     <div className={styles.tabContent}>
 
-      {/* ── Кнопка / форма нового раунду ── */}
-      {!readOnly && (!showForm ? (
-        <button className={styles.createRoundBtn} onClick={() => setShowForm(true)}>
-          ＋ Новий раунд
-        </button>
-      ) : (
+      {/* ── Шапка вкладки: заголовок + кнопка нового раунду ── */}
+      <div className={styles.tabHeader}>
+        <span className={styles.tabTitle}>
+          Раунди
+          {rounds.length > 0 && (
+            <span className={styles.tabCount}>{rounds.length}</span>
+          )}
+        </span>
+        {!readOnly && !showForm && (
+          <button className={styles.createRoundBtn} onClick={() => setShowForm(true)}>
+            + Новий раунд
+          </button>
+        )}
+      </div>
+
+      {/* ── Форма нового раунду ── */}
+      {showForm && (
         <div className={styles.roundFormCard}>
-          <h3 className={styles.roundFormTitle}>Новий раунд</h3>
+          <div className={styles.roundFormHeader}>
+            <h3 className={styles.roundFormTitle}>Новий раунд</h3>
+            <button
+              className={styles.cancelBtn}
+              onClick={() => { setForm(EMPTY_FORM); setFormError(""); setShowForm(false); }}
+              disabled={saving}
+            >
+              Скасувати
+            </button>
+          </div>
           <div className={styles.editForm}>
             <label className={styles.editLabel}>
               Назва <span className={styles.editRequired}>*</span>
@@ -128,7 +180,10 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                 className={styles.editInput}
                 name="title"
                 value={form.title}
-                onChange={(e) => { setForm((f) => ({ ...f, title: e.target.value })); setFormError(""); }}
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, title: e.target.value }));
+                  setFormError("");
+                }}
                 placeholder="Наприклад: Кваліфікація"
                 autoFocus
               />
@@ -140,42 +195,51 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
                 name="description"
                 value={form.description}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                rows={3}
+                rows={2}
                 placeholder="Короткий опис раунду…"
               />
             </label>
             <div className={styles.editRow}>
               <label className={styles.editLabel}>
                 Початок
-                <input className={styles.editInput} type="datetime-local" name="start_date" value={form.start_date}
-                  onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))} />
+                <input
+                  className={styles.editInput}
+                  type="datetime-local"
+                  name="start_date"
+                  value={form.start_date}
+                  onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
+                />
               </label>
               <label className={styles.editLabel}>
                 Кінець
-                <input className={styles.editInput} type="datetime-local" name="end_date" value={form.end_date}
-                  onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))} />
+                <input
+                  className={styles.editInput}
+                  type="datetime-local"
+                  name="end_date"
+                  value={form.end_date}
+                  onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))}
+                />
               </label>
             </div>
             {formError && <p className={styles.formError}>{formError}</p>}
           </div>
           <div className={styles.editActions}>
-            <button
-              className={styles.cancelBtn}
-              onClick={() => { setForm(EMPTY_FORM); setFormError(""); setShowForm(false); }}
-              disabled={saving}
-            >Скасувати</button>
             <button className={styles.saveBtn} onClick={handleCreate} disabled={saving}>
               {saving ? "Створення…" : "Створити раунд"}
             </button>
           </div>
         </div>
-      ))}
+      )}
 
       {/* ── Список раундів ── */}
       {rounds.length === 0 ? (
         <div className={styles.emptyBlock}>
           <p>🏁 Раунди ще не створені.</p>
-          {!readOnly && <p style={{ fontSize: 12, marginTop: -4 }}>Натисніть «Новий раунд», щоб розпочати.</p>}
+          {!readOnly && (
+            <p style={{ fontSize: 12, marginTop: -4 }}>
+              Натисніть «Новий раунд», щоб розпочати.
+            </p>
+          )}
         </div>
       ) : (
         <div className={styles.roundList}>
@@ -198,6 +262,10 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
               onTaskToggle={(taskId) => toggleTask(round.id, taskId)}
               activeSection={activeSection[round.id]}
               onSectionChange={(section) => setSection(round.id, section)}
+              // Task form state lifted to header level
+              showTaskForm={taskForms.has(round.id)}
+              onAddTask={() => openTaskForm(round.id)}
+              onCloseTaskForm={() => closeTaskForm(round.id)}
             />
           ))}
         </div>
@@ -208,7 +276,12 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
         <ConfirmDeleteModal
           icon="🏁"
           title="Видалити раунд?"
-          description={<>Раунд <strong>«{deleteRound.title}»</strong> та всі його завдання будуть видалені назавжди. Цю дію не можна скасувати.</>}
+          description={
+            <>
+              Раунд <strong>«{deleteRound.title}»</strong> та всі його завдання будуть
+              видалені назавжди. Цю дію не можна скасувати.
+            </>
+          }
           confirmLabel="Видалити раунд"
           onConfirm={handleDeleteRound}
           onCancel={() => setDeleteRound(null)}
@@ -216,7 +289,9 @@ export default function RoundsTab({ rounds: initialRounds, loading, tournamentId
         />
       )}
 
-      {toast && <Toast message={toast.message} type={toast.type} onDone={() => setToast(null)} />}
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onDone={() => setToast(null)} />
+      )}
     </div>
   );
 }

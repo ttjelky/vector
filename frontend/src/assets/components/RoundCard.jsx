@@ -1,12 +1,17 @@
 import { useState } from "react";
 import styles from "./styles/RoundsTab.module.css";
 import API from "../../api";
-import { fileIcon, toInputDatetime, formatRoundDateRange, roundStatus, getRoundStatusStyle } from "./tournamentHelpers";
+import {
+  fileIcon,
+  toInputDatetime,
+  formatRoundDateRange,
+  roundStatus,
+  getRoundStatusStyle,
+} from "./tournamentHelpers";
 import { TaskCard } from "./TaskCard";
 import { TaskForm } from "./TaskForm";
 
 // ─── RoundEditForm ────────────────────────────────────────────────────────────
-// Форма редагування раунду — живе тут, бо використовується тільки в RoundCard
 
 function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
   const [form, setForm] = useState({
@@ -36,16 +41,22 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
 
   const removeLink = async (link) => {
     if (!link._new) {
-      try { await API.delete(`/tournaments/${tournamentId}/rounds/${round.id}/links/${link.id}/`); }
-      catch (err) { console.error(err); }
+      try {
+        await API.delete(
+          `/tournaments/${tournamentId}/rounds/${round.id}/links/${link.id}/`
+        );
+      } catch (err) { console.error(err); }
     }
     setLinks((l) => l.filter((x) => x.id !== link.id));
   };
 
   const removeAttachment = async (att) => {
     if (!att._new) {
-      try { await API.delete(`/tournaments/${tournamentId}/rounds/${round.id}/attachments/${att.id}/`); }
-      catch (err) { console.error(err); }
+      try {
+        await API.delete(
+          `/tournaments/${tournamentId}/rounds/${round.id}/attachments/${att.id}/`
+        );
+      } catch (err) { console.error(err); }
     }
     setAttachments((a) => a.filter((x) => x.id !== att.id));
   };
@@ -69,12 +80,18 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
       await API.patch(`/tournaments/${tournamentId}/rounds/${round.id}/`, payload);
 
       for (const link of links.filter((l) => l._new)) {
-        await API.post(`/tournaments/${tournamentId}/rounds/${round.id}/links/`, { label: link.label || link.url, url: link.url });
+        await API.post(
+          `/tournaments/${tournamentId}/rounds/${round.id}/links/`,
+          { label: link.label || link.url, url: link.url }
+        );
       }
       for (const file of newFiles) {
         const fd = new FormData();
         fd.append("file", file);
-        await API.post(`/tournaments/${tournamentId}/rounds/${round.id}/attachments/`, fd);
+        await API.post(
+          `/tournaments/${tournamentId}/rounds/${round.id}/attachments/`,
+          fd
+        );
       }
 
       const fresh = await API.get(`/tournaments/${tournamentId}/rounds/`);
@@ -94,20 +111,44 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
       <div className={styles.editForm}>
         <label className={styles.editLabel}>
           Назва <span className={styles.editRequired}>*</span>
-          <input className={styles.editInput} name="title" value={form.title} onChange={handleChange} />
+          <input
+            className={styles.editInput}
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+          />
         </label>
         <label className={styles.editLabel}>
           Опис
-          <textarea className={styles.editTextarea} name="description" value={form.description} onChange={handleChange} rows={3} placeholder="Опис раунду…" />
+          <textarea
+            className={styles.editTextarea}
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            rows={3}
+            placeholder="Опис раунду…"
+          />
         </label>
         <div className={styles.editRow}>
           <label className={styles.editLabel}>
             Початок
-            <input className={styles.editInput} type="datetime-local" name="start_date" value={form.start_date} onChange={handleChange} />
+            <input
+              className={styles.editInput}
+              type="datetime-local"
+              name="start_date"
+              value={form.start_date}
+              onChange={handleChange}
+            />
           </label>
           <label className={styles.editLabel}>
             Кінець
-            <input className={styles.editInput} type="datetime-local" name="end_date" value={form.end_date} onChange={handleChange} />
+            <input
+              className={styles.editInput}
+              type="datetime-local"
+              name="end_date"
+              value={form.end_date}
+              onChange={handleChange}
+            />
           </label>
         </div>
 
@@ -119,7 +160,9 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
               <span className={styles.attachItemIcon}>🔗</span>
               <span className={styles.attachItemName}>{link.label || link.url}</span>
               <span className={styles.attachItemMeta}>{link.url}</span>
-              <button className={styles.attachRemove} onClick={() => removeLink(link)}>✕</button>
+              <button className={styles.attachRemove} onClick={() => removeLink(link)}>
+                ✕
+              </button>
             </div>
           ))}
           <div className={styles.linkInputRow}>
@@ -137,7 +180,9 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
-            <button className={styles.addLinkBtn} onClick={addLink}>Додати</button>
+            <button className={styles.addLinkBtn} onClick={addLink}>
+              Додати
+            </button>
           </div>
         </div>
 
@@ -148,20 +193,39 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
             <div key={att.id} className={styles.attachItem}>
               <span className={styles.attachItemIcon}>{fileIcon(att.name)}</span>
               <span className={styles.attachItemName}>{att.name}</span>
-              <button className={styles.attachRemove} onClick={() => removeAttachment(att)}>✕</button>
+              <button
+                className={styles.attachRemove}
+                onClick={() => removeAttachment(att)}
+              >
+                ✕
+              </button>
             </div>
           ))}
           {newFiles.map((f, i) => (
             <div key={i} className={styles.attachItem}>
               <span className={styles.attachItemIcon}>{fileIcon(f.name)}</span>
               <span className={styles.attachItemName}>{f.name}</span>
-              <span className={styles.attachItemMeta}>{(f.size / 1024).toFixed(0)} KB</span>
-              <button className={styles.attachRemove} onClick={() => setNewFiles((ff) => ff.filter((_, ii) => ii !== i))}>✕</button>
+              <span className={styles.attachItemMeta}>
+                {(f.size / 1024).toFixed(0)} KB
+              </span>
+              <button
+                className={styles.attachRemove}
+                onClick={() => setNewFiles((ff) => ff.filter((_, ii) => ii !== i))}
+              >
+                ✕
+              </button>
             </div>
           ))}
           <label className={styles.filePickBtn}>
             + Прикріпити файл
-            <input key={fileInputKey} type="file" multiple hidden accept="*/*" onChange={handleFiles} />
+            <input
+              key={fileInputKey}
+              type="file"
+              multiple
+              hidden
+              accept="*/*"
+              onChange={handleFiles}
+            />
           </label>
         </div>
 
@@ -169,7 +233,9 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
       </div>
 
       <div className={styles.editActions}>
-        <button className={styles.cancelBtn} onClick={onCancel} disabled={saving}>Скасувати</button>
+        <button className={styles.cancelBtn} onClick={onCancel} disabled={saving}>
+          Скасувати
+        </button>
         <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
           {saving ? "Збереження…" : "Зберегти"}
         </button>
@@ -197,38 +263,82 @@ export function RoundCard({
   onTaskToggle,
   activeSection,
   onSectionChange,
+  // Task form is now controlled from RoundsTab (header-level)
+  showTaskForm,
+  onAddTask,
+  onCloseTaskForm,
 }) {
-  const [showTaskForm, setShowTaskForm] = useState(false);
   const section = activeSection || "tasks";
 
-  return (
-    <div className={`${styles.roundCard} ${isOpen || isEditing ? styles.roundCardOpen : ""}`}>
+  // Count tasks for the tab label
+  const taskCount = (round.tasks || []).length;
 
+  return (
+    <div
+      className={`${styles.roundCard} ${isOpen || isEditing ? styles.roundCardOpen : ""}`}
+    >
       {/* ── Заголовок ── */}
-      <div className={styles.roundHeader} onClick={() => !isEditing && onToggle()}>
+      <div
+        className={styles.roundHeader}
+        onClick={() => !isEditing && onToggle()}
+      >
         <div className={styles.roundHeaderLeft}>
           <span className={styles.roundTitle}>{round.title}</span>
-          <span className={styles.roundDate}>{formatRoundDateRange(round.start_date, round.end_date)}</span>
+          <span className={styles.roundDate}>
+            {formatRoundDateRange(round.start_date, round.end_date)}
+          </span>
         </div>
+
         <div className={styles.roundHeaderRight}>
-          <span className={styles.roundStatus} style={getRoundStatusStyle(roundStatus(round))}>
+          {/* Task count badge — always visible for quick scan */}
+          {taskCount > 0 && (
+            <span className={styles.roundTaskCount} title="Кількість завдань">
+              {taskCount} завд.
+            </span>
+          )}
+
+          <span
+            className={styles.roundStatus}
+            style={getRoundStatusStyle(roundStatus(round))}
+          >
             {roundStatus(round)}
           </span>
+
+          {/* "+ Додати завдання" moved here — only shown when round is open on tasks tab */}
+          {!readOnly && isOpen && !isEditing && section === "tasks" && (
+            <button
+              className={styles.addTaskInlineBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddTask();
+              }}
+              title="Додати завдання"
+            >
+              + завдання
+            </button>
+          )}
+
           {!readOnly && (
             <button
               className={styles.roundActionBtn}
               onClick={(e) => { e.stopPropagation(); onEditToggle(); }}
               title="Редагувати раунд"
-            >✏️</button>
+            >
+              ✏️
+            </button>
           )}
           {!readOnly && (
             <button
               className={`${styles.roundActionBtn} ${styles.roundActionBtnDanger}`}
               onClick={(e) => { e.stopPropagation(); onDeleteRequest(round); }}
               title="Видалити раунд"
-            >🗑️</button>
+            >
+              🗑️
+            </button>
           )}
-          {!isEditing && <span className={styles.roundChevron}>{isOpen ? "▲" : "▼"}</span>}
+          {!isEditing && (
+            <span className={styles.roundChevron}>{isOpen ? "▲" : "▼"}</span>
+          )}
         </div>
       </div>
 
@@ -247,31 +357,50 @@ export function RoundCard({
       {/* ── Розгорнутий вміст ── */}
       {isOpen && !isEditing && (
         <div className={styles.roundBody}>
-          {round.description && <p className={styles.roundDescription}>{round.description}</p>}
 
-          {round.links?.length > 0 && (
-            <div className={styles.roundMeta}>
-              <span className={styles.roundMetaLabel}>Посилання</span>
-              <div className={styles.roundLinkList}>
-                {round.links.map((link) => (
-                  <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.roundLink}>
-                    🔗 {link.label || link.url}
-                  </a>
-                ))}
-              </div>
-            </div>
+          {/* Description + links/attachments — compact, no extra wrappers */}
+          {round.description && (
+            <p className={styles.roundDescription}>{round.description}</p>
           )}
 
-          {round.attachments?.length > 0 && (
+          {(round.links?.length > 0 || round.attachments?.length > 0) && (
             <div className={styles.roundMeta}>
-              <span className={styles.roundMetaLabel}>Файли</span>
-              <div className={styles.roundFileList}>
-                {round.attachments.map((att) => (
-                  <a key={att.id} href={att.file} target="_blank" rel="noopener noreferrer" className={styles.roundFile}>
-                    {fileIcon(att.name)} {att.name}
-                  </a>
-                ))}
-              </div>
+              {round.links?.length > 0 && (
+                <>
+                  <span className={styles.roundMetaLabel}>Посилання</span>
+                  <div className={styles.roundLinkList}>
+                    {round.links.map((link) => (
+                      <a
+                        key={link.id}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.roundLink}
+                      >
+                        🔗 {link.label || link.url}
+                      </a>
+                    ))}
+                  </div>
+                </>
+              )}
+              {round.attachments?.length > 0 && (
+                <>
+                  <span className={styles.roundMetaLabel}>Файли</span>
+                  <div className={styles.roundFileList}>
+                    {round.attachments.map((att) => (
+                      <a
+                        key={att.id}
+                        href={att.file}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.roundFile}
+                      >
+                        {fileIcon(att.name)} {att.name}
+                      </a>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -281,7 +410,7 @@ export function RoundCard({
               className={`${styles.roundTab} ${section === "tasks" ? styles.roundTabActive : ""}`}
               onClick={() => onSectionChange("tasks")}
             >
-              Завдання {(round.tasks || []).length > 0 && `(${(round.tasks || []).length})`}
+              Завдання{taskCount > 0 && ` (${taskCount})`}
             </button>
             {!readOnly && (
               <button
@@ -296,9 +425,10 @@ export function RoundCard({
           {/* ── Завдання ── */}
           {section === "tasks" && (
             <div className={styles.taskList}>
-              {(round.tasks || []).length === 0 && !showTaskForm && (
-                <p className={styles.empty}>📋 Завдання ще не додані.</p>
+              {taskCount === 0 && !showTaskForm && (
+                <p className={styles.empty}>📋 Завдань ще немає.</p>
               )}
+
               {(round.tasks || []).map((task) => (
                 <TaskCard
                   key={task.id}
@@ -312,31 +442,30 @@ export function RoundCard({
                   onDeleted={(taskId) => onTaskDeleted(round.id, taskId)}
                 />
               ))}
-              {!readOnly && (showTaskForm ? (
+
+              {/* TaskForm rendered inline — triggered from header button */}
+              {!readOnly && showTaskForm && (
                 <TaskForm
                   roundId={round.id}
                   tournamentId={tournamentId}
-                  onCreated={(task) => { onTaskCreated(round.id, task); setShowTaskForm(false); }}
-                  onCancel={() => setShowTaskForm(false)}
+                  onCreated={(task) => onTaskCreated(round.id, task)}
+                  onCancel={onCloseTaskForm}
                 />
-              ) : (
-                <button className={styles.addTaskBtn} onClick={() => setShowTaskForm(true)}>
-                  + Додати завдання
-                </button>
-              ))}
+              )}
             </div>
           )}
 
           {/* ── Всі здачі (для власника / журі) ── */}
           {section === "allSubmissions" && !readOnly && (
             <div className={styles.taskList}>
-              {(round.tasks || []).length === 0 ? (
+              {taskCount === 0 ? (
                 <p className={styles.empty}>У цьому раунді немає завдань.</p>
               ) : (
                 (round.tasks || []).map((task) => (
                   <div key={task.id} className={styles.taskSubmissionsBlock}>
-                    <div className={styles.taskSubmissionsBlockTitle}>📋 {task.title}</div>
-                    {/* AllSubmissionsPanel підключається через TaskCard з вкладкою allSubs */}
+                    <div className={styles.taskSubmissionsBlockTitle}>
+                      📋 {task.title}
+                    </div>
                     <TaskCard
                       task={task}
                       tournamentId={tournamentId}

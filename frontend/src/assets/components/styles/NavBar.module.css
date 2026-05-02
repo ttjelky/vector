@@ -180,6 +180,30 @@ html {
   display: flex;
   align-items: center;
   padding-left: 20px;
+
+  /* Анімація появи/зникнення:
+     opacity + translateX дають відчуття що вкладка "виїжджає" зліва.
+     max-height + overflow collapse прибирає місце при зникненні. */
+  overflow: hidden;
+  max-height: 40px;
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease,
+    max-height 0.25s ease;
+}
+
+.tabHidden {
+  opacity: 0;
+  transform: translateX(-6px);
+  max-height: 0;
+}
+
+.tabVisible {
+  opacity: 1;
+  transform: translateX(0);
+  max-height: 40px;
 }
 
 .nestedLink,

@@ -2,28 +2,29 @@ import React, { createContext, useState, useContext, useCallback } from 'react';
 
 const TabsContext = createContext();
 
+// Завжди порівнюємо id як рядки — id з useParams() є рядком,
+// а id з API може бути числом. Без нормалізації filter/find не спрацьовує.
+const sameId = (a, b) => String(a) === String(b);
+
 export const TabsProvider = ({ children }) => {
   const [openTabs, setOpenTabs] = useState([]);
   const [activeTabId, setActiveTabId] = useState(null);
 
   const addTab = useCallback((tournament) => {
     setOpenTabs((prev) => {
-      if (prev.find((t) => t.id === tournament.id)) return prev;
+      if (prev.find((t) => sameId(t.id, tournament.id))) return prev;
       return [...prev, tournament];
     });
     setActiveTabId(tournament.id);
   }, []);
 
   const closeTab = useCallback((id) => {
-    setOpenTabs((prev) => {
-      const filtered = prev.filter((t) => t.id !== id);
-      return filtered;
-    });
-    setActiveTabId((prev) => (prev === id ? null : prev));
+    setOpenTabs((prev) => prev.filter((t) => !sameId(t.id, id)));
+    setActiveTabId((prev) => (sameId(prev, id) ? null : prev));
   }, []);
 
   /**
-   * Викликаєтьсяззовні, коли користувача виключено з турніру
+   * Викликається ззовні, коли користувача виключено з турніру
    * або турнір було видалено. Ідентично closeTab, але семантично окреме.
    */
   const removeTabById = useCallback((id) => {
@@ -35,7 +36,7 @@ export const TabsProvider = ({ children }) => {
    */
   const updateTab = useCallback((id, patch) => {
     setOpenTabs((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, ...patch } : t))
+      prev.map((t) => (sameId(t.id, id) ? { ...t, ...patch } : t))
     );
   }, []);
 

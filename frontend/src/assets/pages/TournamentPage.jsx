@@ -35,7 +35,7 @@ export default function TournamentPage() {
     API.get(`/tournaments/${id}/`)
       .then(r => {
         setTournament(r.data);
-        // Відкриваємо вкладку в NavBar одразу як отримали дані
+        // addTab ігнорує дублікати всередині TabsContext (sameId guard)
         addTab({ id: r.data.id, name: r.data.name });
       })
       .catch(err => setError({ status: err?.response?.status ?? 0 }))
@@ -49,12 +49,11 @@ export default function TournamentPage() {
     API.get(`/tournaments/${id}/my-role/`)
       .then(r => setMyRole(r.data.role))
       .catch(err => {
-        // 403 = виключено з турніру
         if (err?.response?.status === 403) setError({ status: 403 });
         else console.error(err);
       })
       .finally(() => setRoleLoading(false));
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Автоматично закриває вкладку і редіректить якщо:
   // - 404: турнір видалено
@@ -73,7 +72,6 @@ export default function TournamentPage() {
     setDeleting(true);
     try {
       await API.delete(`/tournaments/${id}/`);
-      // Закриваємо вкладку перед переходом
       removeTabById(id);
       navigate("/tournaments");
     } catch (err) {
