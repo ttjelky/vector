@@ -1,54 +1,14 @@
-/* ─── Design tokens ────────────────────────────────────────────────────────── */
-:root {
-  --accent:        #111111;
-  --accent-light:  #f5f5f5;
-  --accent-border: #d4d4d4;
-  --danger:        #dc2626;
-  --danger-light:  #fef2f2;
-  --danger-border: #fecaca;
-  --success:       #16a34a;
-  --success-light: #f0fdf4;
-  --success-border:#bbf7d0;
-  --warn:          #d97706;
-  --warn-light:    #fffbeb;
-  --warn-border:   #fde68a;
-
-  --bg:            #ffffff;
-  --bg-subtle:     #f8fafc;
-  --bg-muted:      #f1f5f9;
-  --border:        #e2e8f0;
-  --border-strong: #cbd5e1;
-
-  --text-primary:  #0f172a;
-  --text-secondary:#475569;
-  --text-muted:    #94a3b8;
-  --text-inverse:  #ffffff;
-
-  --radius-sm:   6px;
-  --radius-md:   10px;
-  --radius-lg:   14px;
-  --radius-xl:   18px;
-  --radius-full: 9999px;
-
-  --shadow-sm:  0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
-  --shadow-md:  0 4px 12px rgba(15,23,42,.08), 0 2px 4px rgba(15,23,42,.04);
-
-  --font: 'Inter var', 'Inter', system-ui, -apple-system, sans-serif;
-  --transition: 0.15s ease;
-}
-
 /* ─── Tab root ─────────────────────────────────────────────────────────────── */
 .tabContent {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  font-family: var(--font);
 }
 
 /* ─── Empty state ──────────────────────────────────────────────────────────── */
 .empty {
   font-size: 13px;
-  color: var(--text-muted);
+  color: #aaa;
   margin: 0;
   padding: 10px 0;
   text-align: center;
@@ -60,10 +20,10 @@
   align-items: center;
   gap: 8px;
   padding: 36px 20px;
-  background: var(--bg-subtle);
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius-xl);
-  color: var(--text-muted);
+  background: #f7f7f9;
+  border: 1px dashed #e4e4e8;
+  border-radius: 18px;
+  color: #aaa;
 }
 .emptyBlock p { margin: 0; font-size: 14px; }
 
@@ -71,79 +31,80 @@
 .editLabel {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #888;
+  letter-spacing: 0.01em;
 }
-.editRequired { color: var(--danger); }
+.editRequired { color: #c53030; }
 
 .editInput {
-  padding: 8px 11px;
+  padding: 10px 13px;
   font-size: 14px;
-  color: var(--text-primary);
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
+  color: #111;
+  background: #f7f7f9;
+  border: 1px solid #e4e4e8;
+  border-radius: 10px;
   outline: none;
-  font-family: var(--font);
-  transition: border-color var(--transition), box-shadow var(--transition);
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
   width: 100%;
   box-sizing: border-box;
 }
 .editInput:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(0,0,0,.07);
+  border-color: #bbb;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+  background: #fff;
 }
 
 .editTextarea {
-  padding: 9px 11px;
+  padding: 10px 13px;
   font-size: 14px;
-  color: var(--text-primary);
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
+  color: #111;
+  background: #f7f7f9;
+  border: 1px solid #e4e4e8;
+  border-radius: 10px;
   outline: none;
   resize: vertical;
-  font-family: var(--font);
-  line-height: 1.6;
-  transition: border-color var(--transition), box-shadow var(--transition);
+  font-family: inherit;
+  line-height: 1.65;
+  transition: border-color 0.15s, box-shadow 0.15s;
   width: 100%;
   box-sizing: border-box;
 }
 .editTextarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(0,0,0,.07);
+  border-color: #bbb;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+  background: #fff;
 }
 
-/* Answer textarea — larger, more prominent */
 .answerTextarea {
-  padding: 11px 13px;
-  font-size: 14.5px;
-  color: var(--text-primary);
-  background: var(--bg);
-  border: 1.5px solid var(--border-strong);
-  border-radius: var(--radius-md);
+  padding: 10px 13px;
+  font-size: 14px;
+  color: #111;
+  background: #f7f7f9;
+  border: 1px solid #e4e4e8;
+  border-radius: 10px;
   outline: none;
   resize: vertical;
-  font-family: var(--font);
+  font-family: inherit;
   line-height: 1.65;
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition: border-color 0.15s, box-shadow 0.15s;
   width: 100%;
   box-sizing: border-box;
   min-height: 110px;
 }
 .answerTextarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(0,0,0,.07);
+  border-color: #bbb;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+  background: #fff;
 }
 
 .editForm {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 .editRow {
   display: grid;
@@ -154,76 +115,70 @@
 
 .editActions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   justify-content: flex-end;
   padding-top: 4px;
 }
 
 /* ─── Buttons ──────────────────────────────────────────────────────────────── */
 .cancelBtn {
-  padding: 8px 18px;
-  font-size: 13px;
+  padding: 10px 20px;
+  font-size: 13.5px;
   font-weight: 500;
-  color: var(--text-secondary);
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-full);
+  color: #555;
+  background: #f0f0f2;
+  border: 1px solid #e4e4e8;
+  border-radius: 100px;
   cursor: pointer;
-  font-family: var(--font);
-  transition: background var(--transition), border-color var(--transition);
+  transition: background 0.15s;
 }
-.cancelBtn:hover    { background: var(--bg-muted); border-color: var(--border-strong); }
-.cancelBtn:disabled { opacity: .45; cursor: not-allowed; }
+.cancelBtn:hover    { background: #e4e4e8; }
+.cancelBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .saveBtn {
-  padding: 8px 20px;
-  font-size: 13px;
+  padding: 10px 22px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--text-inverse);
-  background: var(--accent);
-  border: 1.5px solid var(--accent);
-  border-radius: var(--radius-full);
+  color: #fff;
+  background: #111;
+  border: none;
+  border-radius: 100px;
   cursor: pointer;
-  font-family: var(--font);
-  transition: background var(--transition), transform .1s, box-shadow var(--transition);
+  transition: background 0.15s, transform 0.1s;
 }
-.saveBtn:hover    { background: #1e1e1e; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+.saveBtn:hover    { background: #2a2a2a; }
 .saveBtn:active   { transform: scale(0.97); }
-.saveBtn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* Primary CTA — "Здати роботу" */
 .submitBtn {
-  padding: 10px 24px;
+  padding: 10px 22px;
   font-size: 14px;
-  font-weight: 700;
-  color: var(--text-inverse);
-  background: var(--accent);
+  font-weight: 600;
+  color: #fff;
+  background: #111;
   border: none;
-  border-radius: var(--radius-full);
+  border-radius: 100px;
   cursor: pointer;
-  font-family: var(--font);
   letter-spacing: -0.01em;
-  transition: background var(--transition), transform .1s, box-shadow var(--transition);
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
 }
-.submitBtn:hover    { background: #1e1e1e; box-shadow: 0 3px 10px rgba(0,0,0,.2); }
+.submitBtn:hover    { background: #2a2a2a; box-shadow: 0 4px 12px rgba(52, 52, 52, 0.2); }
 .submitBtn:active   { transform: scale(0.97); }
-.submitBtn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+.submitBtn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
-/* submitWorkBtn alias (kept for MySubmissionPanel empty state) */
 .submitWorkBtn {
-  padding: 10px 24px;
+  padding: 10px 22px;
   font-size: 14px;
-  font-weight: 700;
-  color: var(--text-inverse);
-  background: var(--accent);
+  font-weight: 600;
+  color: #fff;
+  background: #111;
   border: none;
-  border-radius: var(--radius-full);
+  border-radius: 100px;
   cursor: pointer;
-  font-family: var(--font);
   letter-spacing: -0.01em;
-  transition: background var(--transition), transform .1s, box-shadow var(--transition);
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
 }
-.submitWorkBtn:hover  { background: #1e1e1e; box-shadow: 0 3px 10px rgba(0,0,0,.2); }
+.submitWorkBtn:hover  { background: #2a2a2a; box-shadow: 0 4px 12px rgba(52, 52, 52, 0.2); }
 .submitWorkBtn:active { transform: scale(0.97); }
 
 /* ─── Tab header ────────────────────────────────────────────────────────────── */
@@ -239,7 +194,7 @@
   gap: 7px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: #555;
   letter-spacing: 0.02em;
 }
 .tabCount {
@@ -251,37 +206,34 @@
   padding: 0 5px;
   font-size: 11px;
   font-weight: 700;
-  color: var(--text-muted);
-  background: var(--bg-muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  color: #aaa;
+  background: #f0f0f2;
+  border: 1px solid #e4e4e8;
+  border-radius: 100px;
   line-height: 1;
 }
 
-/* Ghost-стиль: не перетягує увагу зі списку раундів */
 .createRoundBtn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 10px;
-  font-size: 12px;
+  padding: 6px 14px;
+  font-size: 13px;
   font-weight: 500;
-  color: var(--text-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-full);
+  color: #555;
+  background: #f0f0f2;
+  border: 1px solid #e4e4e8;
+  border-radius: 100px;
   cursor: pointer;
-  font-family: var(--font);
-  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  transition: background 0.15s, color 0.15s;
 }
 .createRoundBtn:hover {
-  background: var(--bg-muted);
-  border-color: var(--border);
-  color: var(--text-secondary);
+  background: #e4e4e8;
+  color: #111;
 }
 .createRoundBtn:active { transform: scale(0.97); }
 
-/* ─── Round form header (title + cancel inline) ─────────────────────────────── */
+/* ─── Round form header ─────────────────────────────────────────────────────── */
 .roundFormHeader {
   display: flex;
   align-items: center;
@@ -290,64 +242,64 @@
 }
 
 .addLinkBtn {
-  padding: 8px 14px;
-  font-size: 13px;
+  padding: 10px 20px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--text-inverse);
-  background: var(--text-primary);
+  color: #fff;
+  background: #111;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 100px;
   cursor: pointer;
-  font-family: var(--font);
   white-space: nowrap;
-  transition: background var(--transition);
+  transition: background 0.15s;
 }
-.addLinkBtn:hover { background: #1e293b; }
+.addLinkBtn:hover { background: #2a2a2a; }
 
 .filePickBtn {
   align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 6px 13px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
-  color: var(--text-secondary);
-  background: var(--bg-subtle);
-  border: 1.5px dashed var(--border-strong);
-  border-radius: var(--radius-md);
+  color: #555;
+  background: #f0f0f2;
+  border: 1px dashed #e4e4e8;
+  border-radius: 10px;
   cursor: pointer;
-  font-family: var(--font);
-  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 .filePickBtn:hover {
-  background: var(--bg-muted);
-  border-color: var(--accent);
-  color: var(--text-primary);
+  background: #e4e4e8;
+  border-color: #bbb;
+  color: #111;
 }
 
 .formError {
   font-size: 12.5px;
-  color: var(--danger);
+  color: #c53030;
   margin: 0;
-  padding: 8px 11px;
-  background: var(--danger-light);
-  border: 1px solid var(--danger-border);
-  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  background: #fff5f5;
+  border: 1px solid #fed7d7;
+  border-radius: 10px;
 }
 
 /* ─── Round form card ──────────────────────────────────────────────────────── */
 .roundFormCard {
-  background: var(--bg);
-  border: 1.5px solid var(--accent-border);
-  border-radius: var(--radius-xl);
-  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 18px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  box-shadow: var(--shadow-md);
+  gap: 16px;
 }
 .roundFormTitle {
   font-size: 14px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: #111;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -357,14 +309,14 @@
 
 /* ─── Round card ───────────────────────────────────────────────────────────── */
 .roundCard {
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-xl);
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 16px;
   overflow: hidden;
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.roundCard:hover  { border-color: var(--border-strong); }
-.roundCardOpen    { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
+.roundCard:hover  { border-color: #d4d4d8; }
+.roundCardOpen    { border-color: #d4d4d8; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); }
 
 /* ─── Round header ─────────────────────────────────────────────────────────── */
 .roundHeader {
@@ -378,10 +330,10 @@
   cursor: pointer;
   text-align: left;
   gap: 12px;
-  transition: background var(--transition);
+  transition: background 0.15s;
   box-sizing: border-box;
 }
-.roundHeader:hover { background: var(--bg-subtle); }
+.roundHeader:hover { background: #f7f7f9; }
 
 .roundHeaderLeft {
   display: flex;
@@ -393,13 +345,13 @@
 }
 .roundTitle {
   font-size: 14px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: #111;
   letter-spacing: -0.01em;
 }
 .roundDate {
   font-size: 11.5px;
-  color: var(--text-muted);
+  color: #737373;
   font-variant-numeric: tabular-nums;
 }
 .roundHeaderRight {
@@ -410,35 +362,53 @@
 }
 
 /* ─── Status badges ────────────────────────────────────────────────────────── */
+
+/* Статусний бейдж — лише крапка + текст, без рамки */
 .roundStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 11px;
-  font-weight: 600;
-  padding: 2px 9px;
-  border-radius: var(--radius-full);
+  font-weight: 500;
+  padding: 0;
+  border-radius: 0;
   white-space: nowrap;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
+
+/* Кольорова крапка перед статусом (додається через ::before у JSX-wrapper або через окремий span.statusDot) */
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
 .roundChevron {
   width: 18px;
   height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
+  color: #bbb;
   font-size: 9px;
 }
 
-/* Compact task-count pill in the round header row */
+/* Бейдж кількості завдань — приглушений, без рамки */
 .roundTaskCount {
   display: inline-flex;
   align-items: center;
-  padding: 1px 7px;
+  padding: 0;
   font-size: 11px;
-  font-weight: 500;
-  color: var(--text-muted);
-  background: var(--bg-muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  font-weight: 400;
+  color: #bbb;
+  background: none;
+  border: none;
+  border-radius: 0;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -452,37 +422,37 @@
   justify-content: center;
   font-size: 12px;
   background: none;
-  border: 1.5px solid transparent;
-  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  border-radius: 7px;
   cursor: pointer;
-  transition: background var(--transition), border-color var(--transition);
+  transition: background 0.15s, border-color 0.15s;
   line-height: 1;
   flex-shrink: 0;
 }
-.roundActionBtn:hover       { background: var(--bg-muted); border-color: var(--border); }
-.roundActionBtnDanger:hover { background: var(--danger-light); border-color: var(--danger-border); }
+.roundActionBtn:hover       { background: #f0f0f2; border-color: #e4e4e8; }
+.roundActionBtnDanger:hover { background: #fff5f5; border-color: #fed7d7; }
 
 /* ─── Round body ───────────────────────────────────────────────────────────── */
 .roundBody {
-  border-top: 1px solid var(--border);
-  padding: 10px 16px 12px;
+  border-top: 1px solid #e8e8ec;
+  padding: 10px 16px 14px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 .roundDescription {
-  font-size: 13.5px;
-  color: var(--text-secondary);
+  font-size: 14px;
+  color: #444;
   line-height: 1.65;
   margin: 0;
 }
 
 /* ─── Round edit form ──────────────────────────────────────────────────────── */
-.roundEditForm  { display: flex; flex-direction: column; gap: 14px; }
+.roundEditForm  { display: flex; flex-direction: column; gap: 16px; }
 .roundEditTitle {
   font-size: 14px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: #111;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -491,39 +461,39 @@
 .roundTabs {
   display: flex;
   gap: 2px;
-  background: var(--bg-muted);
-  border-radius: var(--radius-lg);
+  background: #f0f0f2;
+  border-radius: 14px;
   padding: 3px;
   width: fit-content;
-  border: 1px solid var(--border);
+  border: 1px solid #e4e4e8;
 }
 .roundTab {
   padding: 5px 13px;
   font-size: 12.5px;
   font-weight: 500;
-  color: var(--text-muted);
+  color: #aaa;
   background: none;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 10px;
   cursor: pointer;
-  font-family: var(--font);
-  transition: background var(--transition), color var(--transition);
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
-.roundTab:hover  { color: var(--text-secondary); background: rgba(255,255,255,.5); }
+.roundTab:hover  { color: #555; background: rgba(255, 255, 255, 0.5); }
 .roundTabActive  {
-  background: var(--bg);
-  color: var(--text-primary);
+  background: #fff;
+  color: #111;
   font-weight: 600;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-/* ─── Round meta (links/files) — compact pill row ──────────────────────────── */
+/* ─── Round meta (links/files) ─────────────────────────────────────────────── */
 .roundMeta      { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 .roundMetaLabel {
   font-size: 10.5px;
   font-weight: 700;
-  color: var(--text-muted);
+  color: #aaa;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   margin-right: 2px;
@@ -536,19 +506,19 @@
   align-items: center;
   gap: 4px;
   padding: 3px 10px;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  background: #f7f7f9;
+  border: 1px solid #e8e8ec;
+  border-radius: 100px;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: #555;
   text-decoration: none;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .roundLink:hover,
 .roundFile:hover {
-  background: var(--bg-muted);
-  color: var(--text-primary);
-  border-color: var(--border-strong);
+  background: #f0f0f2;
+  color: #111;
+  border-color: #d4d4d8;
 }
 
 /* ─── Attach sections ──────────────────────────────────────────────────────── */
@@ -556,7 +526,7 @@
 .attachSectionLabel {
   font-size: 11px;
   font-weight: 700;
-  color: var(--text-muted);
+  color: #aaa;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -565,21 +535,21 @@
   align-items: center;
   gap: 7px;
   padding: 6px 10px;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  background: #f7f7f9;
+  border: 1px solid #e8e8ec;
+  border-radius: 10px;
   font-size: 12.5px;
 }
 .attachItemIcon { font-size: 14px; flex-shrink: 0; }
 .attachItemName {
   flex: 1;
   font-weight: 500;
-  color: var(--text-primary);
+  color: #111;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.attachItemMeta { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+.attachItemMeta { font-size: 11px; color: #aaa; flex-shrink: 0; }
 
 .attachRemove {
   width: 20px;
@@ -588,18 +558,56 @@
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  color: var(--text-muted);
+  color: #aaa;
   background: none;
   border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .attachRemove:hover {
-  background: var(--danger-light);
-  color: var(--danger);
-  border-color: var(--danger-border);
+  background: #fff5f5;
+  color: #ea5c5c;
+  border-color: #fed7d7;
+}
+
+/* Чіп для вкладень у формі (плоский, без вкладення у вкладенні) */
+.attachChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px 3px 10px;
+  background: #f0f0f2;
+  border: 1px solid #e4e4e8;
+  border-radius: 100px;
+  font-size: 12.5px;
+  color: #333;
+  max-width: 100%;
+}
+.attachChipMeta {
+  font-size: 11px;
+  color: #aaa;
+  flex-shrink: 0;
+}
+.attachChipRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  flex-shrink: 0;
+  color: #bbb;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.15s, background 0.12s;
+}
+.attachChipRemove:hover {
+  color: #ea5c5c;
+  background: rgba(234, 92, 92, 0.1);
 }
 
 .linkInputRow {
@@ -610,63 +618,82 @@
 }
 @media (max-width: 540px) { .linkInputRow { grid-template-columns: 1fr; } }
 
-/* ─── Extras accordion (collapse посилання/файли) ──────────────────────────── */
+/* ─── Extras accordion ─────────────────────────────────────────────────────── */
 .extrasToggle {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 10px;
-  font-size: 12px;
+  padding: 6px 14px;
+  font-size: 13px;
   font-weight: 500;
-  color: var(--text-muted);
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  color: #555;
+  background: #f0f0f2;
+  border: 1px solid #e4e4e8;
+  border-radius: 100px;
   cursor: pointer;
-  font-family: var(--font);
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .extrasToggle:hover {
-  background: var(--bg-muted);
-  color: var(--text-secondary);
-  border-color: var(--border-strong);
+  background: #e4e4e8;
+  color: #111;
 }
 .extrasPanel {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 10px 12px;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  background: #f7f7f9;
+  border: 1px solid #e8e8ec;
+  border-radius: 10px;
 }
 
 /* ─── Tasks ────────────────────────────────────────────────────────────────── */
-.taskList { display: flex; flex-direction: column; gap: 3px; }
+.taskList { display: flex; flex-direction: column; }
 
+/* Рядок завдання — без рамки, лише розділювач знизу */
 .taskCard {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  transition: border-color var(--transition), box-shadow var(--transition);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #f0f0f2;
+  border-radius: 0;
+  overflow: visible;
+  transition: background 0.15s;
 }
-.taskCard:hover   { border-color: var(--border-strong); }
-.taskCardExpanded { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+.taskCard:last-child { border-bottom: none; }
+.taskCard:hover      { background: #fafafa; border-radius: 10px; }
+/* Розгорнуте завдання — легкий фон для виділення */
+.taskCardExpanded {
+  background: #fafafa;
+  border-radius: 10px;
+  border: none;
+  border-bottom: 1px solid #f0f0f2;
+  box-shadow: none;
+}
 
 .taskCardHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 13px;
+  padding: 9px 4px;
   cursor: pointer;
   gap: 10px;
-  transition: background var(--transition);
+  transition: background 0.15s;
+  border-radius: 10px;
 }
-.taskCardHeader:hover { background: var(--bg-subtle); }
 
 .taskCardLeft    { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.taskCardActions { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+
+/* Дії приховані, з'являються при наведенні на рядок */
+.taskCardActions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.taskCard:hover .taskCardActions,
+.taskCardExpanded .taskCardActions { opacity: 1; }
 
 .taskChevron {
   width: 16px;
@@ -675,42 +702,42 @@
   align-items: center;
   justify-content: center;
   font-size: 8px;
-  color: var(--text-muted);
+  color: #bbb;
 }
-.taskTitle { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
-.taskDesc  { font-size: 12.5px; color: var(--text-muted); margin: 0; line-height: 1.45; }
+/* Крок 3: темніший вторинний текст */
+.taskTitle { font-size: 13.5px; font-weight: 500; color: #222; }
+.taskDesc  { font-size: 12.5px; color: #737373; margin: 0; line-height: 1.45; }
 
+/* Крок 4: кнопка видалення — кошик, як у шапці раунду */
 .taskDeleteBtn {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  color: var(--text-muted);
+  font-size: 13px;
+  color: #bbb;
   background: none;
   border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: 7px;
   cursor: pointer;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.taskDeleteBtn:hover { background: var(--danger-light); color: var(--danger); border-color: var(--danger-border); }
+.taskDeleteBtn:hover { background: #fff5f5; color: #ea5c5c; border-color: #fed7d7; }
 
-/* Task body — flat, no card-in-card */
 .taskCardBody {
-  border-top: 1px solid var(--border);
-  padding: 10px 13px;
+  padding: 10px 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.taskDescFull    { font-size: 13.5px; color: var(--text-secondary); line-height: 1.7; margin: 0; white-space: pre-wrap; }
+.taskDescFull    { font-size: 13.5px; color: #444; line-height: 1.7; margin: 0; white-space: pre-wrap; }
 .taskExtras      { display: flex; flex-direction: column; gap: 5px; }
 .taskExtrasLabel {
   font-size: 10.5px;
   font-weight: 700;
-  color: var(--text-muted);
+  color: #aaa;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -722,114 +749,110 @@
   align-items: center;
   gap: 4px;
   padding: 3px 10px;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  background: #f7f7f9;
+  border: 1px solid #e8e8ec;
+  border-radius: 100px;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: #555;
   text-decoration: none;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .taskLink:hover,
 .taskFile:hover {
-  background: var(--bg-muted);
-  color: var(--text-primary);
-  border-color: var(--border-strong);
+  background: #f0f0f2;
+  color: #111;
+  border-color: #d4d4d8;
 }
 
 /* ─── Task inner tabs ──────────────────────────────────────────────────────── */
 .taskInnerTabs {
   display: flex;
   gap: 2px;
-  background: var(--bg-muted);
-  border-radius: var(--radius-md);
+  background: #f0f0f2;
+  border-radius: 10px;
   padding: 3px;
   width: fit-content;
-  border: 1px solid var(--border);
+  border: 1px solid #e4e4e8;
 }
 .taskInnerTab {
   padding: 4px 12px;
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-muted);
+  color: #aaa;
   background: none;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 7px;
   cursor: pointer;
-  font-family: var(--font);
-  transition: background var(--transition), color var(--transition);
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
-.taskInnerTab:hover  { color: var(--text-secondary); background: rgba(255,255,255,.5); }
+.taskInnerTab:hover  { color: #555; background: rgba(255, 255, 255, 0.5); }
 .taskInnerTabActive  {
-  background: var(--bg);
-  color: var(--text-primary);
+  background: #fff;
+  color: #111;
   font-weight: 600;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 /* ─── Task form card ───────────────────────────────────────────────────────── */
 .taskFormCard {
-  background: var(--bg);
-  border: 1.5px solid var(--accent-border);
-  border-radius: var(--radius-lg);
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 14px;
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: var(--shadow-sm);
 }
 .taskFormTitle {
   font-size: 13px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: #111;
   margin: 0;
   letter-spacing: -0.01em;
 }
-/* Kept for backward compat — prefer addTaskInlineBtn */
+
 .addTaskBtn {
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 6px 13px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
-  color: var(--text-secondary);
-  background: var(--bg-subtle);
-  border: 1.5px dashed var(--border-strong);
-  border-radius: var(--radius-full);
+  color: #555;
+  background: #f0f0f2;
+  border: 1px dashed #d4d4d8;
+  border-radius: 100px;
   cursor: pointer;
-  font-family: var(--font);
-  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 .addTaskBtn:hover {
-  background: var(--bg-muted);
-  border-color: var(--border-strong);
-  color: var(--text-primary);
+  background: #e4e4e8;
+  border-color: #bbb;
+  color: #111;
 }
 
-/* "+ завдання" button in the round header — visible when round is open on tasks tab */
 .addTaskInlineBtn {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 3px 9px;
-  font-size: 11.5px;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--text-secondary);
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-full);
+  color: #111;
+  background: transparent;
+  border: 1px solid #d4d4d8;
+  border-radius: 100px;
   cursor: pointer;
-  font-family: var(--font);
   white-space: nowrap;
-  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  margin-left: 6px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 .addTaskInlineBtn:hover {
-  background: var(--bg-muted);
-  border-color: var(--border-strong);
-  color: var(--text-primary);
+  background: #f0f0f2;
+  border-color: #bbb;
 }
 .addTaskInlineBtn:active { transform: scale(0.96); }
 
@@ -838,26 +861,25 @@
 .taskSubmissionsBlockTitle {
   font-size: 12px;
   font-weight: 700;
-  color: var(--text-secondary);
+  color: #555;
   padding: 6px 10px;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  background: #f7f7f9;
+  border: 1px solid #e8e8ec;
+  border-radius: 10px;
   letter-spacing: 0.01em;
 }
 
-/* ─── Submission form — flat inside task body ──────────────────────────────── */
+/* ─── Submission form ──────────────────────────────────────────────────────── */
 .submissionForm {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* Legacy title — keep for compatibility */
 .submissionFormTitle {
   font-size: 13px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: #111;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -876,9 +898,9 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: var(--success-light);
-  border: 1px solid var(--success-border);
-  border-radius: var(--radius-md);
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
   padding: 12px 13px;
 }
 .mySubmissionHeader {
@@ -893,16 +915,16 @@
   gap: 4px;
   font-size: 11.5px;
   font-weight: 700;
-  color: var(--success);
+  color: #16a34a;
   letter-spacing: 0.02em;
   flex-shrink: 0;
-  background: rgba(22,163,74,.1);
+  background: rgba(22, 163, 74, 0.1);
   padding: 2px 9px;
-  border-radius: var(--radius-full);
+  border-radius: 100px;
 }
 .mySubmissionDate {
   font-size: 11.5px;
-  color: var(--text-muted);
+  color: #aaa;
   flex: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -916,15 +938,14 @@
   padding: 4px 11px;
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-secondary);
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-full);
+  color: #555;
+  background: #f0f0f2;
+  border: 1px solid #e4e4e8;
+  border-radius: 100px;
   cursor: pointer;
-  font-family: var(--font);
-  transition: background var(--transition), border-color var(--transition);
+  transition: background 0.15s, border-color 0.15s;
 }
-.editSubmissionBtn:hover { background: var(--bg-muted); border-color: var(--border-strong); }
+.editSubmissionBtn:hover { background: #e4e4e8; border-color: #d4d4d8; }
 
 .deleteSubmissionBtn {
   width: 26px;
@@ -933,23 +954,22 @@
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  color: var(--text-muted);
+  color: #aaa;
   background: none;
-  border: 1.5px solid transparent;
-  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  border-radius: 10px;
   cursor: pointer;
-  font-family: var(--font);
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .deleteSubmissionBtn:hover {
-  background: var(--danger-light);
-  color: var(--danger);
-  border-color: var(--danger-border);
+  background: #fff5f5;
+  color: #ea5c5c;
+  border-color: #fed7d7;
 }
 
 .submissionText {
   font-size: 13.5px;
-  color: var(--text-primary);
+  color: #111;
   line-height: 1.7;
   margin: 0;
   white-space: pre-wrap;
@@ -958,7 +978,7 @@
 .submissionExtrasLabel {
   font-size: 10.5px;
   font-weight: 700;
-  color: var(--text-muted);
+  color: #aaa;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -966,14 +986,14 @@
 /* ─── All submissions list ─────────────────────────────────────────────────── */
 .allSubmissionsList { display: flex; flex-direction: column; gap: 4px; }
 .submissionCard {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 10px;
   overflow: hidden;
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.submissionCard:hover   { border-color: var(--border-strong); }
-.submissionCardExpanded { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+.submissionCard:hover   { border-color: #d4d4d8; }
+.submissionCardExpanded { border-color: #d4d4d8; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06); }
 
 .submissionCardHeader {
   display: flex;
@@ -982,9 +1002,9 @@
   padding: 9px 12px;
   cursor: pointer;
   gap: 10px;
-  transition: background var(--transition);
+  transition: background 0.15s;
 }
-.submissionCardHeader:hover { background: var(--bg-subtle); }
+.submissionCardHeader:hover { background: #f7f7f9; }
 
 .submissionParticipantInfo {
   display: flex;
@@ -996,14 +1016,14 @@
 .submissionParticipantName {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #111;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .submissionParticipantEmail {
   font-size: 11px;
-  color: var(--text-muted);
+  color: #aaa;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1016,7 +1036,7 @@
 }
 .submissionDate {
   font-size: 11px;
-  color: var(--text-muted);
+  color: #aaa;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -1028,14 +1048,14 @@
   padding: 2px 7px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-secondary);
-  background: var(--bg-muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  color: #555;
+  background: #f0f0f2;
+  border: 1px solid #e4e4e8;
+  border-radius: 100px;
   white-space: nowrap;
 }
 .submissionCardBody {
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #e8e8ec;
   padding: 11px 12px;
   display: flex;
   flex-direction: column;
@@ -1045,21 +1065,21 @@
 /* ─── Inline submission status (legacy) ────────────────────────────────────── */
 .submissionList  { display: flex; flex-direction: column; gap: 6px; }
 .submissionInfo  { display: flex; flex-direction: column; gap: 3px; }
-.submissionTeam  { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-.submissionFile  { font-size: 12px; color: var(--text-secondary); }
+.submissionTeam  { font-size: 13px; font-weight: 600; color: #111; }
+.submissionFile  { font-size: 12px; color: #555; }
 
 .submissionStatus {
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-muted);
-  background: var(--bg-muted);
+  color: #aaa;
+  background: #f0f0f2;
   padding: 2px 9px;
-  border-radius: var(--radius-full);
+  border-radius: 100px;
   white-space: nowrap;
-  border: 1px solid var(--border);
+  border: 1px solid #e4e4e8;
 }
 .submissionStatusDone {
-  background: var(--success-light);
-  color: var(--success);
-  border-color: var(--success-border);
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #bbf7d0;
 }

@@ -75,7 +75,14 @@ function MySubmissionPanel({ taskId, roundId, tournamentId }) {
         </span>
         <div className={styles.mySubmissionActions}>
           <button className={styles.editSubmissionBtn} onClick={() => setShowForm(true)}>✏️ Редагувати</button>
-          <button className={styles.deleteSubmissionBtn} onClick={() => setShowConfirm(true)}>🗑️</button>
+          <button className={styles.deleteSubmissionBtn} onClick={() => setShowConfirm(true)}>
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="2 4 14 4"/>
+              <path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
+              <path d="M6 7v5M10 7v5"/>
+              <rect x="3" y="4" width="10" height="9" rx="1"/>
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -254,7 +261,14 @@ export function TaskCard({ task, tournamentId, roundId, onDeleted, readOnly = fa
                 disabled={deleting}
                 title="Видалити завдання"
               >
-                {deleting ? "…" : "✕"}
+                {deleting ? "…" : (
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="2 4 14 4"/>
+                    <path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
+                    <path d="M6 7v5M10 7v5"/>
+                    <rect x="3" y="4" width="10" height="9" rx="1"/>
+                  </svg>
+                )}
               </button>
             )}
           </div>

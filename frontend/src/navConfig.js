@@ -26,6 +26,7 @@ export const ROLE_TABS = {
   participant: [
     { key: "home",        label: "Головна", path: "/dashboard"   },
     { key: "tournaments", label: "Турніри", path: "/tournaments" },
+    { key: "news",        label: "Новини",  path: "/news"        },
   ],
 };
 

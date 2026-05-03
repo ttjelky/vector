@@ -18,6 +18,7 @@ import ResetPassword        from "./assets/pages/ResetPassword";
 import TournamentPage       from "./assets/pages/TournamentPage";
 import JoinTournamentPage   from "./assets/pages/JoinTournamentPage";
 import ProtectedRoute       from "./assets/components/ProtectedRoute";
+import News                 from "./assets/pages/News";
 
 const App = () => (
   <TabsProvider>
@@ -82,6 +83,15 @@ const App = () => (
           element={
             <ProtectedRoute allowedRoles={["participant"]}>
               <ParticipantTournaments />
+            </ProtectedRoute>
+          }
+        />
+
+         <Route
+          path="/news"
+          element={
+            <ProtectedRoute allowedRoles={["participant"]}>
+              <News />
             </ProtectedRoute>
           }
         />

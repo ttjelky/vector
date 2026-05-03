@@ -15,6 +15,7 @@ import LogoutIcon      from './static/icons/Logout.svg?react';
 import BellIcon        from './static/icons/Bell.svg?react';
 import Logo            from './static/VectorLogo.svg';
 import cross           from './static/icons/cross.svg';
+import NewsIcon        from "./static/icons/News.svg?react";
 
 const ICON_MAP = {
   home:        HomeIcon,
@@ -24,6 +25,7 @@ const ICON_MAP = {
   settings:    SettingsIcon,
   profile:     ProfileIcon,
   help:        InfoIcon,
+  news:        NewsIcon,
 };
 
 const renderIcon = (key) => {

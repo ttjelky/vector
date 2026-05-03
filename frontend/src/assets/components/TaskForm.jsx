@@ -98,14 +98,20 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
         {/* Посилання */}
         <div className={styles.attachSection}>
           <span className={styles.attachSectionLabel}>🔗 Посилання</span>
-          {links.map((link) => (
-            <div key={link.id} className={styles.attachItem}>
-              <span className={styles.attachItemIcon}>🔗</span>
-              <span className={styles.attachItemName}>{link.label || link.url}</span>
-              <span className={styles.attachItemMeta}>{link.url}</span>
-              <button className={styles.attachRemove} onClick={() => removeLink(link.id)}>✕</button>
+          {links.length > 0 && (
+            <div className={styles.taskLinkList}>
+              {links.map((link) => (
+                <span key={link.id} className={styles.attachChip}>
+                  🔗 {link.label || link.url}
+                  <button className={styles.attachChipRemove} onClick={() => removeLink(link.id)} title="Видалити">
+                    <svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                      <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
+                    </svg>
+                  </button>
+                </span>
+              ))}
             </div>
-          ))}
+          )}
           <div className={styles.linkInputRow}>
             <input
               className={styles.editInput}
@@ -128,14 +134,21 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
         {/* Файли */}
         <div className={styles.attachSection}>
           <span className={styles.attachSectionLabel}>📎 Файли</span>
-          {files.map((f, i) => (
-            <div key={i} className={styles.attachItem}>
-              <span className={styles.attachItemIcon}>{fileIcon(f.name)}</span>
-              <span className={styles.attachItemName}>{f.name}</span>
-              <span className={styles.attachItemMeta}>{(f.size / 1024).toFixed(0)} KB</span>
-              <button className={styles.attachRemove} onClick={() => removeFile(i)}>✕</button>
+          {files.length > 0 && (
+            <div className={styles.taskFileList}>
+              {files.map((f, i) => (
+                <span key={i} className={styles.attachChip}>
+                  {fileIcon(f.name)} {f.name}
+                  <span className={styles.attachChipMeta}>{(f.size / 1024).toFixed(0)} KB</span>
+                  <button className={styles.attachChipRemove} onClick={() => removeFile(i)} title="Видалити">
+                    <svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                      <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
+                    </svg>
+                  </button>
+                </span>
+              ))}
             </div>
-          ))}
+          )}
           <label className={styles.filePickBtn}>
             + Прикріпити файл
             <input key={fileInputKey} type="file" multiple hidden accept="*/*" onChange={handleFiles} />

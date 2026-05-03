@@ -161,7 +161,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
               <span className={styles.attachItemName}>{link.label || link.url}</span>
               <span className={styles.attachItemMeta}>{link.url}</span>
               <button className={styles.attachRemove} onClick={() => removeLink(link)}>
-                ✕
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="2 4 14 4"/><path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M6 7v5M10 7v5"/><rect x="3" y="4" width="10" height="9" rx="1"/></svg>
               </button>
             </div>
           ))}
@@ -197,7 +197,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
                 className={styles.attachRemove}
                 onClick={() => removeAttachment(att)}
               >
-                ✕
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="2 4 14 4"/><path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M6 7v5M10 7v5"/><rect x="3" y="4" width="10" height="9" rx="1"/></svg>
               </button>
             </div>
           ))}
@@ -212,7 +212,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
                 className={styles.attachRemove}
                 onClick={() => setNewFiles((ff) => ff.filter((_, ii) => ii !== i))}
               >
-                ✕
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="2 4 14 4"/><path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M6 7v5M10 7v5"/><rect x="3" y="4" width="10" height="9" rx="1"/></svg>
               </button>
             </div>
           ))}
@@ -297,10 +297,11 @@ export function RoundCard({
             </span>
           )}
 
-          <span
-            className={styles.roundStatus}
-            style={getRoundStatusStyle(roundStatus(round))}
-          >
+          <span className={styles.roundStatus} style={{ color: getRoundStatusStyle(roundStatus(round)).color }}>
+            <span
+              className={styles.statusDot}
+              style={{ background: getRoundStatusStyle(roundStatus(round)).color }}
+            />
             {roundStatus(round)}
           </span>
 
@@ -324,7 +325,9 @@ export function RoundCard({
               onClick={(e) => { e.stopPropagation(); onEditToggle(); }}
               title="Редагувати раунд"
             >
-              ✏️
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z"/>
+              </svg>
             </button>
           )}
           {!readOnly && (
@@ -333,7 +336,12 @@ export function RoundCard({
               onClick={(e) => { e.stopPropagation(); onDeleteRequest(round); }}
               title="Видалити раунд"
             >
-              🗑️
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="2 4 14 4"/>
+                <path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
+                <path d="M6 7v5M10 7v5"/>
+                <rect x="3" y="4" width="10" height="9" rx="1"/>
+              </svg>
             </button>
           )}
           {!isEditing && (
@@ -404,83 +412,36 @@ export function RoundCard({
             </div>
           )}
 
-          {/* ── Вкладки раунду ── */}
-          <div className={styles.roundTabs}>
-            <button
-              className={`${styles.roundTab} ${section === "tasks" ? styles.roundTabActive : ""}`}
-              onClick={() => onSectionChange("tasks")}
-            >
-              Завдання{taskCount > 0 && ` (${taskCount})`}
-            </button>
-            {!readOnly && (
-              <button
-                className={`${styles.roundTab} ${section === "allSubmissions" ? styles.roundTabActive : ""}`}
-                onClick={() => onSectionChange("allSubmissions")}
-              >
-                Усі здачі
-              </button>
+          {/* ── Завдання ── */}
+          <div className={styles.taskList}>
+            {taskCount === 0 && !showTaskForm && (
+              <p className={styles.empty}>📋 Завдань ще немає.</p>
+            )}
+
+            {(round.tasks || []).map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                tournamentId={tournamentId}
+                roundId={round.id}
+                readOnly={readOnly}
+                myRole={myRole}
+                isOpen={openTaskId === task.id}
+                onToggle={() => onTaskToggle(task.id)}
+                onDeleted={(taskId) => onTaskDeleted(round.id, taskId)}
+              />
+            ))}
+
+            {/* TaskForm rendered inline — triggered from header button */}
+            {!readOnly && showTaskForm && (
+              <TaskForm
+                roundId={round.id}
+                tournamentId={tournamentId}
+                onCreated={(task) => onTaskCreated(round.id, task)}
+                onCancel={onCloseTaskForm}
+              />
             )}
           </div>
-
-          {/* ── Завдання ── */}
-          {section === "tasks" && (
-            <div className={styles.taskList}>
-              {taskCount === 0 && !showTaskForm && (
-                <p className={styles.empty}>📋 Завдань ще немає.</p>
-              )}
-
-              {(round.tasks || []).map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  tournamentId={tournamentId}
-                  roundId={round.id}
-                  readOnly={readOnly}
-                  myRole={myRole}
-                  isOpen={openTaskId === task.id}
-                  onToggle={() => onTaskToggle(task.id)}
-                  onDeleted={(taskId) => onTaskDeleted(round.id, taskId)}
-                />
-              ))}
-
-              {/* TaskForm rendered inline — triggered from header button */}
-              {!readOnly && showTaskForm && (
-                <TaskForm
-                  roundId={round.id}
-                  tournamentId={tournamentId}
-                  onCreated={(task) => onTaskCreated(round.id, task)}
-                  onCancel={onCloseTaskForm}
-                />
-              )}
-            </div>
-          )}
-
-          {/* ── Всі здачі (для власника / журі) ── */}
-          {section === "allSubmissions" && !readOnly && (
-            <div className={styles.taskList}>
-              {taskCount === 0 ? (
-                <p className={styles.empty}>У цьому раунді немає завдань.</p>
-              ) : (
-                (round.tasks || []).map((task) => (
-                  <div key={task.id} className={styles.taskSubmissionsBlock}>
-                    <div className={styles.taskSubmissionsBlockTitle}>
-                      📋 {task.title}
-                    </div>
-                    <TaskCard
-                      task={task}
-                      tournamentId={tournamentId}
-                      roundId={round.id}
-                      readOnly={false}
-                      myRole={myRole}
-                      isOpen={true}
-                      onToggle={() => {}}
-                      onDeleted={() => {}}
-                    />
-                  </div>
-                ))
-              )}
-            </div>
-          )}
         </div>
       )}
     </div>
