@@ -20,6 +20,11 @@ from .serializers import (
 )
 from .permissions import IsTournamentOwner, IsTournamentMemberOrOwner, IsTournamentParticipant
 
+BASE_URL = "http://localhost:5173"
+
+# Ролі, для яких власник може генерувати інвайти
+INVITABLE_ROLES = ('participant', 'jury', 'admin')
+
 
 # ── Tournament views ──────────────────────────────────────────────────────────
 
@@ -62,66 +67,118 @@ class MyTournamentRoleView(APIView):
 # ── Invite / Join views ───────────────────────────────────────────────────────
 
 class TournamentInviteLinkView(APIView):
+    """
+    GET /tournaments/<id>/invite-link/?role=participant|jury|admin
+    Повертає invite_url і invite_pin для вказаної ролі.
+    Доступно тільки власнику.
+    """
     permission_classes = [IsAuthenticated, IsTournamentOwner]
 
     def get(self, request, tournament_pk):
+        role = request.query_params.get('role', 'participant')
+        if role not in INVITABLE_ROLES:
+            return Response(
+                {'detail': f'Невірна роль. Допустимі: {", ".join(INVITABLE_ROLES)}.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         try:
             tournament = Tournament.objects.get(pk=tournament_pk)
         except Tournament.DoesNotExist:
             return Response({'detail': 'Турнір не знайдено.'}, status=status.HTTP_404_NOT_FOUND)
 
+        token = tournament.get_invite_token_for_role(role)
+        pin   = tournament.get_invite_pin_for_role(role)
+
         return Response({
-            'invite_token': str(tournament.invite_token),
-            'invite_url':   f"http://localhost:5173/join/{tournament.invite_token}",
-            'invite_pin':   tournament.invite_pin,
+            'role':         role,
+            'invite_token': str(token),
+            'invite_url':   f"{BASE_URL}/join/{token}",
+            'invite_pin':   pin,
         })
 
 
 class RegeneratePinView(APIView):
+    """
+    POST /tournaments/<id>/regenerate-pin/?role=participant|jury|admin
+    Перегенерує PIN для вказаної ролі.
+    """
     permission_classes = [IsAuthenticated, IsTournamentOwner]
 
     def post(self, request, tournament_pk):
+        role = request.query_params.get('role', 'participant')
+        if role not in INVITABLE_ROLES:
+            return Response(
+                {'detail': f'Невірна роль. Допустимі: {", ".join(INVITABLE_ROLES)}.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         try:
             tournament = Tournament.objects.get(pk=tournament_pk)
         except Tournament.DoesNotExist:
             return Response({'detail': 'Турнір не знайдено.'}, status=status.HTTP_404_NOT_FOUND)
 
-        tournament.invite_pin = generate_invite_pin()
-        tournament.save(update_fields=['invite_pin'])
-
-        return Response({'invite_pin': tournament.invite_pin})
+        new_pin = tournament.set_invite_pin_for_role(role)
+        return Response({'role': role, 'invite_pin': new_pin})
 
 
 class VerifyInvitePinView(APIView):
+    """
+    POST /tournaments/join/<token>/verify-pin/
+    Токен однозначно визначає роль — просто перевіряємо PIN.
+    """
     permission_classes = []
 
     def post(self, request, token):
         pin = request.data.get('pin', '').strip()
-
         if not pin:
             return Response(
                 {'detail': 'PIN не може бути порожнім.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        try:
-            tournament = Tournament.objects.get(invite_token=token)
-        except Tournament.DoesNotExist:
+        tournament, role = self._find_tournament_and_role(token)
+        if not tournament:
             return Response(
                 {'detail': 'Невірний або недійсний інвайт-токен.'},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        if str(tournament.invite_pin) == str(pin):
-            return Response({'valid': True, 'tournament_name': tournament.name})
+        expected_pin = tournament.get_invite_pin_for_role(role)
+        if str(expected_pin) == str(pin):
+            return Response({
+                'valid':            True,
+                'tournament_name':  tournament.name,
+                'role':             role,
+            })
 
         return Response(
             {'detail': 'Невірний PIN-код. Перевірте та спробуйте ще раз.'},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    @staticmethod
+    def _find_tournament_and_role(token):
+        """Шукає турнір за токеном будь-якої ролі, повертає (tournament, role)."""
+        for field, role in [
+            ('invite_token',       'participant'),
+            ('jury_invite_token',  'jury'),
+            ('admin_invite_token', 'admin'),
+        ]:
+            try:
+                t = Tournament.objects.get(**{field: token})
+                return t, role
+            except Tournament.DoesNotExist:
+                continue
+        return None, None
+
 
 class JoinByTokenView(APIView):
+    """
+    POST /tournaments/join/
+    Body: { "token": "<uuid>" }
+    Визначає роль з токена і додає користувача з відповідною роллю.
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -130,10 +187,9 @@ class JoinByTokenView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         token = serializer.validated_data['token']
+        tournament, role = VerifyInvitePinView._find_tournament_and_role(str(token))
 
-        try:
-            tournament = Tournament.objects.get(invite_token=token)
-        except Tournament.DoesNotExist:
+        if not tournament:
             return Response(
                 {'detail': 'Невірний або недійсний інвайт-токен.'},
                 status=status.HTTP_404_NOT_FOUND,
@@ -142,7 +198,7 @@ class JoinByTokenView(APIView):
         member, created = TournamentMember.objects.get_or_create(
             tournament=tournament,
             user=request.user,
-            defaults={'role': 'participant'},
+            defaults={'role': role},
         )
 
         return Response({
@@ -157,9 +213,8 @@ class TournamentPreviewByTokenView(APIView):
     permission_classes = []
 
     def get(self, request, token):
-        try:
-            tournament = Tournament.objects.get(invite_token=token)
-        except Tournament.DoesNotExist:
+        tournament, role = VerifyInvitePinView._find_tournament_and_role(str(token))
+        if not tournament:
             return Response(
                 {'detail': 'Невірний або недійсний інвайт-токен.'},
                 status=status.HTTP_404_NOT_FOUND,
@@ -169,6 +224,7 @@ class TournamentPreviewByTokenView(APIView):
             'id':          tournament.id,
             'name':        tournament.name,
             'description': tournament.description,
+            'role':        role,
         })
 
 
@@ -332,20 +388,14 @@ class TaskAttachmentDeleteView(generics.DestroyAPIView):
 
 def _is_owner_or_staff(request, tournament_pk):
     """Повертає True якщо юзер є власником турніру або має роль admin/jury."""
-    if request.user.role in ('admin', 'jury'):
-        return True
     membership = TournamentMember.objects.filter(
         tournament_id=tournament_pk,
         user=request.user,
     ).first()
-    return membership and membership.role == 'owner'
+    return membership and membership.role in ('owner', 'admin', 'jury')
 
 
 class SubmissionListCreateView(generics.ListCreateAPIView):
-    """
-    GET  — учасник бачить тільки свою здачу; власник/журі/адмін — усі.
-    POST — учасник турніру здає роботу (одна здача на завдання).
-    """
     serializer_class   = SubmissionSerializer
     permission_classes = [IsAuthenticated, IsTournamentParticipant]
 
@@ -368,11 +418,6 @@ class SubmissionListCreateView(generics.ListCreateAPIView):
 
 
 class SubmissionDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """
-    GET    — власник/журі/адмін або сам учасник.
-    PATCH  — тільки учасник (автор здачі).
-    DELETE — тільки учасник (автор здачі).
-    """
     serializer_class   = SubmissionSerializer
     permission_classes = [IsAuthenticated, IsTournamentParticipant]
 

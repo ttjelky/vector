@@ -28,8 +28,8 @@ class IsTournamentOwner(BasePermission):
 
 class IsTournamentMemberOrOwner(BasePermission):
     """
-    GET-запити: дозволяє власникам і учасникам турніру.
-    POST/PATCH/PUT/DELETE: тільки власник.
+    GET-запити: дозволяє власникам, адмінам, журі та учасникам турніру.
+    POST/PATCH/PUT/DELETE: тільки owner і admin.
     """
     message = "Ви не є учасником цього турніру."
 
@@ -40,32 +40,26 @@ class IsTournamentMemberOrOwner(BasePermission):
         if not tournament_id:
             return False
 
-        is_member = TournamentMember.objects.filter(
+        membership = TournamentMember.objects.filter(
             tournament_id=tournament_id,
             user=request.user,
-        ).exists()
+        ).first()
 
-        if not is_member:
+        if not membership:
             return False
 
         # Безпечні методи (GET, HEAD, OPTIONS) — дозволені всім учасникам
         if request.method in SAFE_METHODS:
             return True
 
-        # Мутації — тільки власник
-        return TournamentMember.objects.filter(
-            tournament_id=tournament_id,
-            user=request.user,
-            role='owner',
-        ).exists()
+        # Мутації — тільки owner і admin
+        return membership.role in ('owner', 'admin')
 
 
 class IsTournamentParticipant(BasePermission):
     """
-    Дозволяє будь-який метод (GET, POST, PATCH, DELETE) будь-якому
-    учаснику турніру — і власнику, і participant-у.
-    Використовується для submissions: учасник здає роботу (POST),
-    власник/журі переглядають (GET).
+    Дозволяє будь-який метод будь-якому члену турніру
+    (owner, admin, jury, participant).
     """
     message = "Ви не є учасником цього турніру."
 

@@ -31,23 +31,68 @@ class Tournament(models.Model):
     # Числові значення
     max_teams = models.IntegerField(null=True, blank=True)
 
-    # ── Інвайт-токен ──────────────────────────────────────────────────────────
+    # ── Інвайт для учасників ──────────────────────────────────────────────────
     invite_token = models.UUIDField(
-        default=uuid.uuid4,
-        unique=True,
-        editable=False,
-        verbose_name="Інвайт-токен",
+        default=uuid.uuid4, unique=True, editable=False,
+        verbose_name="Інвайт-токен (учасник)",
+    )
+    invite_pin = models.CharField(
+        max_length=6, default=generate_invite_pin,
+        verbose_name="PIN-код (учасник)",
     )
 
-    # ── PIN-код для додаткової перевірки при приєднанні ───────────────────────
-    invite_pin = models.CharField(
-        max_length=6,
-        default=generate_invite_pin,
-        verbose_name="PIN-код запрошення",
+    # ── Інвайт для журі ───────────────────────────────────────────────────────
+    jury_invite_token = models.UUIDField(
+        default=uuid.uuid4, unique=True, editable=False,
+        verbose_name="Інвайт-токен (журі)",
+    )
+    jury_invite_pin = models.CharField(
+        max_length=6, default=generate_invite_pin,
+        verbose_name="PIN-код (журі)",
+    )
+
+    # ── Інвайт для адмінів ────────────────────────────────────────────────────
+    admin_invite_token = models.UUIDField(
+        default=uuid.uuid4, unique=True, editable=False,
+        verbose_name="Інвайт-токен (адмін)",
+    )
+    admin_invite_pin = models.CharField(
+        max_length=6, default=generate_invite_pin,
+        verbose_name="PIN-код (адмін)",
     )
 
     def __str__(self):
         return self.name
+
+    def get_invite_token_for_role(self, role):
+        mapping = {
+            'participant': self.invite_token,
+            'jury':        self.jury_invite_token,
+            'admin':       self.admin_invite_token,
+        }
+        return mapping.get(role)
+
+    def get_invite_pin_for_role(self, role):
+        mapping = {
+            'participant': self.invite_pin,
+            'jury':        self.jury_invite_pin,
+            'admin':       self.admin_invite_pin,
+        }
+        return mapping.get(role)
+
+    def set_invite_pin_for_role(self, role):
+        """Перегенерує PIN для вказаної ролі, повертає новий PIN."""
+        new_pin = generate_invite_pin()
+        if role == 'participant':
+            self.invite_pin = new_pin
+            self.save(update_fields=['invite_pin'])
+        elif role == 'jury':
+            self.jury_invite_pin = new_pin
+            self.save(update_fields=['jury_invite_pin'])
+        elif role == 'admin':
+            self.admin_invite_pin = new_pin
+            self.save(update_fields=['admin_invite_pin'])
+        return new_pin
 
 
 # ── TournamentMember ──────────────────────────────────────────────────────────
@@ -55,7 +100,16 @@ class Tournament(models.Model):
 TOURNAMENT_ROLE_CHOICES = [
     ('owner',       'Власник'),
     ('participant', 'Учасник'),
+    ('jury',        'Журі'),
+    ('admin',       'Адміністратор'),
 ]
+
+# Токен → роль при приєднанні (використовується у view)
+TOKEN_FIELD_TO_ROLE = {
+    'invite_token':       'participant',
+    'jury_invite_token':  'jury',
+    'admin_invite_token': 'admin',
+}
 
 
 class TournamentMember(models.Model):
@@ -178,18 +232,11 @@ class TaskAttachment(models.Model):
 # ── Submission ────────────────────────────────────────────────────────────────
 
 class Submission(models.Model):
-    """Здача роботи учасником по конкретному завданню."""
     task = models.ForeignKey(
-        Task,
-        on_delete=models.CASCADE,
-        related_name="submissions",
-        verbose_name="Завдання",
+        Task, on_delete=models.CASCADE, related_name="submissions", verbose_name="Завдання",
     )
     participant = models.ForeignKey(
-        'users.User',
-        on_delete=models.CASCADE,
-        related_name="submissions",
-        verbose_name="Учасник",
+        'users.User', on_delete=models.CASCADE, related_name="submissions", verbose_name="Учасник",
     )
     text         = models.TextField(null=True, blank=True, verbose_name="Текст відповіді")
     submitted_at = models.DateTimeField(auto_now_add=True, verbose_name="Час здачі")
