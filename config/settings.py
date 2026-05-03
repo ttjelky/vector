@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.tournaments',
     'django_rest_passwordreset',
-
+    'apps.notifications',
+    
 ]
 
 MIDDLEWARE = [

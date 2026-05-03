@@ -41,6 +41,7 @@ body, html {
   font-size: 14px;
   outline: none;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .searchInput:hover {
@@ -53,29 +54,70 @@ body, html {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-.navBarUserActions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  line-height: 40px;
-}
-
 .searchInput::placeholder {
   color: #9ca3af;
 }
 
-.mainWrapper {
+/* ── Права частина хедера ── */
+.navbarUserActions {
   display: flex;
-  flex: 1;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .userName {
   font-size: 14px;
   font-weight: 500;
   color: #333;
-  margin-right: 15px;
+  white-space: nowrap;
 }
 
+/* Аватарка — кругла фотка */
+.navbarAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e8e8e8;
+  flex-shrink: 0;
+}
+
+/* Аватарка — плейсхолдер з першою літерою */
+.navbarAvatarPlaceholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e8e8e8;
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid #ddd;
+}
+
+/* Bell — стиль тепер в Notifications.module.css */
+.notificationIcon {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── Layout ── */
+.mainWrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.contentArea {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ── Sidebar ── */
 .leftSidebar {
   width: 200px;
   background-color: white;
@@ -86,6 +128,62 @@ body, html {
   flex-shrink: 0;
 }
 
+.primaryNav, .secondaryNav {
+  margin-bottom: 20px;
+}
+
+.leftSidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.leftSidebar li {
+  margin-bottom: 5px;
+}
+
+.leftSidebar a {
+  text-decoration: none;
+  color: #333;
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border-radius: 8px;
+}
+
+.sidebarText {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(39, 50, 64, 1);
+}
+
+.sidebarIcon {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+}
+
+.sidebarSectionTitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: gray;
+  margin-bottom: 10px;
+  margin-left: 13px;
+  margin-top: 0;
+}
+
+.inactiveLink:hover {
+  background-color: #f0f0f0;
+  border-radius: 15px;
+  transition-duration: 0.2s;
+}
+
+.activeLink {
+  background-color: #ececec;
+  border-radius: 15px !important;
+}
+
+/* ── Nested tabs ── */
 .nestedTournament {
   position: relative;
   display: flex;
@@ -102,71 +200,6 @@ body, html {
   color: #888;
   text-decoration: none;
   border-radius: 4px;
-}
-
-/* Назва турніру, що обрізається */
-.tournamentTitle {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
-}
-
-.primaryNav, .secondaryNav {
-  margin-bottom: 20px;
-}
-
-.logoutSection {
-  margin-top: auto;
-}
-
-.leftSidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.leftSidebar li {
-  margin-bottom: 5px;
-}
-
-.leftSidebar a {
-  text-decoration: none;
-  color: #333;
-  display: flex;
-  align-items: center;
-  padding: 10px 15px;
-  border-radius: 8px;
-}
-
-.closeIcon {
-  width: 10px;
-  height: 10px;
-  fill: #888;
-}
-
-.closeIconWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  margin-left: 10px;
-  border-radius: 50%;
-  transition: background-color 0.2s ease;
-}
-
-.closeIconWrapper:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.tabName {
-  font-size: 14px;
-  font-weight: 400;
-  color: #333;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
 }
 
 .nestedLink:hover {
@@ -192,39 +225,47 @@ body, html {
   gap: 8px;
 }
 
-.inactiveLink:hover {
-  background-color: #f0f0f0;
-  border-radius: 15px;
-  transition-duration: 0.2s;
-}
-
-
-.activeLink {
-  background-color: #ececec;
-  border-radius: 15px !important;
-}
-
-.sidebarText {
-  font-size: 12px;
-  font-weight: 400;
-  color: rgba(39, 50, 64, 1);
-}
-
-.sidebarIcon {
-  width: 18px;
-  height: 18px;
-  margin-right: 12px;
-}
-
-.sidebarSectionTitle {
+.tabName {
   font-size: 14px;
   font-weight: 400;
-  color: gray;
-  margin-bottom: 10px;
-  margin-left: 13px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 }
 
+.tournamentTitle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.closeIcon {
+  width: 10px;
+  height: 10px;
+  fill: #888;
+}
+
+.closeIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.closeIconWrapper:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* ── Logout ── */
 .logoutSection {
+  margin-top: auto;
   background-color: rgb(255, 229, 230);
   border-radius: 15px;
 }
@@ -232,6 +273,13 @@ body, html {
 .logoutSection:hover {
   background-color: rgb(255, 201, 204);
   transition-duration: 0.2s;
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 15px;
 }
 
 .logoutIcon {
@@ -245,20 +293,4 @@ body, html {
   font-size: 12px;
   font-weight: 400;
   color: rgb(215, 125, 126);
-}
-
-.notificationIcon {
-  position: relative;
-  width: 18px;
-  height: 18px;
-}
-
-.mainWrapper {
-  display: flex;
-  overflow: hidden;
-}
-
-.contentArea {
-  flex: 1;
-  overflow-y: auto;
 }

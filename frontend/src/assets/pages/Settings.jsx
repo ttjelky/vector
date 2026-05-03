@@ -17,6 +17,12 @@ const LockIcon   = () => <Icon><rect x="3" y="11" width="18" height="11" rx="2" 
 const WarmIcon   = () => <Icon><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></Icon>;
 const EyeOffIcon = () => <Icon><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></Icon>;
 
+// ── Хелпер: зберегти в localStorage і повідомити інші компоненти ──────────────
+const saveSetting = (key, value) => {
+  localStorage.setItem(key, JSON.stringify(value));
+  window.dispatchEvent(new Event("settings-updated"));
+};
+
 // ── Reusable Toggle Row ───────────────────────────────────────────────────────
 const ToggleRow = ({ icon, label, desc, checked, onChange }) => (
   <div className="settings-row">
@@ -52,16 +58,6 @@ const ClickRow = ({ icon, label, desc, onClick }) => (
   </div>
 );
 
-// ── Warm overlay (fixed, pointer-events: none) ────────────────────────────────
-const WarmOverlay = ({ active }) =>
-  active ? (
-    <div style={{
-      position: "fixed", inset: 0, pointerEvents: "none", zIndex: 9998,
-      background: "rgba(255, 140, 30, 0.13)",
-      mixBlendMode: "multiply",
-    }} />
-  ) : null;
-
 // ── Main Component ────────────────────────────────────────────────────────────
 const Settings = () => {
   const get = (key, fallback) => {
@@ -76,93 +72,90 @@ const Settings = () => {
   const [showLogoutBtn, setShowLogoutBtn] = useState(() => get("setting_logout", true));
   const [forgotOpen,    setForgotOpen]    = useState(false);
 
-  // Темна тема — додаємо/знімаємо клас на <html>
+  // Темна тема — клас на <html>
   useEffect(() => {
     document.documentElement.classList.toggle("dark-theme", darkMode);
-    localStorage.setItem("setting_dark",   JSON.stringify(darkMode));
+    saveSetting("setting_dark", darkMode);
   }, [darkMode]);
 
-  useEffect(() => { localStorage.setItem("setting_warm",   JSON.stringify(warmMode));      }, [warmMode]);
-  useEffect(() => { localStorage.setItem("setting_notifs", JSON.stringify(notifications)); }, [notifications]);
-  useEffect(() => { localStorage.setItem("setting_email",  JSON.stringify(emailNotifs));   }, [emailNotifs]);
-  useEffect(() => { localStorage.setItem("setting_logout", JSON.stringify(showLogoutBtn)); }, [showLogoutBtn]);
+  // Решта — просто зберігаємо + повідомляємо NavBar / WarmOverlay
+  useEffect(() => { saveSetting("setting_warm",   warmMode);      }, [warmMode]);
+  useEffect(() => { saveSetting("setting_notifs", notifications); }, [notifications]);
+  useEffect(() => { saveSetting("setting_email",  emailNotifs);   }, [emailNotifs]);
+  useEffect(() => { saveSetting("setting_logout", showLogoutBtn); }, [showLogoutBtn]);
 
   return (
-    <>
-      <WarmOverlay active={warmMode} />
+    <NavBar>
+      <div className="settings-page">
+        <h1>Налаштування</h1>
 
-      <NavBar>
-        <div className="settings-page">
-          <h1>Налаштування</h1>
+        {/* ── Вигляд ── */}
+        <div className="settings-section">
+          <div className="settings-section-title">Вигляд</div>
 
-          {/* ── Вигляд ── */}
-          <div className="settings-section">
-            <div className="settings-section-title">Вигляд</div>
+          <ToggleRow
+            icon={<MoonIcon />}
+            label="Темний режим"
+            desc="Перемикання між світлою та темною темою"
+            checked={darkMode}
+            onChange={() => setDarkMode(v => !v)}
+          />
 
-            <ToggleRow
-              icon={<MoonIcon />}
-              label="Темний режим"
-              desc="Перемикання між світлою та темною темою"
-              checked={darkMode}
-              onChange={() => setDarkMode(v => !v)}
-            />
-
-            <ToggleRow
-              icon={<WarmIcon />}
-              label="Теплий режим"
-              desc="Накладає теплий фільтр — зручно ввечері"
-              checked={warmMode}
-              onChange={() => setWarmMode(v => !v)}
-            />
-          </div>
-
-          {/* ── Сповіщення ── */}
-          <div className="settings-section">
-            <div className="settings-section-title">Сповіщення</div>
-
-            <ToggleRow
-              icon={<BellIcon />}
-              label="Push-сповіщення"
-              desc="Сповіщення всередині застосунку"
-              checked={notifications}
-              onChange={() => setNotifications(v => !v)}
-            />
-
-            <ToggleRow
-              icon={<BellIcon />}
-              label="Email-сповіщення"
-              desc="Надсилати важливе на пошту"
-              checked={emailNotifs}
-              onChange={() => setEmailNotifs(v => !v)}
-            />
-          </div>
-
-          {/* ── Безпека ── */}
-          <div className="settings-section">
-            <div className="settings-section-title">Безпека</div>
-
-            <ClickRow
-              icon={<LockIcon />}
-              label="Оновити пароль"
-              desc="Скинути пароль через електронну пошту"
-              onClick={() => setForgotOpen(true)}
-            />
-          </div>
-
-          {/* ── Інтерфейс ── */}
-          <div className="settings-section">
-            <div className="settings-section-title">Інтерфейс</div>
-
-            <ToggleRow
-              icon={<EyeOffIcon />}
-              label='Кнопка "Вийти" в сайдбарі'
-              desc="Показувати або приховати кнопку виходу в меню"
-              checked={showLogoutBtn}
-              onChange={() => setShowLogoutBtn(v => !v)}
-            />
-          </div>
+          <ToggleRow
+            icon={<WarmIcon />}
+            label="Теплий режим"
+            desc="Накладає теплий фільтр — зручно ввечері"
+            checked={warmMode}
+            onChange={() => setWarmMode(v => !v)}
+          />
         </div>
-      </NavBar>
+
+        {/* ── Сповіщення ── */}
+        <div className="settings-section">
+          <div className="settings-section-title">Сповіщення</div>
+
+          <ToggleRow
+            icon={<BellIcon />}
+            label="Push-сповіщення"
+            desc="Сповіщення всередині застосунку"
+            checked={notifications}
+            onChange={() => setNotifications(v => !v)}
+          />
+
+          <ToggleRow
+            icon={<BellIcon />}
+            label="Email-сповіщення"
+            desc="Надсилати важливе на пошту"
+            checked={emailNotifs}
+            onChange={() => setEmailNotifs(v => !v)}
+          />
+        </div>
+
+        {/* ── Безпека ── */}
+        <div className="settings-section">
+          <div className="settings-section-title">Безпека</div>
+
+          <ClickRow
+            icon={<LockIcon />}
+            label="Оновити пароль"
+            desc="Скинути пароль через електронну пошту"
+            onClick={() => setForgotOpen(true)}
+          />
+        </div>
+
+        {/* ── Інтерфейс ── */}
+        <div className="settings-section">
+          <div className="settings-section-title">Інтерфейс</div>
+
+          <ToggleRow
+            icon={<EyeOffIcon />}
+            label='Кнопка "Вийти" в сайдбарі'
+            desc="Показувати або приховати кнопку виходу в меню"
+            checked={showLogoutBtn}
+            onChange={() => setShowLogoutBtn(v => !v)}
+          />
+        </div>
+      </div>
 
       {/* Forgot password modal */}
       <Forgot
@@ -170,7 +163,7 @@ const Settings = () => {
         onClose={() => setForgotOpen(false)}
         onBackToLogin={() => setForgotOpen(false)}
       />
-    </>
+    </NavBar>
   );
 };
 
