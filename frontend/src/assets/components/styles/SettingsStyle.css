@@ -1,0 +1,170 @@
+/* SettingsStyle.css */
+
+.settings-page {
+    padding: 32px 40px;
+    max-width: 760px;
+    font-family: inherit;
+}
+
+.settings-page h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 28px 0;
+}
+
+/* Section card */
+.settings-section {
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-radius: 14px;
+    padding: 8px 0;
+    margin-bottom: 20px;
+}
+
+.settings-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #aaaaaa;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 10px 20px 6px 20px;
+}
+
+/* Row */
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f2f2f2;
+    gap: 16px;
+    transition: background 0.15s ease;
+}
+
+.settings-row:last-child {
+    border-bottom: none;
+}
+
+.settings-row:hover {
+    background: #fafafa;
+}
+
+.settings-row-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.settings-row-icon {
+    width: 34px;
+    height: 34px;
+    background: #f4f4f4;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #555;
+}
+
+.settings-row-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.settings-row-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.settings-row-desc {
+    font-size: 12px;
+    color: #999;
+}
+
+/* Toggle switch */
+.toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.toggle-track {
+    position: absolute;
+    inset: 0;
+    background: #e0e0e0;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.22s ease;
+}
+
+.toggle input:checked + .toggle-track {
+    background: #4ade80;
+}
+
+.toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+    transition: transform 0.22s ease;
+    pointer-events: none;
+}
+
+.toggle input:checked ~ .toggle-thumb {
+    transform: translateX(20px);
+}
+
+/* Logout row */
+.settings-row.danger .settings-row-icon {
+    background: #fff0f0;
+    color: #e05252;
+}
+
+.settings-row.danger .settings-row-label {
+    color: #e05252;
+}
+
+.settings-row.danger:hover {
+    background: #fff8f8;
+}
+
+/* Chevron for navigable rows */
+.settings-chevron {
+    color: #ccc;
+    flex-shrink: 0;
+}
+
+/* Language / value badge */
+.settings-value {
+    font-size: 13px;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Logout button as row */
+.settings-logout-btn {
+    all: unset;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
+    box-sizing: border-box;
+}
