@@ -63,7 +63,7 @@ const NavBar = ({ children }) => {
   const [notifsLoading, setNotifsLoading] = useState(false);
 
   // mobile sidebar
-  const [sidebarOpen, setSidebarOpen]     = useState(false);
+  const [sidebarOpen, setSidebarOpen]       = useState(false);
   const [sidebarClosing, setSidebarClosing] = useState(false);
 
   const bellRef    = useRef();
@@ -76,6 +76,7 @@ const NavBar = ({ children }) => {
   const role     = localStorage.getItem("userRole") ?? "participant";
   const roleTabs = getTabsForRole(role);
 
+  // ── Профіль ──────────────────────────────────────────────────────────────
   useEffect(() => {
     const storedName = localStorage.getItem('fullUserName');
     if (storedName) setFullUserName(storedName.trim());
@@ -89,6 +90,7 @@ const NavBar = ({ children }) => {
     }
   }, []);
 
+  // ── Кнопка виходу ────────────────────────────────────────────────────────
   useEffect(() => {
     const handler = () =>
       setShowLogout(JSON.parse(localStorage.getItem("setting_logout") ?? "true"));
@@ -100,7 +102,24 @@ const NavBar = ({ children }) => {
     };
   }, []);
 
-  // закрити sidebar по кліку поза
+  // ── Теплий режим ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    const applyWarm = () => {
+      const warm = JSON.parse(localStorage.getItem("setting_warm") ?? "false");
+      document.documentElement.style.filter = warm
+        ? "sepia(0.25) saturate(1.1) brightness(0.98)"
+        : "";
+    };
+    applyWarm(); // застосувати одразу при маунті
+    window.addEventListener("settings-updated", applyWarm);
+    window.addEventListener("storage", applyWarm);
+    return () => {
+      window.removeEventListener("settings-updated", applyWarm);
+      window.removeEventListener("storage", applyWarm);
+    };
+  }, []);
+
+  // ── Закрити sidebar по кліку поза ────────────────────────────────────────
   useEffect(() => {
     if (!sidebarOpen) return;
     const handler = (e) => {
@@ -124,6 +143,7 @@ const NavBar = ({ children }) => {
     }, 320);
   };
 
+  // ── Сповіщення ───────────────────────────────────────────────────────────
   const fetchNotifs = async () => {
     setNotifsLoading(true);
     try {
@@ -174,7 +194,7 @@ const NavBar = ({ children }) => {
 
   const hasUnread = notifs.some(n => !n.is_read);
 
-  // ── Sidebar content (shared desktop + mobile) ────────────────────────────
+  // ── Sidebar content (shared desktop + mobile) ─────────────────────────────
   const SidebarContent = () => (
     <>
       <nav className={styles.primaryNav}>
@@ -251,6 +271,7 @@ const NavBar = ({ children }) => {
             <span /><span /><span />
           </button>
 
+          {/* Лого */}
           <div className={styles.navbarLogo}>
             <img src={Logo} alt="Vector" className={styles.logo} />
           </div>
@@ -302,7 +323,6 @@ const NavBar = ({ children }) => {
                 className={`${styles.mobileSidebar} ${sidebarClosing ? styles.mobileSidebarOut : ''}`}
                 ref={sidebarRef}
               >
-                {/* Юзер-блок у мобільному сайдбарі */}
                 <div className={styles.mobileSidebarUser}>
                   {avatar
                     ? <img src={avatar} alt="avatar" className={styles.mobileAvatar} />
@@ -323,7 +343,6 @@ const NavBar = ({ children }) => {
                   </button>
                 </div>
 
-                {/* Сповіщення в мобільному сайдбарі */}
                 <div className={styles.mobileBellRow}>
                   <div className={nStyles.bellWrap}>
                     <button
