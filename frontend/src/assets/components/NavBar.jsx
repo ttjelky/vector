@@ -83,7 +83,7 @@ const NavBar = ({ children }) => {
 
     const token = getToken();
     if (token) {
-      fetch(`${API}/profile/`, { headers: { Authorization: `Bearer ${token}` } })
+      fetch(`${API}/users/profile/`, { headers: { Authorization: `Bearer ${token}` } })
         .then(r => r.ok ? r.json() : null)
         .then(d => { if (d?.avatar) setAvatar(`http://127.0.0.1:8000${d.avatar}`); })
         .catch(() => {});

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { fetchProfile } from "../../api/profile";
 import styles from "../components/styles/profile.module.css";
 import NavBar from "../components/NavBar";
 
