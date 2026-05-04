@@ -115,6 +115,27 @@ body, html {
 .contentArea {
   flex: 1;
   overflow-y: auto;
+  background: #fff;
+  position: relative;
+}
+
+/* Лоадер всередині контентної зони — не перекриває весь екран */
+.contentArea :global(.loading-overlay) {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+}
+
+/* Якщо лоадер — окремий блок (не overlay), не даємо йому розтягуватись */
+.contentArea :global(.loading-screen),
+.contentArea :global(.loader-wrap) {
+  min-height: unset !important;
+  height: auto !important;
 }
 
 /* ── Sidebar ── */
@@ -184,11 +205,52 @@ body, html {
 }
 
 /* ── Nested tabs ── */
+@keyframes tabOpen {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    max-height: 60px;
+    transform: translateX(0);
+  }
+}
+
 .nestedTournament {
   position: relative;
   display: flex;
   align-items: center;
   padding-left: 20px;
+  overflow: hidden;
+  /* Стан за замовчуванням — повністю видимий (для phase='open') */
+  opacity: 1;
+  max-height: 60px;
+  transform: translateX(0);
+}
+
+/* Початковий стан — елемент схований, анімація ще не почалась */
+.tabHidden {
+  opacity: 0;
+  max-height: 0;
+  transform: translateX(-8px);
+}
+
+/* Запускаємо анімацію появи */
+.tabOpening {
+  animation: tabOpen 0.25s ease forwards;
+}
+
+.tabClosing {
+  opacity: 0;
+  max-height: 0;
+  transform: translateX(-8px);
+  pointer-events: none;
+  transition:
+    opacity    0.22s ease,
+    max-height 0.25s ease,
+    transform  0.22s ease;
 }
 
 .nestedLink {
@@ -256,6 +318,11 @@ body, html {
   height: 20px;
   margin-left: 10px;
   border-radius: 50%;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
   transition: background-color 0.2s ease;
 }
 
@@ -268,11 +335,11 @@ body, html {
   margin-top: auto;
   background-color: rgb(255, 229, 230);
   border-radius: 15px;
+  transition: background-color 0.2s;
 }
 
 .logoutSection:hover {
   background-color: rgb(255, 201, 204);
-  transition-duration: 0.2s;
 }
 
 .logoutBtn {
@@ -280,13 +347,18 @@ body, html {
   align-items: center;
   width: 100%;
   padding: 10px 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 15px;
+  box-sizing: border-box;
 }
 
 .logoutIcon {
   width: 18px;
   height: 18px;
   margin-right: 12px;
-  fill: rgb(215, 125, 126);
+  fill: rgb(215, 125, 126) !important;
 }
 
 .logoutText {

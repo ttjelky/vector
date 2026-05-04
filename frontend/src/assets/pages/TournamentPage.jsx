@@ -83,8 +83,20 @@ export default function TournamentPage() {
 
   const handleRoundCreated = (newRound) => setRounds((prev) => [...prev, newRound]);
 
-  if (loading || roleLoading) return <div>Завантаження...</div>;
-  if (!tournament)            return <div>Турнір не знайдено</div>;
+  if (loading || roleLoading) return (
+    <NavBar>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#888', fontSize: 14 }}>
+        Завантаження...
+      </div>
+    </NavBar>
+  );
+  if (!tournament) return (
+    <NavBar>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#888', fontSize: 14 }}>
+        Турнір не знайдено
+      </div>
+    </NavBar>
+  );
 
   const status = computeStatus(tournament);
 
