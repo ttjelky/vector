@@ -3,19 +3,18 @@ import styles from "./styles/ParticipantsTab.module.css";
 import API from "../../api";
 import { X } from "lucide-react";
 import { ConfirmDeleteModal } from "./TournamentShared";
-import AdminIcon from "./static/icons/admin.svg?react"
 
 const TABS = [
-  { key: "participant", label: "Учасники",     icon: "" },
-  { key: "jury",        label: "Журі",          icon: "" },
-  { key: "admin",       label: "Адміністратори", icon: "" },
+  { key: "participant", label: "Учасники",     icon: "👤" },
+  { key: "jury",        label: "Журі",          icon: "⚖️" },
+  { key: "admin",       label: "Адміністратори", icon: "🛡️" },
 ];
 
 const ROLE_LABELS = {
-  owner:       "Власник",
-  participant: "Учасник",
-  jury:        "Журі",
-  admin:       "Адмін",
+  owner:       "👑 Власник",
+  participant: "👤 Учасник",
+  jury:        "⚖️ Журі",
+  admin:       "🛡️ Адмін",
 };
 
 const INVITE_LABELS = {
@@ -24,19 +23,26 @@ const INVITE_LABELS = {
   admin:       "Запросити адміна",
 };
 
+/**
+ * Props:
+ *  - tournamentId  {string|number}
+ *  - myRole        {string|null}   — "owner" | "participant" | "jury" | "admin" | null
+ *  - loading       {boolean}
+ */
 export default function ParticipantsTab({ tournamentId, myRole, loading }) {
   const [members,        setMembers]        = useState([]);
   const [membersLoading, setMembersLoading] = useState(true);
   const [activeTab,      setActiveTab]      = useState("participant");
 
+  // Invite state — по одному об'єкту на роль
   const [invites, setInvites] = useState({
     participant: { url: null, pin: null },
     jury:        { url: null, pin: null },
     admin:       { url: null, pin: null },
   });
-  const [showPin,      setShowPin]      = useState(null);
-  const [copied,       setCopied]       = useState(null);
-  const [regenRole,    setRegenRole]    = useState(null);
+  const [showPin,      setShowPin]      = useState(null);   // яка роль показує PIN
+  const [copied,       setCopied]       = useState(null);   // яка роль скопійована
+  const [regenRole,    setRegenRole]    = useState(null);   // роль у стані підтвердження
   const [regenLoading, setRegenLoading] = useState(false);
 
   // Delete state
@@ -45,6 +51,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
 
   const isOwner = myRole === "owner";
 
+  // ── Завантажити список учасників ──────────────────────────────────────────
   useEffect(() => {
     if (!tournamentId) return;
     setMembersLoading(true);
@@ -54,6 +61,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
       .finally(() => setMembersLoading(false));
   }, [tournamentId]);
 
+  // ── Завантажити invite дані для всіх ролей (тільки власнику) ─────────────
   useEffect(() => {
     if (!tournamentId || !isOwner) return;
 
@@ -68,6 +76,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
     });
   }, [tournamentId, isOwner]);
 
+  // ── Скопіювати посилання ──────────────────────────────────────────────────
   const handleInvite = useCallback((role) => {
     const url = invites[role]?.url;
     if (!url) return;
@@ -271,12 +280,13 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
         )}
       </div>
 
+      {/* ── Модальне вікно видалення ─────────────────────────────────────── */}
       {memberToDelete && (
         <ConfirmDeleteModal
           icon={TABS.find(t => t.key === memberToDelete.role)?.icon ?? "👤"}
           title="Видалити учасника?"
           description={
-            <><strong>{memberToDelete.username}</strong> буде видалений з турніру.
+            <>Учасник <strong>{memberToDelete.username}</strong> буде видалений з турніру.
             Він зможе приєднатися знову за інвайт-посиланням.</>
           }
           confirmLabel="Так, видалити"
