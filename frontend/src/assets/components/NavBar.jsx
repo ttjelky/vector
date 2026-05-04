@@ -3,6 +3,7 @@ import { useNavigate, NavLink } from 'react-router-dom';
 import { useTabs } from '../../TabsContext';
 import { getTabsForRole, COMMON_TABS } from '../../navConfig';
 import styles from './styles/NavBar.module.css';
+import nStyles from './styles/Notifications.module.css';
 
 import HomeIcon        from './static/icons/Home.svg?react';
 import TournamentsIcon from './static/icons/Tournaments.svg?react';
@@ -16,6 +17,10 @@ import BellIcon        from './static/icons/Bell.svg?react';
 import Logo            from './static/VectorLogo.svg';
 import cross           from './static/icons/cross.svg';
 import NewsIcon        from "./static/icons/News.svg?react";
+
+import { ComposeModal, NotificationDropdown } from './Notifications';
+const API = 'http://127.0.0.1:8000/api';
+const getToken = () => localStorage.getItem('accessToken');
 
 const ICON_MAP = {
   home:        HomeIcon,
@@ -98,6 +103,23 @@ const NavBar = ({ children }) => {
   const navigate = useNavigate();
   const [fullUserName, setFullUserName] = useState('');
 
+  const [avatar, setAvatar]               = useState(null);
+  const [bellOpen, setBellOpen]           = useState(false);
+  const [compose, setCompose]             = useState(false);
+  const [notifs, setNotifs]               = useState([]);
+  const [notifsLoading, setNotifsLoading] = useState(false);
+
+  // mobile sidebar
+  const [sidebarOpen, setSidebarOpen]       = useState(false);
+  const [sidebarClosing, setSidebarClosing] = useState(false);
+
+  const bellRef    = useRef();
+  const sidebarRef = useRef();
+
+  const [showLogout, setShowLogout] = useState(
+    () => JSON.parse(localStorage.getItem("setting_logout") ?? "true")
+  );
+
   const role = localStorage.getItem('userRole') ?? 'participant';
   const roleTabs = getTabsForRole(role);
 
@@ -117,7 +139,96 @@ const NavBar = ({ children }) => {
   useEffect(() => {
     const storedName = localStorage.getItem('fullUserName');
     if (storedName) setFullUserName(storedName.trim());
+    const token = getToken();
+    if (token) {
+      fetch(`${API}/profile/`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d?.avatar) setAvatar(`http://127.0.0.1:8000${d.avatar}`); })
+        .catch(() => {});
+    }
   }, []);
+
+  useEffect(() => {
+    const applyWarm = () => {
+      const warm = JSON.parse(localStorage.getItem("setting_warm") ?? "false");
+      document.documentElement.style.filter = warm
+        ? "sepia(0.25) saturate(1.1) brightness(0.98)"
+        : "";
+    };
+    applyWarm(); // застосувати одразу при маунті
+    window.addEventListener("settings-updated", applyWarm);
+    window.addEventListener("storage", applyWarm);
+    return () => {
+      window.removeEventListener("settings-updated", applyWarm);
+      window.removeEventListener("storage", applyWarm);
+    };
+  }, []);
+
+  // ── Закрити sidebar по кліку поза ────────────────────────────────────────
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const handler = (e) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+        closeSidebar();
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [sidebarOpen]);
+
+  const closeSidebar = () => {
+    setSidebarClosing(true);
+    setTimeout(() => {
+      setSidebarOpen(false);
+      setSidebarClosing(false);
+    }, 320);
+  };
+
+  // ── Сповіщення ───────────────────────────────────────────────────────────
+  const fetchNotifs = async () => {
+    setNotifsLoading(true);
+    try {
+      const res = await fetch(`${API}/notifications/`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (res.ok) setNotifs(await res.json());
+    } catch {}
+    finally { setNotifsLoading(false); }
+  };
+
+  const handleBellClick = () => {
+    const next = !bellOpen;
+    setBellOpen(next);
+    if (next) fetchNotifs();
+  };
+
+  useEffect(() => {
+    if (!bellOpen) return;
+    const handler = (e) => {
+      if (bellRef.current && !bellRef.current.contains(e.target)) setBellOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [bellOpen]);
+
+  const markAllRead = async () => {
+    await fetch(`${API}/notifications/mark-read/`, {
+      method: 'POST', headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    setNotifs(n => n.map(x => ({ ...x, is_read: true })));
+  };
+
+  const markOneRead = async (id) => {
+    await fetch(`${API}/notifications/mark-read/${id}/`, {
+      method: 'POST', headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    setNotifs(n => n.map(x => x.id === id ? { ...x, is_read: true } : x));
+  };
+
 
   const handleLogout = (e) => {
     e.preventDefault();
@@ -127,14 +238,18 @@ const NavBar = ({ children }) => {
     navigate('/');
   };
 
+  const hasUnread = notifs.some(n => !n.is_read);
+
   return (
     <div className={styles.vectorApp}>
 
       {/* ── Верхня панель ── */}
       <header className={styles.topNavbar}>
+
         <div className={styles.navbarLogo}>
           <img src={Logo} alt="Vector" className={styles.logo} />
         </div>
+
         <div className={styles.search}>
           <input
             type="search"
@@ -142,12 +257,34 @@ const NavBar = ({ children }) => {
             className={styles.searchInput}
           />
         </div>
+
         <div className={styles.navbarUserActions}>
           <span className={styles.userName}>{fullUserName}</span>
-          <button className={styles.notificationBtn} aria-label="Сповіщення">
-            <BellIcon className={styles.notificationIcon} />
-          </button>
-        </div>
+          {avatar
+              ? <img src={avatar} alt="avatar" className={styles.navbarAvatar} />
+              : (
+                <div className={styles.navbarAvatarPlaceholder}>
+                  {fullUserName?.[0]?.toUpperCase() || '?'}
+                </div>
+              )
+            }
+          <div className={nStyles.bellWrap} ref={bellRef}>
+              <button className={nStyles.bellBtn} aria-label="Сповіщення" onClick={handleBellClick}>
+                <BellIcon className={styles.notificationIcon} />
+                {hasUnread && <span className={nStyles.badge} />}
+              </button>
+              {bellOpen && (
+                <NotificationDropdown
+                  notifs={notifs}
+                  loading={notifsLoading}
+                  onClose={() => setBellOpen(false)}
+                  onCompose={() => { setBellOpen(false); setCompose(true); }}
+                  onMarkAllRead={markAllRead}
+                  onMarkOne={markOneRead}
+                />
+              )}
+            </div>
+          </div>
       </header>
 
       <div className={styles.mainWrapper}>
@@ -185,6 +322,7 @@ const NavBar = ({ children }) => {
           </nav>
 
           <div className={styles.logoutSection}>
+            {showLogout && (
             <button
               onClick={handleLogout}
               className={styles.logoutBtn}
@@ -193,6 +331,7 @@ const NavBar = ({ children }) => {
               <LogoutIcon className={styles.logoutIcon} />
               <span className={styles.logoutText}>Вийти</span>
             </button>
+            )}
           </div>
 
         </aside>
@@ -201,6 +340,9 @@ const NavBar = ({ children }) => {
           {children}
         </main>
       </div>
+      {compose && (
+        <ComposeModal onClose={() => setCompose(false)} onSent={fetchNotifs} />
+      )}
     </div>
   );
 };
