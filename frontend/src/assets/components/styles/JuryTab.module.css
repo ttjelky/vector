@@ -1,0 +1,670 @@
+/* ─── Tab content ─────────────────────────────────────────────────────────── */
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Stats row ───────────────────────────────────────────────────────────── */
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.statCard {
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: box-shadow 0.15s;
+}
+
+.statCard:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.statCard_warning {
+  border-color: #fde8c8;
+  background: #fffaf4;
+}
+
+.statCard_success {
+  border-color: #c8f0de;
+  background: #f4fdf8;
+}
+
+.statValue {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.statCard_warning .statValue { color: #c07020; }
+.statCard_success .statValue { color: #1a8a50; }
+
+.statLabel {
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* ─── Filters bar ─────────────────────────────────────────────────────────── */
+
+.filtersBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.searchWrap {
+  flex: 1;
+  min-width: 180px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  color: #bbb;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  font-size: 13.5px;
+  color: #111;
+  background: #fff;
+  border: 1px solid #e4e4e8;
+  border-radius: 10px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.searchInput:focus {
+  border-color: #bbb;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+}
+
+.searchInput::placeholder { color: #ccc; }
+
+.filterSelect {
+  padding: 9px 12px;
+  font-size: 13px;
+  color: #444;
+  background: #fff;
+  border: 1px solid #e4e4e8;
+  border-radius: 10px;
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s;
+  white-space: nowrap;
+}
+
+.filterSelect:focus { border-color: #bbb; }
+
+/* ─── Status tabs ─────────────────────────────────────────────────────────── */
+
+.statusTabs {
+  display: flex;
+  background: #f5f5f7;
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.statusTab {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.statusTab:hover { color: #444; background: #ebebed; }
+
+.statusTabActive {
+  background: #fff;
+  color: #111;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* ─── Empty block ─────────────────────────────────────────────────────────── */
+
+.emptyBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 24px;
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 16px;
+  text-align: center;
+  color: #aaa;
+  font-size: 13.5px;
+}
+
+.emptyIcon { font-size: 28px; }
+
+/* ─── Submission list ─────────────────────────────────────────────────────── */
+
+.submissionList {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* ─── Submission card ─────────────────────────────────────────────────────── */
+
+.subCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border: none;
+  border-bottom: 1px solid #f2f2f4;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+  font-family: inherit;
+  width: 100%;
+}
+
+.subCard:last-child { border-bottom: none; }
+.subCard:hover      { background: #fafafa; }
+
+.subCardLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.subIndex {
+  width: 26px;
+  height: 26px;
+  background: #f0f0f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.subInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.subTask {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subRound {
+  font-size: 12px;
+  color: #888;
+}
+
+.subDate {
+  font-size: 11.5px;
+  color: #bbb;
+}
+
+.subCardRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.scoreBadge {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  background: #f0f0f2;
+  border-radius: 100px;
+  padding: 3px 10px;
+}
+
+/* ─── Status pills ────────────────────────────────────────────────────────── */
+
+.statusPill {
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 100px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+.statusGraded {
+  background: #e6f7ee;
+  color: #1a8a50;
+}
+
+.statusPending {
+  background: #fff8ec;
+  color: #b06a10;
+}
+
+.chevron { color: #ccc; flex-shrink: 0; }
+
+/* ─── Detail view ─────────────────────────────────────────────────────────── */
+
+.detailWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  background: #f0f0f2;
+  border: 1px solid #e4e4e8;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+  width: fit-content;
+}
+
+.backBtn:hover { background: #e4e4e8; color: #111; }
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .detailGrid { grid-template-columns: 1fr; }
+}
+
+/* ─── Detail content (left) ───────────────────────────────────────────────── */
+
+.detailContent {
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.detailHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detailTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.detailRound {
+  font-size: 13px;
+  color: #888;
+}
+
+/* ─── Anon badge ──────────────────────────────────────────────────────────── */
+
+.anonBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #f5f7ff;
+  border: 1px solid #dde4f5;
+  border-radius: 10px;
+  font-size: 12.5px;
+  color: #5566aa;
+  font-weight: 500;
+}
+
+/* ─── Content box ─────────────────────────────────────────────────────────── */
+
+.contentBox {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contentSectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #aaa;
+  margin: 0;
+}
+
+.contentText {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.contentLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  color: #3a7ad5;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.contentLink:hover { text-decoration: underline; }
+
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.contentImage {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e8e8ec;
+  transition: opacity 0.15s;
+}
+
+.contentImage:hover { opacity: 0.85; }
+
+.noContent {
+  font-size: 13px;
+  color: #bbb;
+  margin: 0;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.submittedAt {
+  font-size: 12px;
+  color: #bbb;
+  padding-top: 4px;
+  border-top: 1px solid #f2f2f4;
+}
+
+/* ─── Grade panel (right) ─────────────────────────────────────────────────── */
+
+.gradePanel {
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 18px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky;
+  top: 20px;
+}
+
+.gradePanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.gradePanelTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+/* ─── Criteria ────────────────────────────────────────────────────────────── */
+
+.criteriaList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.criteriaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.criteriaHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.criteriaLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+.criteriaMax {
+  font-size: 11.5px;
+  color: #bbb;
+}
+
+.scoreInputWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scoreInput {
+  width: 72px;
+  padding: 8px 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  background: #f7f7f9;
+  border: 1px solid #e4e4e8;
+  border-radius: 10px;
+  outline: none;
+  font-family: inherit;
+  text-align: center;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -moz-appearance: textfield;
+}
+
+.scoreInput::-webkit-inner-spin-button,
+.scoreInput::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.scoreInput:focus {
+  border-color: #bbb;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+  background: #fff;
+}
+
+.scoreSlash {
+  font-size: 13px;
+  color: #bbb;
+}
+
+/* ─── Score bar ───────────────────────────────────────────────────────────── */
+
+.scoreBar {
+  height: 4px;
+  background: #f0f0f2;
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.scoreBarFill {
+  height: 100%;
+  background: #111;
+  border-radius: 100px;
+  transition: width 0.2s ease;
+}
+
+/* ─── Total score ─────────────────────────────────────────────────────────── */
+
+.totalScore {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f7f7f9;
+  border-radius: 12px;
+}
+
+.totalLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+}
+
+.totalValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+
+/* ─── Comment ─────────────────────────────────────────────────────────────── */
+
+.commentLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #888;
+}
+
+.commentArea {
+  padding: 10px 13px;
+  font-size: 13.5px;
+  color: #111;
+  background: #f7f7f9;
+  border: 1px solid #e4e4e8;
+  border-radius: 10px;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 90px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.commentArea:focus {
+  border-color: #bbb;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+  background: #fff;
+}
+
+.commentArea::placeholder { color: #ccc; }
+
+/* ─── Grade feedback ──────────────────────────────────────────────────────── */
+
+.gradeError {
+  font-size: 12.5px;
+  color: #c53030;
+  margin: 0;
+  padding: 8px 12px;
+  background: #fff5f5;
+  border: 1px solid #fed7d7;
+  border-radius: 7px;
+}
+
+.gradeSuccess {
+  font-size: 12.5px;
+  color: #276749;
+  margin: 0;
+  padding: 8px 12px;
+  background: #f0fff4;
+  border: 1px solid #c6f6d5;
+  border-radius: 7px;
+}
+
+/* ─── Grade button ────────────────────────────────────────────────────────── */
+
+.gradeBtn {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: #111;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.gradeBtn:hover    { background: #2a2a2a; }
+.gradeBtn:active   { transform: scale(0.98); }
+.gradeBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.gradeDate {
+  font-size: 11.5px;
+  color: #bbb;
+  text-align: center;
+  margin: 0;
+}
+
+/* ─── Responsive stats ────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .statsRow { grid-template-columns: 1fr; }
+  .filtersBar { flex-direction: column; align-items: stretch; }
+  .statusTabs { justify-content: center; }
+}
