@@ -3,7 +3,6 @@ import { useNavigate, NavLink } from 'react-router-dom';
 import { useTabs } from '../../TabsContext';
 import { getTabsForRole, COMMON_TABS } from '../../navConfig';
 import styles from './styles/NavBar.module.css';
-import nStyles from './styles/Notifications.module.css';
 
 import HomeIcon        from './static/icons/Home.svg?react';
 import TournamentsIcon from './static/icons/Tournaments.svg?react';
