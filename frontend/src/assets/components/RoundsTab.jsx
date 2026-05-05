@@ -21,7 +21,6 @@ export default function RoundsTab({
   const [editingRound,  setEditingRound]  = useState(null);
   const [activeSection, setActiveSection] = useState({});
   const [openTask,      setOpenTask]      = useState({});
-  // taskForms: set of roundIds that have the task form open (moved to header level)
   const [taskForms,     setTaskForms]     = useState(new Set());
   const [showForm,      setShowForm]      = useState(false);
   const [form,          setForm]          = useState(EMPTY_FORM);
@@ -52,10 +51,9 @@ export default function RoundsTab({
   const setSection = (roundId, section) =>
     setActiveSection((s) => ({ ...s, [roundId]: section }));
 
-  // ── Форма завдання (відкривається з заголовка раунду) ─────────────────────
+  // ── Форма завдання ─────────────────────────────────────────────────────────
 
   const openTaskForm = (roundId) => {
-    // Ensure the round is open and on tasks tab
     setOpenRound(roundId);
     setActiveSection((s) => ({ ...s, [roundId]: "tasks" }));
     setTaskForms((prev) => new Set(prev).add(roundId));
@@ -137,7 +135,21 @@ export default function RoundsTab({
   if (loading) {
     return (
       <div className={styles.tabContent}>
-        <p className={styles.empty}>⏳ Завантаження раундів…</p>
+        {/* Skeleton-плейсхолдери замість тексту */}
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            style={{
+              height: 68,
+              background: "#f3f4f6",
+              borderRadius: 18,
+              border: "1.5px solid #e5e7eb",
+              animation: "pulse 1.5s ease-in-out infinite",
+              opacity: 1 - i * 0.2,
+            }}
+          />
+        ))}
+        <style>{`@keyframes pulse { 0%,100%{opacity:0.6} 50%{opacity:1} }`}</style>
       </div>
     );
   }
@@ -145,7 +157,7 @@ export default function RoundsTab({
   return (
     <div className={styles.tabContent}>
 
-      {/* ── Шапка вкладки: заголовок + кнопка нового раунду ── */}
+      {/* ── Шапка вкладки ── */}
       <div className={styles.tabHeader}>
         <span className={styles.tabTitle}>
           Раунди
@@ -231,13 +243,14 @@ export default function RoundsTab({
         </div>
       )}
 
-      {/* ── Список раундів ── */}
+      {/* ── Список раундів або порожній стан ── */}
       {rounds.length === 0 ? (
         <div className={styles.emptyBlock}>
-          <p>🏁 Раунди ще не створені.</p>
+          <div className={styles.emptyBlockIcon}>🏁</div>
+          <p>Раунди ще не створені</p>
           {!readOnly && (
-            <p style={{ fontSize: 12, marginTop: -4 }}>
-              Натисніть «Новий раунд», щоб розпочати.
+            <p style={{ fontSize: 13, marginTop: -4, color: "#9ca3af" }}>
+              Натисніть «+ Новий раунд», щоб розпочати
             </p>
           )}
         </div>
@@ -262,7 +275,6 @@ export default function RoundsTab({
               onTaskToggle={(taskId) => toggleTask(round.id, taskId)}
               activeSection={activeSection[round.id]}
               onSectionChange={(section) => setSection(round.id, section)}
-              // Task form state lifted to header level
               showTaskForm={taskForms.has(round.id)}
               onAddTask={() => openTaskForm(round.id)}
               onCloseTaskForm={() => closeTaskForm(round.id)}

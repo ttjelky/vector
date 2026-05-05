@@ -4,7 +4,6 @@ import API from "../../api";
 import { fileIcon } from "./tournamentHelpers";
 
 // ─── TaskForm ─────────────────────────────────────────────────────────────────
-// Форма створення нового завдання в раунді
 
 export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
   const [form,         setForm]         = useState({ title: "", description: "" });
@@ -97,7 +96,7 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
 
         {/* Посилання */}
         <div className={styles.attachSection}>
-          <span className={styles.attachSectionLabel}>🔗 Посилання</span>
+          <span className={styles.attachSectionLabel}>Посилання</span>
           {links.length > 0 && (
             <div className={styles.taskLinkList}>
               {links.map((link) => (
@@ -115,7 +114,7 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
           <div className={styles.linkInputRow}>
             <input
               className={styles.editInput}
-              placeholder="URL посилання"
+              placeholder="https://..."
               value={linkForm.url}
               onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
@@ -133,7 +132,7 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
 
         {/* Файли */}
         <div className={styles.attachSection}>
-          <span className={styles.attachSectionLabel}>📎 Файли</span>
+          <span className={styles.attachSectionLabel}>Файли</span>
           {files.length > 0 && (
             <div className={styles.taskFileList}>
               {files.map((f, i) => (
