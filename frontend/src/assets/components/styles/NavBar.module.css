@@ -10,81 +10,116 @@ body, html {
   height: 100vh;
   font-family: 'DM Sans', sans-serif;
   overflow: hidden;
-  background: #fff;
+  background: transparent;
 }
 
-/* ── Top navbar ── */
 .topNavbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  height: 56px;
-  /* left padding = sidebar left margin (12px) so logo aligns with sidebar edge */
-  padding: 0 16px 0 16px;
-  /* glassmorphism — content scrolls "under" this bar */
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 12px rgba(0,0,0,0.04);
+  padding: 10px 12px 0 12px;
   z-index: 200;
-  flex-shrink: 0;
-  position: relative;
+  pointer-events: none;
+  gap: 10px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
 }
 
+/* Logo island — same glassmorphism + width as sidebar */
 .navbarLogo {
+  width: 212px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 6px 20px rgba(0,0,0,0.10);
+  padding: 10px 16px;
   display: flex;
   align-items: center;
-  /* 200px sidebar + 12px gap − 16px header padding = 196px to keep logo column aligned */
-  width: 196px;
-  flex-shrink: 0;
+  pointer-events: all;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.navbarLogo:hover {
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.05),
+    0 8px 24px rgba(0,0,0,0.12);
 }
 
 .logo {
   width: 140px;
 }
 
+/* Search island */
 .search {
-  width: 100%;
-  max-width: 400px;
+  flex: 0 0 auto;
+  width: 320px;
+  margin: 0 0 0 10px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 16px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 8px;
+  pointer-events: all;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search:focus-within {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 4px 16px rgba(0,0,0,0.10);
 }
 
 .searchInput {
   width: 100%;
-  padding: 9px 14px;
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 12px;
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(8px);
+  padding: 11px 0;
+  border: none;
+  background: transparent;
   font-size: 14px;
   outline: none;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
   font-family: 'DM Sans', sans-serif;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
-
-.searchInput:hover {
-  border-color: #cbd5e1;
-  background: rgba(255,255,255,0.95);
-}
-
-.searchInput:focus {
-  border-color: #3b82f6;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  color: #222;
 }
 
 .searchInput::placeholder {
   color: #9ca3af;
 }
 
-/* ── Right header actions ── */
+/* Right actions island */
 .navbarUserActions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 16px rgba(0,0,0,0.08);
+  padding: 6px 10px 6px 12px;
   flex-shrink: 0;
+  pointer-events: all;
+  transition: background 0.3s ease;
+  margin-left: auto;
+}
+
+.navbarUserActions:hover {
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .userName {
@@ -130,14 +165,16 @@ body, html {
   overflow: hidden;
   padding: 0;
   position: relative;
+  height: 100vh;
 }
 
 /* ── Content area — full bleed, sidebar overlaps from the left ── */
 .contentArea {
   flex: 1;
   overflow-y: auto;
-  background: #fff;
+  background: transparent;
   padding-left: 232px;
+  padding-top: 68px;
   border-radius: 0;
   position: relative;
 }
@@ -181,7 +218,8 @@ body, html {
 /* ── Floating sidebar — positioned absolutely over the content ── */
 .leftSidebar {
   position: absolute;
-  top: 10px;
+  /* FIX: top = navbar height (68px) + gap (10px) */
+  top: 78px;
   left: 10px;
   bottom: 10px;
   width: 212px;
@@ -338,21 +376,21 @@ body, html {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 4px 8px 4px 12px;
+  padding: 6px 8px 6px 12px;
   color: #888;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 16px !important;
   transition: background-color 0.15s ease;
 }
 
 .nestedLink:hover {
   background-color: rgba(0,0,0,0.05);
-  border-radius: 8px;
+  border-radius: 16px !important;
 }
 
 .activeNestedLink {
   background-color: rgba(0,0,0,0.06);
-  border-radius: 8px;
+  border-radius: 16px !important;
 }
 
 .nestedLink, .activeNestedLink {
@@ -368,7 +406,7 @@ body, html {
 }
 
 .tabName {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   color: #555;
   white-space: nowrap;

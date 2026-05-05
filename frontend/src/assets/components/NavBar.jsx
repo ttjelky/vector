@@ -266,6 +266,9 @@ const NavBar = ({ children }) => {
         </div>
 
         <div className={styles.search}>
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" style={{opacity:0.4,flexShrink:0}}>
+            <circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/>
+          </svg>
           <input
             type="search"
             placeholder="Пошук..."

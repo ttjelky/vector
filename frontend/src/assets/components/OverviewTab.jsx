@@ -182,7 +182,6 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
         <h2 className={styles.sectionTitle}>Деталі</h2>
         <div className={styles.infoGrid}>
           <InfoRow label="Формат"             value={FORMAT_LABELS[tournament.format] || "Не вказано"} />
-          <InfoRow label="Статус"             value={<StatusBadge status={status} />} />
           <InfoRow label="Початок турніру"    value={formatDate(tournament.start_date)} />
           <InfoRow label="Початок реєстрації" value={formatDate(tournament.registration_start)} />
           <InfoRow label="Кінець реєстрації"  value={formatDate(tournament.registration_end)} />
