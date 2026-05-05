@@ -1,3 +1,32 @@
+/* ─── Variables in :root so they work in ALL render contexts ─────────────────
+   (SubmissionDetail replaces .tabContent entirely, so scoping to .tabContent
+   would break all var() references in the detail view)
+──────────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --jury-ink:         #111111;
+  --jury-ink-mid:     #555555;
+  --jury-ink-soft:    #999999;
+  --jury-ink-ghost:   #c8c8cc;
+  --jury-surface:     #ffffff;
+  --jury-canvas:      #f5f5f7;
+  --jury-border:      #e8e8ec;
+  --jury-border-soft: #f2f2f4;
+  --jury-amber:       #c07020;
+  --jury-amber-bg:    #fffaf4;
+  --jury-amber-brd:   #fde8c8;
+  --jury-green:       #1a8a50;
+  --jury-green-bg:    #f4fdf8;
+  --jury-green-brd:   #c8f0de;
+  --jury-blue:        #3366cc;
+  --jury-blue-bg:     #f0f5ff;
+  --jury-blue-brd:    #c8d8f8;
+  --jury-radius-sm:   8px;
+  --jury-radius-md:   12px;
+  --jury-radius-lg:   16px;
+  --jury-radius-xl:   20px;
+}
+
 /* ─── Tab content ─────────────────────────────────────────────────────────── */
 
 .tabContent {
@@ -15,60 +44,115 @@
 }
 
 .statCard {
-  background: #fff;
-  border: 1px solid #e8e8ec;
-  border-radius: 16px;
-  padding: 16px 20px;
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-lg);
+  padding: 18px 20px 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
   transition: box-shadow 0.15s;
 }
 
 .statCard:hover {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .statCard_warning {
-  border-color: #fde8c8;
-  background: #fffaf4;
+  border-color: var(--jury-amber-brd);
+  background: var(--jury-amber-bg);
 }
 
 .statCard_success {
-  border-color: #c8f0de;
-  background: #f4fdf8;
+  border-color: var(--jury-green-brd);
+  background: var(--jury-green-bg);
 }
 
+.statCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.statIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--jury-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--jury-border-soft);
+  color: var(--jury-ink-soft);
+  flex-shrink: 0;
+}
+
+.statCard_warning .statIcon { background: #fde8c8; color: var(--jury-amber); }
+.statCard_success .statIcon { background: #c8f0de; color: var(--jury-green); }
+
 .statValue {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
-  color: #111;
+  color: var(--jury-ink);
   letter-spacing: -0.03em;
   line-height: 1;
 }
 
-.statCard_warning .statValue { color: #c07020; }
-.statCard_success .statValue { color: #1a8a50; }
+.statCard_warning .statValue { color: var(--jury-amber); }
+.statCard_success .statValue { color: var(--jury-green); }
 
 .statLabel {
   font-size: 12px;
-  color: #999;
+  color: var(--jury-ink-soft);
   font-weight: 500;
-  letter-spacing: 0.01em;
+}
+
+/* ─── Progress bar ────────────────────────────────────────────────────────── */
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progressLabel {
+  font-size: 12.5px;
+  color: var(--jury-ink-soft);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.progressTrack {
+  flex: 1;
+  height: 5px;
+  background: var(--jury-border);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--jury-green);
+  border-radius: 100px;
+  transition: width 0.4s ease;
+}
+
+.progressPct {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--jury-green);
+  min-width: 38px;
+  text-align: right;
 }
 
 /* ─── Filters bar ─────────────────────────────────────────────────────────── */
 
 .filtersBar {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .searchWrap {
-  flex: 1;
-  min-width: 180px;
   position: relative;
   display: flex;
   align-items: center;
@@ -77,7 +161,7 @@
 .searchIcon {
   position: absolute;
   left: 12px;
-  color: #bbb;
+  color: var(--jury-ink-ghost);
   pointer-events: none;
 }
 
@@ -85,10 +169,10 @@
   width: 100%;
   padding: 9px 12px 9px 34px;
   font-size: 13.5px;
-  color: #111;
-  background: #fff;
-  border: 1px solid #e4e4e8;
-  border-radius: 10px;
+  color: var(--jury-ink);
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-md);
   outline: none;
   font-family: inherit;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -96,33 +180,44 @@
 
 .searchInput:focus {
   border-color: #bbb;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
 }
 
-.searchInput::placeholder { color: #ccc; }
+.searchInput::placeholder { color: var(--jury-ink-ghost); }
+
+.filtersRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
 .filterSelect {
-  padding: 9px 12px;
+  padding: 8px 28px 8px 11px;
   font-size: 13px;
-  color: #444;
-  background: #fff;
-  border: 1px solid #e4e4e8;
-  border-radius: 10px;
+  color: var(--jury-ink-mid);
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-md);
   outline: none;
   cursor: pointer;
   font-family: inherit;
   transition: border-color 0.15s;
   white-space: nowrap;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  background-color: var(--jury-surface);
 }
 
 .filterSelect:focus { border-color: #bbb; }
 
-/* ─── Status tabs ─────────────────────────────────────────────────────────── */
-
 .statusTabs {
   display: flex;
-  background: #f5f5f7;
-  border-radius: 10px;
+  background: var(--jury-canvas);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-md);
   padding: 3px;
   gap: 2px;
 }
@@ -130,22 +225,24 @@
 .statusTab {
   padding: 6px 12px;
   border: none;
-  border-radius: 7px;
+  border-radius: calc(var(--jury-radius-md) - 3px);
   background: transparent;
   font-size: 12.5px;
   font-weight: 500;
-  color: #888;
+  color: var(--jury-ink-soft);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
+  font-family: inherit;
 }
 
-.statusTab:hover { color: #444; background: #ebebed; }
+.statusTab:hover { color: var(--jury-ink-mid); background: rgba(255,255,255,0.7); }
 
 .statusTabActive {
-  background: #fff;
-  color: #111;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  background: var(--jury-surface);
+  color: var(--jury-ink);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  font-weight: 600;
 }
 
 /* ─── Empty block ─────────────────────────────────────────────────────────── */
@@ -155,26 +252,57 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 48px 24px;
-  background: #fff;
-  border: 1px solid #e8e8ec;
-  border-radius: 16px;
+  gap: 10px;
+  padding: 52px 24px;
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-xl);
   text-align: center;
-  color: #aaa;
-  font-size: 13.5px;
 }
 
-.emptyIcon { font-size: 28px; }
+.emptyIconWrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--jury-canvas);
+  border: 1px solid var(--jury-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--jury-ink-ghost);
+}
+
+.emptyText {
+  font-size: 13.5px;
+  color: var(--jury-ink-soft);
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.6;
+}
+
+.emptySubtext {
+  font-size: 12px;
+  color: var(--jury-ink-ghost);
+  margin: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinnerIcon {
+  animation: spin 0.9s linear infinite;
+  display: block;
+}
 
 /* ─── Submission list ─────────────────────────────────────────────────────── */
 
 .submissionList {
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border: 1px solid #e8e8ec;
-  border-radius: 16px;
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-lg);
   overflow: hidden;
 }
 
@@ -183,11 +311,10 @@
 .subCard {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 18px;
+  gap: 14px;
+  padding: 13px 18px;
   border: none;
-  border-bottom: 1px solid #f2f2f4;
+  border-bottom: 1px solid var(--jury-border-soft);
   background: transparent;
   cursor: pointer;
   text-align: left;
@@ -197,70 +324,98 @@
 }
 
 .subCard:last-child { border-bottom: none; }
-.subCard:hover      { background: #fafafa; }
-
-.subCardLeft {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex: 1;
-  min-width: 0;
-}
+.subCard:hover      { background: var(--jury-canvas); }
 
 .subIndex {
-  width: 26px;
-  height: 26px;
-  background: #f0f0f2;
+  width: 28px;
+  height: 28px;
+  background: var(--jury-canvas);
+  border: 1px solid var(--jury-border);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
-  color: #666;
+  color: var(--jury-ink-soft);
   flex-shrink: 0;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.subCard:hover .subIndex {
+  background: var(--jury-ink);
+  color: #fff;
+  border-color: var(--jury-ink);
 }
 
 .subInfo {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
+  flex: 1;
 }
 
 .subTask {
   font-size: 14px;
-  font-weight: 500;
-  color: #111;
+  font-weight: 600;
+  color: var(--jury-ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.subMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .subRound {
   font-size: 12px;
-  color: #888;
+  color: var(--jury-ink-soft);
+}
+
+.subMetaDot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--jury-ink-ghost);
+  flex-shrink: 0;
 }
 
 .subDate {
-  font-size: 11.5px;
-  color: #bbb;
+  font-size: 12px;
+  color: var(--jury-ink-ghost);
 }
 
 .subCardRight {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
 .scoreBadge {
   font-size: 13px;
   font-weight: 600;
-  color: #111;
-  background: #f0f0f2;
+  color: var(--jury-ink);
+  background: var(--jury-canvas);
+  border: 1px solid var(--jury-border);
   border-radius: 100px;
   padding: 3px 10px;
+}
+
+.chevron {
+  color: var(--jury-ink-ghost);
+  flex-shrink: 0;
+  transition: transform 0.15s, color 0.15s;
+}
+
+.subCard:hover .chevron {
+  color: var(--jury-ink-mid);
+  transform: translateX(2px);
 }
 
 /* ─── Status pills ────────────────────────────────────────────────────────── */
@@ -274,16 +429,16 @@
 }
 
 .statusGraded {
-  background: #e6f7ee;
-  color: #1a8a50;
+  background: var(--jury-green-bg);
+  color: var(--jury-green);
+  border: 1px solid var(--jury-green-brd);
 }
 
 .statusPending {
-  background: #fff8ec;
-  color: #b06a10;
+  background: var(--jury-amber-bg);
+  color: var(--jury-amber);
+  border: 1px solid var(--jury-amber-brd);
 }
-
-.chevron { color: #ccc; flex-shrink: 0; }
 
 /* ─── Detail view ─────────────────────────────────────────────────────────── */
 
@@ -300,9 +455,9 @@
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #555;
-  background: #f0f0f2;
-  border: 1px solid #e4e4e8;
+  color: var(--jury-ink-mid);
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
@@ -310,7 +465,7 @@
   width: fit-content;
 }
 
-.backBtn:hover { background: #e4e4e8; color: #111; }
+.backBtn:hover { background: var(--jury-canvas); color: var(--jury-ink); }
 
 .detailGrid {
   display: grid;
@@ -319,39 +474,48 @@
   align-items: start;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 800px) {
   .detailGrid { grid-template-columns: 1fr; }
 }
 
 /* ─── Detail content (left) ───────────────────────────────────────────────── */
 
 .detailContent {
-  background: #fff;
-  border: 1px solid #e8e8ec;
-  border-radius: 18px;
-  padding: 24px;
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-lg);
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  overflow: hidden;
 }
 
 .detailHeader {
+  padding: 22px 22px 18px;
+  border-bottom: 1px solid var(--jury-border-soft);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+}
+
+.detailTitleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .detailTitle {
   font-size: 20px;
   font-weight: 700;
-  color: #111;
+  color: var(--jury-ink);
   margin: 0;
   letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .detailRound {
   font-size: 13px;
-  color: #888;
+  color: var(--jury-ink-soft);
 }
 
 /* ─── Anon badge ──────────────────────────────────────────────────────────── */
@@ -359,22 +523,34 @@
 .anonBadge {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: #f5f7ff;
-  border: 1px solid #dde4f5;
-  border-radius: 10px;
+  gap: 10px;
+  padding: 11px 16px;
+  background: var(--jury-blue-bg);
+  border-bottom: 1px solid var(--jury-blue-brd);
   font-size: 12.5px;
-  color: #5566aa;
+  color: var(--jury-blue);
   font-weight: 500;
+}
+
+.anonBadgeIcon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: rgba(51, 102, 204, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--jury-blue);
 }
 
 /* ─── Content box ─────────────────────────────────────────────────────────── */
 
 .contentBox {
+  padding: 22px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
 }
 
 .contentSection {
@@ -388,7 +564,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #aaa;
+  color: var(--jury-ink-ghost);
   margin: 0;
 }
 
@@ -400,17 +576,56 @@
   overflow-wrap: break-word;
 }
 
+/* ─── Links ───────────────────────────────────────────────────────────────── */
+
+.linkList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .contentLink {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
+  padding: 9px 12px;
   font-size: 13.5px;
-  color: #3a7ad5;
+  color: var(--jury-blue);
   text-decoration: none;
+  background: var(--jury-blue-bg);
+  border: 1px solid var(--jury-blue-brd);
+  border-radius: var(--jury-radius-md);
   word-break: break-all;
+  transition: background 0.15s;
 }
 
-.contentLink:hover { text-decoration: underline; }
+.contentLink:hover { background: #dde8f8; text-decoration: underline; }
+
+/* ─── Files ───────────────────────────────────────────────────────────────── */
+
+.fileList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  font-size: 13.5px;
+  color: var(--jury-ink-mid);
+  text-decoration: none;
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-md);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.fileItem:hover { background: var(--jury-canvas); border-color: #ccc; }
+
+/* ─── Images ──────────────────────────────────────────────────────────────── */
 
 .imageGrid {
   display: grid;
@@ -422,16 +637,17 @@
   width: 100%;
   aspect-ratio: 4/3;
   object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid #e8e8ec;
+  border-radius: var(--jury-radius-md);
+  border: 1px solid var(--jury-border);
   transition: opacity 0.15s;
+  display: block;
 }
 
 .contentImage:hover { opacity: 0.85; }
 
 .noContent {
   font-size: 13px;
-  color: #bbb;
+  color: var(--jury-ink-ghost);
   margin: 0;
   padding: 20px 0;
   text-align: center;
@@ -439,23 +655,23 @@
 
 .submittedAt {
   font-size: 12px;
-  color: #bbb;
-  padding-top: 4px;
-  border-top: 1px solid #f2f2f4;
+  color: var(--jury-ink-ghost);
+  padding: 12px 22px;
+  border-top: 1px solid var(--jury-border-soft);
+  background: var(--jury-canvas);
 }
 
 /* ─── Grade panel (right) ─────────────────────────────────────────────────── */
 
 .gradePanel {
-  background: #fff;
-  border: 1px solid #e8e8ec;
-  border-radius: 18px;
-  padding: 22px;
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-lg);
   display: flex;
   flex-direction: column;
-  gap: 18px;
   position: sticky;
   top: 20px;
+  overflow: hidden;
 }
 
 .gradePanelHeader {
@@ -463,13 +679,23 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--jury-border-soft);
+  background: var(--jury-canvas);
 }
 
 .gradePanelTitle {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  color: #111;
+  color: var(--jury-ink);
   margin: 0;
+}
+
+.gradePanelBody {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 /* ─── Criteria ────────────────────────────────────────────────────────────── */
@@ -483,7 +709,7 @@
 .criteriaItem {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
 .criteriaHeader {
@@ -495,62 +721,69 @@
 .criteriaLabel {
   font-size: 13px;
   font-weight: 500;
-  color: #333;
+  color: var(--jury-ink);
 }
 
 .criteriaMax {
   font-size: 11.5px;
-  color: #bbb;
+  color: var(--jury-ink-ghost);
 }
 
-.scoreInputWrap {
+.scoreInputRow {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: stretch;
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-md);
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.scoreInputRow:focus-within {
+  border-color: #bbb;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
 }
 
 .scoreInput {
-  width: 72px;
-  padding: 8px 10px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #111;
-  background: #f7f7f9;
-  border: 1px solid #e4e4e8;
-  border-radius: 10px;
+  width: 64px;
+  padding: 9px 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--jury-ink);
+  background: transparent;
+  border: none;
   outline: none;
   font-family: inherit;
   text-align: center;
-  transition: border-color 0.15s, box-shadow 0.15s;
   -moz-appearance: textfield;
 }
 
 .scoreInput::-webkit-inner-spin-button,
 .scoreInput::-webkit-outer-spin-button { -webkit-appearance: none; }
 
-.scoreInput:focus {
-  border-color: #bbb;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
-  background: #fff;
-}
-
 .scoreSlash {
-  font-size: 13px;
-  color: #bbb;
+  font-size: 12.5px;
+  color: var(--jury-ink-soft);
+  padding: 0 12px;
+  border-left: 1px solid var(--jury-border);
+  display: flex;
+  align-items: center;
+  background: var(--jury-canvas);
+  white-space: nowrap;
 }
 
 /* ─── Score bar ───────────────────────────────────────────────────────────── */
 
 .scoreBar {
   height: 4px;
-  background: #f0f0f2;
+  background: var(--jury-border);
   border-radius: 100px;
   overflow: hidden;
 }
 
 .scoreBarFill {
   height: 100%;
-  background: #111;
+  background: var(--jury-ink);
   border-radius: 100px;
   transition: width 0.2s ease;
 }
@@ -562,20 +795,21 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: #f7f7f9;
-  border-radius: 12px;
+  background: var(--jury-canvas);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-md);
 }
 
 .totalLabel {
   font-size: 13px;
   font-weight: 500;
-  color: #555;
+  color: var(--jury-ink-soft);
 }
 
 .totalValue {
   font-size: 18px;
   font-weight: 700;
-  color: #111;
+  color: var(--jury-ink);
   letter-spacing: -0.02em;
 }
 
@@ -587,30 +821,30 @@
   gap: 6px;
   font-size: 13px;
   font-weight: 500;
-  color: #888;
+  color: var(--jury-ink-soft);
 }
 
 .commentArea {
   padding: 10px 13px;
   font-size: 13.5px;
-  color: #111;
-  background: #f7f7f9;
-  border: 1px solid #e4e4e8;
-  border-radius: 10px;
+  color: var(--jury-ink);
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-md);
   outline: none;
   font-family: inherit;
   resize: vertical;
   min-height: 90px;
   transition: border-color 0.15s, box-shadow 0.15s;
+  line-height: 1.6;
 }
 
 .commentArea:focus {
   border-color: #bbb;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
-  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
 }
 
-.commentArea::placeholder { color: #ccc; }
+.commentArea::placeholder { color: var(--jury-ink-ghost); }
 
 /* ─── Grade feedback ──────────────────────────────────────────────────────── */
 
@@ -621,7 +855,7 @@
   padding: 8px 12px;
   background: #fff5f5;
   border: 1px solid #fed7d7;
-  border-radius: 7px;
+  border-radius: var(--jury-radius-sm);
 }
 
 .gradeSuccess {
@@ -631,7 +865,18 @@
   padding: 8px 12px;
   background: #f0fff4;
   border: 1px solid #c6f6d5;
-  border-radius: 7px;
+  border-radius: var(--jury-radius-sm);
+}
+
+/* ─── Grade panel footer ──────────────────────────────────────────────────── */
+
+.gradePanelFooter {
+  padding: 14px 18px;
+  border-top: 1px solid var(--jury-border-soft);
+  background: var(--jury-canvas);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* ─── Grade button ────────────────────────────────────────────────────────── */
@@ -642,9 +887,9 @@
   font-size: 14px;
   font-weight: 600;
   color: #fff;
-  background: #111;
+  background: var(--jury-ink);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--jury-radius-md);
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s, transform 0.1s;
@@ -656,15 +901,20 @@
 
 .gradeDate {
   font-size: 11.5px;
-  color: #bbb;
+  color: var(--jury-ink-ghost);
   text-align: center;
   margin: 0;
 }
 
-/* ─── Responsive stats ────────────────────────────────────────────────────── */
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
 
-@media (max-width: 600px) {
-  .statsRow { grid-template-columns: 1fr; }
-  .filtersBar { flex-direction: column; align-items: stretch; }
+@media (max-width: 680px) {
+  .statsRow { grid-template-columns: 1fr 1fr; }
+  .statsRow > :last-child { grid-column: 1 / -1; }
+  .filtersRow { flex-direction: column; align-items: stretch; }
   .statusTabs { justify-content: center; }
+}
+
+@media (max-width: 400px) {
+  .statsRow { grid-template-columns: 1fr; }
 }

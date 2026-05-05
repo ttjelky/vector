@@ -7,10 +7,10 @@ const STATUS_GRADED  = "graded";
 const STATUS_PENDING = "pending";
 
 const SORT_OPTIONS = [
-  { value: "submitted_desc", label: "Дата подання (від нових)" },
-  { value: "submitted_asc",  label: "Дата подання (від старих)" },
-  { value: "score_desc",     label: "Бал (від високого)" },
-  { value: "score_asc",      label: "Бал (від низького)" },
+  { value: "submitted_desc", label: "Дата (нові спочатку)" },
+  { value: "submitted_asc",  label: "Дата (старі спочатку)" },
+  { value: "score_desc",     label: "Бал (від вищого)" },
+  { value: "score_asc",      label: "Бал (від нижчого)" },
 ];
 
 function formatDate(iso) {
@@ -168,16 +168,48 @@ export default function JuryTab({ tournamentId, rounds = [], loading }) {
   const pendingCount = submissions.filter(s => s.my_grade == null).length;
   const gradedCount  = submissions.filter(s => s.my_grade != null).length;
   const maxTotal     = criteria.reduce((a, c) => a + c.max, 0);
+  const pct          = submissions.length > 0
+    ? Math.round((gradedCount / submissions.length) * 100)
+    : 0;
 
   return (
     <div className={styles.tabContent}>
+      {/* Stats */}
       <div className={styles.statsRow}>
-        <StatCard label="Всього робіт" value={submissions.length} />
-        <StatCard label="Не оцінено"   value={pendingCount} accent="warning" />
-        <StatCard label="Оцінено"      value={gradedCount}  accent="success" />
+        <StatCard label="Всього робіт" value={submissions.length} icon={
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        } />
+        <StatCard label="Не оцінено" value={pendingCount} accent="warning" icon={
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        } />
+        <StatCard label="Оцінено" value={gradedCount} accent="success" icon={
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        } />
       </div>
 
+      {/* Progress */}
+      {submissions.length > 0 && (
+        <div className={styles.progressHeader}>
+          <span className={styles.progressLabel}>Прогрес оцінювання</span>
+          <div className={styles.progressTrack}>
+            <div className={styles.progressFill} style={{ width: `${pct}%` }} />
+          </div>
+          <span className={styles.progressPct}>{pct}%</span>
+        </div>
+      )}
+
+      {/* Filters */}
       <div className={styles.filtersBar}>
+        {/* Row 1: search */}
         <div className={styles.searchWrap}>
           <svg className={styles.searchIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -190,44 +222,63 @@ export default function JuryTab({ tournamentId, rounds = [], loading }) {
           />
         </div>
 
-        <select className={styles.filterSelect} value={selectedRound} onChange={e => setSelectedRound(e.target.value)}>
-          <option value="all">Всі раунди</option>
-          {rounds.map(r => <option key={r.id} value={String(r.id)}>{r.title}</option>)}
-        </select>
+        {/* Row 2: round + status tabs + sort */}
+        <div className={styles.filtersRow}>
+          <select className={styles.filterSelect} value={selectedRound} onChange={e => setSelectedRound(e.target.value)}>
+            <option value="all">Всі раунди</option>
+            {rounds.map(r => <option key={r.id} value={String(r.id)}>{r.title}</option>)}
+          </select>
 
-        <div className={styles.statusTabs}>
-          {[
-            { value: STATUS_ALL,     label: "Усі" },
-            { value: STATUS_PENDING, label: "Не оцінено" },
-            { value: STATUS_GRADED,  label: "Оцінено" },
-          ].map(opt => (
-            <button
-              key={opt.value}
-              className={`${styles.statusTab} ${statusFilter === opt.value ? styles.statusTabActive : ""}`}
-              onClick={() => setStatusFilter(opt.value)}
-            >
-              {opt.label}
-            </button>
-          ))}
+          <div className={styles.statusTabs}>
+            {[
+              { value: STATUS_ALL,     label: "Усі" },
+              { value: STATUS_PENDING, label: "Не оцінено" },
+              { value: STATUS_GRADED,  label: "Оцінено" },
+            ].map(opt => (
+              <button
+                key={opt.value}
+                className={`${styles.statusTab} ${statusFilter === opt.value ? styles.statusTabActive : ""}`}
+                onClick={() => setStatusFilter(opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          <select className={styles.filterSelect} value={sortBy} onChange={e => setSortBy(e.target.value)}>
+            {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
         </div>
-
-        <select className={styles.filterSelect} value={sortBy} onChange={e => setSortBy(e.target.value)}>
-          {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
       </div>
 
+      {/* List */}
       {subsLoading || loading ? (
         <div className={styles.emptyBlock}>
-          <span className={styles.emptyIcon}>⏳</span>
-          <p>Завантаження робіт...</p>
+          <div className={styles.emptyIconWrap}>
+            <svg className={styles.spinnerIcon} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+          </div>
+          <p className={styles.emptyText}>Завантаження робіт...</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className={styles.emptyBlock}>
-          <span className={styles.emptyIcon}>📋</span>
-          <p>{submissions.length === 0
-            ? "Подань ще немає. Учасники ще не здали роботи."
-            : "За вашим фільтром нічого не знайдено."
-          }</p>
+          <div className={styles.emptyIconWrap}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <p className={styles.emptyText}>
+            {submissions.length === 0
+              ? "Подань ще немає. Учасники ще не здали роботи."
+              : "За вашим фільтром нічого не знайдено."}
+          </p>
+          {submissions.length > 0 && (
+            <p className={styles.emptySubtext}>Спробуйте змінити фільтри або пошуковий запит</p>
+          )}
         </div>
       ) : (
         <div className={styles.submissionList}>
@@ -248,10 +299,13 @@ export default function JuryTab({ tournamentId, rounds = [], loading }) {
 
 // ─── StatCard ─────────────────────────────────────────────────────────────────
 
-function StatCard({ label, value, accent }) {
+function StatCard({ label, value, accent, icon }) {
   return (
     <div className={`${styles.statCard} ${accent ? styles[`statCard_${accent}`] : ""}`}>
-      <span className={styles.statValue}>{value}</span>
+      <div className={styles.statCardTop}>
+        <span className={styles.statValue}>{value}</span>
+        {icon && <div className={styles.statIcon}>{icon}</div>}
+      </div>
       <span className={styles.statLabel}>{label}</span>
     </div>
   );
@@ -262,27 +316,27 @@ function StatCard({ label, value, accent }) {
 function SubmissionCard({ submission: sub, index, maxTotal, onClick }) {
   const isGraded = sub.my_grade != null;
   const total    = isGraded ? (sub.my_grade.total ?? calcTotal(sub.my_grade.scores)) : null;
+
   return (
     <button className={styles.subCard} onClick={onClick}>
-      <div className={styles.subCardLeft}>
-        <span className={styles.subIndex}>{index}</span>
-        <div className={styles.subInfo}>
-          <span className={styles.subTask}>{sub.task_title || "Без назви"}</span>
+      <span className={styles.subIndex}>{index}</span>
+
+      <div className={styles.subInfo}>
+        <span className={styles.subTask}>{sub.task_title || "Без назви"}</span>
+        <div className={styles.subMeta}>
           <span className={styles.subRound}>{sub.round_title || "—"}</span>
-          <span className={styles.subDate}>Подано: {formatDate(sub.submitted_at)}</span>
+          <span className={styles.subMetaDot} />
+          <span className={styles.subDate}>{formatDate(sub.submitted_at)}</span>
         </div>
       </div>
+
       <div className={styles.subCardRight}>
-        {isGraded ? (
-          <>
-            {total !== null && (
-              <span className={styles.scoreBadge}>{total} / {maxTotal}</span>
-            )}
-            <span className={`${styles.statusPill} ${styles.statusGraded}`}>Оцінено ✓</span>
-          </>
-        ) : (
-          <span className={`${styles.statusPill} ${styles.statusPending}`}>Не оцінено</span>
+        {isGraded && total !== null && (
+          <span className={styles.scoreBadge}>{total} / {maxTotal}</span>
         )}
+        <span className={`${styles.statusPill} ${isGraded ? styles.statusGraded : styles.statusPending}`}>
+          {isGraded ? "Оцінено ✓" : "Не оцінено"}
+        </span>
         <svg className={styles.chevron} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="m9 18 6-6-6-6"/>
         </svg>
@@ -300,8 +354,8 @@ function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, 
     ? criteria.reduce((a, c) => a + (Number(gradeForm.scores[c.key]) || 0), 0)
     : null;
 
-  const links = sub.content_links ?? [];
-  const files = sub.content_files ?? [];
+  const links      = sub.content_links ?? [];
+  const files      = sub.content_files ?? [];
   const imageFiles = files.filter(f => isImageFile(f.name || f.file || ""));
   const otherFiles = files.filter(f => !isImageFile(f.name || f.file || ""));
   const hasContent = sub.content_text || links.length > 0 || files.length > 0;
@@ -309,27 +363,34 @@ function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, 
   return (
     <div className={styles.detailWrap}>
       <button className={styles.backBtn} onClick={onClose}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <path d="m15 18-6-6 6-6"/>
         </svg>
         Назад до списку
       </button>
 
       <div className={styles.detailGrid}>
-        {/* ── Ліва колонка ── */}
+        {/* ── Left: submission content ── */}
         <div className={styles.detailContent}>
           <div className={styles.detailHeader}>
-            <h2 className={styles.detailTitle}>{sub.task_title || "Без назви"}</h2>
+            <div className={styles.detailTitleRow}>
+              <h2 className={styles.detailTitle}>{sub.task_title || "Без назви"}</h2>
+              <span className={`${styles.statusPill} ${isGraded ? styles.statusGraded : styles.statusPending}`}>
+                {isGraded ? "Оцінено ✓" : "Не оцінено"}
+              </span>
+            </div>
             <span className={styles.detailRound}>{sub.round_title}</span>
           </div>
 
           <div className={styles.anonBadge}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
+            <div className={styles.anonBadgeIcon}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
             Особисті дані учасника приховані для об'єктивного оцінювання
           </div>
 
@@ -394,7 +455,7 @@ function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, 
           <div className={styles.submittedAt}>Подано: {formatDate(sub.submitted_at)}</div>
         </div>
 
-        {/* ── Права колонка: оцінювання ── */}
+        {/* ── Right: grading panel ── */}
         <div className={styles.gradePanel}>
           <div className={styles.gradePanelHeader}>
             <h3 className={styles.gradePanelTitle}>
@@ -407,65 +468,71 @@ function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, 
 
           {gradeForm && criteria.length > 0 ? (
             <>
-              <div className={styles.criteriaList}>
-                {criteria.map(c => {
-                  const pct = Math.min(100, ((Number(gradeForm.scores[c.key]) || 0) / c.max) * 100);
-                  return (
-                    <div key={c.key} className={styles.criteriaItem}>
-                      <div className={styles.criteriaHeader}>
-                        <span className={styles.criteriaLabel}>{c.label}</span>
-                        <span className={styles.criteriaMax}>макс. {c.max}</span>
+              <div className={styles.gradePanelBody}>
+                <div className={styles.criteriaList}>
+                  {criteria.map(c => {
+                    const val = Number(gradeForm.scores[c.key]) || 0;
+                    const pct = Math.min(100, (val / c.max) * 100);
+                    return (
+                      <div key={c.key} className={styles.criteriaItem}>
+                        <div className={styles.criteriaHeader}>
+                          <span className={styles.criteriaLabel}>{c.label}</span>
+                          <span className={styles.criteriaMax}>макс. {c.max}</span>
+                        </div>
+                        <div className={styles.scoreInputRow}>
+                          <input
+                            type="number"
+                            min={0}
+                            max={c.max}
+                            step={1}
+                            className={styles.scoreInput}
+                            value={gradeForm.scores[c.key]}
+                            onChange={e => setGradeForm(f => ({ ...f, scores: { ...f.scores, [c.key]: e.target.value } }))}
+                            placeholder="0"
+                          />
+                          <span className={styles.scoreSlash}>/ {c.max}</span>
+                        </div>
+                        <div className={styles.scoreBar}>
+                          <div className={styles.scoreBarFill} style={{ width: `${pct}%` }} />
+                        </div>
                       </div>
-                      <div className={styles.scoreInputWrap}>
-                        <input
-                          type="number"
-                          min={0}
-                          max={c.max}
-                          step={1}
-                          className={styles.scoreInput}
-                          value={gradeForm.scores[c.key]}
-                          onChange={e => setGradeForm(f => ({ ...f, scores: { ...f.scores, [c.key]: e.target.value } }))}
-                          placeholder="0"
-                        />
-                        <span className={styles.scoreSlash}>/ {c.max}</span>
-                      </div>
-                      <div className={styles.scoreBar}>
-                        <div className={styles.scoreBarFill} style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+
+                <div className={styles.totalScore}>
+                  <span className={styles.totalLabel}>Загальний бал</span>
+                  <span className={styles.totalValue}>{total} / {maxTotal}</span>
+                </div>
+
+                <label className={styles.commentLabel}>
+                  Коментар / Фідбек
+                  <textarea
+                    className={styles.commentArea}
+                    rows={4}
+                    value={gradeForm.comment}
+                    onChange={e => setGradeForm(f => ({ ...f, comment: e.target.value }))}
+                    placeholder="Напишіть детальний фідбек для учасника..."
+                  />
+                </label>
+
+                {error   && <p className={styles.gradeError}>{error}</p>}
+                {success && <p className={styles.gradeSuccess}>✓ Оцінку збережено успішно!</p>}
               </div>
 
-              <div className={styles.totalScore}>
-                <span className={styles.totalLabel}>Загальний бал</span>
-                <span className={styles.totalValue}>{total} / {maxTotal}</span>
+              <div className={styles.gradePanelFooter}>
+                <button className={styles.gradeBtn} onClick={onSave} disabled={saving}>
+                  {saving ? "Збереження…" : isGraded ? "Оновити оцінку" : "Зберегти оцінку"}
+                </button>
+                {isGraded && sub.my_grade?.updated_at && (
+                  <p className={styles.gradeDate}>Оцінено: {formatDate(sub.my_grade.updated_at)}</p>
+                )}
               </div>
-
-              <label className={styles.commentLabel}>
-                Коментар / Фідбек
-                <textarea
-                  className={styles.commentArea}
-                  rows={4}
-                  value={gradeForm.comment}
-                  onChange={e => setGradeForm(f => ({ ...f, comment: e.target.value }))}
-                  placeholder="Напишіть детальний фідбек для учасника..."
-                />
-              </label>
-
-              {error   && <p className={styles.gradeError}>{error}</p>}
-              {success && <p className={styles.gradeSuccess}>✓ Оцінку збережено успішно!</p>}
-
-              <button className={styles.gradeBtn} onClick={onSave} disabled={saving}>
-                {saving ? "Збереження…" : isGraded ? "Оновити оцінку" : "Зберегти оцінку"}
-              </button>
-
-              {isGraded && sub.my_grade?.updated_at && (
-                <p className={styles.gradeDate}>Оцінено: {formatDate(sub.my_grade.updated_at)}</p>
-              )}
             </>
           ) : (
-            <p className={styles.noContent}>Критерії оцінювання не налаштовані.</p>
+            <div className={styles.gradePanelBody}>
+              <p className={styles.noContent}>Критерії оцінювання не налаштовані.</p>
+            </div>
           )}
         </div>
       </div>
