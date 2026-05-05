@@ -14,6 +14,7 @@ from .views import (
     SubmissionListCreateView, SubmissionDetailView,
     SubmissionLinkCreateView, SubmissionLinkDeleteView,
     SubmissionAttachmentCreateView, SubmissionAttachmentDeleteView,
+    JurySubmissionsView, JuryGradeView,
 )
 
 urlpatterns = [
@@ -34,6 +35,10 @@ urlpatterns = [
     # ── Members ────────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/members/', TournamentMemberListView.as_view(), name='tournament-members'),
     path('<int:tournament_pk>/members/<int:pk>/', TournamentMemberDeleteView.as_view(), name='tournament-member-delete'),
+
+    # ── Jury panel ─────────────────────────────────────────────────────────────
+    path('<int:tournament_pk>/jury/submissions/', JurySubmissionsView.as_view(), name='jury-submissions'),
+    path('<int:tournament_pk>/jury/submissions/<int:submission_pk>/grade/', JuryGradeView.as_view(), name='jury-grade'),
 
     # ── Rounds ────────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/rounds/', RoundListCreateView.as_view(), name='round-list-create'),
