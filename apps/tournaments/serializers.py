@@ -4,6 +4,7 @@ from .models import (
     Round, RoundLink, RoundAttachment,
     Task, TaskLink, TaskAttachment,
     Submission, SubmissionLink, SubmissionAttachment,
+    Grade,
 )
 
 
@@ -131,3 +132,63 @@ class SubmissionSerializer(serializers.ModelSerializer):
             'links', 'attachments',
         ]
         read_only_fields = ['task', 'submitted_at', 'updated_at']
+
+
+# ── Grade serializers ─────────────────────────────────────────────────────────
+
+class GradeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = Grade
+        fields = ['id', 'submission', 'juror', 'scores', 'comment', 'total', 'created_at', 'updated_at']
+        read_only_fields = ['juror', 'total', 'created_at', 'updated_at']
+
+
+class GradeWriteSerializer(serializers.Serializer):
+    """Серіалізатор для створення/оновлення оцінки журі."""
+    scores  = serializers.DictField(child=serializers.FloatField(min_value=0))
+    comment = serializers.CharField(allow_blank=True, default="")
+
+
+# ── Jury panel serializers ────────────────────────────────────────────────────
+
+class JurySubmissionSerializer(serializers.ModelSerializer):
+    """
+    Подання для журі — без особистих даних учасника (анонімізовано).
+    Містить my_grade поточного журі.
+    """
+    task_title  = serializers.CharField(source='task.title',        read_only=True)
+    round_id    = serializers.IntegerField(source='task.round.id',  read_only=True)
+    round_title = serializers.CharField(source='task.round.title',  read_only=True)
+
+    # Контент для перегляду
+    content_text  = serializers.CharField(source='text', read_only=True)
+    content_links = SubmissionLinkSerializer(source='links', many=True, read_only=True)
+    content_files = SubmissionAttachmentSerializer(source='attachments', many=True, read_only=True)
+
+    # Оцінка поточного журі — заповнюється у view через SerializerMethodField
+    my_grade = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = Submission
+        fields = [
+            'id',
+            'task_title', 'round_id', 'round_title',
+            'content_text', 'content_links', 'content_files',
+            'submitted_at',
+            'my_grade',
+        ]
+
+    def get_my_grade(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return None
+        grade = obj.grades.filter(juror=request.user).first()
+        if not grade:
+            return None
+        return {
+            'id':         grade.id,
+            'scores':     grade.scores,
+            'comment':    grade.comment,
+            'total':      grade.total,
+            'updated_at': grade.updated_at,
+        }

@@ -53,29 +53,39 @@ const NavItem = ({ tabKey, label, path, children }) => (
 );
 
 /* ─── Вкладка турніру з анімацією ─── */
-// isNew=true  → вкладка щойно додана, програємо анімацію появи
-// isNew=false → вкладка вже існувала (навігація між сторінками), одразу visible
-const TournamentTab = ({ tab, onClose, isNew }) => {
-  const [visible, setVisible] = useState(!isNew);
+// Логіка: кожна вкладка при першому маунті починає у схованому стані
+// (opacity:0, max-height:0) і одразу після маунту через rAF отримує
+// клас tabOpening — так браузер гарантовано бачить початковий стан і грає анімацію.
+// При закритті — tabClosing через transition.
+const TournamentTab = ({ tab, onClose, animate }) => {
+  // animate=true  → вкладка щойно додана, програємо появу
+  // animate=false → вкладка вже існувала (NavBar ремаунтився), одразу видима
+  const [phase, setPhase] = useState(animate ? 'hidden' : 'open');
 
   useEffect(() => {
-    if (!isNew) return;
-    // Подвійний rAF: браузер фіксує initial tabHidden, потім застосовує transition
-    const raf = requestAnimationFrame(() =>
-      requestAnimationFrame(() => setVisible(true))
-    );
+    if (!animate) return;
+    const raf = requestAnimationFrame(() => {
+      setPhase('opening');
+    });
     return () => cancelAnimationFrame(raf);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClose = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setVisible(false);
+    setPhase('closing');
     setTimeout(() => onClose(tab.id), 250);
   };
 
+  const cls = [
+    styles.nestedTournament,
+    phase === 'hidden'  ? styles.tabHidden  : '',
+    phase === 'opening' ? styles.tabOpening : '',
+    phase === 'closing' ? styles.tabClosing : '',
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className={`${styles.nestedTournament} ${visible ? styles.tabVisible : styles.tabHidden}`}>
+    <div className={cls}>
       <NavLink
         to={`/tournament/${tab.id}`}
         className={({ isActive }) =>
@@ -120,21 +130,26 @@ const NavBar = ({ children }) => {
     () => JSON.parse(localStorage.getItem("setting_logout") ?? "true")
   );
 
+  useEffect(() => {
+    const syncLogout = () =>
+      setShowLogout(JSON.parse(localStorage.getItem("setting_logout") ?? "true"));
+    window.addEventListener("settings-updated", syncLogout);
+    window.addEventListener("storage", syncLogout);
+    return () => {
+      window.removeEventListener("settings-updated", syncLogout);
+      window.removeEventListener("storage", syncLogout);
+    };
+  }, []);
+
   const role = localStorage.getItem('userRole') ?? 'participant';
   const roleTabs = getTabsForRole(role);
 
-  // Зберігаємо Set id-шників з ПОПЕРЕДНЬОГО рендеру.
-  // Якщо id є в prevIds → вкладка вже існувала → isNew=false (без анімації).
-  // Якщо id нема в prevIds → щойно додана → isNew=true (з анімацією).
-  // Після рендеру оновлюємо ref поточним станом.
-  const prevTabIdsRef = useRef(new Set());
+  // Зберігаємо id вкладок які існували на момент першого маунту NavBar.
+  // Якщо NavBar ремаунтується (перехід між сторінками), ці вкладки вже відомі
+  // і не повинні анімуватись. Нові вкладки (яких тут немає) отримають animate=true.
+  const initialTabIds = useRef(new Set(openTabs.map(t => String(t.id))));
 
-  const currentIds = new Set(openTabs.map((t) => String(t.id)));
-  const newTabIds  = new Set(
-    [...currentIds].filter((id) => !prevTabIdsRef.current.has(id))
-  );
-  // Синхронізуємо ref після визначення нових — до наступного рендеру
-  prevTabIdsRef.current = currentIds;
+
 
   useEffect(() => {
     const storedName = localStorage.getItem('fullUserName');
@@ -251,6 +266,9 @@ const NavBar = ({ children }) => {
         </div>
 
         <div className={styles.search}>
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" style={{opacity:0.4,flexShrink:0}}>
+            <circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/>
+          </svg>
           <input
             type="search"
             placeholder="Пошук..."
@@ -302,7 +320,7 @@ const NavBar = ({ children }) => {
                           key={tab.id}
                           tab={tab}
                           onClose={closeTab}
-                          isNew={newTabIds.has(String(tab.id))}
+                          animate={!initialTabIds.current.has(String(tab.id))}
                         />
                       ))}
                     </div>
@@ -328,7 +346,7 @@ const NavBar = ({ children }) => {
               className={styles.logoutBtn}
               type="button"
             >
-              <LogoutIcon className={styles.logoutIcon} />
+              <LogoutIcon className={styles.logoutIcon} style={{ color: 'rgb(215,125,126)', fill: 'rgb(215,125,126)' }} />
               <span className={styles.logoutText}>Вийти</span>
             </button>
             )}

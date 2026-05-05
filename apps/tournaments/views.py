@@ -10,6 +10,7 @@ from .models import (
     Round, RoundLink, RoundAttachment,
     Task, TaskLink, TaskAttachment,
     Submission, SubmissionLink, SubmissionAttachment,
+    Grade,
     generate_invite_pin,
 )
 from .serializers import (
@@ -17,13 +18,21 @@ from .serializers import (
     RoundSerializer, RoundLinkSerializer, RoundAttachmentSerializer,
     TaskSerializer, TaskLinkSerializer, TaskAttachmentSerializer,
     SubmissionSerializer, SubmissionLinkSerializer, SubmissionAttachmentSerializer,
+    GradeSerializer, GradeWriteSerializer, JurySubmissionSerializer,
 )
-from .permissions import IsTournamentOwner, IsTournamentMemberOrOwner, IsTournamentParticipant
+from .permissions import IsTournamentOwner, IsTournamentMemberOrOwner, IsTournamentParticipant, IsTournamentJury
 
 BASE_URL = "http://localhost:5173"
 
 # Ролі, для яких власник може генерувати інвайти
 INVITABLE_ROLES = ('participant', 'jury', 'admin')
+
+# Критерії оцінювання за замовчуванням
+DEFAULT_CRITERIA = [
+    {"key": "originality",  "label": "Оригінальність",  "max": 10},
+    {"key": "execution",    "label": "Виконання",        "max": 10},
+    {"key": "presentation", "label": "Презентація",      "max": 10},
+]
 
 
 # ── Tournament views ──────────────────────────────────────────────────────────
@@ -481,3 +490,101 @@ class SubmissionAttachmentDeleteView(generics.DestroyAPIView):
         if obj.submission.participant != self.request.user:
             raise PermissionDenied("Ви можете редагувати лише свою здачу.")
         return obj
+
+
+# ── Jury panel views ──────────────────────────────────────────────────────────
+
+class JurySubmissionsView(APIView):
+    """
+    GET /tournaments/<tournament_pk>/jury/submissions/
+
+    Повертає всі подання в межах турніру для оцінювання журі.
+    Особисті дані учасника не включаються (анонімізація).
+    Доступно: jury, owner, admin.
+    """
+    permission_classes = [IsAuthenticated, IsTournamentJury]
+
+    def get(self, request, tournament_pk):
+        # Отримуємо всі подання по всіх завданнях цього турніру
+        submissions = (
+            Submission.objects
+            .filter(task__round__tournament_id=tournament_pk)
+            .select_related('task', 'task__round')
+            .prefetch_related('links', 'attachments', 'grades')
+            .order_by('-submitted_at')
+        )
+
+        serializer = JurySubmissionSerializer(
+            submissions,
+            many=True,
+            context={'request': request},
+        )
+
+        return Response({
+            'submissions': serializer.data,
+            'criteria':    DEFAULT_CRITERIA,
+        })
+
+
+class JuryGradeView(APIView):
+    """
+    POST /tournaments/<tournament_pk>/jury/submissions/<submission_pk>/grade/
+
+    Створює або оновлює оцінку журі для вказаного подання.
+    Body: { "scores": {"originality": 8, "execution": 7, "presentation": 9}, "comment": "..." }
+    Доступно: jury, owner, admin.
+    """
+    permission_classes = [IsAuthenticated, IsTournamentJury]
+
+    def post(self, request, tournament_pk, submission_pk):
+        # Перевіряємо що подання належить до цього турніру
+        try:
+            submission = (
+                Submission.objects
+                .select_related('task__round__tournament')
+                .get(pk=submission_pk, task__round__tournament_id=tournament_pk)
+            )
+        except Submission.DoesNotExist:
+            return Response({'detail': 'Подання не знайдено.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = GradeWriteSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        scores  = serializer.validated_data['scores']
+        comment = serializer.validated_data['comment']
+
+        # Валідація балів відносно критеріїв
+        for criterion in DEFAULT_CRITERIA:
+            key     = criterion['key']
+            max_val = criterion['max']
+            val     = scores.get(key)
+            if val is None:
+                return Response(
+                    {'detail': f'Відсутній бал для критерію «{criterion["label"]}».'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if not (0 <= val <= max_val):
+                return Response(
+                    {'detail': f'Бал для «{criterion["label"]}» має бути від 0 до {max_val}.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Створюємо або оновлюємо оцінку
+        grade, _ = Grade.objects.update_or_create(
+            submission=submission,
+            juror=request.user,
+            defaults={
+                'scores':  scores,
+                'comment': comment,
+                'total':   sum(scores.values()),
+            },
+        )
+
+        return Response({
+            'id':         grade.id,
+            'scores':     grade.scores,
+            'comment':    grade.comment,
+            'total':      grade.total,
+            'updated_at': grade.updated_at,
+        }, status=status.HTTP_200_OK)
