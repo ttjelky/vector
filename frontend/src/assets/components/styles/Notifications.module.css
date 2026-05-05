@@ -93,34 +93,31 @@
 .notifItem:hover { background: #fafafa; }
 .unread { background: #f0fdf4; }
 
-.notifSender { font-size: 11px; color: #aaa; font-weight: 500; }
-.notifSubject { font-size: 13px; font-weight: 600; color: #1a1a1a; margin: 0; }
-.notifText { font-size: 13px; color: #444; margin: 0; line-height: 1.4; }
+.notifSender   { font-size: 11px; color: #aaa; font-weight: 500; }
+.notifSubject  { font-size: 13px; font-weight: 600; color: #1a1a1a; margin: 0; }
+.notifText     { font-size: 13px; color: #444; margin: 0; line-height: 1.4; }
 .notifTournament { font-size: 11px; color: #888; }
-.notifLinks { display: flex; flex-direction: column; gap: 3px; margin-top: 2px; }
-.notifLink { font-size: 12px; color: #3b82f6; text-decoration: none; }
+.notifLinks    { display: flex; flex-direction: column; gap: 3px; margin-top: 2px; }
+.notifLink     { font-size: 12px; color: #3b82f6; text-decoration: none; }
 .notifLink:hover { text-decoration: underline; }
-.notifTime { font-size: 11px; color: #bbb; margin-top: 2px; }
+.notifTime     { font-size: 11px; color: #bbb; margin-top: 2px; }
 
 /* ── Compose overlay ─────────────────────────────────────────────────────── */
 .composeOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  z-index: 1000;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(3px);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   padding: 20px;
+  z-index: 9999;
   animation: overlayIn 0.25s ease both;
 }
-
 .composeOverlayOut {
   animation: overlayOut 0.3s ease forwards;
 }
-
 @keyframes overlayIn {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -132,84 +129,112 @@
 
 /* ── Compose modal ───────────────────────────────────────────────────────── */
 .composeModal {
-  background: #f5f5f7;
+  background: #ffffff;
   border-radius: 28px;
-  border: 6px solid white;
-  box-shadow:
-    inset 0 0 0 1px #dcdcdc,
-    0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid lightgray;
   width: 100%;
   max-width: 560px;
-  max-height: 88vh;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
-  animation: modalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  position: relative;
+  overflow: hidden;
+  animation: modalIn 0.4s ease;
 }
-
 .composeModalOut {
-  animation: modalOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: modalOut 0.3s ease forwards;
 }
-
 @keyframes modalIn {
-  from { opacity: 0; transform: scale(0.92) translateY(16px); }
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 @keyframes modalOut {
   from { opacity: 1; transform: scale(1) translateY(0); }
-  to   { opacity: 0; transform: scale(0.92) translateY(16px); }
+  to   { opacity: 0; transform: scale(0.95) translateY(10px); }
 }
 
+/* ── Floating header (glassmorphism) ─────────────────────────────────────── */
 .composeHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid rgba(0,0,0,0.07);
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px 20px 16px;
+  z-index: 10;
+  pointer-events: none;
+  position: relative;
 }
+.composeHeader::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, transparent 100%);
+  border-radius: 24px 24px 0 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
 .composeTitle {
+  padding: 5px 16px;
   font-size: 22px;
-  font-weight: 700;
-  color: #1a1a1a;
-  font-family: "Google Sans", sans-serif;
+  font-weight: 500;
+  color: #111;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.05);
+  border-radius: 1000px;
+  margin: 0;
+  pointer-events: auto;
 }
+
 .composeClose {
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: rgba(255,255,255,0.6);
-  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.05);
+  border-radius: 1000px;
   cursor: pointer;
   color: #555;
-  transition: background 0.15s, transform 0.15s;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  pointer-events: auto;
+  transition: background 0.15s;
 }
-.composeClose:hover { background: #e5e5e5; transform: scale(1.08); }
+.composeClose:hover { background: #ececec; }
 
+/* ── Body (єдиний скрол тут) ─────────────────────────────────────────────── */
 .composeBody {
-  padding: 16px 24px;
-  overflow-y: auto;
+  flex: 1;
+  padding: 8px 24px 24px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  overflow-y: auto;
 }
 
-/* ── Fields ─────────────────────────────────────────────────────────────── */
+/* ── Fields ──────────────────────────────────────────────────────────────── */
 .composeField {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 .composeField label {
-  font-size: 12px;
+  font-size: 20px;
   font-weight: 500;
-  color: gray;
+  color: #666;
+  margin-left: 4px;
   display: flex;
   align-items: center;
   gap: 5px;
-  font-family: "Google Sans", sans-serif;
 }
 .attachIcon { display: flex; align-items: center; color: #aaa; }
 
@@ -217,23 +242,24 @@
 .composeField textarea {
   display: block;
   width: 100%;
-  min-height: 44px;
+  min-height: 48px;
   padding: 0 14px;
-  border: 1px solid #d1d1d1;
-  border-radius: 12px;
+  border: 0.5px solid rgba(0,0,0,0.2);
+  border-radius: 14px;
   font-size: 14px;
   font-family: inherit;
   background: #fff;
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.1s, box-shadow 0.1s;
+  color: #111;
+  transition: border-color 0.15s, box-shadow 0.15s;
   resize: vertical;
 }
-.composeField textarea { padding: 10px 14px; min-height: 90px; }
+.composeField textarea { padding: 12px 14px; min-height: 100px; }
 .composeField input:focus,
 .composeField textarea:focus {
-  border-color: #111;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+  box-shadow: 0 0 0 2px #378ADD55;
+  border-color: #378ADD;
 }
 
 /* ── Recipient autocomplete ──────────────────────────────────────────────── */
@@ -246,18 +272,22 @@
 .recipientWrap input {
   display: block;
   width: 100%;
-  min-height: 44px;
+  min-height: 48px;
   padding: 0 14px;
-  border: 1px solid #d1d1d1;
-  border-radius: 12px;
+  border: 0.5px solid rgba(0,0,0,0.2);
+  border-radius: 14px;
   font-size: 14px;
   font-family: inherit;
   background: #fff;
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.1s;
+  color: #111;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.recipientWrap input:focus { border-color: #111; }
+.recipientWrap input:focus {
+  box-shadow: 0 0 0 2px #378ADD55;
+  border-color: #378ADD;
+}
 
 .selectedBadge {
   display: inline-flex;
@@ -292,7 +322,6 @@
   overflow: hidden;
   animation: dropIn 0.15s cubic-bezier(.22,.68,0,1.2) both;
 }
-
 .autocompleteItem {
   display: flex;
   flex-direction: column;
@@ -304,7 +333,6 @@
 }
 .autocompleteItem:last-child { border-bottom: none; }
 .autocompleteItem:hover { background: #f5f5f5; }
-
 .acName { font-size: 14px; font-weight: 600; color: #1a1a1a; }
 .acSub  { font-size: 12px; color: #888; }
 
@@ -314,19 +342,20 @@
 
 .addBtn {
   white-space: nowrap;
-  padding: 0 16px;
-  height: 44px;
-  background: #1a1a1a;
+  padding: 0 18px;
+  height: 48px;
+  background: #1f1f1f;
   color: #fff;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.2s;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(52,52,52,0.2);
 }
-.addBtn:hover { background: #333; }
+.addBtn:hover { background: #2a2a2a; transform: translateY(-1px); }
 
 /* ── Chips ───────────────────────────────────────────────────────────────── */
 .chipList { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
@@ -354,55 +383,65 @@
 }
 .attachFileBtn:hover { border-color: #888; background: #f5f5f5; }
 
-.errorText { font-size: 12px; color: #e05252; margin: 0; }
+.errorText { font-size: 12px; color: #ff4d4d; margin: 0; }
 
-/* ── Footer ──────────────────────────────────────────────────────────────── */
+/* ── Floating footer (glassmorphism) ─────────────────────────────────────── */
 .composeFooter {
+  flex-shrink: 0;
   display: flex;
-  align-items: center;
   justify-content: flex-end;
-  gap: 10px;
-  padding: 14px 24px 20px;
-  border-top: 1px solid rgba(0,0,0,0.07);
+  gap: 12px;
+  padding: 16px 24px 20px;
+  box-sizing: border-box;
+  z-index: 10;
+  position: relative;
+}
+.composeFooter::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.08) 0%, transparent 100%);
+  border-radius: 0 0 24px 24px;
+  z-index: -1;
+  pointer-events: none;
 }
 
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
 .cancelBtn {
-  padding: 10px 20px;
-  border: 1px solid #e0e0e0;
-  border-radius: 1000px;
-  background: #fff;
+  padding: 9px 18px;
+  border-radius: 100px;
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  color: #555;
+  transition: all 0.2s ease;
+  background: rgb(232, 232, 232);
+  color: #333;
+  border: 1px solid rgba(0,0,0,0.1);
   font-family: inherit;
-  transition: background 0.15s;
 }
-.cancelBtn:hover { background: #f5f5f5; }
+.cancelBtn:hover { transform: translateY(-1px); }
 
 .sendBtn {
-  display: flex;
+  padding: 9px 18px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #1f1f1f;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(52,52,52,0.2);
+  font-family: inherit;
+  display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 10px 22px;
-  background: linear-gradient(180deg, #3a3a3a, #1f1f1f);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.8);
-  border-radius: 1000px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.15),
-    inset 0 -2px 4px rgba(0,0,0,0.6),
-    0 6px 12px rgba(0,0,0,0.15);
-  transition: 0.2s;
 }
 .sendBtn:hover:not(:disabled) {
-  background: linear-gradient(180deg, #444, #242424);
+  background: #2a2a2a;
   transform: translateY(-1px);
 }
-.sendBtn:disabled { background: #999; cursor: not-allowed; box-shadow: none; }
+.sendBtn:disabled { background: #555; opacity: 0.6; cursor: not-allowed; }
 
 /* ── Mobile ──────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
@@ -410,42 +449,24 @@
     padding: 0;
     align-items: flex-end;
   }
-
   .composeModal {
     max-width: 100%;
     width: 100%;
     max-height: 92vh;
     border-radius: 28px 28px 0 0;
-    border: 4px solid white;
-    border-bottom: none;
   }
-
   .composeTitle { font-size: 18px; }
-
-  .linkRow {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
+  .linkRow { flex-direction: column; align-items: stretch; gap: 8px; }
   .addBtn { width: 100%; }
-
   .composeFooter {
     flex-direction: column-reverse;
     gap: 8px;
     padding: 12px 20px 24px;
   }
-  .cancelBtn,
-  .sendBtn {
-    width: 100%;
-    justify-content: center;
-  }
-
+  .cancelBtn, .sendBtn { width: 100%; justify-content: center; }
   .dropdown {
     position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    top: auto; bottom: 0; left: 0; right: 0;
     width: 100%;
     border-radius: 20px 20px 0 0;
     max-height: 70vh;

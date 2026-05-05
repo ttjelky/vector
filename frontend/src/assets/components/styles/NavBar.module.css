@@ -156,6 +156,33 @@ body, html {
   cursor: default;
 }
 
+/* Аватарка — кругла фотка */
+.navbarAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e8e8e8;
+  flex-shrink: 0;
+}
+
+/* Аватарка — плейсхолдер з першою літерою */
+.navbarAvatarPlaceholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e8e8e8;
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid #ddd;
+}
+
+/* Bell — стиль тепер в Notifications.module.css */
 .notificationIcon {
   width: 18px;
   height: 18px;
@@ -255,6 +282,10 @@ body, html {
   margin-bottom: 16px;
 }
 
+.primaryNav, .secondaryNav {
+  margin-bottom: 20px;
+}
+
 .leftSidebar ul {
   list-style: none;
   padding: 0;
@@ -278,6 +309,12 @@ body, html {
   font-size: 13px;
   font-weight: 450;
   color: rgba(39, 50, 64, 0.85);
+}
+
+.sidebarText {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(39, 50, 64, 1);
 }
 
 .sidebarIcon {
