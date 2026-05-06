@@ -1,47 +1,13 @@
 import { useState } from "react";
 import styles from "./styles/RoundsTab.module.css";
 import API from "../../api";
-import {
-  fileIcon,
-  toInputDatetime,
-  formatRoundDateRange,
-  roundStatus,
-  getRoundStatusStyle,
-} from "./tournamentHelpers";
-import { TaskCard } from "./TaskCard";
-import { TaskForm } from "./TaskForm";
+import { fileIcon, toInputDatetime } from "./tournamentHelpers";
 
-// ─── Chevron SVG ──────────────────────────────────────────────────────────────
-
-function ChevronIcon({ open }) {
-  return (
-    <svg
-      className={`${styles.chevronSvg} ${open ? styles.chevronSvgOpen : ""}`}
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="4 6 8 10 12 6" />
-    </svg>
-  );
-}
-
-// ─── Icon helpers ─────────────────────────────────────────────────────────────
-
-function EditIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z"/>
-    </svg>
-  );
-}
+// ─── Icon helpers ──────────────────────────────────────────────────────────────
 
 function TrashIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="2 4 14 4"/>
       <path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
       <path d="M6 7v5M10 7v5"/>
@@ -127,7 +93,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
       }
 
       const fresh = await API.get(`/tournaments/${tournamentId}/rounds/`);
-      const freshRound = fresh.data.find((r) => r.id === round.id) || payload;
+      const freshRound = fresh.data.find((r) => r.id === round.id) || { ...round, ...payload };
       onSaved(freshRound);
     } catch (err) {
       console.error(err);
@@ -139,7 +105,6 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
 
   return (
     <div className={styles.roundEditForm}>
-      <h4 className={styles.roundEditTitle}>Редагування раунду</h4>
       <div className={styles.editForm}>
         <label className={styles.editLabel}>
           Назва <span className={styles.editRequired}>*</span>
@@ -219,7 +184,6 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
               <button
                 className={styles.attachRemove}
                 onClick={() => setNewFiles((ff) => ff.filter((_, ii) => ii !== i))}
-                title="Видалити файл"
               >
                 <TrashIcon />
               </button>
@@ -245,18 +209,21 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
 }
 
 // ─── RoundCard ────────────────────────────────────────────────────────────────
+// Тепер — Drawer для редагування раунду. Пропси збережені для сумісності.
 
 export function RoundCard({
   round,
   tournamentId,
+  // Нові ключові пропси для drawer-режиму:
+  onRoundSaved,
+  onEditToggle,
+  // Старі пропси (залишаємо для сумісності, але не використовуємо в UI):
   readOnly,
   myRole,
   isOpen,
   isEditing,
   onToggle,
-  onEditToggle,
   onDeleteRequest,
-  onRoundSaved,
   onTaskCreated,
   onTaskDeleted,
   openTaskId,
@@ -267,183 +234,43 @@ export function RoundCard({
   onAddTask,
   onCloseTaskForm,
 }) {
-  const taskCount = (round.tasks || []).length;
-  const rstatus   = roundStatus(round);
-  const rstyle    = getRoundStatusStyle(rstatus);
+  if (!round) return null;
+
+  const handleClose = () => {
+    if (onEditToggle) onEditToggle();
+  };
 
   return (
-    <div className={`${styles.roundCard} ${isOpen || isEditing ? styles.roundCardOpen : ""}`}>
-
-      {/* ── Заголовок ── */}
+    <>
+      {/* Фон з blur-ефектом */}
       <div
-        className={styles.roundHeader}
-        onClick={() => !isEditing && onToggle()}
-        role="button"
-        aria-expanded={isOpen}
-      >
-        <div className={styles.roundHeaderLeft}>
-          <span className={styles.roundTitle}>{round.title}</span>
-          <span className={styles.roundDate}>
-            {formatRoundDateRange(round.start_date, round.end_date)}
-          </span>
-        </div>
+        className={styles.roundEditDrawerBackdrop}
+        onClick={handleClose}
+        aria-label="Закрити"
+      />
 
-        <div className={styles.roundHeaderRight}>
-          {/* Кількість завдань — повна назва, зрозуміла */}
-          {taskCount > 0 && (
-            <span className={styles.roundTaskCount}>
-              {taskCount} {taskCount === 1 ? "завдання" : taskCount < 5 ? "завдання" : "завдань"}
-            </span>
-          )}
-
-          {/* Статус */}
-          <span
-            className={styles.roundStatus}
-            style={{ color: rstyle.color, background: rstyle.background ?? "#f3f4f6" }}
+      {/* Drawer панель */}
+      <div className={styles.roundEditDrawer} role="dialog" aria-modal="true">
+        <div className={styles.roundEditDrawerHeader}>
+          <span className={styles.roundEditDrawerTitle}>Редагувати раунд</span>
+          <button
+            className={styles.drawerCloseBtn}
+            onClick={handleClose}
+            title="Закрити"
+            aria-label="Закрити"
           >
-            <span className={styles.statusDot} style={{ background: rstyle.color }} />
-            {rstatus}
-          </span>
-
-          {/* Кнопка «+ завдання» — тільки власнику, тільки коли відкрито */}
-          {!readOnly && isOpen && !isEditing && (
-            <button
-              className={styles.addTaskInlineBtn}
-              onClick={(e) => { e.stopPropagation(); onAddTask(); }}
-              title="Додати завдання до раунду"
-            >
-              + Завдання
-            </button>
-          )}
-
-          {/* Редагувати */}
-          {!readOnly && (
-            <button
-              className={styles.roundActionBtn}
-              onClick={(e) => { e.stopPropagation(); onEditToggle(); }}
-              title="Редагувати раунд"
-            >
-              <EditIcon />
-            </button>
-          )}
-
-          {/* Видалити */}
-          {!readOnly && (
-            <button
-              className={`${styles.roundActionBtn} ${styles.roundActionBtnDanger}`}
-              onClick={(e) => { e.stopPropagation(); onDeleteRequest(round); }}
-              title="Видалити раунд"
-            >
-              <TrashIcon />
-            </button>
-          )}
-
-          {/* Шеврон — SVG замість текстових символів */}
-          {!isEditing && <ChevronIcon open={isOpen} />}
+            ✕
+          </button>
         </div>
-      </div>
-
-      {/* ── Форма редагування ── */}
-      {isEditing && (
-        <div className={styles.roundBody}>
+        <div className={styles.roundEditDrawerBody}>
           <RoundEditForm
             round={round}
             tournamentId={tournamentId}
             onSaved={onRoundSaved}
-            onCancel={onEditToggle}
+            onCancel={handleClose}
           />
         </div>
-      )}
-
-      {/* ── Розгорнутий вміст ── */}
-      {isOpen && !isEditing && (
-        <div className={styles.roundBody}>
-
-          {/* Опис раунду */}
-          {round.description && (
-            <p className={styles.roundDescription}>{round.description}</p>
-          )}
-
-          {/* Посилання та файли раунду */}
-          {(round.links?.length > 0 || round.attachments?.length > 0) && (
-            <div className={styles.roundMeta}>
-              {round.links?.length > 0 && (
-                <div>
-                  <span className={styles.roundMetaLabel}>Посилання</span>
-                  <div className={styles.roundLinkList} style={{ marginTop: 5 }}>
-                    {round.links.map((link) => (
-                      <a
-                        key={link.id}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.roundLink}
-                      >
-                        🔗 {link.label || link.url}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {round.attachments?.length > 0 && (
-                <div>
-                  <span className={styles.roundMetaLabel}>Файли</span>
-                  <div className={styles.roundFileList} style={{ marginTop: 5 }}>
-                    {round.attachments.map((att) => (
-                      <a
-                        key={att.id}
-                        href={att.file}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.roundFile}
-                      >
-                        {fileIcon(att.name)} {att.name}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── Список завдань ── */}
-          <div className={styles.taskList}>
-            {/* Заголовок секції завдань */}
-            <div className={styles.taskListHeader}>
-              <span className={styles.taskListTitle}>
-                Завдання {taskCount > 0 ? `(${taskCount})` : ""}
-              </span>
-            </div>
-
-            {taskCount === 0 && !showTaskForm && (
-              <p className={styles.empty}>Завдань ще немає.</p>
-            )}
-
-            {(round.tasks || []).map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                tournamentId={tournamentId}
-                roundId={round.id}
-                readOnly={readOnly}
-                myRole={myRole}
-                isOpen={openTaskId === task.id}
-                onToggle={() => onTaskToggle(task.id)}
-                onDeleted={(taskId) => onTaskDeleted(round.id, taskId)}
-              />
-            ))}
-
-            {!readOnly && showTaskForm && (
-              <TaskForm
-                roundId={round.id}
-                tournamentId={tournamentId}
-                onCreated={(task) => onTaskCreated(round.id, task)}
-                onCancel={onCloseTaskForm}
-              />
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }

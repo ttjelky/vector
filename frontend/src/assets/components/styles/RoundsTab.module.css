@@ -1,71 +1,692 @@
 /* ════════════════════════════════════════════════════════════════════════════
-   RoundsTab — повністю перероблений дизайн
-   Принципи:
-     • Немає «карток в картках» — розкритий раунд стає секцією, не вкладеним блоком
-     • Завдання — рядки з лівою кольоровою смужкою, розкриваються inline
-     • Всі форми — окремий повноширинний шар поверх списку
-     • Кольорова система: білий фон, акценти #111827, нюансні сірі
+   RoundsTab — Apple-style / Glassmorphism redesign
+   Концепція: Pill-tabs для вибору раунду, Slide-over Drawer для завдань.
+   Стилістика: SF Pro, мінімум кольорів, тонкі лінії, багато простору.
    ════════════════════════════════════════════════════════════════════════════ */
 
-/* ─── Root ──────────────────────────────────────────────────────────────────── */
+/* ─── Layout ─────────────────────────────────────────────────────────────────── */
 .tabContent {
   display: flex;
   flex-direction: column;
+  gap: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+}
+
+/* ─── Tab Header ─────────────────────────────────────────────────────────────── */
+.tabHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
+  margin-bottom: 20px;
 }
 
-/* ─── Empty state ───────────────────────────────────────────────────────────── */
-.empty {
+.tabTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: -0.04em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+}
+
+.tabCount {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #86868b;
+  background: rgba(0,0,0,0.05);
+  padding: 2px 9px;
+  border-radius: 100px;
+  letter-spacing: 0;
+}
+
+/* ─── Create Round button ─────────────────────────────────────────────────────── */
+.createRoundBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  background: #1d1d1f;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  transition: background 0.15s, transform 0.1s;
+}
+.createRoundBtn:hover  { background: #2d2d2f; }
+.createRoundBtn:active { transform: scale(0.97); }
+
+/* ─── Pill Tabs ────────────────────────────────────────────────────────────────── */
+.pillTabsWrapper {
+  display: flex;
+  overflow-x: auto;
+  gap: 6px;
+  padding: 0 0 16px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex-wrap: nowrap;
+}
+.pillTabsWrapper::-webkit-scrollbar { display: none; }
+
+.pillTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
   font-size: 13.5px;
-  color: #9ca3af;
-  margin: 0;
-  padding: 12px 0;
-  text-align: center;
+  font-weight: 500;
+  color: #6e6e73;
+  background: rgba(0,0,0,0.04);
+  border: 1px solid transparent;
+  border-radius: 100px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.pillTab:hover:not(.pillTabActive) {
+  background: rgba(0,0,0,0.07);
+  color: #1d1d1f;
 }
 
+.pillTabActive {
+  background: #1d1d1f;
+  color: #fff;
+  border-color: #1d1d1f;
+}
+
+.pillTabDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* ─── Round content area ─────────────────────────────────────────────────────── */
+.roundContent {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: fadeUp 0.22s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Round info banner ─────────────────────────────────────────────────────── */
+.roundInfoBanner {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 18px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.roundInfoRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.roundInfoMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.roundInfoTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.025em;
+}
+
+.roundInfoDate {
+  font-size: 12px;
+  color: #86868b;
+  font-variant-numeric: tabular-nums;
+}
+
+.roundInfoDesc {
+  font-size: 13.5px;
+  color: #6e6e73;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.roundInfoActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.roundIconBtn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #86868b;
+  background: rgba(0,0,0,0.04);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.roundIconBtn:hover { background: rgba(0,0,0,0.08); color: #1d1d1f; }
+.roundIconBtnDanger:hover { background: #fff1f2; color: #dc2626; }
+
+/* ─── Round links & files chips ─────────────────────────────────────────────── */
+.roundMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.roundLink, .roundFile {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1d1d1f;
+  background: rgba(0,0,0,0.04);
+  border-radius: 100px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.roundLink:hover, .roundFile:hover { background: rgba(0,0,0,0.08); }
+
+/* ─── Status badge  ──────────────────────────────────────────────────────────── */
+.roundStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 100px;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+.statusDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ─── Task list section ──────────────────────────────────────────────────────── */
+.taskListSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.taskListHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+
+.taskListTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: #aeaeb2;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* ─── Task card (slim row) ───────────────────────────────────────────────────── */
+.taskCard {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 14px;
+  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+  user-select: none;
+}
+.taskCard:hover {
+  border-color: rgba(0,0,0,0.13);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
+}
+.taskCard:active { transform: translateY(0); box-shadow: none; }
+
+/* keep the old .taskCardExpanded for compat */
+.taskCardExpanded { border-color: rgba(0,0,0,0.12); }
+
+.taskCardLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.taskTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taskDesc {
+  font-size: 12.5px;
+  color: #86868b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.taskCardRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.taskDeadline {
+  font-size: 11.5px;
+  color: #aeaeb2;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.taskDeadlinePast { color: #ff3b30; }
+
+/* old compat */
+.taskCardHeader { display: contents; }
+.taskCardActions { display: contents; }
+.taskChevron { display: none; }
+.taskCardBody { display: none; }
+
+.taskDeleteBtn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #aeaeb2;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.taskDeleteBtn:hover { background: #fff1f2; color: #dc2626; }
+
+.taskArrow {
+  color: #d1d1d6;
+  display: flex;
+  align-items: center;
+}
+
+/* ─── Task Drawer (slide-over) ───────────────────────────────────────────────── */
+.drawerBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.28);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 100;
+  animation: backdropIn 0.25s ease;
+}
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(500px, 100vw);
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border-left: 1px solid rgba(0,0,0,0.08);
+  box-shadow: -12px 0 48px rgba(0,0,0,0.13);
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  animation: drawerIn 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow: hidden;
+}
+@keyframes drawerIn {
+  from { transform: translateX(100%); opacity: 0.8; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+
+.drawerTitleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.drawerTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+}
+
+.drawerSubtitle {
+  font-size: 12px;
+  color: #86868b;
+}
+
+.drawerCloseBtn {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #86868b;
+  background: rgba(0,0,0,0.05);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 15px;
+  line-height: 1;
+  transition: background 0.15s, color 0.15s;
+}
+.drawerCloseBtn:hover { background: rgba(0,0,0,0.09); color: #1d1d1f; }
+
+.drawerTabs {
+  display: flex;
+  gap: 0;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.drawerTabs::-webkit-scrollbar { display: none; }
+
+.drawerTab {
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #86868b;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.drawerTab:hover { color: #1d1d1f; }
+.drawerTabActive {
+  color: #1d1d1f;
+  border-bottom-color: #1d1d1f;
+  font-weight: 600;
+}
+
+.drawerBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.1) transparent;
+}
+
+.drawerDeadlineBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #c2410c;
+  font-weight: 500;
+}
+.drawerDeadlineExpired {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #dc2626;
+}
+
+/* ─── Drawer content elements ────────────────────────────────────────────────── */
+.drawerDesc {
+  font-size: 14px;
+  color: #3d3d3f;
+  line-height: 1.75;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.drawerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.drawerSectionLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #aeaeb2;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.chipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #1d1d1f;
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 100px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.chip:hover { background: rgba(0,0,0,0.08); }
+
+/* ─── Add task / inline buttons ──────────────────────────────────────────────── */
+.addTaskInlineBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #6e6e73;
+  background: rgba(0,0,0,0.04);
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+.addTaskInlineBtn:hover { background: rgba(0,0,0,0.08); color: #1d1d1f; }
+
+.addTaskBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6e6e73;
+  background: transparent;
+  border: 1.5px dashed rgba(0,0,0,0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  align-self: flex-start;
+}
+.addTaskBtn:hover { border-color: rgba(0,0,0,0.3); color: #1d1d1f; background: rgba(0,0,0,0.02); }
+
+/* ─── Empty states ───────────────────────────────────────────────────────────── */
 .emptyBlock {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   padding: 64px 20px;
-  background: #fafafa;
-  border: 1.5px dashed #e5e7eb;
-  border-radius: 22px;
-  color: #9ca3af;
+  color: #aeaeb2;
+  text-align: center;
 }
-.emptyBlock p { margin: 0; font-size: 14px; }
+.emptyBlock p { margin: 0; font-size: 14px; color: #86868b; }
+
 .emptyBlockIcon {
-  width: 52px;
-  height: 52px;
+  font-size: 30px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f3f4f6;
-  border-radius: 16px;
-  font-size: 26px;
+  background: rgba(0,0,0,0.04);
+  border-radius: 18px;
 }
 
-/* ─── Shared form inputs ────────────────────────────────────────────────────── */
+.empty {
+  font-size: 13.5px;
+  color: #aeaeb2;
+  margin: 0;
+  padding: 10px 0;
+  text-align: center;
+}
+
+/* ─── Form cards ────────────────────────────────────────────────────────────── */
+.roundFormCard {
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  animation: fadeUp 0.2s ease;
+}
+.roundFormHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.roundFormTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.taskFormCard {
+  background: rgba(0,0,0,0.02);
+  border: 1.5px dashed rgba(0,0,0,0.12);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.taskFormTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* ─── Shared form inputs ─────────────────────────────────────────────────────── */
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .editLabel {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: #6b7280;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
-.editRequired { color: #ef4444; }
+.editRequired { color: #ff3b30; }
 
 .editInput {
   padding: 10px 14px;
   font-size: 14px;
-  color: #111827;
-  background: #fff;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 11px;
+  color: #1d1d1f;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
   outline: none;
   font-family: inherit;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -73,18 +694,18 @@
   box-sizing: border-box;
 }
 .editInput:focus {
-  border-color: #111827;
-  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.07);
+  border-color: #1d1d1f;
+  box-shadow: 0 0 0 3px rgba(29,29,31,0.07);
 }
-.editInput::placeholder { color: #d1d5db; }
+.editInput::placeholder { color: #d1d1d6; }
 
 .editTextarea {
   padding: 10px 14px;
   font-size: 14px;
-  color: #111827;
-  background: #fff;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 11px;
+  color: #1d1d1f;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
   outline: none;
   resize: vertical;
   font-family: inherit;
@@ -94,18 +715,18 @@
   box-sizing: border-box;
 }
 .editTextarea:focus {
-  border-color: #111827;
-  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.07);
+  border-color: #1d1d1f;
+  box-shadow: 0 0 0 3px rgba(29,29,31,0.07);
 }
-.editTextarea::placeholder { color: #d1d5db; }
+.editTextarea::placeholder { color: #d1d1d6; }
 
 .answerTextarea {
   padding: 12px 14px;
   font-size: 14px;
-  color: #111827;
-  background: #fff;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 11px;
+  color: #1d1d1f;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
   outline: none;
   resize: vertical;
   font-family: inherit;
@@ -116,15 +737,10 @@
   min-height: 120px;
 }
 .answerTextarea:focus {
-  border-color: #111827;
-  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.07);
+  border-color: #1d1d1f;
+  box-shadow: 0 0 0 3px rgba(29,29,31,0.07);
 }
 
-.editForm {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
 .editRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -139,20 +755,20 @@
   padding-top: 4px;
 }
 
-/* ─── Buttons ───────────────────────────────────────────────────────────────── */
+/* ─── Buttons ────────────────────────────────────────────────────────────────── */
 .cancelBtn {
   padding: 9px 18px;
   font-size: 13.5px;
   font-weight: 500;
-  color: #374151;
-  background: #f9fafb;
-  border: 1.5px solid #e5e7eb;
+  color: #1d1d1f;
+  background: rgba(0,0,0,0.05);
+  border: none;
   border-radius: 100px;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
   font-family: inherit;
+  transition: background 0.15s;
 }
-.cancelBtn:hover    { background: #f3f4f6; border-color: #d1d5db; }
+.cancelBtn:hover    { background: rgba(0,0,0,0.09); }
 .cancelBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .saveBtn {
@@ -160,14 +776,14 @@
   font-size: 13.5px;
   font-weight: 600;
   color: #fff;
-  background: #111827;
+  background: #1d1d1f;
   border: none;
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s, transform 0.1s;
 }
-.saveBtn:hover    { background: #1f2937; }
+.saveBtn:hover    { background: #2d2d2f; }
 .saveBtn:active   { transform: scale(0.97); }
 .saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -176,135 +792,38 @@
   font-size: 14px;
   font-weight: 600;
   color: #fff;
-  background: #111827;
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  letter-spacing: -0.01em;
-  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
-}
-.submitBtn:hover    { background: #1f2937; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-.submitBtn:active   { transform: scale(0.97); }
-.submitBtn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
-
-.submitWorkBtn {
-  padding: 10px 22px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #fff;
-  background: #111827;
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  letter-spacing: -0.01em;
-  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
-}
-.submitWorkBtn:hover  { background: #1f2937; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-.submitWorkBtn:active { transform: scale(0.97); }
-
-/* ─── Tab header ─────────────────────────────────────────────────────────────── */
-.tabHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 4px;
-}
-.tabTitle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 17px;
-  font-weight: 800;
-  color: #111827;
-  letter-spacing: -0.03em;
-}
-.tabCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 7px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #6b7280;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 100px;
-  line-height: 1;
-}
-
-.createRoundBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 18px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #fff;
-  background: #111827;
+  background: #1d1d1f;
   border: none;
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s, transform 0.1s;
 }
-.createRoundBtn:hover  { background: #1f2937; }
-.createRoundBtn:active { transform: scale(0.97); }
+.submitBtn:hover    { background: #2d2d2f; }
+.submitBtn:active   { transform: scale(0.97); }
+.submitBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ─── Round / Task form cards — inline full-width panels ─────────────────────── */
-.roundFormHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.roundFormCard {
-  background: #fff;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 22px;
-  padding: 24px 26px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-}
-.roundFormTitle {
-  font-size: 15px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-/* Форма завдання — така ж, без окремого вкладеного виду */
-.taskFormCard {
-  background: #fafafa;
-  border: 1.5px dashed #d1d5db;
-  border-radius: 16px;
-  padding: 20px 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 4px;
-}
-.taskFormTitle {
-  font-size: 14px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.addLinkBtn {
-  padding: 9px 18px;
+.submitWorkBtn {
+  padding: 10px 20px;
   font-size: 13.5px;
   font-weight: 600;
   color: #fff;
-  background: #111827;
+  background: #1d1d1f;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, transform 0.1s;
+}
+.submitWorkBtn:hover  { background: #2d2d2f; }
+.submitWorkBtn:active { transform: scale(0.97); }
+
+.addLinkBtn {
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  background: #1d1d1f;
   border: none;
   border-radius: 100px;
   cursor: pointer;
@@ -312,106 +831,49 @@
   font-family: inherit;
   transition: background 0.15s;
 }
-.addLinkBtn:hover { background: #1f2937; }
+.addLinkBtn:hover { background: #2d2d2f; }
 
 .filePickBtn {
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 8px 14px;
+  padding: 7px 14px;
   font-size: 13px;
   font-weight: 500;
-  color: #4b5563;
-  background: #fff;
-  border: 1.5px dashed #d1d5db;
+  color: #6e6e73;
+  background: rgba(0,0,0,0.04);
+  border: 1.5px dashed rgba(0,0,0,0.15);
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 .filePickBtn:hover {
-  background: #f3f4f6;
-  border-color: #9ca3af;
-  color: #111827;
+  background: rgba(0,0,0,0.07);
+  border-color: rgba(0,0,0,0.28);
+  color: #1d1d1f;
 }
 
 .formError {
   font-size: 13px;
   color: #dc2626;
   margin: 0;
-  padding: 10px 13px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 10px;
+  padding: 10px 14px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 12px;
 }
 
-/* ─── Attachment helpers (chips, links, files) ───────────────────────────────── */
+/* ─── Attach section ─────────────────────────────────────────────────────────── */
 .attachSection { display: flex; flex-direction: column; gap: 8px; }
+
 .attachSectionLabel {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
-
-.attachChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px 5px 12px;
-  font-size: 13px;
-  color: #374151;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 100px;
-  white-space: nowrap;
-}
-.attachChipMeta { font-size: 11.5px; color: #9ca3af; }
-.attachChipRemove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #9ca3af;
-  border-radius: 100px;
-  padding: 0;
-  transition: color 0.15s, background 0.15s;
-  flex-shrink: 0;
-}
-.attachChipRemove:hover { color: #dc2626; background: #fee2e2; }
-
-.attachItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: #f9fafb;
-  border: 1px solid #f3f4f6;
-  border-radius: 10px;
-}
-.attachItemIcon { font-size: 16px; flex-shrink: 0; }
-.attachItemName { font-size: 13.5px; color: #111827; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.attachItemMeta { font-size: 11.5px; color: #9ca3af; }
-.attachRemove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: none;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #9ca3af;
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-.attachRemove:hover { background: #fef2f2; color: #dc2626; }
 
 .linkInputRow {
   display: flex;
@@ -419,444 +881,143 @@
   align-items: flex-start;
   flex-wrap: wrap;
 }
-.linkInputRow .editInput { flex: 1; min-width: 140px; }
+.linkInputRow .editInput { flex: 1; min-width: 120px; }
 
-.taskLinkList { display: flex; flex-wrap: wrap; gap: 6px; }
-.taskLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  font-size: 13px;
-  color: #374151;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 100px;
-  text-decoration: none;
-  transition: background 0.15s, border-color 0.15s;
-  white-space: nowrap;
-}
-.taskLink:hover { background: #f3f4f6; border-color: #d1d5db; color: #111827; }
-
-.taskFileList { display: flex; flex-wrap: wrap; gap: 6px; }
-.taskFile {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  font-size: 13px;
-  color: #374151;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 100px;
-  text-decoration: none;
-  transition: background 0.15s, border-color 0.15s;
-  white-space: nowrap;
-}
-.taskFile:hover { background: #f3f4f6; border-color: #d1d5db; color: #111827; }
-
-/* ─── Round list ─────────────────────────────────────────────────────────────── */
-.roundList { display: flex; flex-direction: column; gap: 10px; }
-
-/* ════════════════════════════════════════════════════════════════════════════
-   ROUND CARD
-   Відкритий стан: картка розширюється знизу без вкладених карток.
-   Тіло раунду — просто секція з padding і роздільною лінією.
-   ════════════════════════════════════════════════════════════════════════════ */
-.roundCard {
-  background: #fff;
-  border: 1.5px solid #ececec;
-  border-radius: 22px;
-  overflow: hidden;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.roundCard:hover  {
-  border-color: #d4d4d4;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-}
-.roundCardOpen {
-  border-color: #d1d5db;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.09);
-}
-
-/* ─── Round header ──────────────────────────────────────────────────────────── */
-.roundHeader {
-  width: 100%;
+.taskLinkList, .taskFileList {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 22px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-  gap: 14px;
-  transition: background 0.15s;
-  box-sizing: border-box;
-}
-.roundHeader:hover { background: #fafafa; }
-
-.roundHeaderLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  min-width: 0;
-}
-.roundTitle {
-  font-size: 15.5px;
-  font-weight: 700;
-  color: #111827;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  letter-spacing: -0.02em;
-}
-.roundDate {
-  font-size: 12.5px;
-  color: #9ca3af;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-variant-numeric: tabular-nums;
-}
-
-.roundHeaderRight {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.roundTaskCount {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #6b7280;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 100px;
-  white-space: nowrap;
-}
-
-.roundStatus {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 11px;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 100px;
-  white-space: nowrap;
-}
-.statusDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-/* Кнопка «+ Завдання» у шапці */
-.addTaskInlineBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 13px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #374151;
-  background: #f3f4f6;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-  white-space: nowrap;
-}
-.addTaskInlineBtn:hover {
-  background: #111827;
-  color: #fff;
-  border-color: #111827;
-}
-
-/* Іконні кнопки (редагування / видалення) */
-.roundActionBtn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: 1.5px solid transparent;
-  border-radius: 10px;
-  cursor: pointer;
-  color: #9ca3af;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-  flex-shrink: 0;
-}
-.roundActionBtn:hover {
-  background: #f3f4f6;
-  border-color: #e5e7eb;
-  color: #374151;
-}
-.roundActionBtnDanger:hover {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #dc2626;
-}
-
-/* Шеврон */
-.chevronSvg {
-  width: 18px;
-  height: 18px;
-  color: #9ca3af;
-  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  flex-shrink: 0;
-}
-.chevronSvgOpen { transform: rotate(180deg); }
-
-/* ─── Round body (тіло раунду — НЕ вкладена картка) ──────────────────────────── */
-.roundBody {
-  border-top: 1.5px solid #f3f4f6;
-  padding: 0;
-}
-
-/* Опис раунду */
-.roundDescription {
-  font-size: 14px;
-  color: #4b5563;
-  line-height: 1.75;
-  margin: 0;
-  padding: 18px 24px 0;
-  white-space: pre-wrap;
-}
-
-/* Посилання та файли раунду */
-.roundMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px 24px 0;
-}
-.roundMetaLabel {
-  font-size: 11px;
-  font-weight: 700;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-}
-.roundLinkList { display: flex; flex-wrap: wrap; gap: 6px; }
-.roundLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  font-size: 13px;
-  color: #374151;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 100px;
-  text-decoration: none;
-  transition: background 0.15s, border-color 0.15s;
-}
-.roundLink:hover { background: #f3f4f6; border-color: #d1d5db; color: #111827; }
-
-.roundFileList { display: flex; flex-wrap: wrap; gap: 6px; }
-.roundFile {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  font-size: 13px;
-  color: #374151;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 100px;
-  text-decoration: none;
-  transition: background 0.15s, border-color 0.15s;
-}
-.roundFile:hover { background: #f3f4f6; border-color: #d1d5db; color: #111827; }
-
-/* ════════════════════════════════════════════════════════════════════════════
-   TASK LIST — список завдань всередині розкритого раунду
-   Без «карток в картках»: просто рядки з лівою акцентною смужкою
-   ════════════════════════════════════════════════════════════════════════════ */
-.taskList {
-  display: flex;
-  flex-direction: column;
-  padding: 16px 24px 20px;
-  gap: 0;
-}
-
-.taskListHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 10px;
-}
-.taskListTitle {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-}
-
-/* ─── Task row ───────────────────────────────────────────────────────────────── */
-.taskCard {
-  /* Рядок — НЕ картка. Відокремлюємо легкою лінією */
-  border-bottom: 1px solid #f3f4f6;
-  transition: background 0.15s;
-}
-.taskCard:last-child { border-bottom: none; }
-.taskCard:first-child { border-radius: 14px 14px 0 0; }
-
-.taskCardExpanded {
-  background: #fafafa;
-  border-radius: 14px;
-  border: 1.5px solid #e5e7eb;
-  margin-bottom: 6px;
-  /* коли розгортаємо — окреслюємо, але без Box-in-Box */
-}
-.taskCardExpanded + .taskCard { border-top: none; }
-
-/* ─── Task card header ──────────────────────────────────────────────────────── */
-.taskCardHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 14px;
-  cursor: pointer;
-  gap: 12px;
-  border-radius: 14px;
-  transition: background 0.12s;
-}
-.taskCardHeader:hover { background: #f5f5f5; }
-.taskCardExpanded .taskCardHeader { border-radius: 14px 14px 0 0; background: #f5f5f5; }
-
-.taskCardLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  flex: 1;
-  min-width: 0;
-}
-
-/* Кольорова акцентна крапка перед заголовком */
-.taskTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  letter-spacing: -0.01em;
-}
-.taskTitle::before {
-  content: "";
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #d1d5db;
-  flex-shrink: 0;
-  transition: background 0.15s;
-}
-.taskCardExpanded .taskTitle::before { background: #111827; }
-
-.taskDesc {
-  font-size: 12.5px;
-  color: #9ca3af;
-  margin: 0;
-  line-height: 1.5;
-  padding-left: 15px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.taskCardActions {
-  display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
-  flex-shrink: 0;
 }
 
-.taskDeleteBtn {
-  width: 28px;
-  height: 28px;
-  display: flex;
+.taskLink, .taskFile {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #1d1d1f;
+  background: rgba(0,0,0,0.04);
+  border-radius: 100px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.taskLink:hover, .taskFile:hover { background: rgba(0,0,0,0.08); }
+
+.attachChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  font-size: 12.5px;
+  color: #1d1d1f;
+  background: rgba(0,0,0,0.05);
+  border-radius: 100px;
+}
+.attachChipMeta { font-size: 11px; color: #aeaeb2; }
+
+.attachChipRemove {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 8px;
+  width: 16px;
+  height: 16px;
+  background: rgba(0,0,0,0.08);
+  border: none;
+  border-radius: 50%;
   cursor: pointer;
-  color: #d1d5db;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  color: #6e6e73;
+  padding: 0;
+  transition: background 0.15s, color 0.15s;
 }
-.taskDeleteBtn:hover { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+.attachChipRemove:hover { background: #fecdd3; color: #dc2626; }
 
-.taskChevron { display: flex; align-items: center; }
-
-/* ─── Task card body ─────────────────────────────────────────────────────────── */
-.taskCardBody {
-  padding: 12px 14px 16px;
+.attachItem {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-  border-top: 1px solid #ececec;
-}
-
-/* ─── Task inner tabs ───────────────────────────────────────────────────────── */
-.taskInnerTabs {
-  display: flex;
-  gap: 2px;
-  background: #f3f4f6;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.03);
   border-radius: 10px;
-  padding: 3px;
-  align-self: flex-start;
 }
-.taskInnerTab {
-  padding: 6px 14px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #6b7280;
+.attachItemIcon { font-size: 15px; }
+.attachItemName {
+  flex: 1;
+  font-size: 13px;
+  color: #1d1d1f;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attachItemMeta { font-size: 11.5px; color: #aeaeb2; }
+
+.attachRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  color: #aeaeb2;
   background: none;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-family: inherit;
   transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
 }
-.taskInnerTab:hover { color: #374151; background: rgba(255,255,255,0.6); }
-.taskInnerTabActive { background: #fff; color: #111827; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.attachRemove:hover { background: #fff1f2; color: #dc2626; }
 
-/* ─── Task detail body ──────────────────────────────────────────────────────── */
-.taskDescFull {
-  font-size: 14px;
-  color: #374151;
-  line-height: 1.75;
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-.taskExtras { display: flex; flex-direction: column; gap: 6px; }
-.taskExtrasLabel {
-  font-size: 11px;
-  font-weight: 700;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
+/* ─── Round edit drawer ───────────────────────────────────────────────────────── */
+.roundEditDrawerBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 90;
+  animation: backdropIn 0.22s ease;
 }
 
-/* ─── Round edit form (всередині тіла раунду) ─────────────────────────────────── */
-.roundEditForm {
+.roundEditDrawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(460px, 100vw);
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border-left: 1px solid rgba(0,0,0,0.08);
+  box-shadow: -8px 0 40px rgba(0,0,0,0.11);
+  z-index: 91;
+  display: flex;
+  flex-direction: column;
+  animation: drawerIn 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow: hidden;
+}
+
+.roundEditDrawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 20px 24px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+.roundEditDrawerTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: -0.025em;
+}
+.roundEditDrawerBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.1) transparent;
+}
+.roundEditForm {
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -864,16 +1025,12 @@
 .roundEditTitle {
   font-size: 14px;
   font-weight: 700;
-  color: #111827;
+  color: #1d1d1f;
   margin: 0;
   letter-spacing: -0.01em;
 }
 
-/* ════════════════════════════════════════════════════════════════════════════
-   SUBMISSION COMPONENTS
-   ════════════════════════════════════════════════════════════════════════════ */
-
-/* ─── My submission panel ───────────────────────────────────────────────────── */
+/* ─── My submission panel ────────────────────────────────────────────────────── */
 .mySubmissionEmpty {
   display: flex;
   flex-direction: column;
@@ -888,9 +1045,9 @@
   flex-direction: column;
   gap: 12px;
   background: #f0fdf4;
-  border: 1.5px solid #bbf7d0;
-  border-radius: 13px;
-  padding: 15px 17px;
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 14px 16px;
 }
 .mySubmissionHeader {
   display: flex;
@@ -902,30 +1059,28 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 700;
   color: #15803d;
-  letter-spacing: 0.02em;
-  flex-shrink: 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   background: rgba(21,128,61,0.1);
   padding: 3px 10px;
   border-radius: 100px;
 }
 .mySubmissionDate {
   font-size: 12px;
-  color: #9ca3af;
+  color: #aeaeb2;
   flex: 1;
-  font-variant-numeric: tabular-nums;
 }
 .mySubmissionActions {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-shrink: 0;
 }
 .editSubmissionBtn {
   padding: 5px 12px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   color: #374151;
   background: #fff;
@@ -935,7 +1090,7 @@
   font-family: inherit;
   transition: background 0.15s;
 }
-.editSubmissionBtn:hover { background: #f9fafb; border-color: #9ca3af; }
+.editSubmissionBtn:hover { background: #f9fafb; }
 
 .deleteSubmissionBtn {
   width: 28px;
@@ -943,18 +1098,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #d1d5db;
+  color: #d1d1d6;
   background: none;
-  border: 1px solid transparent;
+  border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
-.deleteSubmissionBtn:hover { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+.deleteSubmissionBtn:hover { background: #fff1f2; color: #dc2626; }
 
 .submissionText {
   font-size: 14px;
-  color: #111827;
+  color: #1d1d1f;
   line-height: 1.75;
   margin: 0;
   white-space: pre-wrap;
@@ -963,25 +1118,24 @@
 .submissionExtrasLabel {
   font-size: 11px;
   font-weight: 700;
-  color: #9ca3af;
+  color: #aeaeb2;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
-/* ─── Submission form ───────────────────────────────────────────────────────── */
+/* ─── Submission form ────────────────────────────────────────────────────────── */
 .submissionForm { display: flex; flex-direction: column; gap: 14px; }
 .submissionFormTitle {
   font-size: 14px;
   font-weight: 700;
-  color: #111827;
+  color: #1d1d1f;
   margin: 0;
-  letter-spacing: -0.01em;
 }
 
-/* ─── Grade result block ────────────────────────────────────────────────────── */
+/* ─── Grade result block ─────────────────────────────────────────────────────── */
 .gradeResultBlock {
   background: #faf5ff;
-  border: 1.5px solid #e9d5ff;
+  border: 1px solid #e9d5ff;
   border-radius: 14px;
   padding: 16px 18px;
   display: flex;
@@ -1001,11 +1155,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.gradeResultTotalWrap {
-  display: flex;
-  align-items: baseline;
-  gap: 3px;
-}
+.gradeResultTotalWrap { display: flex; align-items: baseline; gap: 3px; }
 .gradeResultTotal {
   font-size: 24px;
   font-weight: 800;
@@ -1013,11 +1163,7 @@
   letter-spacing: -0.04em;
   line-height: 1;
 }
-.gradeResultTotalMax {
-  font-size: 14px;
-  font-weight: 500;
-  color: #a78bfa;
-}
+.gradeResultTotalMax { font-size: 14px; font-weight: 500; color: #a78bfa; }
 .gradeResultScores { display: flex; flex-direction: column; gap: 10px; }
 .gradeResultScoreRow {
   display: grid;
@@ -1031,13 +1177,12 @@
   background: #ede9fe;
   border-radius: 100px;
   overflow: hidden;
-  position: relative;
 }
 .gradeResultScoreBarFill {
   height: 100%;
   background: linear-gradient(90deg, #7c3aed, #a78bfa);
   border-radius: 100px;
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
   min-width: 2px;
 }
 .gradeResultScoreValue {
@@ -1071,17 +1216,17 @@
 }
 .gradeResultDate { font-size: 11.5px; color: #a78bfa; }
 
-/* ─── All submissions (owner / jury view) ───────────────────────────────────── */
-.allSubmissionsList { display: flex; flex-direction: column; gap: 4px; }
+/* ─── All submissions (owner / jury view) ────────────────────────────────────── */
+.allSubmissionsList { display: flex; flex-direction: column; gap: 5px; }
 .submissionCard {
   background: #fff;
-  border: 1.5px solid #f3f4f6;
+  border: 1px solid rgba(0,0,0,0.07);
   border-radius: 12px;
   overflow: hidden;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s;
 }
-.submissionCard:hover   { border-color: #e5e7eb; }
-.submissionCardExpanded { border-color: #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.submissionCard:hover { border-color: rgba(0,0,0,0.12); }
+.submissionCardExpanded { border-color: rgba(0,0,0,0.1); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
 .submissionCardHeader {
   display: flex;
@@ -1092,39 +1237,28 @@
   gap: 12px;
   transition: background 0.15s;
 }
-.submissionCardHeader:hover { background: #fafafa; }
+.submissionCardHeader:hover { background: rgba(0,0,0,0.02); }
 
-.submissionParticipantInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
-}
+.submissionParticipantInfo { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .submissionParticipantName {
   font-size: 13.5px;
   font-weight: 600;
-  color: #111827;
+  color: #1d1d1f;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .submissionParticipantEmail {
   font-size: 11.5px;
-  color: #9ca3af;
+  color: #aeaeb2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.submissionCardMeta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
+.submissionCardMeta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .submissionDate {
   font-size: 11.5px;
-  color: #9ca3af;
+  color: #aeaeb2;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -1136,66 +1270,89 @@
   padding: 3px 9px;
   font-size: 11.5px;
   font-weight: 600;
-  color: #4b5563;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  color: #6e6e73;
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.06);
   border-radius: 100px;
   white-space: nowrap;
 }
 .submissionCardBody {
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid rgba(0,0,0,0.05);
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* ─── Legacy wrappers ───────────────────────────────────────────────────────── */
+/* ─── Task inner tabs (inside submission panel) ──────────────────────────────── */
+.taskInnerTabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  margin-bottom: 12px;
+}
+.taskInnerTab {
+  padding: 7px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #86868b;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.taskInnerTab:hover { color: #1d1d1f; }
+.taskInnerTabActive { color: #1d1d1f; border-bottom-color: #1d1d1f; font-weight: 600; }
+
+/* ─── Chevron icon ───────────────────────────────────────────────────────────── */
+.chevronSvg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+.chevronSvgOpen { transform: rotate(180deg); }
+
+/* ─── Skeleton loading ───────────────────────────────────────────────────────── */
+.skeleton {
+  height: 60px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.07) 50%, rgba(0,0,0,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: 14px;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Legacy compat wrappers ─────────────────────────────────────────────────── */
 .taskSubmissionsBlock { display: flex; flex-direction: column; gap: 8px; }
 .taskSubmissionsBlockTitle {
   font-size: 12px;
   font-weight: 700;
-  color: #4b5563;
-  padding: 6px 12px;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  letter-spacing: 0.01em;
+  color: #6e6e73;
+  padding: 5px 10px;
+  background: rgba(0,0,0,0.04);
+  border-radius: 8px;
 }
 .submissionList { display: flex; flex-direction: column; gap: 6px; }
 .submissionInfo { display: flex; flex-direction: column; gap: 3px; }
-.submissionTeam { font-size: 13.5px; font-weight: 600; color: #111827; }
-.submissionFile { font-size: 12.5px; color: #4b5563; }
+.submissionTeam { font-size: 13.5px; font-weight: 600; color: #1d1d1f; }
+.submissionFile { font-size: 12.5px; color: #6e6e73; }
 .submissionStatus {
   font-size: 11.5px;
   font-weight: 600;
-  color: #9ca3af;
-  background: #f3f4f6;
+  color: #aeaeb2;
+  background: rgba(0,0,0,0.04);
   padding: 3px 10px;
   border-radius: 100px;
   white-space: nowrap;
-  border: 1px solid #e5e7eb;
 }
-.submissionStatusDone {
-  background: #f0fdf4;
-  color: #15803d;
-  border-color: #bbf7d0;
-}
+.submissionStatusDone { background: #f0fdf4; color: #15803d; }
 
-/* ─── Add task button (inside task list) ─────────────────────────────────────── */
-.addTaskBtn {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 7px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #4b5563;
-  background: #f9fafb;
-  border: 1.5px dashed #d1d5db;
-  border-radius: 100px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-.addTaskBtn:hover { background: #f3f4f6; border-color: #9ca3af; color: #111827; }
+/* ─── Round list (compat) ─────────────────────────────────────────────────────── */
+.roundList { display: flex; flex-direction: column; gap: 0; }
+.roundCard, .roundHeader, .roundBody { display: contents; }

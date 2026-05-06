@@ -5,29 +5,54 @@ import { fileIcon } from "./tournamentHelpers";
 import { ConfirmDeleteModal } from "./TournamentShared";
 import { SubmissionForm } from "./SubmissionForm";
 
-// ─── Chevron SVG ──────────────────────────────────────────────────────────────
+// ─── Icon helpers ──────────────────────────────────────────────────────────────
+
+function TrashIconSm() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="2 4 14 4"/>
+      <path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
+      <path d="M6 7v5M10 7v5"/>
+      <rect x="3" y="4" width="10" height="9" rx="1"/>
+    </svg>
+  );
+}
+
+function ChevronRight() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 4 10 8 6 12"/>
+    </svg>
+  );
+}
 
 function ChevronIcon({ open }) {
   return (
     <svg
       className={`${styles.chevronSvg} ${open ? styles.chevronSvgOpen : ""}`}
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 16 16" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
     >
       <polyline points="4 6 8 10 12 6" />
     </svg>
   );
 }
 
-// ─── GradeResultPanel ─────────────────────────────────────────────────────────
-// Виправлено:
-//  - прогрес-бари точно відображають відсоток (100% = повна ширина)
-//  - коментар має інформацію про автора
-//  - загальний бал пояснюється чітко
+// ─── Deadline helpers ──────────────────────────────────────────────────────────
+
+function isDeadlinePassed(endDate) {
+  if (!endDate) return false;
+  return new Date() > new Date(endDate);
+}
+
+function formatDeadline(endDate) {
+  if (!endDate) return null;
+  return new Date(endDate).toLocaleDateString("uk-UA", {
+    day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
+  });
+}
+
+// ─── GradeResultPanel ──────────────────────────────────────────────────────────
 
 function GradeResultPanel({ submissionId, taskId, roundId, tournamentId }) {
   const [grade,   setGrade]   = useState(undefined);
@@ -47,8 +72,8 @@ function GradeResultPanel({ submissionId, taskId, roundId, tournamentId }) {
 
   if (!grade) {
     return (
-      <div className={styles.gradeResultBlock} style={{ background: "#f9fafb", border: "1.5px solid #e5e7eb" }}>
-        <p style={{ margin: 0, fontSize: 13.5, color: "#9ca3af", textAlign: "center", padding: "8px 0" }}>
+      <div className={styles.gradeResultBlock} style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.06)" }}>
+        <p style={{ margin: 0, fontSize: 13.5, color: "#aeaeb2", textAlign: "center", padding: "8px 0" }}>
           Вашу роботу ще не оцінено журі
         </p>
       </div>
@@ -81,7 +106,6 @@ function GradeResultPanel({ submissionId, taskId, roundId, tournamentId }) {
           {keys.map((key) => {
             const val   = Number(scores[key]) || 0;
             const max   = grade.criteria_max?.[key] ?? 10;
-            // Точне відсоткове обчислення (100% = повна ширина)
             const pct   = max > 0 ? Math.min(100, Math.round((val / max) * 100)) : 0;
             const label = criteriaLabels[key] ?? key;
             const isMax = val === max;
@@ -89,10 +113,7 @@ function GradeResultPanel({ submissionId, taskId, roundId, tournamentId }) {
               <div key={key} className={styles.gradeResultScoreRow}>
                 <span className={styles.gradeResultScoreLabel}>{label}</span>
                 <div className={styles.gradeResultScoreBarTrack} title={`${pct}%`}>
-                  <div
-                    className={styles.gradeResultScoreBarFill}
-                    style={{ width: `${pct}%` }}
-                  />
+                  <div className={styles.gradeResultScoreBarFill} style={{ width: `${pct}%` }} />
                 </div>
                 <span className={`${styles.gradeResultScoreValue} ${isMax ? styles.gradeResultScoreValueMax : ""}`}>
                   {val} / {max}
@@ -105,7 +126,6 @@ function GradeResultPanel({ submissionId, taskId, roundId, tournamentId }) {
 
       {grade.comment && (
         <div className={styles.gradeResultComment}>
-          {/* Показуємо ім'я судді якщо є */}
           {grade.judge_name && (
             <div className={styles.gradeResultCommentAuthor}>
               <span>👤</span>
@@ -126,17 +146,14 @@ function GradeResultPanel({ submissionId, taskId, roundId, tournamentId }) {
 }
 
 // ─── MySubmissionPanel ────────────────────────────────────────────────────────
-// Виправлено: вкладки «Моя здача» та «Оцінка» — чіткі різні назви,
-// жодного дублювання
 
-function MySubmissionPanel({ taskId, roundId, tournamentId }) {
+function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed }) {
   const [submission,  setSubmission]  = useState(undefined);
   const [loading,     setLoading]     = useState(true);
   const [showForm,    setShowForm]    = useState(false);
   const [deleting,    setDeleting]    = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  // Перемикач між двома вкладками всередині панелі учасника
-  const [activeView,  setActiveView]  = useState("submission"); // "submission" | "grade"
+  const [activeView,  setActiveView]  = useState("submission");
 
   const basePath = `/tournaments/${tournamentId}/rounds/${roundId}/tasks/${taskId}/submissions/`;
 
@@ -156,11 +173,8 @@ function MySubmissionPanel({ taskId, roundId, tournamentId }) {
       await API.delete(`${basePath}${submission.id}/`);
       setSubmission(null);
       setShowConfirm(false);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDeleting(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setDeleting(false); }
   };
 
   if (loading) return <p className={styles.empty}>Завантаження здачі…</p>;
@@ -178,24 +192,25 @@ function MySubmissionPanel({ taskId, roundId, tournamentId }) {
     );
   }
 
-  /* Здачі ще немає — показуємо CTA */
   if (!submission) {
     return (
       <div className={styles.mySubmissionEmpty}>
         <p className={styles.empty}>Ви ще не здали роботу по цьому завданню.</p>
-        <button className={styles.submitWorkBtn} onClick={() => setShowForm(true)}>
-          Здати роботу
-        </button>
+        {deadlinePassed ? (
+          <p style={{ fontSize: 13, color: "#ff3b30", margin: 0 }}>
+            ⏰ Дедлайн минув — здача недоступна
+          </p>
+        ) : (
+          <button className={styles.submitWorkBtn} onClick={() => setShowForm(true)}>
+            Здати роботу
+          </button>
+        )}
       </div>
     );
   }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      {/*
-        Вкладки всередині панелі учасника.
-        Назви: «Моя здача» і «Оцінка» — чіткі та різні.
-      */}
       <div className={styles.taskInnerTabs}>
         <button
           className={`${styles.taskInnerTab} ${activeView === "submission" ? styles.taskInnerTabActive : ""}`}
@@ -214,25 +229,22 @@ function MySubmissionPanel({ taskId, roundId, tournamentId }) {
       {activeView === "submission" && (
         <div className={styles.mySubmissionCard}>
           <div className={styles.mySubmissionHeader}>
-            <span className={styles.mySubmissionLabel}>Здано</span>
+            <span className={styles.mySubmissionLabel}>✓ Здано</span>
             <span className={styles.mySubmissionDate}>
               {new Date(submission.submitted_at).toLocaleString("uk-UA")}
             </span>
             <div className={styles.mySubmissionActions}>
-              <button className={styles.editSubmissionBtn} onClick={() => setShowForm(true)}>
-                Редагувати
-              </button>
+              {!deadlinePassed && (
+                <button className={styles.editSubmissionBtn} onClick={() => setShowForm(true)}>
+                  Редагувати
+                </button>
+              )}
               <button
                 className={styles.deleteSubmissionBtn}
                 onClick={() => setShowConfirm(true)}
                 title="Видалити здачу"
               >
-                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="2 4 14 4"/>
-                  <path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
-                  <path d="M6 7v5M10 7v5"/>
-                  <rect x="3" y="4" width="10" height="9" rx="1"/>
-                </svg>
+                <TrashIconSm />
               </button>
             </div>
           </div>
@@ -331,8 +343,8 @@ function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
                 {new Date(sub.submitted_at).toLocaleString("uk-UA")}
               </span>
               <div className={styles.submissionBadges}>
-                {sub.text                && <span className={styles.subBadge}>Текст</span>}
-                {sub.links?.length > 0   && <span className={styles.subBadge}>🔗 {sub.links.length}</span>}
+                {sub.text                    && <span className={styles.subBadge}>Текст</span>}
+                {sub.links?.length > 0       && <span className={styles.subBadge}>🔗 {sub.links.length}</span>}
                 {sub.attachments?.length > 0 && <span className={styles.subBadge}>📎 {sub.attachments.length}</span>}
               </div>
               <ChevronIcon open={expanded === sub.id} />
@@ -376,32 +388,190 @@ function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
   );
 }
 
-// ─── TaskCard ─────────────────────────────────────────────────────────────────
-// Виправлено: єдиний рядок вкладок з різними назвами, чіткий activeTab,
-// без дублювання «Моя здача»
+// ─── Task Drawer ───────────────────────────────────────────────────────────────
 
-export function TaskCard({ task, tournamentId, roundId, onDeleted, readOnly = false, myRole, isOpen, onToggle }) {
-  const [activeTab,   setActiveTab]   = useState("details");
-  const [deleting,    setDeleting]    = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDate, onClose }) {
+  const [activeTab, setActiveTab] = useState("details");
 
   const isOwnerOrAdmin = myRole === "owner" || myRole === "admin";
   const isJury         = myRole === "jury";
   const isParticipant  = readOnly && !isJury;
 
-  const hasDetails = task.description || task.links?.length > 0 || task.attachments?.length > 0;
+  const hasDetails  = task.description || task.links?.length > 0 || task.attachments?.length > 0;
+  const deadlinePassed = isDeadlinePassed(roundEndDate ?? task.end_date);
+  const deadlineLabel  = formatDeadline(roundEndDate ?? task.end_date);
 
-  /*
-   * Будуємо масив вкладок залежно від ролі.
-   * Назви чіткі й унікальні — жодного дублювання.
-   */
-  const innerTabs = [];
-  if (hasDetails)    innerTabs.push({ id: "details",  label: "Деталі" });
-  if (isParticipant) innerTabs.push({ id: "submit",   label: "Моя здача" });
-  if (isOwnerOrAdmin || isJury) innerTabs.push({ id: "allSubs", label: "Здачі учасників" });
+  const tabs = [];
+  if (hasDetails)    tabs.push({ id: "details",  label: "Деталі" });
+  if (isParticipant) tabs.push({ id: "submit",   label: "Моя здача" });
+  if (isOwnerOrAdmin || isJury) tabs.push({ id: "allSubs", label: "Здачі учасників" });
 
-  const showTabs = innerTabs.length > 1;
-  const validTab = innerTabs.find((t) => t.id === activeTab) ? activeTab : (innerTabs[0]?.id ?? "details");
+  // Якщо поточна вкладка недоступна — беремо першу
+  const validTab = tabs.find((t) => t.id === activeTab) ? activeTab : (tabs[0]?.id ?? "details");
+
+  // Зупиняємо клік усередині drawer від закриття
+  const handleDrawerClick = (e) => e.stopPropagation();
+
+  return (
+    <>
+      {/* Backdrop з blur */}
+      <div className={styles.drawerBackdrop} onClick={onClose} />
+
+      {/* Сам Drawer */}
+      <div
+        className={styles.drawer}
+        role="dialog"
+        aria-modal="true"
+        aria-label={task.title}
+        onClick={handleDrawerClick}
+      >
+        {/* Шапка */}
+        <div className={styles.drawerHeader}>
+          <div className={styles.drawerTitleGroup}>
+            <span className={styles.drawerTitle}>{task.title}</span>
+            {deadlineLabel && (
+              <span className={styles.drawerSubtitle}>
+                Дедлайн: {deadlineLabel}
+              </span>
+            )}
+          </div>
+          <button
+            className={styles.drawerCloseBtn}
+            onClick={onClose}
+            aria-label="Закрити"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Банер простроченого дедлайну */}
+        {deadlinePassed && (isParticipant) && (
+          <div style={{ padding: "0 24px" }}>
+            <div className={`${styles.drawerDeadlineBanner} ${styles.drawerDeadlineExpired}`}>
+              ⏰ Дедлайн минув — нові здачі не приймаються
+            </div>
+          </div>
+        )}
+
+        {/* Вкладки */}
+        {tabs.length > 1 && (
+          <div className={styles.drawerTabs}>
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                className={`${styles.drawerTab} ${validTab === tab.id ? styles.drawerTabActive : ""}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Тіло */}
+        <div className={styles.drawerBody}>
+
+          {/* ── Деталі ── */}
+          {(validTab === "details" || tabs.length === 0) && (
+            <>
+              {task.description && (
+                <div className={styles.drawerSection}>
+                  <span className={styles.drawerSectionLabel}>Опис</span>
+                  <p className={styles.drawerDesc}>{task.description}</p>
+                </div>
+              )}
+
+              {task.links?.length > 0 && (
+                <div className={styles.drawerSection}>
+                  <span className={styles.drawerSectionLabel}>Посилання</span>
+                  <div className={styles.chipList}>
+                    {task.links.map((link) => (
+                      <a
+                        key={link.id}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.chip}
+                      >
+                        🔗 {link.label || link.url}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {task.attachments?.length > 0 && (
+                <div className={styles.drawerSection}>
+                  <span className={styles.drawerSectionLabel}>Файли</span>
+                  <div className={styles.chipList}>
+                    {task.attachments.map((att) => (
+                      <a
+                        key={att.id}
+                        href={att.file}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.chip}
+                      >
+                        {fileIcon(att.name)} {att.name}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!task.description && !task.links?.length && !task.attachments?.length && (
+                <p className={styles.empty}>Опис завдання відсутній.</p>
+              )}
+            </>
+          )}
+
+          {/* ── Моя здача (учасник) ── */}
+          {validTab === "submit" && isParticipant && (
+            <MySubmissionPanel
+              taskId={task.id}
+              roundId={roundId}
+              tournamentId={tournamentId}
+              deadlinePassed={deadlinePassed}
+            />
+          )}
+
+          {/* ── Всі здачі (власник / адмін / журі) ── */}
+          {validTab === "allSubs" && (isOwnerOrAdmin || isJury) && (
+            <AllSubmissionsPanel
+              taskId={task.id}
+              roundId={roundId}
+              tournamentId={tournamentId}
+            />
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ─── TaskCard ─────────────────────────────────────────────────────────────────
+// Slim row card → відкриває Drawer при кліку.
+// Пропс roundEndDate передається з RoundsTab для перевірки дедлайну.
+
+export function TaskCard({
+  task,
+  tournamentId,
+  roundId,
+  onDeleted,
+  readOnly = false,
+  myRole,
+  roundEndDate,
+  // Legacy пропси (ігноруємо, залишаємо для сумісності)
+  isOpen: _isOpen,
+  onToggle: _onToggle,
+}) {
+  const [drawerOpen,  setDrawerOpen]  = useState(false);
+  const [deleting,    setDeleting]    = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const endDate      = roundEndDate ?? task.end_date;
+  const deadlinePast = isDeadlinePassed(endDate);
+  const deadlineStr  = formatDeadline(endDate);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -417,120 +587,66 @@ export function TaskCard({ task, tournamentId, roundId, onDeleted, readOnly = fa
 
   return (
     <>
-      <div className={`${styles.taskCard} ${isOpen ? styles.taskCardExpanded : ""}`}>
-
-        {/* ── Заголовок ── */}
-        <div className={styles.taskCardHeader} onClick={onToggle} role="button" aria-expanded={isOpen}>
-          <div className={styles.taskCardLeft}>
-            <span className={styles.taskTitle}>{task.title}</span>
-            {!isOpen && task.description && (
-              <p className={styles.taskDesc}>
-                {task.description.length > 90
-                  ? task.description.slice(0, 90) + "…"
-                  : task.description}
-              </p>
-            )}
-          </div>
-          <div className={styles.taskCardActions}>
-            {!readOnly && (
-              <button
-                className={styles.taskDeleteBtn}
-                onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
-                disabled={deleting}
-                title="Видалити завдання"
-              >
-                {deleting ? "…" : (
-                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="2 4 14 4"/>
-                    <path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
-                    <path d="M6 7v5M10 7v5"/>
-                    <rect x="3" y="4" width="10" height="9" rx="1"/>
-                  </svg>
-                )}
-              </button>
-            )}
-            <span className={styles.taskChevron}>
-              <ChevronIcon open={isOpen} />
-            </span>
-          </div>
+      {/* ── Slim row card ── */}
+      <div
+        className={styles.taskCard}
+        onClick={() => setDrawerOpen(true)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setDrawerOpen(true)}
+        aria-label={`Відкрити завдання: ${task.title}`}
+      >
+        <div className={styles.taskCardLeft}>
+          <span className={styles.taskTitle}>{task.title}</span>
+          {task.description && (
+            <p className={styles.taskDesc}>
+              {task.description.length > 80
+                ? task.description.slice(0, 80) + "…"
+                : task.description}
+            </p>
+          )}
         </div>
 
-        {/* ── Розгорнутий вміст ── */}
-        {isOpen && (
-          <div className={styles.taskCardBody}>
+        <div className={styles.taskCardRight}>
+          {deadlineStr && (
+            <span className={`${styles.taskDeadline} ${deadlinePast ? styles.taskDeadlinePast : ""}`}>
+              {deadlinePast ? "⏰ " : ""}
+              {deadlineStr}
+            </span>
+          )}
 
-            {/* Єдиний рядок вкладок (якщо є більше однієї) */}
-            {showTabs && (
-              <div className={styles.taskInnerTabs}>
-                {innerTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    className={`${styles.taskInnerTab} ${validTab === tab.id ? styles.taskInnerTabActive : ""}`}
-                    onClick={(e) => { e.stopPropagation(); setActiveTab(tab.id); }}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            )}
+          {!readOnly && (
+            <button
+              className={styles.taskDeleteBtn}
+              onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
+              disabled={deleting}
+              title="Видалити завдання"
+              aria-label="Видалити завдання"
+            >
+              {deleting ? "…" : <TrashIconSm />}
+            </button>
+          )}
 
-            {/* ── Деталі ── */}
-            {(validTab === "details" || !showTabs) && (
-              <>
-                {task.description && (
-                  <p className={styles.taskDescFull}>{task.description}</p>
-                )}
-                {task.links?.length > 0 && (
-                  <div className={styles.taskExtras}>
-                    <span className={styles.taskExtrasLabel}>Посилання</span>
-                    <div className={styles.taskLinkList}>
-                      {task.links.map((link) => (
-                        <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.taskLink}>
-                          🔗 {link.label || link.url}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {task.attachments?.length > 0 && (
-                  <div className={styles.taskExtras}>
-                    <span className={styles.taskExtrasLabel}>Файли</span>
-                    <div className={styles.taskFileList}>
-                      {task.attachments.map((att) => (
-                        <a key={att.id} href={att.file} target="_blank" rel="noopener noreferrer" className={styles.taskFile}>
-                          {fileIcon(att.name)} {att.name}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {!task.description && !task.links?.length && !task.attachments?.length && (
-                  <p className={styles.empty}>Опис завдання відсутній.</p>
-                )}
-              </>
-            )}
-
-            {/* ── Моя здача (учасник) ── */}
-            {validTab === "submit" && isParticipant && (
-              <MySubmissionPanel
-                taskId={task.id}
-                roundId={roundId}
-                tournamentId={tournamentId}
-              />
-            )}
-
-            {/* ── Всі здачі (власник / адмін / журі) ── */}
-            {validTab === "allSubs" && (isOwnerOrAdmin || isJury) && (
-              <AllSubmissionsPanel
-                taskId={task.id}
-                roundId={roundId}
-                tournamentId={tournamentId}
-              />
-            )}
-          </div>
-        )}
+          <span className={styles.taskArrow}>
+            <ChevronRight />
+          </span>
+        </div>
       </div>
 
+      {/* ── Slide-over Drawer ── */}
+      {drawerOpen && (
+        <TaskDrawer
+          task={task}
+          roundId={roundId}
+          tournamentId={tournamentId}
+          readOnly={readOnly}
+          myRole={myRole}
+          roundEndDate={endDate}
+          onClose={() => setDrawerOpen(false)}
+        />
+      )}
+
+      {/* ── Confirm delete modal ── */}
       {showConfirm && (
         <ConfirmDeleteModal
           icon="📋"

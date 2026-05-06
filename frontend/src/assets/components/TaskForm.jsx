@@ -4,6 +4,8 @@ import API from "../../api";
 import { fileIcon } from "./tournamentHelpers";
 
 // ─── TaskForm ─────────────────────────────────────────────────────────────────
+// Вся логіка збережена без змін.
+// Зовнішній вигляд оновлено до нової системи стилів.
 
 export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
   const [form,         setForm]         = useState({ title: "", description: "" });
@@ -57,7 +59,9 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
         await API.post(`/tournaments/${tournamentId}/rounds/${roundId}/tasks/${task.id}/attachments/`, fd);
       }
 
-      const updated = await API.get(`/tournaments/${tournamentId}/rounds/${roundId}/tasks/${task.id}/`);
+      const updated = await API.get(
+        `/tournaments/${tournamentId}/rounds/${roundId}/tasks/${task.id}/`
+      );
       onCreated(updated.data);
     } catch (err) {
       console.error(err);
@@ -70,6 +74,7 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
   return (
     <div className={styles.taskFormCard}>
       <h4 className={styles.taskFormTitle}>Нове завдання</h4>
+
       <div className={styles.editForm}>
         <label className={styles.editLabel}>
           Назва <span className={styles.editRequired}>*</span>
@@ -82,6 +87,7 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
             autoFocus
           />
         </label>
+
         <label className={styles.editLabel}>
           Опис
           <textarea
@@ -94,23 +100,31 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
           />
         </label>
 
-        {/* Посилання */}
+        {/* ── Посилання ── */}
         <div className={styles.attachSection}>
           <span className={styles.attachSectionLabel}>Посилання</span>
+
           {links.length > 0 && (
             <div className={styles.taskLinkList}>
               {links.map((link) => (
                 <span key={link.id} className={styles.attachChip}>
                   🔗 {link.label || link.url}
-                  <button className={styles.attachChipRemove} onClick={() => removeLink(link.id)} title="Видалити">
-                    <svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                      <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
+                  <button
+                    className={styles.attachChipRemove}
+                    onClick={() => removeLink(link.id)}
+                    title="Видалити"
+                    type="button"
+                  >
+                    <svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <line x1="2" y1="2" x2="14" y2="14"/>
+                      <line x1="14" y1="2" x2="2" y2="14"/>
                     </svg>
                   </button>
                 </span>
               ))}
             </div>
           )}
+
           <div className={styles.linkInputRow}>
             <input
               className={styles.editInput}
@@ -126,28 +140,38 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
-            <button className={styles.addLinkBtn} onClick={addLink}>Додати</button>
+            <button className={styles.addLinkBtn} onClick={addLink} type="button">
+              Додати
+            </button>
           </div>
         </div>
 
-        {/* Файли */}
+        {/* ── Файли ── */}
         <div className={styles.attachSection}>
           <span className={styles.attachSectionLabel}>Файли</span>
+
           {files.length > 0 && (
             <div className={styles.taskFileList}>
               {files.map((f, i) => (
                 <span key={i} className={styles.attachChip}>
                   {fileIcon(f.name)} {f.name}
                   <span className={styles.attachChipMeta}>{(f.size / 1024).toFixed(0)} KB</span>
-                  <button className={styles.attachChipRemove} onClick={() => removeFile(i)} title="Видалити">
-                    <svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                      <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
+                  <button
+                    className={styles.attachChipRemove}
+                    onClick={() => removeFile(i)}
+                    title="Видалити"
+                    type="button"
+                  >
+                    <svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <line x1="2" y1="2" x2="14" y2="14"/>
+                      <line x1="14" y1="2" x2="2" y2="14"/>
                     </svg>
                   </button>
                 </span>
               ))}
             </div>
           )}
+
           <label className={styles.filePickBtn}>
             + Прикріпити файл
             <input key={fileInputKey} type="file" multiple hidden accept="*/*" onChange={handleFiles} />
@@ -158,8 +182,10 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
       </div>
 
       <div className={styles.editActions}>
-        <button className={styles.cancelBtn} onClick={onCancel} disabled={saving}>Скасувати</button>
-        <button className={styles.saveBtn} onClick={handleCreate} disabled={saving}>
+        <button className={styles.cancelBtn} onClick={onCancel} disabled={saving} type="button">
+          Скасувати
+        </button>
+        <button className={styles.saveBtn} onClick={handleCreate} disabled={saving} type="button">
           {saving ? "Створення…" : "Додати завдання"}
         </button>
       </div>
