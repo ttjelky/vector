@@ -15,7 +15,7 @@ from .views import (
     SubmissionLinkCreateView, SubmissionLinkDeleteView,
     SubmissionAttachmentCreateView, SubmissionAttachmentDeleteView,
     JurySubmissionsView, JuryGradeView,
-    SubmissionGradeView,
+    SubmissionGradeView, ParticipantGradesNewsView,
 )
 
 urlpatterns = [
@@ -79,4 +79,6 @@ urlpatterns = [
     # ── Submission attachments ────────────────────────────────────────────────
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/attachments/', SubmissionAttachmentCreateView.as_view(), name='submission-attachment-create'),
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/attachments/<int:pk>/', SubmissionAttachmentDeleteView.as_view(), name='submission-attachment-delete'),
+
+    path('my-grades/', ParticipantGradesNewsView.as_view(), name='participant-grades-news'),
 ]

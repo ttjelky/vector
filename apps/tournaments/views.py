@@ -655,3 +655,88 @@ class SubmissionGradeView(APIView):
             'updated_at':      latest_grade.updated_at if latest_grade else None,
             'grades_count':    grades.count(),
         })
+
+class ParticipantGradesNewsView(APIView):
+    """
+    GET /tournaments/my-grades/
+ 
+    Повертає всі оцінені подання поточного учасника по всіх турнірах.
+    Кожен елемент містить назву завдання, туру, ім'я журі, критерії,
+    бали, загальний бал, коментар і дату оцінювання.
+ 
+    Формат відповіді (масив):
+    [
+      {
+        "id":           <grade_id>,
+        "task_title":   "...",
+        "round_title":  "...",
+        "tournament":   "...",
+        "jury_name":    "...",
+        "criteria":     [{"key": "...", "label": "...", "max": N}, ...],
+        "scores":       {"originality": 8, ...},
+        "total":        25,
+        "max_total":    30,
+        "comment":      "...",
+        "graded_at":    "2025-05-05T14:30:00Z",
+        "read":         false
+      },
+      ...
+    ]
+    """
+    permission_classes = [IsAuthenticated]
+ 
+    def get(self, request):
+        # Всі оцінки для подань де учасник = поточний користувач
+        grades = (
+            Grade.objects
+            .filter(submission__participant=request.user)
+            .select_related(
+                'juror',
+                'submission__task',
+                'submission__task__round',
+                'submission__task__round__tournament',
+            )
+            .order_by('-updated_at')
+        )
+ 
+        result = []
+        for grade in grades:
+            sub        = grade.submission
+            task       = sub.task
+            round_     = task.round
+            tournament = round_.tournament
+ 
+            # Будуємо список критеріїв з DEFAULT_CRITERIA
+            criteria_list = [
+                {
+                    "key":   c["key"],
+                    "label": c["label"],
+                    "max":   c["max"],
+                }
+                for c in DEFAULT_CRITERIA
+            ]
+            max_total = sum(c["max"] for c in DEFAULT_CRITERIA)
+ 
+            # Ім'я журі — full_name якщо є, інакше username
+            jury = grade.juror
+            jury_name = (
+                f"{jury.first_name} {jury.last_name}".strip()
+                or jury.username
+            )
+ 
+            result.append({
+                "id":           grade.id,
+                "task_title":   task.title,
+                "round_title":  round_.title,
+                "tournament":   tournament.name,
+                "jury_name":    jury_name,
+                "criteria":     criteria_list,
+                "scores":       grade.scores or {},
+                "total":        grade.total,
+                "max_total":    max_total,
+                "comment":      grade.comment or "",
+                "graded_at":    grade.updated_at,
+                "read":         False,   # TODO: додати поле Grade.read якщо потрібно
+            })
+ 
+        return Response(result, status=status.HTTP_200_OK)
