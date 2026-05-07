@@ -2,6 +2,7 @@ import { useState } from "react";
 import styles from "./styles/RoundCard.module.css";
 import API from "../../api";
 import { fileIcon, toInputDatetime } from "./tournamentHelpers";
+import { RichTextArea } from "./RichTextArea";
 
 // ─── Icon helpers ──────────────────────────────────────────────────────────────
 
@@ -112,13 +113,12 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
         </label>
         <label className={styles.editLabel}>
           Опис
-          <textarea
-            className={styles.editTextarea}
-            name="description"
-            value={form.description}
-            onChange={handleChange}
+          <RichTextArea
+            id="round-description"
             rows={3}
             placeholder="Опис раунду…"
+            value={form.description}
+            onChange={(e) => { setForm((f) => ({ ...f, description: e.target.value })); setError(""); }}
           />
         </label>
         <div className={styles.editRow}>

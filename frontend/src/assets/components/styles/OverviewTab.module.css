@@ -218,3 +218,103 @@
 
 .deleteBtn:hover  { background: #fee2e2; border-color: #f89595; }
 .deleteBtn:active { transform: scale(0.97); }
+
+/* ═══════════════════════════════════════════════════
+   RICH CONTENT DISPLAY — додати до OverviewTab.module.css
+   ═══════════════════════════════════════════════════ */
+
+.emptyText {
+  color: #aaaaaa;
+  font-size: 14px;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Базовий контейнер для відформатованого HTML */
+.richContent {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #111111;
+  word-break: break-word;
+}
+
+.richContent p {
+  margin: 0 0 8px;
+}
+
+.richContent p:last-child {
+  margin-bottom: 0;
+}
+
+.richContent h2 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 14px 0 5px;
+  color: #111111;
+  letter-spacing: -0.2px;
+}
+
+.richContent h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 12px 0 4px;
+  color: #111111;
+}
+
+.richContent ul,
+.richContent ol {
+  margin: 4px 0 10px;
+  padding-left: 20px;
+}
+
+.richContent li {
+  margin-bottom: 4px;
+  line-height: 1.6;
+}
+
+.richContent ul li { list-style-type: disc; }
+.richContent ol li { list-style-type: decimal; }
+
+.richContent blockquote {
+  border-left: 3px solid #111111;
+  margin: 10px 0;
+  padding: 4px 0 4px 14px;
+  color: #555555;
+  font-style: italic;
+}
+
+.richContent pre {
+  background: #f3f3f3;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 7px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  overflow-x: auto;
+  margin: 8px 0;
+  color: #333333;
+  white-space: pre-wrap;
+}
+
+.richContent a {
+  color: #111111;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.richContent a:hover { color: #444444; }
+
+.richContent b,
+.richContent strong { font-weight: 700; }
+
+.richContent i,
+.richContent em { font-style: italic; }
+
+.richContent u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.richContent s,
+.richContent strike { text-decoration: line-through; }

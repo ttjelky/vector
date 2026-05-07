@@ -250,7 +250,7 @@ function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed }) {
           </div>
 
           {submission.text && (
-            <p className={styles.submissionText}>{submission.text}</p>
+            <div className={styles.submissionText} dangerouslySetInnerHTML={{ __html: submission.text }} />
           )}
 
           {submission.links?.length > 0 && (
@@ -353,7 +353,7 @@ function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
 
           {expanded === sub.id && (
             <div className={styles.submissionCardBody}>
-              {sub.text && <p className={styles.submissionText}>{sub.text}</p>}
+              {sub.text && <div className={styles.submissionText} dangerouslySetInnerHTML={{ __html: sub.text }} />}
 
               {sub.links?.length > 0 && (
                 <div className={styles.submissionExtras}>
@@ -477,7 +477,7 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
               {task.description && (
                 <div className={styles.drawerSection}>
                   <span className={styles.drawerSectionLabel}>Опис</span>
-                  <p className={styles.drawerDesc}>{task.description}</p>
+                  <div className={styles.drawerDesc} dangerouslySetInnerHTML={{ __html: task.description }} />
                 </div>
               )}
 
@@ -600,9 +600,7 @@ export function TaskCard({
           <span className={styles.taskTitle}>{task.title}</span>
           {task.description && (
             <p className={styles.taskDesc}>
-              {task.description.length > 80
-                ? task.description.slice(0, 80) + "…"
-                : task.description}
+              {task.description.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 80) + (task.description.replace(/<[^>]*>/g, "").length > 80 ? "…" : "")}
             </p>
           )}
         </div>
