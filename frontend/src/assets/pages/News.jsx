@@ -105,7 +105,6 @@ function GradeCard({ item, defaultOpen = false, onRead }) {
           </p>
         </div>
 
-        {/* Plain score — big numbers, no ring */}
         <div className={styles.cardScore}>
           <span className={`${styles.scoreMain} ${styles[`score_${tier}`]}`}>{total}</span>
           <span className={styles.scoreOf}>/ {maxTotal || "—"}</span>

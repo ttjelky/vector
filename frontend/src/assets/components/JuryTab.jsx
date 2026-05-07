@@ -323,6 +323,15 @@ function SubmissionCard({ submission: sub, index, maxTotal, onClick }) {
 
       <div className={styles.subInfo}>
         <span className={styles.subTask}>{sub.task_title || "Без назви"}</span>
+        {sub.author_name && (
+          <span className={styles.subAuthor}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            {sub.author_name}
+          </span>
+        )}
         <div className={styles.subMeta}>
           <span className={styles.subRound}>{sub.round_title || "—"}</span>
           <span className={styles.subMetaDot} />
@@ -382,17 +391,18 @@ function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, 
             <span className={styles.detailRound}>{sub.round_title}</span>
           </div>
 
-          <div className={styles.anonBadge}>
-            <div className={styles.anonBadgeIcon}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
+          {sub.author_name && (
+            <div className={styles.authorBadge}>
+              <div className={styles.authorBadgeIcon}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <span className={styles.authorBadgeLabel}>Автор:</span>
+              <span className={styles.authorBadgeName}>{sub.author_name}</span>
             </div>
-            Особисті дані учасника приховані для об'єктивного оцінювання
-          </div>
+          )}
 
           <div className={styles.contentBox}>
             {sub.content_text && (

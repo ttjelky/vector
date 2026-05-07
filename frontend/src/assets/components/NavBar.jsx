@@ -19,7 +19,9 @@ import cross           from './static/icons/cross.svg';
 import NewsIcon        from "./static/icons/News.svg?react";
 
 import { ComposeModal, NotificationDropdown } from './Notifications';
+
 const API = 'http://127.0.0.1:8000/api';
+const WS_BASE = 'ws://127.0.0.1:8000/ws';
 const getToken = () => localStorage.getItem('accessToken');
 
 const ICON_MAP = {
@@ -53,13 +55,7 @@ const NavItem = ({ tabKey, label, path, children }) => (
 );
 
 /* ─── Вкладка турніру з анімацією ─── */
-// Логіка: кожна вкладка при першому маунті починає у схованому стані
-// (opacity:0, max-height:0) і одразу після маунту через rAF отримує
-// клас tabOpening — так браузер гарантовано бачить початковий стан і грає анімацію.
-// При закритті — tabClosing через transition.
 const TournamentTab = ({ tab, onClose, animate }) => {
-  // animate=true  → вкладка щойно додана, програємо появу
-  // animate=false → вкладка вже існувала (NavBar ремаунтився), одразу видима
   const [phase, setPhase] = useState(animate ? 'hidden' : 'open');
 
   useEffect(() => {
@@ -107,9 +103,70 @@ const TournamentTab = ({ tab, onClose, animate }) => {
   );
 };
 
+/* ─── Хук: WebSocket для подій виключення з турніру ─────────────────────────
+ *
+ * Бекенд надсилає повідомлення формату:
+ *   { type: "tournament_removed", tournament_id: <id> }
+ *
+ * При отриманні такого повідомлення вкладка учасника автоматично закривається.
+ *
+ * Якщо WebSocket недоступний — хук тихо завершує роботу без помилок.
+ * Reconnect відбувається через 3 секунди після обриву з'єднання.
+ */
+const useTournamentRemovalWS = (removeTabById) => {
+  const wsRef       = useRef(null);
+  const mountedRef  = useRef(true);
+  const retryTimer  = useRef(null);
+
+  useEffect(() => {
+    mountedRef.current = true;
+
+    const connect = () => {
+      const token = getToken();
+      if (!token || !mountedRef.current) return;
+
+      try {
+        const ws = new WebSocket(`${WS_BASE}/user-events/?token=${token}`);
+        wsRef.current = ws;
+
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'tournament_removed' && data.tournament_id != null) {
+              removeTabById(data.tournament_id);
+            }
+          } catch {
+            // некоректний JSON — ігноруємо
+          }
+        };
+
+        ws.onclose = () => {
+          if (!mountedRef.current) return;
+          // Перепідключення через 3 секунди
+          retryTimer.current = setTimeout(connect, 3000);
+        };
+
+        ws.onerror = () => {
+          ws.close(); // onclose спрацює і запустить retry
+        };
+      } catch {
+        // WebSocket не підтримується або невалідний URL
+      }
+    };
+
+    connect();
+
+    return () => {
+      mountedRef.current = false;
+      clearTimeout(retryTimer.current);
+      wsRef.current?.close();
+    };
+  }, [removeTabById]);
+};
+
 /* ─── Головний компонент ─── */
 const NavBar = ({ children }) => {
-  const { openTabs, closeTab } = useTabs();
+  const { openTabs, closeTab, removeTabById } = useTabs();
   const navigate = useNavigate();
   const [fullUserName, setFullUserName] = useState('');
 
@@ -130,6 +187,9 @@ const NavBar = ({ children }) => {
     () => JSON.parse(localStorage.getItem("setting_logout") ?? "true")
   );
 
+  // ── Підключаємо WS-хук для авто-закриття вкладок ────────────────────────
+  useTournamentRemovalWS(removeTabById);
+
   useEffect(() => {
     const syncLogout = () =>
       setShowLogout(JSON.parse(localStorage.getItem("setting_logout") ?? "true"));
@@ -144,12 +204,7 @@ const NavBar = ({ children }) => {
   const role = localStorage.getItem('userRole') ?? 'participant';
   const roleTabs = getTabsForRole(role);
 
-  // Зберігаємо id вкладок які існували на момент першого маунту NavBar.
-  // Якщо NavBar ремаунтується (перехід між сторінками), ці вкладки вже відомі
-  // і не повинні анімуватись. Нові вкладки (яких тут немає) отримають animate=true.
   const initialTabIds = useRef(new Set(openTabs.map(t => String(t.id))));
-
-
 
   useEffect(() => {
     const storedName = localStorage.getItem('fullUserName');
@@ -170,7 +225,7 @@ const NavBar = ({ children }) => {
         ? "sepia(0.25) saturate(1.1) brightness(0.98)"
         : "";
     };
-    applyWarm(); // застосувати одразу при маунті
+    applyWarm();
     window.addEventListener("settings-updated", applyWarm);
     window.addEventListener("storage", applyWarm);
     return () => {
@@ -244,12 +299,15 @@ const NavBar = ({ children }) => {
     setNotifs(n => n.map(x => x.id === id ? { ...x, is_read: true } : x));
   };
 
-
+  // ── Logout ───────────────────────────────────────────────────────────────
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem('accessToken');
     localStorage.removeItem('fullUserName');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('userId');
+    // Сповіщаємо TabsContext про зміну акаунту — він скине всі вкладки
+    window.dispatchEvent(new Event('auth-changed'));
     navigate('/');
   };
 

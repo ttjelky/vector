@@ -27,10 +27,12 @@ class TournamentMemberSerializer(serializers.ModelSerializer):
     username   = serializers.CharField(source='user.username', read_only=True)
     email      = serializers.EmailField(source='user.email',   read_only=True)
     user_role  = serializers.CharField(source='user.role',     read_only=True)
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name  = serializers.CharField(source='user.last_name',  read_only=True)
 
     class Meta:
         model  = TournamentMember
-        fields = ['id', 'user', 'username', 'email', 'user_role', 'role', 'joined_at']
+        fields = ['id', 'user', 'username', 'email', 'user_role', 'role', 'joined_at', 'first_name', 'last_name']
         read_only_fields = ['joined_at']
 
 
@@ -160,12 +162,15 @@ class JurySubmissionSerializer(serializers.ModelSerializer):
     round_id    = serializers.IntegerField(source='task.round.id',  read_only=True)
     round_title = serializers.CharField(source='task.round.title',  read_only=True)
 
+    # Ім'я автора — full_name якщо є, інакше username
+    author_name = serializers.SerializerMethodField()
+
     # Контент для перегляду
     content_text  = serializers.CharField(source='text', read_only=True)
     content_links = SubmissionLinkSerializer(source='links', many=True, read_only=True)
     content_files = SubmissionAttachmentSerializer(source='attachments', many=True, read_only=True)
 
-    # Оцінка поточного журі — заповнюється у view через SerializerMethodField
+    # Оцінка поточного журі
     my_grade = serializers.SerializerMethodField()
 
     class Meta:
@@ -173,10 +178,18 @@ class JurySubmissionSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'task_title', 'round_id', 'round_title',
+            'author_name',
             'content_text', 'content_links', 'content_files',
             'submitted_at',
             'my_grade',
         ]
+
+    def get_author_name(self, obj):
+        user = obj.participant
+        if not user:
+            return "Ім'я не вказано"
+        full_name = f"{user.first_name} {user.last_name}".strip()
+        return full_name or user.username or f"Учасник #{user.id}"
 
     def get_my_grade(self, obj):
         request = self.context.get('request')
