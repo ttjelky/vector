@@ -1,245 +1,219 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTabs } from "../../TabsContext";
+import API from "../../api";
 import NavBar from "../components/NavBar";
+import TournamentCard from "../components/TournamentCard";
 import styles from "../components/styles/admindashboard.module.css";
 
-// ── API helpers (замінити на свої реальні імпорти) ──────────────────────────
-// import { getTournaments, getNotifications } from "../../api";
-
-const MOCK_TOURNAMENTS = [
-  {
-    id: 1,
-    name: "example424242",
-    description: "example опис",
-    date: "7 травня",
-    status: "open",
-    gradient: "linear-gradient(135deg, #6366f1 0%, #a855f7 40%, #ef4444 100%)",
-  },
-  {
-    id: 2,
-    name: "eaxample 2",
-    description: "67",
-    date: "7 травня",
-    status: "open",
-    gradient: "linear-gradient(135deg, #f472b6 0%, #e879f9 50%, #a855f7 100%)",
-  },
-  {
-    id: 3,
-    name: "Tournament 3",
-    description: "Третій турнір для прикладу",
-    date: "10 травня",
-    status: "closed",
-    gradient: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%)",
-  },
-];
-
-const MOCK_NOTIFICATIONS = [
-  { id: 1, type: "info", title: "Новий учасник", message: "Сергій Дейнега зареєструвався на турнір", time: "2 хв тому" },
-  { id: 2, type: "warning", title: "Турнір завтра", message: "example424242 розпочнеться завтра о 10:00", time: "1 год тому" },
-  { id: 3, type: "success", title: "Результати збережено", message: "Результати раунду 3 успішно збережено", time: "3 год тому" },
-  { id: 4, type: "info", title: "Нова реєстрація", message: "5 нових учасників зареєструвалося", time: "вчора" },
-  { id: 5, type: "error", title: "Помилка синхронізації", message: "Не вдалося синхронізувати дані з сервером", time: "вчора" },
-  { id: 6, type: "success", title: "Турнір завершено", message: "eaxample 2 успішно завершено", time: "2 дні тому" },
-];
-
-const STATUS_LABELS = {
-  open: "Реєстрація відкрита",
-  closed: "Закрито",
-  ongoing: "Триває",
-};
-
-const NOTIFICATION_ICONS = {
-  info: "ℹ️",
-  warning: "⚠️",
-  success: "✅",
-  error: "❌",
-};
-
-const placeholders = [
-  { icon: "📊", title: "Аналітика", description: "Огляд статистики турнірів, учасників та активності — у розробці." },
-  { icon: "👥", title: "Управління користувачами", description: "Перегляд, редагування та модерація акаунтів — у розробці." },
-  { icon: "📋", title: "Звіти", description: "Автоматичне генерування звітів по турнірах та роботах — у розробці." },
-];
-
-// ────────────────────────────────────────────────────────────────────────────
-
-const TournamentCard = ({ tournament }) => (
-  <div className={styles.tournamentCard}>
-    <div className={styles.cardBanner} style={{ background: tournament.gradient }} />
-    <div className={styles.cardBody}>
-      <div className={styles.cardTopRow}>
-        <span className={styles.cardTitle}>{tournament.name}</span>
-        <span className={`${styles.statusBadge} ${styles[`status_${tournament.status}`]}`}>
-          {STATUS_LABELS[tournament.status] ?? tournament.status}
-        </span>
-      </div>
-      {tournament.description && (
-        <p className={styles.cardDesc}>{tournament.description}</p>
-      )}
-      <span className={styles.dateBadge}>{tournament.date}</span>
-    </div>
-  </div>
-);
-
+// ── Notification tile ─────────────────────────────────────────────────────────
 const NotificationTile = ({ notification }) => (
-  <div className={`${styles.notifTile} ${styles[`notif_${notification.type}`]}`}>
-    <span className={styles.notifIcon}>{NOTIFICATION_ICONS[notification.type]}</span>
+  <div className={`${styles.notifTile} ${notification.is_read ? styles.notif_read : styles.notif_unread}`}>
     <div className={styles.notifContent}>
-      <span className={styles.notifTitle}>{notification.title}</span>
-      <span className={styles.notifMsg}>{notification.message}</span>
+      {notification.subject && (
+        <span className={styles.notifTitle}>{notification.subject}</span>
+      )}
+      <span className={styles.notifMsg}>{notification.text}</span>
+      {notification.tournament && (
+        <span className={styles.notifTournamentTag}>🏆 {notification.tournament}</span>
+      )}
+      {notification.links?.length > 0 && (
+        <div className={styles.notifLinkList}>
+          {notification.links.map((l, i) => (
+            <a key={i} href={l.url} target="_blank" rel="noreferrer" className={styles.notifLink}>
+              {l.label || l.url}
+            </a>
+          ))}
+        </div>
+      )}
     </div>
-    <span className={styles.notifTime}>{notification.time}</span>
+    <div className={styles.notifMeta}>
+      {notification.sender_full || notification.sender ? (
+        <span className={styles.notifSender}>{notification.sender_full || notification.sender}</span>
+      ) : null}
+      <span className={styles.notifTime}>{notification.created_at}</span>
+    </div>
+    {!notification.is_read && <span className={styles.notifDot} />}
   </div>
 );
 
-// ────────────────────────────────────────────────────────────────────────────
-
+// ── Main component ────────────────────────────────────────────────────────────
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [tournaments, setTournaments] = useState([]);
+  const { addTab } = useTabs();
+
+  const [tournaments,   setTournaments]   = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [animDir, setAnimDir] = useState("next");
+  const [loadingT,      setLoadingT]      = useState(true);
+  const [loadingN,      setLoadingN]      = useState(true);
+
+  const [currentIndex, setCurrentIndex]   = useState(0);
+  const [isAnimating,  setIsAnimating]    = useState(false);
+  const [animDir,      setAnimDir]        = useState("next");
   const timerRef = useRef(null);
 
-  // ── fetch data ─────────────────────────────────────────────────────────────
+  // ── fetch ──────────────────────────────────────────────────────────────────
   useEffect(() => {
-    // Замінити на реальні API виклики:
-    // getTournaments().then(setTournaments).catch(() => setTournaments(MOCK_TOURNAMENTS));
-    // getNotifications().then(setNotifications).catch(() => setNotifications(MOCK_NOTIFICATIONS));
-    setTournaments(MOCK_TOURNAMENTS);
-    setNotifications(MOCK_NOTIFICATIONS);
+    API.get("/tournaments/")
+      .then(r => setTournaments(r.data))
+      .catch(() => {})
+      .finally(() => setLoadingT(false));
+
+    API.get("/notifications/")
+      .then(r => setNotifications(r.data))
+      .catch(() => {})
+      .finally(() => setLoadingN(false));
   }, []);
 
-  // ── carousel logic ─────────────────────────────────────────────────────────
-  const goTo = useCallback(
-    (dir) => {
-      if (isAnimating || tournaments.length === 0) return;
-      setAnimDir(dir);
-      setIsAnimating(true);
-      setTimeout(() => {
-        setCurrentIndex((prev) =>
-          dir === "next"
-            ? (prev + 1) % tournaments.length
-            : (prev - 1 + tournaments.length) % tournaments.length
-        );
-        setIsAnimating(false);
-      }, 320);
-    },
-    [isAnimating, tournaments.length]
-  );
+  // ── mark read ──────────────────────────────────────────────────────────────
+  const markAllRead = async () => {
+    await API.post("/notifications/mark-read/");
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+  };
+
+  const markOneRead = async (id) => {
+    await API.post(`/notifications/mark-read/${id}/`);
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+  };
+
+  // ── carousel ───────────────────────────────────────────────────────────────
+  const goTo = useCallback((dir) => {
+    if (isAnimating || tournaments.length === 0) return;
+    setAnimDir(dir);
+    setIsAnimating(true);
+    setTimeout(() => {
+      setCurrentIndex(prev =>
+        dir === "next"
+          ? (prev + 1) % tournaments.length
+          : (prev - 1 + tournaments.length) % tournaments.length
+      );
+      setIsAnimating(false);
+    }, 320);
+  }, [isAnimating, tournaments.length]);
 
   useEffect(() => {
     if (tournaments.length < 2) return;
-    timerRef.current = setInterval(() => goTo("next"), 15000);
+    timerRef.current = setInterval(() => goTo("next"), 30000);
     return () => clearInterval(timerRef.current);
   }, [goTo, tournaments.length]);
 
   const resetTimer = (dir) => {
     clearInterval(timerRef.current);
     goTo(dir);
-    timerRef.current = setInterval(() => goTo("next"), 15000);
+    timerRef.current = setInterval(() => goTo("next"), 30000);
   };
 
   const current = tournaments[currentIndex];
+  const unreadCount = notifications.filter(n => !n.is_read).length;
 
-  // ────────────────────────────────────────────────────────────────────────────
   return (
     <NavBar>
       <div className={styles.contentArea}>
 
-        {/* ── Header ── */}
+        {/* ── Page header ── */}
         <div className={styles.pageHeader}>
           <h2 className={styles.pageTitle}>Головна панель адміністратора</h2>
           <p className={styles.pageSubtitle}>Огляд турнірів та останніх сповіщень</p>
         </div>
 
-        {/* ── Two-column layout ── */}
+        {/* ── Two-column grid ── */}
         <div className={styles.mainGrid}>
 
-          {/* LEFT — Tournament Carousel */}
+          {/* LEFT — Carousel */}
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>Турніри</h3>
               {tournaments.length > 1 && (
                 <div className={styles.carouselControls}>
-                  <button
-                    className={styles.arrowBtn}
-                    onClick={() => resetTimer("prev")}
-                    aria-label="Попередній"
-                  >
-                    ‹
-                  </button>
+                  <button className={styles.arrowBtn} onClick={() => resetTimer("prev")} aria-label="Попередній">‹</button>
                   <span className={styles.carouselDots}>
                     {tournaments.map((_, i) => (
-                      <span
-                        key={i}
-                        className={`${styles.dot} ${i === currentIndex ? styles.dotActive : ""}`}
-                      />
+                      <span key={i} className={`${styles.dot} ${i === currentIndex ? styles.dotActive : ""}`} />
                     ))}
                   </span>
-                  <button
-                    className={styles.arrowBtn}
-                    onClick={() => resetTimer("next")}
-                    aria-label="Наступний"
-                  >
-                    ›
-                  </button>
+                  <button className={styles.arrowBtn} onClick={() => resetTimer("next")} aria-label="Наступний">›</button>
                 </div>
               )}
             </div>
 
             <div className={styles.carouselWrapper}>
-              {current && (
+              {loadingT ? (
+                <div className={styles.skeletonCard}>
+                  <div className={styles.skeletonImg} />
+                  <div className={styles.skeletonBody}>
+                    <div className={styles.skeletonLine} style={{ width: "55%" }} />
+                    <div className={styles.skeletonLine} style={{ width: "35%" }} />
+                  </div>
+                </div>
+              ) : current ? (
                 <div
                   className={`${styles.carouselSlide} ${
                     isAnimating
-                      ? animDir === "next"
-                        ? styles.slideExitLeft
-                        : styles.slideExitRight
+                      ? animDir === "next" ? styles.slideExitLeft : styles.slideExitRight
                       : styles.slideEnter
                   }`}
+                  onClick={() => {
+                    addTab({ id: current.id, name: current.name });
+                    navigate(`/tournament/${current.id}`);
+                  }}
+                  style={{ cursor: "pointer" }}
                 >
-                  <TournamentCard tournament={current} />
+                  <TournamentCard
+                    name={current.name}
+                    info={current.description}
+                    date={current.start_date}
+                    accentColor={current.accent_color}
+                    imageMode={current.image_mode}
+                    stockImage={current.stock_image}
+                    customImage={
+                      current.custom_image
+                        ? (current.custom_image.startsWith("http") ? current.custom_image : `http://localhost:8000${current.custom_image}`)
+                        : null
+                    }
+                  />
+                </div>
+              ) : (
+                <div className={styles.emptyState}>
+                  <span className={styles.emptyIcon}>🏆</span>
+                  <span>Турнірів ще немає</span>
                 </div>
               )}
             </div>
-
-            <button className={styles.createBtn} onClick={() => navigate("/tournaments/create")}>
-              + Створити турнір
-            </button>
           </section>
 
           {/* RIGHT — Notifications */}
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitle}>Сповіщення</h3>
-              {notifications.length > 0 && (
-                <span className={styles.notifCount}>{notifications.length}</span>
+              <h3 className={styles.sectionTitle}>
+                Сповіщення
+                {unreadCount > 0 && <span className={styles.notifCount}>{unreadCount}</span>}
+              </h3>
+              {unreadCount > 0 && (
+                <button className={styles.markAllBtn} onClick={markAllRead}>
+                  Прочитати всі
+                </button>
               )}
             </div>
 
             <div className={styles.notifGrid}>
-              {notifications.length === 0 ? (
+              {loadingN ? (
+                [0,1,2].map(i => (
+                  <div key={i} className={styles.skeletonTile}>
+                    <div className={styles.skeletonLine} style={{ width: "50%" }} />
+                    <div className={styles.skeletonLine} style={{ width: "80%" }} />
+                  </div>
+                ))
+              ) : notifications.length === 0 ? (
                 <p className={styles.emptyState}>Немає нових сповіщень</p>
               ) : (
-                notifications.map((n) => <NotificationTile key={n.id} notification={n} />)
+                notifications.map(n => (
+                  <div key={n.id} onClick={() => !n.is_read && markOneRead(n.id)}>
+                    <NotificationTile notification={n} />
+                  </div>
+                ))
               )}
             </div>
           </section>
-        </div>
-
-        {/* ── Placeholders ── */}
-        <div className={styles.placeholderGrid}>
-          {placeholders.map((item) => (
-            <div key={item.title} className={styles.placeholderCard}>
-              <span className={styles.placeholderIcon}>{item.icon}</span>
-              <strong className={styles.placeholderTitle}>{item.title}</strong>
-              <p className={styles.placeholderDesc}>{item.description}</p>
-              <span className={styles.soonBadge}>Незабаром</span>
-            </div>
-          ))}
         </div>
 
       </div>

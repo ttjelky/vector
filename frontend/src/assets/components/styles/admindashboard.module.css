@@ -1,4 +1,6 @@
-/* ── Base ─────────────────────────────────────────────────────────────────── */
+/* admindashboard.module.css
+   Стилі ТІЛЬКИ для AdminDashboard — не містять tournamentGrid/tournamentCard/createBtn */
+
 :global(body) {
   background-color: #fbfbfb;
   margin: 0;
@@ -10,7 +12,7 @@
   max-width: 1400px;
 }
 
-/* ── Page header ─────────────────────────────────────────────────────────── */
+/* ── Page header ──────────────────────────────────────────────────────────── */
 .pageHeader {
   margin-bottom: 2rem;
 }
@@ -28,7 +30,7 @@
   margin: 0;
 }
 
-/* ── Two-column main grid ────────────────────────────────────────────────── */
+/* ── Two-column main grid ─────────────────────────────────────────────────── */
 .mainGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -37,12 +39,10 @@
 }
 
 @media (max-width: 900px) {
-  .mainGrid {
-    grid-template-columns: 1fr;
-  }
+  .mainGrid { grid-template-columns: 1fr; }
 }
 
-/* ── Section shell ───────────────────────────────────────────────────────── */
+/* ── Section shell ────────────────────────────────────────────────────────── */
 .section {
   background: #fff;
   border: 1px solid #ebebeb;
@@ -58,6 +58,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .sectionTitle {
@@ -65,29 +66,31 @@
   font-weight: 600;
   color: var(--color-text, #111);
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* ── Carousel ────────────────────────────────────────────────────────────── */
+/* ── Carousel ─────────────────────────────────────────────────────────────── */
 .carouselWrapper {
   position: relative;
   overflow: hidden;
   flex: 1;
   border-radius: 12px;
   min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.carouselSlide {
-  width: 100%;
-}
+.carouselSlide { width: 100%; }
 
-/* Entrance — always visible */
 .slideEnter {
   opacity: 1;
   transform: translateX(0);
   transition: opacity 0.32s ease, transform 0.32s ease;
 }
 
-/* Exits */
 .slideExitLeft {
   opacity: 0;
   transform: translateX(-40px);
@@ -102,7 +105,6 @@
   pointer-events: none;
 }
 
-/* Arrow buttons */
 .carouselControls {
   display: flex;
   align-items: center;
@@ -126,12 +128,8 @@
   padding: 0;
 }
 
-.arrowBtn:hover {
-  background: #f4f4f4;
-  border-color: #c8c8c8;
-}
+.arrowBtn:hover { background: #f4f4f4; border-color: #c8c8c8; }
 
-/* Dots */
 .carouselDots {
   display: flex;
   gap: 5px;
@@ -152,114 +150,7 @@
   border-radius: 3px;
 }
 
-/* ── Tournament Card ─────────────────────────────────────────────────────── */
-.tournamentCard {
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1px solid #ebebeb;
-  cursor: pointer;
-  transition: box-shadow 0.25s, transform 0.25s;
-}
-
-.tournamentCard:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
-}
-
-.cardBanner {
-  height: 130px;
-  width: 100%;
-}
-
-.cardBody {
-  padding: 1rem 1.1rem 1.1rem;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.cardTopRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.cardTitle {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #111;
-}
-
-.cardDesc {
-  font-size: 0.82rem;
-  color: #777;
-  margin: 0;
-}
-
-.dateBadge {
-  display: inline-flex;
-  align-items: center;
-  background: #f3f4f6;
-  border-radius: 20px;
-  padding: 2px 10px;
-  font-size: 0.78rem;
-  color: #555;
-  width: fit-content;
-}
-
-/* Status badges */
-.statusBadge {
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 3px 10px;
-  border-radius: 20px;
-}
-
-.status_open {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.status_closed {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.status_ongoing {
-  background: #fef9c3;
-  color: #ca8a04;
-}
-
-/* ── Create button ───────────────────────────────────────────────────────── */
-.createBtn {
-  width: 100%;
-  min-height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  border: 2px dashed #e1e1e1;
-  border-radius: 12px;
-  color: #999;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.22s ease;
-  margin-top: auto;
-}
-
-.createBtn:hover {
-  background: #fafafa;
-  border-color: #c1c1c1;
-  color: #555;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-  transform: translateY(-1px);
-}
-
-/* ── Notifications ───────────────────────────────────────────────────────── */
+/* ── Notifications ────────────────────────────────────────────────────────── */
 .notifCount {
   background: #6366f1;
   color: #fff;
@@ -271,6 +162,20 @@
   text-align: center;
 }
 
+.markAllBtn {
+  font-size: 12px;
+  font-weight: 500;
+  color: #888;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+  white-space: nowrap;
+  margin-left: auto;
+}
+.markAllBtn:hover { color: #1a1a1a; }
+
 .notifGrid {
   display: flex;
   flex-direction: column;
@@ -280,39 +185,49 @@
   padding-right: 2px;
 }
 
-.notifGrid::-webkit-scrollbar {
-  width: 4px;
-}
-.notifGrid::-webkit-scrollbar-thumb {
-  background: #e1e1e1;
-  border-radius: 4px;
-}
+.notifGrid::-webkit-scrollbar { width: 4px; }
+.notifGrid::-webkit-scrollbar-thumb { background: #e1e1e1; border-radius: 4px; }
 
 .notifTile {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  padding: 0.7rem 0.9rem;
+  padding: 0.75rem 1rem;
   border-radius: 10px;
   border-left: 3px solid transparent;
+  position: relative;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.notifTile:hover { opacity: 0.85; }
+
+.notif_unread {
+  background: #f0f4ff;
+  border-color: #6366f1;
 }
 
-.notif_info    { background: #f0f4ff; border-color: #6366f1; }
-.notif_warning { background: #fffbeb; border-color: #f59e0b; }
-.notif_success { background: #f0fdf4; border-color: #22c55e; }
-.notif_error   { background: #fff1f2; border-color: #f43f5e; }
+.notif_read {
+  background: #fafafa;
+  border-color: #e5e7eb;
+}
 
-.notifIcon {
-  font-size: 1rem;
+.notifDot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6366f1;
   flex-shrink: 0;
-  margin-top: 1px;
 }
 
 .notifContent {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  min-width: 0;
 }
 
 .notifTitle {
@@ -323,74 +238,123 @@
 
 .notifMsg {
   font-size: 0.78rem;
-  color: #666;
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notifTournamentTag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #7a9abf;
+  background: #f0f5fb;
+  padding: 2px 8px;
+  border-radius: 999px;
+  width: fit-content;
+  margin-top: 2px;
+}
+
+.notifLinkList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.notifLink {
+  font-size: 0.75rem;
+  color: #6366f1;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.notifLink:hover { text-decoration: underline; }
+
+.notifMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.notifSender {
+  font-size: 0.72rem;
+  color: #999;
+  white-space: nowrap;
 }
 
 .notifTime {
   font-size: 0.72rem;
   color: #aaa;
   white-space: nowrap;
-  flex-shrink: 0;
-  margin-top: 2px;
 }
 
+/* ── Empty state ──────────────────────────────────────────────────────────── */
 .emptyState {
-  text-align: center;
-  color: #aaa;
-  font-size: 0.85rem;
-  margin: auto 0;
-  padding: 2rem 0;
-}
-
-/* ── Placeholder cards ───────────────────────────────────────────────────── */
-.placeholderGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-}
-
-.placeholderCard {
-  border: 2px dashed var(--color-border, #d1d5db);
-  border-radius: 12px;
-  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  opacity: 0.65;
-  background: var(--color-surface, #f9fafb);
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #bbb;
+  font-size: 0.85rem;
+  padding: 2rem 0;
+  text-align: center;
+  margin: auto;
 }
 
-.placeholderIcon {
-  font-size: 1.75rem;
+.emptyIcon { font-size: 1.8rem; opacity: 0.5; }
+
+/* ── Skeletons ────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
 }
 
-.placeholderTitle {
-  font-size: 0.9rem;
-  color: #333;
+.skeletonCard {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #ebebeb;
+  background: #fff;
+  width: 100%;
 }
 
-.placeholderDesc {
-  font-size: 0.82rem;
-  color: var(--color-text-muted, #888);
-  margin: 0;
-  flex: 1;
+.skeletonImg {
+  height: 130px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
 }
 
-.soonBadge {
-  display: inline-block;
-  margin-top: auto;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--color-text-muted, #aaa);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: 1px solid currentColor;
-  border-radius: 4px;
-  padding: 2px 8px;
-  width: fit-content;
+.skeletonBody {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-/* ── Legacy stats (залишено) ─────────────────────────────────────────────── */
+.skeletonLine {
+  height: 11px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.skeletonTile {
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+/* ── Legacy stats (збережено для сумісності) ──────────────────────────────── */
 .statscontainer {
   display: flex;
   gap: 20px;
