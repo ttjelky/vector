@@ -90,6 +90,16 @@ const NavBar = ({ children }) => {
     }
   }, []);
 
+  // ── Реалтайм-оновлення після збереження профілю ───────────────────────
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail?.fullUserName) setFullUserName(e.detail.fullUserName);
+      if (e.detail?.avatar !== undefined) setAvatar(e.detail.avatar);
+    };
+    window.addEventListener('profile-updated', handler);
+    return () => window.removeEventListener('profile-updated', handler);
+  }, []);
+
   // ── Кнопка виходу ────────────────────────────────────────────────────────
   useEffect(() => {
     const handler = () =>
