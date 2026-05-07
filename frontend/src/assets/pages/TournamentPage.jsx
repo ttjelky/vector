@@ -9,8 +9,10 @@ import { computeStatus } from "../components/tournamentHelpers";
 import OverviewTab from "../components/OverviewTab";
 import ParticipantsTab from "../components/ParticipantsTab";
 import RoundsTab from "../components/RoundsTab";
+import JuryTab from "../components/JuryTab";
 import { useTabs } from "../../TabsContext";
 import useTournamentTabGuard from "../../useTournamentTabGuard";
+import LeaderboardTab from "../components/LeaderboardTab";
 
 export default function TournamentPage() {
   const { id }   = useParams();
@@ -27,15 +29,15 @@ export default function TournamentPage() {
 
   const [myRole,      setMyRole]      = useState(null);
   const [roleLoading, setRoleLoading] = useState(true);
-  const [error,       setError]       = useState(null); // { status: number }
+  const [error,       setError]       = useState(null);
 
   const isOwner = myRole === "owner";
+  const isJury  = myRole === "jury";
 
   useEffect(() => {
     API.get(`/tournaments/${id}/`)
       .then(r => {
         setTournament(r.data);
-        // addTab ігнорує дублікати всередині TabsContext (sameId guard)
         addTab({ id: r.data.id, name: r.data.name });
       })
       .catch(err => setError({ status: err?.response?.status ?? 0 }))
@@ -55,9 +57,6 @@ export default function TournamentPage() {
       .finally(() => setRoleLoading(false));
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Автоматично закриває вкладку і редіректить якщо:
-  // - 404: турнір видалено
-  // - 403: користувача виключено
   useTournamentTabGuard(id, {
     isDeleted: error?.status === 404,
     isKicked:  error?.status === 403,
@@ -83,8 +82,20 @@ export default function TournamentPage() {
 
   const handleRoundCreated = (newRound) => setRounds((prev) => [...prev, newRound]);
 
-  if (loading || roleLoading) return <div>Завантаження...</div>;
-  if (!tournament)            return <div>Турнір не знайдено</div>;
+  if (loading || roleLoading) return (
+    <NavBar>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#888', fontSize: 14 }}>
+        Завантаження...
+      </div>
+    </NavBar>
+  );
+  if (!tournament) return (
+    <NavBar>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#888', fontSize: 14 }}>
+        Турнір не знайдено
+      </div>
+    </NavBar>
+  );
 
   const status = computeStatus(tournament);
 
@@ -97,10 +108,12 @@ export default function TournamentPage() {
   })();
 
   const tabs = [
-    { id: "overview",     label: "Основна сторінка" },
-    { id: "rounds",       label: "Раунди" },
-    { id: "participants", label: "Учасники" },
-  ];
+  { id: "overview",     label: "Основна сторінка" },
+  { id: "rounds",       label: "Раунди" },
+  { id: "participants", label: "Учасники" },
+  { id: "leaderboard",  label: "Таблиця лідерів" },
+  ...(isJury ? [{ id: "jury", label: "Панель журі" }] : []),
+];
 
   return (
     <NavBar>
@@ -123,7 +136,22 @@ export default function TournamentPage() {
                 </p>
               )}
             </div>
-            <StatusBadge status={status} />
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <StatusBadge status={status} />
+              {isJury && (
+                <span style={{
+                  fontSize: 11.5,
+                  fontWeight: 600,
+                  color: "#5566aa",
+                  background: "#f0f2ff",
+                  border: "1px solid #dde4f5",
+                  borderRadius: 100,
+                  padding: "3px 10px",
+                }}>
+                  ⚖️ Журі
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -179,6 +207,24 @@ export default function TournamentPage() {
               tournamentId={id}
               myRole={myRole}
               loading={false}
+            />
+          )}
+
+          {activeTab === "jury" && isJury && (
+            <JuryTab
+              tournamentId={id}
+              rounds={rounds}
+              loading={roundsLoading}
+            />
+          )}
+
+          {activeTab === "leaderboard" && (
+            <LeaderboardTab
+              tournamentId={id}
+              rounds={rounds}
+              loading={roundsLoading}
+              isOwner={isOwner}
+              myRole={myRole}
             />
           )}
         </div>

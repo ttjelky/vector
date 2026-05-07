@@ -74,3 +74,28 @@ class IsTournamentParticipant(BasePermission):
             tournament_id=tournament_id,
             user=request.user,
         ).exists()
+
+
+class IsTournamentJury(BasePermission):
+    """
+    Дозволяє доступ тільки журі, адміну або власнику турніру.
+    Використовується для ендпоінтів панелі журі.
+    """
+    message = "Доступ дозволено тільки членам журі."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        tournament_id = get_tournament_id(view)
+        if not tournament_id:
+            return False
+
+        membership = TournamentMember.objects.filter(
+            tournament_id=tournament_id,
+            user=request.user,
+        ).first()
+
+        if not membership:
+            return False
+
+        return membership.role in ('jury', 'owner', 'admin')

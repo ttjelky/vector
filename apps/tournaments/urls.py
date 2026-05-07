@@ -14,6 +14,9 @@ from .views import (
     SubmissionListCreateView, SubmissionDetailView,
     SubmissionLinkCreateView, SubmissionLinkDeleteView,
     SubmissionAttachmentCreateView, SubmissionAttachmentDeleteView,
+    JurySubmissionsView, JuryGradeView,
+    SubmissionGradeView, ParticipantGradesNewsView,
+    LeaderboardView,
 )
 
 urlpatterns = [
@@ -34,6 +37,13 @@ urlpatterns = [
     # ── Members ────────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/members/', TournamentMemberListView.as_view(), name='tournament-members'),
     path('<int:tournament_pk>/members/<int:pk>/', TournamentMemberDeleteView.as_view(), name='tournament-member-delete'),
+
+    # ── Jury panel ─────────────────────────────────────────────────────────────
+    path('<int:tournament_pk>/jury/submissions/', JurySubmissionsView.as_view(), name='jury-submissions'),
+    path('<int:tournament_pk>/jury/submissions/<int:submission_pk>/grade/', JuryGradeView.as_view(), name='jury-grade'),
+
+    # ── Leaderboard ────────────────────────────────────────────────────────────
+    path('<int:tournament_pk>/leaderboard/', LeaderboardView.as_view(), name='leaderboard'),
 
     # ── Rounds ────────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/rounds/', RoundListCreateView.as_view(), name='round-list-create'),
@@ -67,7 +77,12 @@ urlpatterns = [
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/links/', SubmissionLinkCreateView.as_view(), name='submission-link-create'),
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/links/<int:pk>/', SubmissionLinkDeleteView.as_view(), name='submission-link-delete'),
 
+    # ── Submission grade (for participant)
+    path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/grade/', SubmissionGradeView.as_view(), name='submission-grade'),
+
     # ── Submission attachments ────────────────────────────────────────────────
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/attachments/', SubmissionAttachmentCreateView.as_view(), name='submission-attachment-create'),
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/attachments/<int:pk>/', SubmissionAttachmentDeleteView.as_view(), name='submission-attachment-delete'),
+
+    path('my-grades/', ParticipantGradesNewsView.as_view(), name='participant-grades-news'),
 ]
