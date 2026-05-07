@@ -87,19 +87,10 @@ const Settings = () => {
   return (
     <NavBar>
       <div className="settings-page">
-        <h1>Налаштування</h1>
 
         {/* ── Вигляд ── */}
         <div className="settings-section">
           <div className="settings-section-title">Вигляд</div>
-
-          <ToggleRow
-            icon={<MoonIcon />}
-            label="Темний режим"
-            desc="Перемикання між світлою та темною темою"
-            checked={darkMode}
-            onChange={() => setDarkMode(v => !v)}
-          />
 
           <ToggleRow
             icon={<WarmIcon />}

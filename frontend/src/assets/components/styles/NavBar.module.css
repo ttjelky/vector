@@ -10,60 +10,116 @@ body, html {
   height: 100vh;
   font-family: 'DM Sans', sans-serif;
   overflow: hidden;
+  background: transparent;
 }
 
 .topNavbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  height: 60px;
-  padding: 0 20px;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  padding: 10px 12px 0 12px;
   z-index: 100;
+  pointer-events: none;
+  gap: 10px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Logo island — same glassmorphism + width as sidebar */
+.navbarLogo {
+  width: 212px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 6px 20px rgba(0,0,0,0.10);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  pointer-events: all;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.navbarLogo:hover {
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.05),
+    0 8px 24px rgba(0,0,0,0.12);
 }
 
 .logo {
-  width: 160px;
+  width: 140px;
 }
 
+/* Search island */
 .search {
-  width: 100%;
-  max-width: 400px;
+  flex: 0 0 auto;
+  width: 320px;
+  margin: 0 0 0 10px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 16px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 8px;
+  pointer-events: all;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search:focus-within {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 4px 16px rgba(0,0,0,0.10);
 }
 
 .searchInput {
   width: 100%;
-  padding: 10px 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  background: #f9fafb;
+  padding: 11px 0;
+  border: none;
+  background: transparent;
   font-size: 14px;
   outline: none;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-}
-
-.searchInput:hover {
-  border-color: #cbd5e1;
-}
-
-.searchInput:focus {
-  border-color: #3b82f6;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  font-family: 'DM Sans', sans-serif;
+  color: #222;
 }
 
 .searchInput::placeholder {
   color: #9ca3af;
 }
 
-/* ── Права частина хедера ── */
+/* Right actions island */
 .navbarUserActions {
   display: flex;
   align-items: center;
   gap: 10px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 16px rgba(0,0,0,0.08);
+  padding: 6px 16px;
   flex-shrink: 0;
+  pointer-events: all;
+  transition: background 0.3s ease;
+  margin-left: auto;
+}
+
+.navbarUserActions:hover {
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .userName {
@@ -71,6 +127,33 @@ body, html {
   font-weight: 500;
   color: #333;
   white-space: nowrap;
+  cursor: default;
+}
+
+.navbarAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e8e8e8;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.navbarAvatarPlaceholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e8e8e8;
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid #ddd;
+  cursor: default;
 }
 
 /* Аватарка — кругла фотка */
@@ -105,27 +188,98 @@ body, html {
   height: 18px;
 }
 
-/* ── Layout ── */
+/* ── Main layout ── */
 .mainWrapper {
   display: flex;
   flex: 1;
   overflow: hidden;
+  padding: 0;
+  position: relative;
+  height: 100vh;
 }
 
+/* ── Content area — full bleed, sidebar overlaps from the left ── */
 .contentArea {
   flex: 1;
   overflow-y: auto;
+  background: transparent;
+  padding-left: 232px;
+  padding-top: 68px;
+  border-radius: 0;
+  position: relative;
 }
 
-/* ── Sidebar ── */
+/* Gradient fade under the sidebar — content bleeds but softly yields */
+.contentArea::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255,255,255,1)    0%,
+    rgba(255,255,255,0.98) 55%,
+    rgba(255,255,255,0)    100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.contentArea :global(.loading-overlay) {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+  border-radius: 16px;
+}
+
+.contentArea :global(.loading-screen),
+.contentArea :global(.loader-wrap) {
+  min-height: unset !important;
+  height: auto !important;
+}
+
+/* ── Floating sidebar — positioned absolutely over the content ── */
 .leftSidebar {
-  width: 200px;
-  background-color: white;
-  border-right: 1px solid #dee2e6;
-  padding: 20px;
+  position: absolute;
+  /* FIX: top = navbar height (68px) + gap (10px) */
+  top: 78px;
+  left: 10px;
+  bottom: 10px;
+  width: 212px;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 6px 20px rgba(0,0,0,0.10),
+    0 24px 56px rgba(0,0,0,0.10);
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.leftSidebar:hover {
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.05),
+    0 8px 24px rgba(0,0,0,0.12),
+    0 32px 64px rgba(0,0,0,0.14);
+}
+
+.primaryNav, .secondaryNav {
+  margin-bottom: 16px;
 }
 
 .primaryNav, .secondaryNav {
@@ -139,7 +293,7 @@ body, html {
 }
 
 .leftSidebar li {
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
 .leftSidebar a {
@@ -147,8 +301,14 @@ body, html {
   color: #333;
   display: flex;
   align-items: center;
-  padding: 10px 15px;
-  border-radius: 8px;
+  padding: 10px 13px;
+  border-radius: 10px;
+}
+
+.sidebarText {
+  font-size: 13px;
+  font-weight: 450;
+  color: rgba(39, 50, 64, 0.85);
 }
 
 .sidebarText {
@@ -158,37 +318,97 @@ body, html {
 }
 
 .sidebarIcon {
-  width: 18px;
-  height: 18px;
-  margin-right: 12px;
+  width: 17px;
+  height: 17px;
+  margin-right: 10px;
+  opacity: 0.75;
 }
 
 .sidebarSectionTitle {
-  font-size: 14px;
-  font-weight: 400;
-  color: gray;
-  margin-bottom: 10px;
-  margin-left: 13px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #aab0bc;
+  margin-bottom: 8px;
+  margin-left: 12px;
   margin-top: 0;
 }
 
+.inactiveLink {
+  transition: background-color 0.15s ease;
+}
+
 .inactiveLink:hover {
-  background-color: #f0f0f0;
-  border-radius: 15px;
-  transition-duration: 0.2s;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+}
+
+.inactiveLink:hover .sidebarText {
+  color: rgba(39, 50, 64, 1);
+}
+
+.inactiveLink:hover .sidebarIcon {
+  opacity: 1;
 }
 
 .activeLink {
-  background-color: #ececec;
-  border-radius: 15px !important;
+  background-color: rgba(0, 0, 0, 0.07);
+  border-radius: 16px !important;
 }
 
-/* ── Nested tabs ── */
+.activeLink .sidebarText {
+  color: rgba(39, 50, 64, 1);
+}
+
+.activeLink .sidebarIcon {
+  opacity: 1;
+}
+
+/* ── Nested tournament tabs ── */
+@keyframes tabOpen {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    max-height: 60px;
+    transform: translateX(0);
+  }
+}
+
 .nestedTournament {
   position: relative;
   display: flex;
   align-items: center;
-  padding-left: 20px;
+  padding-left: 16px;
+  overflow: hidden;
+  opacity: 1;
+  max-height: 60px;
+  transform: translateX(0);
+}
+
+.tabHidden {
+  opacity: 0;
+  max-height: 0;
+  transform: translateX(-6px);
+}
+
+.tabOpening {
+  animation: tabOpen 0.25s ease forwards;
+}
+
+.tabClosing {
+  opacity: 0;
+  max-height: 0;
+  transform: translateX(-6px);
+  pointer-events: none;
+  transition:
+    opacity    0.22s ease,
+    max-height 0.25s ease,
+    transform  0.22s ease;
 }
 
 .nestedLink {
@@ -196,21 +416,21 @@ body, html {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 4px 8px 4px 15px;
+  padding: 6px 8px 6px 12px;
   color: #888;
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: 16px !important;
+  transition: background-color 0.15s ease;
 }
 
 .nestedLink:hover {
-  background-color: #f0f0f0;
-  border-radius: 15px;
-  transition-duration: 0.2s;
+  background-color: rgba(0,0,0,0.05);
+  border-radius: 16px !important;
 }
 
 .activeNestedLink {
-  background-color: #ececec;
-  border-radius: 15px !important;
+  background-color: rgba(0,0,0,0.06);
+  border-radius: 16px !important;
 }
 
 .nestedLink, .activeNestedLink {
@@ -218,17 +438,17 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 10px !important;
-  margin: 3px 0;
+  padding: 5px 8px !important;
+  margin: 2px 0;
   width: fit-content;
   min-width: 0;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tabName {
   font-size: 14px;
   font-weight: 400;
-  color: #333;
+  color: #555;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -243,54 +463,63 @@ body, html {
 }
 
 .closeIcon {
-  width: 10px;
-  height: 10px;
-  fill: #888;
+  width: 9px;
+  height: 9px;
+  opacity: 0.5;
 }
 
 .closeIconWrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  margin-left: 10px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  transition: background-color 0.2s ease;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease;
 }
 
 .closeIconWrapper:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 /* ── Logout ── */
 .logoutSection {
   margin-top: auto;
-  background-color: rgb(255, 229, 230);
-  border-radius: 15px;
+  border-radius: 16px;
+  transition: background-color 0.2s;
+  background-color: rgba(255, 229, 230, 0.7);
 }
 
 .logoutSection:hover {
-  background-color: rgb(255, 201, 204);
-  transition-duration: 0.2s;
+  background-color: rgba(255, 201, 204, 0.9);
 }
 
 .logoutBtn {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 10px 15px;
+  padding: 10px 13px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  box-sizing: border-box;
 }
 
 .logoutIcon {
-  width: 18px;
-  height: 18px;
-  margin-right: 12px;
-  fill: rgb(215, 125, 126);
+  width: 17px;
+  height: 17px;
+  margin-right: 10px;
+  fill: rgb(215, 125, 126) !important;
 }
 
 .logoutText {
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 13px;
+  font-weight: 450;
   color: rgb(215, 125, 126);
 }

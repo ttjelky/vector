@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useContext, useCallback, useEffect, useRef } from 'react';
 
 const TabsContext = createContext();
 
@@ -6,9 +6,40 @@ const TabsContext = createContext();
 // а id з API може бути числом. Без нормалізації filter/find не спрацьовує.
 const sameId = (a, b) => String(a) === String(b);
 
+/**
+ * Повертає поточний userId з localStorage.
+ * Використовується щоб прив'язати стан вкладок до конкретного акаунту.
+ */
+const getCurrentUserId = () => localStorage.getItem('userId') ?? null;
+
 export const TabsProvider = ({ children }) => {
+  // Ключ поточного юзера — при його зміні стан вкладок скидається.
+  const [currentUserId, setCurrentUserId] = useState(getCurrentUserId);
   const [openTabs, setOpenTabs] = useState([]);
   const [activeTabId, setActiveTabId] = useState(null);
+
+  // Слухаємо зміни userId (login / logout / зміна акаунту).
+  // NavBar при logout очищає localStorage і викидає подію 'auth-changed'.
+  useEffect(() => {
+    const sync = () => {
+      const nextId = getCurrentUserId();
+      setCurrentUserId(prev => {
+        if (prev !== nextId) {
+          // Акаунт змінився — скидаємо всі вкладки
+          setOpenTabs([]);
+          setActiveTabId(null);
+        }
+        return nextId;
+      });
+    };
+
+    window.addEventListener('auth-changed', sync);
+    window.addEventListener('storage', sync);          // зміни з інших вкладок браузера
+    return () => {
+      window.removeEventListener('auth-changed', sync);
+      window.removeEventListener('storage', sync);
+    };
+  }, []);
 
   const addTab = useCallback((tournament) => {
     setOpenTabs((prev) => {

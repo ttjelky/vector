@@ -12,22 +12,28 @@ const ACCENT_COLORS = ["#5da3ea", "#4ad4a9", "#d83030", "#da83a0", "#928be1", "#
 
 const FORMAT_LABELS = { solo: "Одиночний", team: "Командний" };
 
+// ─── RichContent — безпечний рендер HTML з редактора ─────────────────────────
+
+function RichContent({ html, emptyText = "Відсутній.", className }) {
+  if (!html || html === "<br>" || html === "<p><br></p>") {
+    return <p className={styles.emptyText}>{emptyText}</p>;
+  }
+  return (
+    <div
+      className={`${styles.richContent} ${className || ""}`}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+
 // ─── Компонент ────────────────────────────────────────────────────────────────
 
-/**
- * Props:
- *  - tournament  {object}
- *  - status      {string}
- *  - onSave      {function}
- *  - readOnly    {boolean}  — якщо true, кнопка "Редагувати" прихована
- */
 export default function OverviewTab({ tournament, status, onSave, readOnly = false }) {
   const [editing, setEditing] = useState(false);
   const [saving,  setSaving]  = useState(false);
   const [error,   setError]   = useState("");
   const [form,    setForm]    = useState(buildForm(tournament));
 
-  // Стан картинки в режимі редагування
   const [imageMode,     setImageMode]     = useState(tournament.image_mode  || "stock");
   const [stockImage,    setStockImage]    = useState(tournament.stock_image || STOCK_IMAGES[0].id);
   const [customFile,    setCustomFile]    = useState(null);
@@ -60,24 +66,18 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
     if (!form.name.trim()) { setError("Назва турніру обов'язкова."); return; }
     setSaving(true);
     try {
-      // Використовуємо FormData щоб передати файл якщо є
       const payload = new FormData();
       payload.append("name",               form.name.trim());
-      payload.append("description",        form.description.trim());
+      payload.append("description",        form.description || "");
       payload.append("format",             form.format.trim()      || "");
       payload.append("start_date",         form.start_date         || "");
       payload.append("registration_start", form.registration_start || "");
       payload.append("registration_end",   form.registration_end   || "");
       payload.append("max_teams",          form.max_teams !== "" ? Number(form.max_teams) : "");
-      payload.append("rules",              form.rules.trim()       || "");
+      payload.append("rules",              form.rules              || "");
       payload.append("image_mode",         imageMode);
-
-      if (imageMode === "stock") {
-        payload.append("stock_image", stockImage);
-      }
-      if (imageMode === "custom" && customFile) {
-        payload.append("custom_image", customFile);
-      }
+      if (imageMode === "stock")                payload.append("stock_image",  stockImage);
+      if (imageMode === "custom" && customFile) payload.append("custom_image", customFile);
 
       await onSave(payload);
       setEditing(false);
@@ -87,8 +87,6 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
       setSaving(false);
     }
   };
-
-  const rules = tournament.rules || "";
 
   // ── Режим редагування ───────────────────────────────────────────────────────
 
@@ -105,6 +103,7 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
             <label className={styles.editLabel}>
               Опис
               <RichTextArea
+                id="description"
                 name="description"
                 value={form.description}
                 onChange={(e) => handleChange({ target: { name: "description", value: e.target.value } })}
@@ -112,7 +111,6 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
               />
             </label>
 
-            {/* ── Картинка турніру ── */}
             <ImagePicker
               imageMode={imageMode}       setImageMode={setImageMode}
               stockImage={stockImage}     setStockImage={setStockImage}
@@ -142,6 +140,7 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
             <label className={styles.editLabel}>
               Правила
               <RichTextArea
+                id="rules"
                 name="rules"
                 value={form.rules}
                 onChange={(e) => handleChange({ target: { name: "rules", value: e.target.value } })}
@@ -170,19 +169,21 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Про турнір</h2>
-          {/* Кнопка редагування — тільки власнику */}
           {!readOnly && (
             <button className={styles.editBtn} onClick={() => setEditing(true)}>Редагувати</button>
           )}
         </div>
-        <p className={styles.description}>{tournament.description || "Опис відсутній."}</p>
+        <RichContent
+          html={tournament.description}
+          emptyText="Опис відсутній."
+          className={styles.descriptionContent}
+        />
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Деталі</h2>
         <div className={styles.infoGrid}>
           <InfoRow label="Формат"             value={FORMAT_LABELS[tournament.format] || "Не вказано"} />
-          <InfoRow label="Статус"             value={<StatusBadge status={status} />} />
           <InfoRow label="Початок турніру"    value={formatDate(tournament.start_date)} />
           <InfoRow label="Початок реєстрації" value={formatDate(tournament.registration_start)} />
           <InfoRow label="Кінець реєстрації"  value={formatDate(tournament.registration_end)} />
@@ -190,13 +191,14 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
         </div>
       </section>
 
-      {rules && (
+      {tournament.rules && (
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Правила</h2>
           <div className={styles.rulesBox}>
-            {rules.split("\n").filter(Boolean).map((line, i) => (
-              <p key={i} className={styles.ruleLine}>{line}</p>
-            ))}
+            <RichContent
+              html={tournament.rules}
+              emptyText="Правила відсутні."
+            />
           </div>
         </section>
       )}
