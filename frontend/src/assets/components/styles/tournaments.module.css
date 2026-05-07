@@ -1,0 +1,54 @@
+
+.tournamentGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.tournamentCard {
+  flex: 1 1 400px;
+  max-width: 100%;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tournamentCard:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  transform: translateY(-3px);
+}
+
+.createBtn {
+  width: 100%;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 2px dashed #e1e1e1;
+  border-radius: 20px;
+  color: #888;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 20px 0;
+}
+
+.createBtn:hover {
+  background: #fcfcfc;
+  border-color: #d1d1d1;
+  color: #444;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+  transform: translateY(-2px);
+}
+
+.createBtn:active {
+  transform: translateY(0);
+}
+
+.createBtnContainer {
+  display: flex;
+  justify-content: center;
+}
