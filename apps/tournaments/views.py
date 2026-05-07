@@ -155,6 +155,26 @@ class VerifyInvitePinView(APIView):
 
         expected_pin = tournament.get_invite_pin_for_role(role)
         if str(expected_pin) == str(pin):
+            # Перевіряємо чи роль користувача відповідає ролі посилання
+            if request.user.is_authenticated and request.user.role != role:
+                ROLE_UA = {
+                    'participant': 'учасника',
+                    'jury':        'журі',
+                    'admin':       'адміністратора',
+                }
+                return Response(
+                    {
+                        'detail': (
+                            f'Це посилання призначене для {ROLE_UA.get(role, role)}. '
+                            f'Ваша роль у системі — «{request.user.role}». '
+                            f'Зверніться до організатора, якщо вважаєте це помилкою.'
+                        ),
+                        'role_mismatch': True,
+                        'required_role': role,
+                        'user_role':     request.user.role,
+                    },
+                    status=status.HTTP_403_FORBIDDEN,
+                )
             return Response({
                 'valid':            True,
                 'tournament_name':  tournament.name,
@@ -202,6 +222,27 @@ class JoinByTokenView(APIView):
             return Response(
                 {'detail': 'Невірний або недійсний інвайт-токен.'},
                 status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Перевіряємо чи роль користувача відповідає ролі посилання
+        if request.user.role != role:
+            ROLE_UA = {
+                'participant': 'учасника',
+                'jury':        'журі',
+                'admin':       'адміністратора',
+            }
+            return Response(
+                {
+                    'detail': (
+                        f'Це посилання призначене для {ROLE_UA.get(role, role)}. '
+                        f'Ваша роль у системі — «{request.user.role}». '
+                        f'Зверніться до організатора, якщо вважаєте це помилкою.'
+                    ),
+                    'role_mismatch': True,
+                    'required_role': role,
+                    'user_role':     request.user.role,
+                },
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         member, created = TournamentMember.objects.get_or_create(

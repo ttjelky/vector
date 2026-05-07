@@ -13,7 +13,8 @@ function getAvatarColor(str = "") {
   return palette[Math.abs(hash) % palette.length];
 }
 
-const MEDAL = { 1: "1", 2: "2", 3: "3" };
+const MEDAL = { 1: "🥇", 2: "🥈", 3: "🥉" };
+const MEDAL_LABELS = { 1: "1", 2: "2", 3: "3" };
 
 function aggregateFromSubmissions(submissions) {
   const byParticipant = {};
@@ -36,13 +37,113 @@ function aggregateFromSubmissions(submissions) {
   return Object.values(byParticipant);
 }
 
+// ── Excel export ──────────────────────────────────────────────────────────────
+
+async function exportToExcel({ ranked, roundIds, roundMap, tournamentId }) {
+  // Dynamic import — не впливає на початковий бандл
+  const XLSX = await import("xlsx");
+
+  const wb = XLSX.utils.book_new();
+
+  // ── Заголовки ──
+  const header = ["#", "Учасник", ...roundIds.map(id => roundMap[id]), "Разом"];
+
+  // ── Рядки даних ──
+  const rows = ranked.map(p => [
+    p.rank,
+    p.participant_name,
+    ...roundIds.map(id => p.round_scores?.[id] ?? ""),
+    p.total,
+  ]);
+
+  const wsData = [header, ...rows];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // ── Ширина колонок ──
+  ws["!cols"] = [
+    { wch: 5 },                                              // #
+    { wch: 30 },                                             // Учасник
+    ...roundIds.map(() => ({ wch: 16 })),                   // Раунди
+    { wch: 12 },                                             // Разом
+  ];
+
+  // ── Стилі заголовка ──
+  const headerStyle = {
+    font: { bold: true, color: { rgb: "FFFFFF" }, name: "Arial", sz: 11 },
+    fill: { fgColor: { rgb: "4F46E5" }, patternType: "solid" },
+    alignment: { horizontal: "center", vertical: "center" },
+    border: {
+      bottom: { style: "thin", color: { rgb: "3730A3" } },
+    },
+  };
+
+  header.forEach((_, colIdx) => {
+    const cellAddr = XLSX.utils.encode_cell({ r: 0, c: colIdx });
+    if (!ws[cellAddr]) ws[cellAddr] = {};
+    ws[cellAddr].s = headerStyle;
+  });
+
+  // ── Стилі рядків (медалі + зебра) ──
+  const medalFills = {
+    1: { fgColor: { rgb: "FFF9C4" }, patternType: "solid" }, // золото
+    2: { fgColor: { rgb: "F0F0F0" }, patternType: "solid" }, // срібло
+    3: { fgColor: { rgb: "FFE0CC" }, patternType: "solid" }, // бронза
+  };
+
+  const zebraFill   = { fgColor: { rgb: "F8F7FF" }, patternType: "solid" };
+  const centerAlign = { horizontal: "center", vertical: "center" };
+  const leftAlign   = { horizontal: "left",   vertical: "center" };
+
+  ranked.forEach((p, rowIdx) => {
+    const excelRow = rowIdx + 1; // +1 через заголовок
+    const fill = medalFills[p.rank] ?? (rowIdx % 2 === 1 ? zebraFill : undefined);
+
+    header.forEach((_, colIdx) => {
+      const cellAddr = XLSX.utils.encode_cell({ r: excelRow, c: colIdx });
+      if (!ws[cellAddr]) ws[cellAddr] = { v: "", t: "s" };
+
+      const isName  = colIdx === 1;
+      const isTotal = colIdx === header.length - 1;
+
+      ws[cellAddr].s = {
+        font: {
+          name: "Arial",
+          sz: 10,
+          bold: isTotal,
+          color: isTotal ? { rgb: "1E1B4B" } : undefined,
+        },
+        alignment: isName ? leftAlign : centerAlign,
+        ...(fill ? { fill } : {}),
+        border: {
+          bottom: { style: "hair", color: { rgb: "E5E7EB" } },
+          right:  colIdx === header.length - 1
+            ? undefined
+            : { style: "hair", color: { rgb: "E5E7EB" } },
+        },
+      };
+    });
+  });
+
+  // ── Закріпити перший рядок ──
+  ws["!freeze"] = { xSplit: 0, ySplit: 1, topLeftCell: "A2", activePane: "bottomLeft" };
+
+  XLSX.utils.book_append_sheet(wb, ws, "Таблиця лідерів");
+
+  // ── Зберегти ──
+  const date = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `leaderboard_${tournamentId}_${date}.xlsx`);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoading, isOwner, myRole }) {
   const [leaderboard,  setLeaderboard]  = useState([]);
-  const [published,    setPublished]    = useState(null); // null = не завантажено
+  const [published,    setPublished]    = useState(null);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
   const [sortBy,       setSortBy]       = useState("total");
   const [publishing,   setPublishing]   = useState(false);
+  const [exporting,    setExporting]    = useState(false);
 
   const canAlwaysSee = isOwner || myRole === "admin";
 
@@ -50,7 +151,6 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
     setLoading(true);
     setError(null);
 
-    // Єдиний ендпоінт для всіх ролей — бекенд сам контролює доступ
     API.get(`/tournaments/${tournamentId}/leaderboard/`)
       .then(r => {
         const data = r.data;
@@ -61,11 +161,9 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
       .catch(err => {
         const status = err?.response?.status;
         if (status === 403) {
-          // Таблиця ще не опублікована — бекенд повернув 403
           setPublished(false);
           setLoading(false);
         } else if (status === 404) {
-          // Немає окремого ендпоінту — fallback тільки для owner/admin через jury/submissions
           if (canAlwaysSee) {
             API.get(`/tournaments/${tournamentId}/jury/submissions/`)
               .then(r => {
@@ -75,7 +173,6 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
               .catch(() => setError("Не вдалося завантажити дані."))
               .finally(() => setLoading(false));
           } else {
-            // Учасник/журі — не маємо даних, вважаємо не опубліковано
             setPublished(false);
             setLoading(false);
           }
@@ -102,6 +199,17 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
       console.error("Помилка зміни публікації:", err);
     } finally {
       setPublishing(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    setExporting(true);
+    try {
+      await exportToExcel({ ranked, roundIds, roundMap, tournamentId });
+    } catch (err) {
+      console.error("Помилка експорту:", err);
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -145,7 +253,6 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
     </div>
   );
 
-  // Таблиця не опублікована
   if (!canAlwaysSee && !published) return (
     <div className={styles.stateBox}>
       <span className={styles.stateIcon}>🔒</span>
@@ -198,7 +305,7 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
         </div>
       ) : (
         <>
-          {/* Sort pills */}
+          {/* Controls row: sort pills + export button */}
           <div className={styles.controls}>
             <span className={styles.controlsLabel}>Сортувати за:</span>
             <div className={styles.pills}>
@@ -218,6 +325,40 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
                 </button>
               ))}
             </div>
+
+            {/* Excel export button */}
+            <button
+              className={styles.exportBtn}
+              onClick={handleExportExcel}
+              disabled={exporting}
+              title="Завантажити таблицю лідерів у форматі Excel"
+            >
+              {exporting ? (
+                <>
+                  <span className={styles.exportSpinner} />
+                  Експорт…
+                </>
+              ) : (
+                <>
+                  <svg
+                    className={styles.exportIcon}
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3 14.5V16a1 1 0 001 1h12a1 1 0 001-1v-1.5M10 3v9m0 0l-3-3m3 3l3-3"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Excel
+                </>
+              )}
+            </button>
           </div>
 
           {/* Table */}
@@ -249,7 +390,7 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
                     ].join(" ")}
                   >
                     <td className={styles.tdRank}>
-                      {MEDAL[p.rank] ?? <span className={styles.rankNum}>{p.rank}</span>}
+                      {MEDAL_LABELS[p.rank] ?? <span className={styles.rankNum}>{p.rank}</span>}
                     </td>
                     <td className={styles.tdName}>
                       <div className={styles.participant}>
