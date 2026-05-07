@@ -1,108 +1,425 @@
-
+/* ── Base ─────────────────────────────────────────────────────────────────── */
 :global(body) {
-    background-color: #fbfbfb;
-    margin: 0;
-    padding: 0;
+  background-color: #fbfbfb;
+  margin: 0;
+  padding: 0;
 }
 
 .contentArea {
-    padding: 40px;
+  padding: 40px;
+  max-width: 1400px;
 }
 
-.statscontainer {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin-top: 40px;
-    font-family: "'Arial', sans-serif";
-    background-color: "#f8f8f8";
-    padding: 20px;
-    border-radius: 12px;
+/* ── Page header ─────────────────────────────────────────────────────────── */
+.pageHeader {
+  margin-bottom: 2rem;
 }
 
-.infocard {
-    font-family: "Google Sans", sans-serif;
-    background-color: #fff;
-    color: #111;
-    padding: 30px;
-    border-radius: 10px;
-    text-align: center;
-    min-width: 150px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    border: 1px solid #e0e0e0;
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+  color: var(--color-text, #111);
 }
 
-.infotitle {
-        font-size: 16px;
-        margin-bottom: 10px;
-        text-transform: uppercase;
-        color: #333;
+.pageSubtitle {
+  color: var(--color-text-muted, #888);
+  font-size: 0.9rem;
+  margin: 0;
 }
 
-.infovalue {
-        font-size: 28px;
-        font-weight: bold;
+/* ── Two-column main grid ────────────────────────────────────────────────── */
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
-.createBtn {
-    width: 100%;
-    min-height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    /* Світлий, ледь помітний фон */
-    background: #ffffff;
-    /* Тонка пунктирна або суцільна лінія */
-    border: 2px dashed #e1e1e1; 
-    border-radius: 20px;
-    
-    color: #888; /* Спокійний колір тексту */
-    font-size: 18px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    margin: 20px 0;
+@media (max-width: 900px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.tournamentGrid {
+/* ── Section shell ───────────────────────────────────────────────────────── */
+.section {
+  background: #fff;
+  border: 1px solid #ebebeb;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem 1.5rem;
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 360px;
 }
 
-.tournamentCard {
-  flex: 1 1 400px;
-  max-width: 100%;
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text, #111);
+  margin: 0;
+}
+
+/* ── Carousel ────────────────────────────────────────────────────────────── */
+.carouselWrapper {
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  border-radius: 12px;
+  min-height: 220px;
+}
+
+.carouselSlide {
+  width: 100%;
+}
+
+/* Entrance — always visible */
+.slideEnter {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+}
+
+/* Exits */
+.slideExitLeft {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+  pointer-events: none;
+}
+
+.slideExitRight {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+  pointer-events: none;
+}
+
+/* Arrow buttons */
+.carouselControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.arrowBtn {
+  background: none;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  font-size: 1.1rem;
+  line-height: 1;
   cursor: pointer;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s, border-color 0.18s;
   padding: 0;
+}
+
+.arrowBtn:hover {
+  background: #f4f4f4;
+  border-color: #c8c8c8;
+}
+
+/* Dots */
+.carouselDots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d1d5db;
+  transition: background 0.2s, width 0.2s;
+}
+
+.dotActive {
+  background: #6366f1;
+  width: 16px;
+  border-radius: 3px;
+}
+
+/* ── Tournament Card ─────────────────────────────────────────────────────── */
+.tournamentCard {
   border-radius: 14px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  border: 1px solid #ebebeb;
+  cursor: pointer;
+  transition: box-shadow 0.25s, transform 0.25s;
 }
 
 .tournamentCard:hover {
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  transform: translateY(-3px);
- 
-}
-
-.createBtn:hover {
-    background: #fcfcfc;
-  border-color: #d1d1d1;
-  color: #444;
-  
-  /* М'яка тінь, що додає глибини */
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
 }
 
-.createBigBtn:active {
-  transform: translateY(0);
+.cardBanner {
+  height: 130px;
+  width: 100%;
 }
 
+.cardBody {
+  padding: 1rem 1.1rem 1.1rem;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
 
-.createBtnContainer {
-    display: flex;
-    justify-content: center;
+.cardTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.cardTitle {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111;
+}
+
+.cardDesc {
+  font-size: 0.82rem;
+  color: #777;
+  margin: 0;
+}
+
+.dateBadge {
+  display: inline-flex;
+  align-items: center;
+  background: #f3f4f6;
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.78rem;
+  color: #555;
+  width: fit-content;
+}
+
+/* Status badges */
+.statusBadge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.status_open {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status_closed {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status_ongoing {
+  background: #fef9c3;
+  color: #ca8a04;
+}
+
+/* ── Create button ───────────────────────────────────────────────────────── */
+.createBtn {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 2px dashed #e1e1e1;
+  border-radius: 12px;
+  color: #999;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  margin-top: auto;
+}
+
+.createBtn:hover {
+  background: #fafafa;
+  border-color: #c1c1c1;
+  color: #555;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+/* ── Notifications ───────────────────────────────────────────────────────── */
+.notifCount {
+  background: #6366f1;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 2px 8px;
+  min-width: 22px;
+  text-align: center;
+}
+
+.notifGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  overflow-y: auto;
+  max-height: 340px;
+  padding-right: 2px;
+}
+
+.notifGrid::-webkit-scrollbar {
+  width: 4px;
+}
+.notifGrid::-webkit-scrollbar-thumb {
+  background: #e1e1e1;
+  border-radius: 4px;
+}
+
+.notifTile {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  border-left: 3px solid transparent;
+}
+
+.notif_info    { background: #f0f4ff; border-color: #6366f1; }
+.notif_warning { background: #fffbeb; border-color: #f59e0b; }
+.notif_success { background: #f0fdf4; border-color: #22c55e; }
+.notif_error   { background: #fff1f2; border-color: #f43f5e; }
+
+.notifIcon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.notifContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.notifTitle {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.notifMsg {
+  font-size: 0.78rem;
+  color: #666;
+}
+
+.notifTime {
+  font-size: 0.72rem;
+  color: #aaa;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.emptyState {
+  text-align: center;
+  color: #aaa;
+  font-size: 0.85rem;
+  margin: auto 0;
+  padding: 2rem 0;
+}
+
+/* ── Placeholder cards ───────────────────────────────────────────────────── */
+.placeholderGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.placeholderCard {
+  border: 2px dashed var(--color-border, #d1d5db);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  opacity: 0.65;
+  background: var(--color-surface, #f9fafb);
+}
+
+.placeholderIcon {
+  font-size: 1.75rem;
+}
+
+.placeholderTitle {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.placeholderDesc {
+  font-size: 0.82rem;
+  color: var(--color-text-muted, #888);
+  margin: 0;
+  flex: 1;
+}
+
+.soonBadge {
+  display: inline-block;
+  margin-top: auto;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #aaa);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 2px 8px;
+  width: fit-content;
+}
+
+/* ── Legacy stats (залишено) ─────────────────────────────────────────────── */
+.statscontainer {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 40px;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.infocard {
+  font-family: "Google Sans", sans-serif;
+  background-color: #fff;
+  color: #111;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 150px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.infotitle {
+  font-size: 16px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  color: #333;
+}
+
+.infovalue {
+  font-size: 28px;
+  font-weight: bold;
 }
