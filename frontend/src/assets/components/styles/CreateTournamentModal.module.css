@@ -31,8 +31,7 @@
   background: #ffffff;
   border-radius: 28px;
   border: 1px solid lightgray;
-  /* крок 1 — просторніший */
-  width: min(1060px, 96vw);
+  width: min(1100px, 96vw);
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -43,9 +42,8 @@
   transform-origin: center center;
 }
 
-/* крок 2 — ширший */
 .modalWide {
-  width: min(1280px, 96vw);
+  width: min(1340px, 96vw);
 }
 
 .modalOut {
@@ -54,29 +52,12 @@
 }
 
 @keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: scale(0.92) translateY(20px);
-    filter: blur(2px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0);
-  }
+  from { opacity: 0; transform: scale(0.92) translateY(20px); filter: blur(2px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
 }
-
 @keyframes modalOut {
-  from {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.94) translateY(12px);
-    filter: blur(1px);
-  }
+  from { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+  to   { opacity: 0; transform: scale(0.94) translateY(12px); filter: blur(1px); }
 }
 
 .form {
@@ -104,55 +85,41 @@
   background: linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.4) 40%, transparent 100%);
   animation: headerIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
 }
-
 @keyframes headerIn {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 .closeBtn {
-  width: 30px;
-  padding: 5px;
+  width: 30px; padding: 5px;
   background: rgba(255,255,255,0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.2);
   box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.05);
-  border-radius: 1000px;
-  cursor: pointer;
-  pointer-events: auto;
+  border-radius: 1000px; cursor: pointer; pointer-events: auto;
   transition: background 0.15s, transform 0.15s;
 }
 .closeBtn:hover  { background: #ececec; transform: scale(1.08); }
 .closeBtn:active { transform: scale(0.94); }
 
 .stepIndicator {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,0.55);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.3);
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  border-radius: 1000px;
-  padding: 8px 14px;
-  pointer-events: auto;
+  border-radius: 1000px; padding: 8px 14px; pointer-events: auto;
 }
 
 .stepDot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #d0d0d0;
+  width: 8px; height: 8px; border-radius: 50%; background: #d0d0d0;
   transition: background 0.38s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .stepDotActive { background: #1f1f1f; transform: scale(1.18); }
 
 .stepLine {
-  width: 24px; height: 2px;
-  background: #d0d0d0;
-  border-radius: 2px;
+  width: 24px; height: 2px; background: #d0d0d0; border-radius: 2px;
   transition: background 0.38s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .stepLineActive { background: #1f1f1f; }
@@ -161,25 +128,18 @@
    BODY — TWO COLUMNS
 ══════════════════════════════════════════ */
 .body {
-  display: flex;
-  flex-direction: row;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
+  display: flex; flex-direction: row;
+  flex: 1; min-height: 0; overflow: hidden;
 }
 
-/* ── Ліва панель — вужча ── */
+/* ── Ліва панель — товща ── */
 .panelLeft {
-  width: 360px;
+  width: 420px;
   flex-shrink: 0;
   border-right: 1px solid #f0f0f0;
-  padding: 72px 18px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  padding: 72px 20px 80px;
+  display: flex; flex-direction: column; gap: 18px;
+  overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;
 }
 .panelLeft::-webkit-scrollbar { display: none; }
 
@@ -192,16 +152,12 @@
   to   { opacity: 1; transform: translateX(0) translateY(0); }
 }
 
-/* ── Права панель — більше простору ── */
+/* ── Права панель ── */
 .panelRight {
-  flex: 1;
-  min-width: 0;
-  padding: 72px 40px 18px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  flex: 1; min-width: 0;
+  padding: 72px 40px 80px;
+  overflow-y: auto; display: flex; flex-direction: column;
+  scrollbar-width: none; -ms-overflow-style: none;
 }
 .panelRight::-webkit-scrollbar { display: none; }
 
@@ -212,50 +168,32 @@
   margin-bottom: 24px;
   animation: metaIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
 @keyframes metaIn {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.stepNum {
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 0.8px; text-transform: uppercase;
-  color: #aaa; margin: 0;
-}
-.stepTitle {
-  font-size: 28px; font-weight: 600;
-  color: #111; margin: 4px 0 4px;
-}
-.stepSub { font-size: 13px; color: #888; margin: 0; }
+.stepNum  { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: #aaa; margin: 0; }
+.stepTitle { font-size: 28px; font-weight: 600; color: #111; margin: 4px 0 4px; }
+.stepSub  { font-size: 13px; color: #888; margin: 0; }
 
 /* ══════════════════════════════════════════
-   STEP CONTENT ANIMATIONS
+   STEP ANIMATIONS
 ══════════════════════════════════════════ */
-.stepContent {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  flex: 1;
-}
+.stepContent { display: flex; flex-direction: column; gap: 16px; flex: 1; }
 
-.stepAnimForward {
-  animation: stepForward 0.44s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+.stepAnimForward { animation: stepForward 0.44s cubic-bezier(0.16, 1, 0.3, 1) both; }
 @keyframes stepForward {
   from { opacity: 0; transform: translateX(26px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 
-.stepAnimBack {
-  animation: stepBack 0.44s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+.stepAnimBack { animation: stepBack 0.44s cubic-bezier(0.16, 1, 0.3, 1) both; }
 @keyframes stepBack {
   from { opacity: 0; transform: translateX(-26px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 
-/* ── Stagger ── */
 .stagger1, .stagger2, .stagger3, .stagger4 {
   opacity: 0;
   animation: fieldIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -276,22 +214,17 @@
 .previewContainer { margin-bottom: 0; }
 
 .previewLabel {
-  font-size: 10px; text-transform: uppercase;
-  letter-spacing: 0.08em; font-weight: 600;
-  color: #b0b0b0; margin-bottom: 10px; display: block;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+  font-weight: 600; color: #b0b0b0; margin-bottom: 10px; display: block;
 }
 
 .previewCard {
-  background: white; width: 100%;
-  position: relative; border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-  border: 1px solid rgba(0,0,0,0.05);
-  transition: all 0.3s ease;
+  background: white; width: 100%; position: relative; border-radius: 14px;
+  overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.05); transition: all 0.3s ease;
 }
 .previewCard::before {
-  content: "";
-  position: absolute; top: 0; left: 0; bottom: 0;
+  content: ""; position: absolute; top: 0; left: 0; bottom: 0;
   width: 5px; background-color: var(--accent); z-index: 1;
 }
 
@@ -299,17 +232,22 @@
   height: 100px; position: relative; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
 }
-.cardImg {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%; object-fit: cover; display: block;
-}
+.cardImg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+
 .previewContent { padding: 12px; margin-left: 8px; }
-.previewHeader  { display: flex; align-items: center; justify-content: space-between; }
-.previewName    { margin: 0; font-size: 20px; color: #1d1d1f; }
+.previewHeader  { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.previewName    { margin: 0; font-size: 18px; color: #1d1d1f; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .previewInfo    { margin: 6px 0 10px; font-size: 12px; color: gray; }
 .previewFooter  { display: flex; }
 .previewDate    { font-size: 12px; color: gray; background: rgb(239,239,239); padding: 4px 10px; border-radius: 100px; }
-.previewBadge   { display: inline-block; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 500; background: rgb(219,240,219); color: rgb(89,112,89); opacity: 0.9; }
+
+/* ── Бейдж в один рядок ── */
+.previewBadge {
+  display: inline-block; white-space: nowrap; flex-shrink: 0;
+  padding: 4px 10px; border-radius: 100px;
+  font-size: 11px; font-weight: 500;
+  background: rgb(219,240,219); color: rgb(89,112,89); opacity: 0.9;
+}
 
 /* ══════════════════════════════════════════
    SIDEBAR
@@ -323,13 +261,13 @@
 
 .imgTabs { display: flex; background: #f3f3f3; border-radius: 7px; padding: 2px; gap: 2px; }
 .imgTab  { flex: 1; padding: 5px 0; font-size: 11.5px; font-weight: 500; color: #999; background: transparent; border: none; border-radius: 5px; cursor: pointer; transition: background 0.13s, color 0.13s; }
-.imgTab:hover    { color: #555; }
-.imgTabActive    { background: #fff; color: #111; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.imgTab:hover  { color: #555; }
+.imgTabActive  { background: #fff; color: #111; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
 .stockGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-.stockItem { height: 52px; border-radius: 10px; cursor: pointer; transition: transform 0.13s, box-shadow 0.13s; }
-.stockItem:hover   { transform: scale(1.02); box-shadow: 0 3px 10px rgba(0,0,0,0.13); }
-.stockItemActive   { border: 2px solid #487cad; }
+.stockItem { height: 56px; border-radius: 10px; cursor: pointer; transition: transform 0.13s, box-shadow 0.13s; }
+.stockItem:hover  { transform: scale(1.02); box-shadow: 0 3px 10px rgba(0,0,0,0.13); }
+.stockItemActive  { border: 2px solid #487cad; }
 
 .uploadZone {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -344,23 +282,16 @@
 .fileInputHidden    { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 
 /* ── Color swatches ── */
-.colorGrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+.colorGrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
 
 .swatch {
-  border-radius: 12px; cursor: pointer;
-  border: 2.5px solid transparent;
-  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
-              border-color 0.13s, box-shadow 0.13s;
-  outline: none;
-  height: 52px;
+  border-radius: 12px; cursor: pointer; border: 2.5px solid transparent;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.13s, box-shadow 0.13s;
+  outline: none; height: 52px;
 }
 .swatch:hover  { transform: scale(1.07); box-shadow: 0 4px 14px rgba(0,0,0,0.16); }
 .swatch:active { transform: scale(0.95); }
-.swatchActive  {
-  border: 2.5px solid #487cad;
-  box-shadow: 0 0 0 2px #487cad33;
-  transform: scale(1.05);
-}
+.swatchActive  { border: 2.5px solid #487cad; box-shadow: 0 0 0 2px #487cad33; transform: scale(1.05); }
 
 /* ══════════════════════════════════════════
    TYPE CARDS
@@ -396,8 +327,7 @@
   width: 16px; height: 16px; border-radius: 50%; background: #1a1a1a;
   display: flex; align-items: center; justify-content: center;
   opacity: 0; transform: scale(0.3);
-  transition: opacity 0.15s, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
-  z-index: 2;
+  transition: opacity 0.15s, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 2;
 }
 .typeCardActive .typeCheck { opacity: 1; transform: scale(1); }
 .typeCheckIcon { width: 8px; height: 8px; stroke: #fff; stroke-width: 2.5; fill: none; }
@@ -408,12 +338,10 @@
 .fieldError {
   display: flex; align-items: center; gap: 5px;
   font-size: 11.5px; font-weight: 500; color: #e05252;
-  margin-top: 2px;
-  animation: errorIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-top: 2px; animation: errorIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .fieldError::before {
-  content: "!";
-  display: inline-flex; align-items: center; justify-content: center;
+  content: "!"; display: inline-flex; align-items: center; justify-content: center;
   width: 14px; height: 14px; border-radius: 50%;
   background: #e05252; color: #fff; font-size: 9px; font-weight: 700; flex-shrink: 0;
 }
@@ -425,7 +353,7 @@
 /* ══════════════════════════════════════════
    FORM FIELDS
 ══════════════════════════════════════════ */
-.field   { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 
 .label {
   font-size: 12.5px; font-weight: 600; color: #6b6b6b;
@@ -485,7 +413,7 @@
 .sectionTitle   { font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #a8a8a8; white-space: nowrap; }
 .sectionLine    { flex: 1; height: 1px; background: #f0f0f0; }
 
-.twoCol  { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 .regBlock {
   background: #f9f9f9; border: 1px solid #f0f0f0;
@@ -493,19 +421,19 @@
 }
 
 /* ══════════════════════════════════════════
-   FOOTER
+   FOOTER — прозорий з білою тінню
 ══════════════════════════════════════════ */
 .footer {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: flex-end;
-  flex-shrink: 0;
-  position: relative;
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  box-sizing: border-box;
   z-index: 10;
-  border-top: 1px solid rgba(0,0,0,0.06);
-  background: rgba(255,255,255,0.97);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 40%, rgba(255,255,255,0.4) 70%, transparent 100%);
   animation: footerIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
 }
 
@@ -516,7 +444,8 @@
 
 .footerActions {
   display: flex; align-items: center; gap: 10px;
-  padding: 14px 24px;
+  padding: 20px 24px 18px;
+  pointer-events: auto;
 }
 
 .btnCancel {

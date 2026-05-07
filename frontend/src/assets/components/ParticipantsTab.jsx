@@ -23,6 +23,25 @@ const INVITE_LABELS = {
   admin:       "Запросити адміна",
 };
 
+// ── Аватарка учасника ─────────────────────────────────────────────────────
+function MemberAvatar({ member }) {
+  const src = member.avatar
+    ? (member.avatar.startsWith("http") ? member.avatar : `http://127.0.0.1:8000${member.avatar}`)
+    : null;
+
+  const initials = (member.full_name || member.username || "?")
+    .split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+
+  if (src) {
+    return <img src={src} alt={initials} className={styles.memberAvatar} />;
+  }
+  return (
+    <div className={styles.memberAvatarPlaceholder}>
+      {initials}
+    </div>
+  );
+}
+
 export default function ParticipantsTab({ tournamentId, myRole, loading }) {
   const [members,        setMembers]        = useState([]);
   const [membersLoading, setMembersLoading] = useState(true);
@@ -60,7 +79,6 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
 
   useEffect(() => {
     if (!tournamentId || !isOwner) return;
-
     const roles = ["participant", "jury", "admin"];
     roles.forEach(role => {
       API.get(`/tournaments/${tournamentId}/invite-link/?role=${role}`)
@@ -82,8 +100,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
       el.style.position = "fixed";
       el.style.opacity  = "0";
       document.body.appendChild(el);
-      el.focus();
-      el.select();
+      el.focus(); el.select();
       try { document.execCommand("copy"); } catch { window.prompt("Скопіюйте вручну:", url); }
       document.body.removeChild(el);
     };
@@ -156,6 +173,8 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
 
   return (
     <div className={styles.tabContent}>
+
+      {/* ── Підвкладки ── */}
       <div className={styles.subTabs}>
         {TABS.map(tab => {
           const count = members.filter(m =>
@@ -174,6 +193,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
         })}
       </div>
 
+      {/* ── Заголовок + кнопка ── */}
       <div className={styles.participantsHeader}>
         <span className={styles.teamCount}>
           {TABS.find(t => t.key === activeTab)?.label}: {visibleMembers.length}
@@ -194,6 +214,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
         )}
       </div>
 
+      {/* ── PIN ── */}
       {isOwner && pinVisible && invite?.pin && (
         <div className={styles.pinSection}>
           <div className={styles.pinInfo}>
@@ -213,13 +234,17 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
         </div>
       )}
 
+      {/* ── Список ── */}
       <div className={styles.teamList}>
         {visibleMembers.length === 0 ? (
           <p className={styles.empty}>Список порожній.</p>
         ) : (
           visibleMembers.map((member, idx) => (
             <div key={member.id} className={styles.teamCard}>
-              <div className={styles.teamIndex}>{idx + 1}</div>
+
+              {/* Аватарка замість індексу */}
+              <MemberAvatar member={member} />
+
               <div className={styles.teamInfo}>
                 {/* ВИПРАВЛЕНО: Відображаємо Ім'я та Прізвище */}
                 <span className={styles.teamName}>{getDisplayName(member)}</span>
@@ -228,6 +253,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
                   {member.user_role && ` · ${member.user_role}`}
                 </span>
               </div>
+
               {isOwner && member.role !== "owner" && (
                 <button
                   className={styles.removeBtn}
@@ -236,6 +262,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
                   ✕
                 </button>
               )}
+
               {member.joined_at && (
                 <div className={styles.teamDate}>
                   {new Date(member.joined_at).toLocaleDateString("uk-UA")}
