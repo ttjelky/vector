@@ -1,5 +1,5 @@
 import { useState } from "react";
-import styles from "./styles/RoundsTab.module.css";
+import styles from "./styles/SubmissionForm.module.css";
 import API from "../../api";
 import { fileIcon } from "./tournamentHelpers";
 

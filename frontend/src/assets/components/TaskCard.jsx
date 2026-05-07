@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import styles from "./styles/RoundsTab.module.css";
+import styles from "./styles/TaskCard.module.css";
 import API from "../../api";
 import { fileIcon } from "./tournamentHelpers";
 import { ConfirmDeleteModal } from "./TournamentShared";

@@ -499,7 +499,7 @@ class JurySubmissionsView(APIView):
     GET /tournaments/<tournament_pk>/jury/submissions/
 
     Повертає всі подання в межах турніру для оцінювання журі.
-    Особисті дані учасника не включаються (анонімізація).
+    Містить ім'я автора та оцінку поточного журі.
     Доступно: jury, owner, admin.
     """
     permission_classes = [IsAuthenticated, IsTournamentJury]
@@ -509,7 +509,7 @@ class JurySubmissionsView(APIView):
         submissions = (
             Submission.objects
             .filter(task__round__tournament_id=tournament_pk)
-            .select_related('task', 'task__round')
+            .select_related('task', 'task__round', 'participant')
             .prefetch_related('links', 'attachments', 'grades')
             .order_by('-submitted_at')
         )

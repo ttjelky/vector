@@ -28,7 +28,7 @@ export default function TournamentPage() {
 
   const [myRole,      setMyRole]      = useState(null);
   const [roleLoading, setRoleLoading] = useState(true);
-  const [error,       setError]       = useState(null); // { status: number }
+  const [error,       setError]       = useState(null);
 
   const isOwner = myRole === "owner";
   const isJury  = myRole === "jury";
@@ -106,15 +106,12 @@ export default function TournamentPage() {
     return { background: "#e8e8e8" };
   })();
 
-  // Формуємо вкладки залежно від ролі
   const tabs = [
-    { id: "overview",     label: "Основна сторінка" },
-    { id: "rounds",       label: "Раунди" },
-    // Журі бачить свою панель замість «Учасники»
-    isJury
-      ? { id: "jury",     label: "Панель журі" }
-      : { id: "participants", label: "Учасники" },
-  ];
+  { id: "overview",     label: "Основна сторінка" },
+  { id: "rounds",       label: "Раунди" },
+  { id: "participants", label: "Учасники" },
+  ...(isJury ? [{ id: "jury", label: "Панель журі" }] : []),
+];
 
   return (
     <NavBar>
@@ -203,7 +200,7 @@ export default function TournamentPage() {
             />
           )}
 
-          {activeTab === "participants" && !isJury && (
+          {activeTab === "participants" && (
             <ParticipantsTab
               tournamentId={id}
               myRole={myRole}

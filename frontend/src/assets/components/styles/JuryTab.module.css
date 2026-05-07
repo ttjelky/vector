@@ -518,30 +518,51 @@
   color: var(--jury-ink-soft);
 }
 
-/* ─── Anon badge ──────────────────────────────────────────────────────────── */
+/* ─── Author badge (detail view) ──────────────────────────────────────────── */
 
-.anonBadge {
+.authorBadge {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 11px 16px;
-  background: var(--jury-blue-bg);
-  border-bottom: 1px solid var(--jury-blue-brd);
-  font-size: 12.5px;
-  color: var(--jury-blue);
-  font-weight: 500;
+  background: var(--jury-canvas);
+  border-bottom: 1px solid var(--jury-border-soft);
+  font-size: 13px;
 }
 
-.anonBadgeIcon {
+.authorBadgeIcon {
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  background: rgba(51, 102, 204, 0.1);
+  background: var(--jury-border);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--jury-blue);
+  color: var(--jury-ink-soft);
+}
+
+.authorBadgeLabel {
+  font-size: 12px;
+  color: var(--jury-ink-soft);
+  font-weight: 500;
+}
+
+.authorBadgeName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--jury-ink);
+}
+
+/* ─── Author name on submission cards ────────────────────────────────────── */
+
+.subAuthor {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--jury-ink-soft);
+  font-weight: 500;
 }
 
 /* ─── Content box ─────────────────────────────────────────────────────────── */
