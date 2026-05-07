@@ -1,7 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════════
-   RoundsTab — Apple-style / Glassmorphism redesign
-   Концепція: Pill-tabs для вибору раунду, Slide-over Drawer для завдань.
-   Стилістика: SF Pro, мінімум кольорів, тонкі лінії, багато простору.
+   RoundsTab — layout, pill tabs, round banner, shared form system, skeleton
    ════════════════════════════════════════════════════════════════════════════ */
 
 /* ─── Layout ─────────────────────────────────────────────────────────────────── */
@@ -220,7 +218,7 @@
 }
 .roundLink:hover, .roundFile:hover { background: rgba(0,0,0,0.08); }
 
-/* ─── Status badge  ──────────────────────────────────────────────────────────── */
+/* ─── Status badge ──────────────────────────────────────────────────────────── */
 .roundStatus {
   display: inline-flex;
   align-items: center;
@@ -262,295 +260,7 @@
   letter-spacing: 0.07em;
 }
 
-/* ─── Task card (slim row) ───────────────────────────────────────────────────── */
-.taskCard {
-  background: #ffffff;
-  border: 1px solid rgba(0,0,0,0.07);
-  border-radius: 14px;
-  padding: 13px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
-  user-select: none;
-}
-.taskCard:hover {
-  border-color: rgba(0,0,0,0.13);
-  box-shadow: 0 2px 14px rgba(0,0,0,0.06);
-  transform: translateY(-1px);
-}
-.taskCard:active { transform: translateY(0); box-shadow: none; }
-
-/* keep the old .taskCardExpanded for compat */
-.taskCardExpanded { border-color: rgba(0,0,0,0.12); }
-
-.taskCardLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1;
-}
-
-.taskTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1d1d1f;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.taskDesc {
-  font-size: 12.5px;
-  color: #86868b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.taskCardRight {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.taskDeadline {
-  font-size: 11.5px;
-  color: #aeaeb2;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-.taskDeadlinePast { color: #ff3b30; }
-
-/* old compat */
-.taskCardHeader { display: contents; }
-.taskCardActions { display: contents; }
-.taskChevron { display: none; }
-.taskCardBody { display: none; }
-
-.taskDeleteBtn {
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #aeaeb2;
-  background: none;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-.taskDeleteBtn:hover { background: #fff1f2; color: #dc2626; }
-
-.taskArrow {
-  color: #d1d1d6;
-  display: flex;
-  align-items: center;
-}
-
-/* ─── Task Drawer (slide-over) ───────────────────────────────────────────────── */
-.drawerBackdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.28);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  z-index: 100;
-  animation: backdropIn 0.25s ease;
-}
-@keyframes backdropIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(500px, 100vw);
-  background: rgba(255,255,255,0.97);
-  backdrop-filter: blur(28px) saturate(200%);
-  -webkit-backdrop-filter: blur(28px) saturate(200%);
-  border-left: 1px solid rgba(0,0,0,0.08);
-  box-shadow: -12px 0 48px rgba(0,0,0,0.13);
-  z-index: 101;
-  display: flex;
-  flex-direction: column;
-  animation: drawerIn 0.32s cubic-bezier(0.32, 0.72, 0, 1);
-  overflow: hidden;
-}
-@keyframes drawerIn {
-  from { transform: translateX(100%); opacity: 0.8; }
-  to   { transform: translateX(0);    opacity: 1; }
-}
-
-.drawerHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 22px 24px 18px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-  flex-shrink: 0;
-}
-
-.drawerTitleGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-
-.drawerTitle {
-  font-size: 17px;
-  font-weight: 700;
-  color: #1d1d1f;
-  letter-spacing: -0.035em;
-  line-height: 1.2;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-}
-
-.drawerSubtitle {
-  font-size: 12px;
-  color: #86868b;
-}
-
-.drawerCloseBtn {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #86868b;
-  background: rgba(0,0,0,0.05);
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  flex-shrink: 0;
-  font-size: 15px;
-  line-height: 1;
-  transition: background 0.15s, color 0.15s;
-}
-.drawerCloseBtn:hover { background: rgba(0,0,0,0.09); color: #1d1d1f; }
-
-.drawerTabs {
-  display: flex;
-  gap: 0;
-  padding: 0 24px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-  flex-shrink: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.drawerTabs::-webkit-scrollbar { display: none; }
-
-.drawerTab {
-  padding: 10px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #86868b;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  font-family: inherit;
-  transition: color 0.15s, border-color 0.15s;
-  margin-bottom: -1px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.drawerTab:hover { color: #1d1d1f; }
-.drawerTabActive {
-  color: #1d1d1f;
-  border-bottom-color: #1d1d1f;
-  font-weight: 600;
-}
-
-.drawerBody {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0,0,0,0.1) transparent;
-}
-
-.drawerDeadlineBanner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  border-radius: 12px;
-  font-size: 13px;
-  color: #c2410c;
-  font-weight: 500;
-}
-.drawerDeadlineExpired {
-  background: #fff1f2;
-  border-color: #fecdd3;
-  color: #dc2626;
-}
-
-/* ─── Drawer content elements ────────────────────────────────────────────────── */
-.drawerDesc {
-  font-size: 14px;
-  color: #3d3d3f;
-  line-height: 1.75;
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-.drawerSection {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.drawerSectionLabel {
-  font-size: 11px;
-  font-weight: 700;
-  color: #aeaeb2;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.chipList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 12px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #1d1d1f;
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 100px;
-  text-decoration: none;
-  transition: background 0.15s;
-}
-.chip:hover { background: rgba(0,0,0,0.08); }
-
-/* ─── Add task / inline buttons ──────────────────────────────────────────────── */
+/* ─── Add task inline button ─────────────────────────────────────────────────── */
 .addTaskInlineBtn {
   display: inline-flex;
   align-items: center;
@@ -567,55 +277,6 @@
   transition: background 0.15s, color 0.15s;
 }
 .addTaskInlineBtn:hover { background: rgba(0,0,0,0.08); color: #1d1d1f; }
-
-.addTaskBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #6e6e73;
-  background: transparent;
-  border: 1.5px dashed rgba(0,0,0,0.15);
-  border-radius: 12px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
-  align-self: flex-start;
-}
-.addTaskBtn:hover { border-color: rgba(0,0,0,0.3); color: #1d1d1f; background: rgba(0,0,0,0.02); }
-
-/* ─── Empty states ───────────────────────────────────────────────────────────── */
-.emptyBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 64px 20px;
-  color: #aeaeb2;
-  text-align: center;
-}
-.emptyBlock p { margin: 0; font-size: 14px; color: #86868b; }
-
-.emptyBlockIcon {
-  font-size: 30px;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.04);
-  border-radius: 18px;
-}
-
-.empty {
-  font-size: 13.5px;
-  color: #aeaeb2;
-  margin: 0;
-  padding: 10px 0;
-  text-align: center;
-}
 
 /* ─── Form cards ────────────────────────────────────────────────────────────── */
 .roundFormCard {
@@ -642,23 +303,6 @@
   color: #1d1d1f;
   margin: 0;
   letter-spacing: -0.02em;
-}
-
-.taskFormCard {
-  background: rgba(0,0,0,0.02);
-  border: 1.5px dashed rgba(0,0,0,0.12);
-  border-radius: 16px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.taskFormTitle {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1d1d1f;
-  margin: 0;
-  letter-spacing: -0.01em;
 }
 
 /* ─── Shared form inputs ─────────────────────────────────────────────────────── */
@@ -720,27 +364,6 @@
 }
 .editTextarea::placeholder { color: #d1d1d6; }
 
-.answerTextarea {
-  padding: 12px 14px;
-  font-size: 14px;
-  color: #1d1d1f;
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: 12px;
-  outline: none;
-  resize: vertical;
-  font-family: inherit;
-  line-height: 1.7;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  width: 100%;
-  box-sizing: border-box;
-  min-height: 120px;
-}
-.answerTextarea:focus {
-  border-color: #1d1d1f;
-  box-shadow: 0 0 0 3px rgba(29,29,31,0.07);
-}
-
 .editRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -786,37 +409,6 @@
 .saveBtn:hover    { background: #2d2d2f; }
 .saveBtn:active   { transform: scale(0.97); }
 .saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.submitBtn {
-  padding: 10px 22px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  background: #1d1d1f;
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s, transform 0.1s;
-}
-.submitBtn:hover    { background: #2d2d2f; }
-.submitBtn:active   { transform: scale(0.97); }
-.submitBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.submitWorkBtn {
-  padding: 10px 20px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #fff;
-  background: #1d1d1f;
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s, transform 0.1s;
-}
-.submitWorkBtn:hover  { background: #2d2d2f; }
-.submitWorkBtn:active { transform: scale(0.97); }
 
 .addLinkBtn {
   padding: 9px 16px;
@@ -883,55 +475,6 @@
 }
 .linkInputRow .editInput { flex: 1; min-width: 120px; }
 
-.taskLinkList, .taskFileList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.taskLink, .taskFile {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #1d1d1f;
-  background: rgba(0,0,0,0.04);
-  border-radius: 100px;
-  text-decoration: none;
-  transition: background 0.15s;
-}
-.taskLink:hover, .taskFile:hover { background: rgba(0,0,0,0.08); }
-
-.attachChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  font-size: 12.5px;
-  color: #1d1d1f;
-  background: rgba(0,0,0,0.05);
-  border-radius: 100px;
-}
-.attachChipMeta { font-size: 11px; color: #aeaeb2; }
-
-.attachChipRemove {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  background: rgba(0,0,0,0.08);
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  color: #6e6e73;
-  padding: 0;
-  transition: background 0.15s, color 0.15s;
-}
-.attachChipRemove:hover { background: #fecdd3; color: #dc2626; }
-
 .attachItem {
   display: flex;
   align-items: center;
@@ -966,354 +509,36 @@
 }
 .attachRemove:hover { background: #fff1f2; color: #dc2626; }
 
-/* ─── Round edit drawer ───────────────────────────────────────────────────────── */
-.roundEditDrawerBackdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.2);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  z-index: 90;
-  animation: backdropIn 0.22s ease;
-}
-
-.roundEditDrawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(460px, 100vw);
-  background: rgba(255,255,255,0.97);
-  backdrop-filter: blur(24px) saturate(200%);
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
-  border-left: 1px solid rgba(0,0,0,0.08);
-  box-shadow: -8px 0 40px rgba(0,0,0,0.11);
-  z-index: 91;
+/* ─── Empty states ───────────────────────────────────────────────────────────── */
+.emptyBlock {
   display: flex;
   flex-direction: column;
-  animation: drawerIn 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-  overflow: hidden;
-}
-
-.roundEditDrawerHeader {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  padding: 20px 24px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-  flex-shrink: 0;
-}
-.roundEditDrawerTitle {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1d1d1f;
-  letter-spacing: -0.025em;
-}
-.roundEditDrawerBody {
-  flex: 1;
-  overflow-y: auto;
-  padding: 22px 24px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0,0,0,0.1) transparent;
-}
-.roundEditForm {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-.roundEditTitle {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1d1d1f;
-  margin: 0;
-  letter-spacing: -0.01em;
-}
-
-/* ─── My submission panel ────────────────────────────────────────────────────── */
-.mySubmissionEmpty {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 4px 0;
-}
-.mySubmissionEmpty .empty { text-align: left; padding: 0; }
-
-.mySubmissionCard {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 14px;
-  padding: 14px 16px;
-}
-.mySubmissionHeader {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.mySubmissionLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #15803d;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: rgba(21,128,61,0.1);
-  padding: 3px 10px;
-  border-radius: 100px;
-}
-.mySubmissionDate {
-  font-size: 12px;
+  padding: 64px 20px;
   color: #aeaeb2;
-  flex: 1;
+  text-align: center;
 }
-.mySubmissionActions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.editSubmissionBtn {
-  padding: 5px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #374151;
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-}
-.editSubmissionBtn:hover { background: #f9fafb; }
+.emptyBlock p { margin: 0; font-size: 14px; color: #86868b; }
 
-.deleteSubmissionBtn {
-  width: 28px;
-  height: 28px;
+.emptyBlockIcon {
+  font-size: 30px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #d1d1d6;
-  background: none;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.deleteSubmissionBtn:hover { background: #fff1f2; color: #dc2626; }
-
-.submissionText {
-  font-size: 14px;
-  color: #1d1d1f;
-  line-height: 1.75;
-  margin: 0;
-  white-space: pre-wrap;
-}
-.submissionExtras { display: flex; flex-direction: column; gap: 5px; }
-.submissionExtrasLabel {
-  font-size: 11px;
-  font-weight: 700;
-  color: #aeaeb2;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-/* ─── Submission form ────────────────────────────────────────────────────────── */
-.submissionForm { display: flex; flex-direction: column; gap: 14px; }
-.submissionFormTitle {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1d1d1f;
-  margin: 0;
-}
-
-/* ─── Grade result block ─────────────────────────────────────────────────────── */
-.gradeResultBlock {
-  background: #faf5ff;
-  border: 1px solid #e9d5ff;
-  border-radius: 14px;
-  padding: 16px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.gradeResultHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.gradeResultTitle {
-  font-size: 11px;
-  font-weight: 700;
-  color: #7c3aed;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.gradeResultTotalWrap { display: flex; align-items: baseline; gap: 3px; }
-.gradeResultTotal {
-  font-size: 24px;
-  font-weight: 800;
-  color: #6d28d9;
-  letter-spacing: -0.04em;
-  line-height: 1;
-}
-.gradeResultTotalMax { font-size: 14px; font-weight: 500; color: #a78bfa; }
-.gradeResultScores { display: flex; flex-direction: column; gap: 10px; }
-.gradeResultScoreRow {
-  display: grid;
-  grid-template-columns: 1fr 2fr auto;
-  align-items: center;
-  gap: 12px;
-}
-.gradeResultScoreLabel { font-size: 13px; color: #374151; font-weight: 500; }
-.gradeResultScoreBarTrack {
-  height: 6px;
-  background: #ede9fe;
-  border-radius: 100px;
-  overflow: hidden;
-}
-.gradeResultScoreBarFill {
-  height: 100%;
-  background: linear-gradient(90deg, #7c3aed, #a78bfa);
-  border-radius: 100px;
-  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
-  min-width: 2px;
-}
-.gradeResultScoreValue {
-  font-size: 13px;
-  font-weight: 700;
-  color: #6d28d9;
-  min-width: 44px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.gradeResultScoreValueMax { color: #059669; }
-.gradeResultComment {
-  font-size: 13.5px;
-  color: #374151;
-  line-height: 1.7;
-  margin: 0;
-  padding: 12px 14px;
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid #ede9fe;
-}
-.gradeResultCommentAuthor {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #7c3aed;
-}
-.gradeResultDate { font-size: 11.5px; color: #a78bfa; }
-
-/* ─── All submissions (owner / jury view) ────────────────────────────────────── */
-.allSubmissionsList { display: flex; flex-direction: column; gap: 5px; }
-.submissionCard {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.07);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: border-color 0.15s;
-}
-.submissionCard:hover { border-color: rgba(0,0,0,0.12); }
-.submissionCardExpanded { border-color: rgba(0,0,0,0.1); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-
-.submissionCardHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 11px 14px;
-  cursor: pointer;
-  gap: 12px;
-  transition: background 0.15s;
-}
-.submissionCardHeader:hover { background: rgba(0,0,0,0.02); }
-
-.submissionParticipantInfo { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.submissionParticipantName {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #1d1d1f;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.submissionParticipantEmail {
-  font-size: 11.5px;
-  color: #aeaeb2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.submissionCardMeta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.submissionDate {
-  font-size: 11.5px;
-  color: #aeaeb2;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-.submissionBadges { display: flex; align-items: center; gap: 4px; }
-.subBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 3px 9px;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #6e6e73;
   background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 100px;
-  white-space: nowrap;
-}
-.submissionCardBody {
-  border-top: 1px solid rgba(0,0,0,0.05);
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  border-radius: 18px;
 }
 
-/* ─── Task inner tabs (inside submission panel) ──────────────────────────────── */
-.taskInnerTabs {
-  display: flex;
-  gap: 0;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-  margin-bottom: 12px;
+.empty {
+  font-size: 13.5px;
+  color: #aeaeb2;
+  margin: 0;
+  padding: 10px 0;
+  text-align: center;
 }
-.taskInnerTab {
-  padding: 7px 12px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #86868b;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  font-family: inherit;
-  margin-bottom: -1px;
-  transition: color 0.15s, border-color 0.15s;
-}
-.taskInnerTab:hover { color: #1d1d1f; }
-.taskInnerTabActive { color: #1d1d1f; border-bottom-color: #1d1d1f; font-weight: 600; }
-
-/* ─── Chevron icon ───────────────────────────────────────────────────────────── */
-.chevronSvg {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.2s ease;
-}
-.chevronSvgOpen { transform: rotate(180deg); }
 
 /* ─── Skeleton loading ───────────────────────────────────────────────────────── */
 .skeleton {
@@ -1327,32 +552,3 @@
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-
-/* ─── Legacy compat wrappers ─────────────────────────────────────────────────── */
-.taskSubmissionsBlock { display: flex; flex-direction: column; gap: 8px; }
-.taskSubmissionsBlockTitle {
-  font-size: 12px;
-  font-weight: 700;
-  color: #6e6e73;
-  padding: 5px 10px;
-  background: rgba(0,0,0,0.04);
-  border-radius: 8px;
-}
-.submissionList { display: flex; flex-direction: column; gap: 6px; }
-.submissionInfo { display: flex; flex-direction: column; gap: 3px; }
-.submissionTeam { font-size: 13.5px; font-weight: 600; color: #1d1d1f; }
-.submissionFile { font-size: 12.5px; color: #6e6e73; }
-.submissionStatus {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #aeaeb2;
-  background: rgba(0,0,0,0.04);
-  padding: 3px 10px;
-  border-radius: 100px;
-  white-space: nowrap;
-}
-.submissionStatusDone { background: #f0fdf4; color: #15803d; }
-
-/* ─── Round list (compat) ─────────────────────────────────────────────────────── */
-.roundList { display: flex; flex-direction: column; gap: 0; }
-.roundCard, .roundHeader, .roundBody { display: contents; }

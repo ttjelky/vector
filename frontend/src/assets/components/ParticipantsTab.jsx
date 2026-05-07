@@ -5,16 +5,16 @@ import { X } from "lucide-react";
 import { ConfirmDeleteModal } from "./TournamentShared";
 
 const TABS = [
-  { key: "participant", label: "Учасники",     icon: "👤" },
-  { key: "jury",        label: "Журі",          icon: "⚖️" },
-  { key: "admin",       label: "Адміністратори", icon: "🛡️" },
+  { key: "participant", label: "Учасники",     icon: "" },
+  { key: "jury",        label: "Журі",          icon: "" },
+  { key: "admin",       label: "Адміністратори", icon: "" },
 ];
 
 const ROLE_LABELS = {
-  owner:       "👑 Власник",
-  participant: "👤 Учасник",
-  jury:        "⚖️ Журі",
-  admin:       "🛡️ Адмін",
+  owner:       "Власник",
+  participant: "Учасник",
+  jury:        "Журі",
+  admin:       "Адмін",
 };
 
 const INVITE_LABELS = {
@@ -61,6 +61,12 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
   const [deletingMember,  setDeletingMember]  = useState(false);
 
   const isOwner = myRole === "owner";
+
+  // Допоміжна функція для отримання гарного імені
+  const getDisplayName = (member) => {
+    const fullName = `${member.first_name || ""} ${member.last_name || ""}`.trim();
+    return fullName || member.username || member.email || "Анонімний користувач";
+  };
 
   useEffect(() => {
     if (!tournamentId) return;
@@ -180,7 +186,6 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
               className={`${styles.subTab} ${activeTab === tab.key ? styles.subTabActive : ""}`}
               onClick={() => { setActiveTab(tab.key); setShowPin(null); setRegenRole(null); }}
             >
-              <span className={styles.subTabIcon}>{tab.icon}</span>
               {tab.label}
               <span className={styles.subTabCount}>{count}</span>
             </button>
@@ -213,42 +218,26 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
       {isOwner && pinVisible && invite?.pin && (
         <div className={styles.pinSection}>
           <div className={styles.pinInfo}>
-            <span className={styles.pinText}>
-              Також надайте <strong>PIN-код:</strong>
-            </span>
+            <span className={styles.pinText}>Надайте <strong>PIN-код:</strong></span>
             <div className={styles.pinCode}>{invite.pin}</div>
           </div>
-
           <button
             onClick={() => handleRegenerate(activeTab)}
             disabled={regenLoading}
-            title="Змінити PIN-код (старий стане недійсним)"
             className={`${styles.regenBtn} ${isRegen ? styles.regenConfirm : ""}`}
           >
             {regenLoading ? "Оновлення…" : isRegen ? "Підтвердити?" : "Змінити PIN"}
           </button>
-
-          <div
-            className={styles.crossIcon}
-            onClick={() => { setShowPin(null); setRegenRole(null); }}
-          >
+          <div className={styles.crossIcon} onClick={() => setShowPin(null)}>
             <X size={20} />
           </div>
-
-          {isRegen && (
-            <p className={styles.regenWarning}>
-              Старий PIN стане недійсним. Натисніть «Підтвердити?» для підтвердження.
-            </p>
-          )}
         </div>
       )}
 
       {/* ── Список ── */}
       <div className={styles.teamList}>
         {visibleMembers.length === 0 ? (
-          <p className={styles.empty}>
-            {TABS.find(t => t.key === activeTab)?.label} ще немає.
-          </p>
+          <p className={styles.empty}>Список порожній.</p>
         ) : (
           visibleMembers.map((member, idx) => (
             <div key={member.id} className={styles.teamCard}>
@@ -257,9 +246,8 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
               <MemberAvatar member={member} />
 
               <div className={styles.teamInfo}>
-                <span className={styles.teamName}>
-                  {member.full_name || member.username}
-                </span>
+                {/* ВИПРАВЛЕНО: Відображаємо Ім'я та Прізвище */}
+                <span className={styles.teamName}>{getDisplayName(member)}</span>
                 <span className={styles.teamMeta}>
                   {ROLE_LABELS[member.role] ?? member.role}
                   {member.user_role && ` · ${member.user_role}`}
@@ -270,7 +258,6 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
                 <button
                   className={styles.removeBtn}
                   onClick={() => handleRemoveMember(member)}
-                  title="Видалити учасника"
                 >
                   ✕
                 </button>
@@ -288,11 +275,10 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
 
       {memberToDelete && (
         <ConfirmDeleteModal
-          icon={TABS.find(t => t.key === memberToDelete.role)?.icon ?? "👤"}
+          icon="👤"
           title="Видалити учасника?"
           description={
-            <>Учасник <strong>{memberToDelete.username}</strong> буде видалений з турніру.
-            Він зможе приєднатися знову за інвайт-посиланням.</>
+            <>Учасник <strong>{getDisplayName(memberToDelete)}</strong> буде видалений з турніру.</>
           }
           confirmLabel="Так, видалити"
           onConfirm={confirmRemoveMember}

@@ -61,6 +61,12 @@ class Tournament(models.Model):
         verbose_name="PIN-код (адмін)",
     )
 
+    # ── Таблиця лідерів ───────────────────────────────────────────────────────
+    leaderboard_published = models.BooleanField(
+        default=False,
+        verbose_name="Таблиця лідерів опублікована",
+    )
+
     def __str__(self):
         return self.name
 
