@@ -2,6 +2,7 @@ import { useState } from "react";
 import styles from "./styles/SubmissionForm.module.css";
 import API from "../../api";
 import { fileIcon } from "./tournamentHelpers";
+import { RichTextArea } from "./RichTextArea";
 
 // ─── SubmissionForm ───────────────────────────────────────────────────────────
 // Форма для учасника: здати або оновити роботу по завданню
@@ -47,7 +48,8 @@ export function SubmissionForm({ taskId, roundId, tournamentId, existingSubmissi
   const removeNewFile = (idx) => setFiles((f) => f.filter((_, i) => i !== idx));
 
   const handleSubmit = async () => {
-    const hasContent = text.trim() || links.length > 0 || files.length > 0 ||
+    const plainText = text.replace(/<[^>]*>/g, "").trim();
+    const hasContent = plainText || links.length > 0 || files.length > 0 ||
       (existingSubmission?.attachments?.length > 0);
     if (!hasContent) {
       setError("Додайте текст, посилання або файл перед здачею.");
@@ -89,12 +91,12 @@ export function SubmissionForm({ taskId, roundId, tournamentId, existingSubmissi
 
   return (
     <div className={styles.submissionForm}>
-      <textarea
-        className={styles.answerTextarea}
-        value={text}
-        onChange={(e) => { setText(e.target.value); setError(""); }}
+      <RichTextArea
+        id="submission-text"
         rows={5}
         placeholder="Введи відповідь…"
+        value={text}
+        onChange={(e) => { setText(e.target.value); setError(""); }}
       />
 
       <div>

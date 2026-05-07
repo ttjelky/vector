@@ -477,3 +477,267 @@
   .panelRight { overflow: visible; }
   .twoCol    { grid-template-columns: 1fr; }
 }
+
+/* ═══════════════════════════════════════════════════
+   RICH TEXT EDITOR  — додати до CreateTournamentModal.module.css
+   ═══════════════════════════════════════════════════ */
+
+/* Outer shell */
+.richEditor {
+  border: 1.5px solid rgba(0,0,0,0.12);
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: hidden;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.richEditor:focus-within {
+  border-color: #111111;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.07);
+}
+
+/* ── Toolbar ── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  background: #f7f7f7;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  flex-wrap: wrap;
+  min-height: 38px;
+}
+
+.tbGroup {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.tbBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: #555555;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.tbBtn:hover {
+  background: rgba(0,0,0,0.08);
+  color: #111111;
+}
+
+.tbBtnActive {
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+.tbDivider {
+  display: inline-block;
+  width: 1px;
+  height: 18px;
+  background: rgba(0,0,0,0.12);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* ── Link popup ── */
+.linkPopup {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0,0,0,0.09);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeDown 0.15s ease;
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.linkPopupRow {
+  display: flex;
+  gap: 8px;
+}
+
+.linkInput {
+  flex: 1;
+  height: 32px;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  border-radius: 6px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #111111;
+  outline: none;
+  background: #fafafa;
+  transition: border-color 0.15s;
+}
+
+.linkInput:focus {
+  border-color: #111111;
+  background: #ffffff;
+}
+
+.linkPopupActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.linkBtn {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  color: #555555;
+  transition: background 0.12s, color 0.12s;
+}
+
+.linkBtn:hover { background: #f0f0f0; color: #111111; }
+
+.linkBtnPrimary {
+  background: #111111;
+  border-color: #111111;
+  color: #ffffff;
+}
+
+.linkBtnPrimary:hover:not(:disabled) { background: #333333; }
+.linkBtnPrimary:disabled { opacity: 0.35; cursor: default; }
+
+/* ── Editor area ── */
+.editorWrap {
+  position: relative;
+}
+
+.editorPlaceholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 11px 14px;
+  font-size: 13.5px;
+  color: #aaaaaa;
+  pointer-events: none;
+  user-select: none;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.editorContent {
+  padding: 11px 14px;
+  font-size: 13.5px;
+  font-family: 'Google Sans', 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.65;
+  color: #111111;
+  outline: none;
+  overflow-y: auto;
+  max-height: 340px;
+  word-break: break-word;
+}
+
+/* Rich content styles inside editor */
+.editorContent h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 10px 0 4px;
+  color: #111111;
+  letter-spacing: -0.2px;
+}
+
+.editorContent h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 8px 0 3px;
+  color: #111111;
+}
+
+.editorContent p {
+  margin: 0 0 6px;
+}
+
+.editorContent ul,
+.editorContent ol {
+  margin: 4px 0 8px;
+  padding-left: 22px;
+}
+
+.editorContent li {
+  margin-bottom: 3px;
+  line-height: 1.6;
+}
+
+.editorContent ul li { list-style-type: disc; }
+.editorContent ol li { list-style-type: decimal; }
+
+.editorContent blockquote {
+  border-left: 3px solid #111111;
+  margin: 8px 0;
+  padding: 4px 0 4px 12px;
+  color: #555555;
+  font-style: italic;
+}
+
+.editorContent pre {
+  background: #f3f3f3;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  overflow-x: auto;
+  margin: 6px 0;
+  color: #333333;
+  white-space: pre-wrap;
+}
+
+.editorContent a {
+  color: #111111;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.editorContent a:hover { color: #444444; }
+
+.editorContent b,
+.editorContent strong { font-weight: 700; }
+
+.editorContent i,
+.editorContent em { font-style: italic; }
+
+.editorContent u { text-decoration: underline; text-underline-offset: 2px; }
+
+.editorContent s,
+.editorContent strike { text-decoration: line-through; }
+
+/* ── Footer ── */
+.editorFooter {
+  display: flex;
+  justify-content: flex-end;
+  padding: 5px 12px 6px;
+  background: #f7f7f7;
+  border-top: 1px solid rgba(0,0,0,0.07);
+}
+
+.editorCharCount {
+  font-size: 11px;
+  color: #aaaaaa;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import styles from "./styles/TaskForm.module.css";
 import API from "../../api";
 import { fileIcon } from "./tournamentHelpers";
+import { RichTextArea } from "./RichTextArea";
 
 // ─── TaskForm ─────────────────────────────────────────────────────────────────
 // Вся логіка збережена без змін.
@@ -90,13 +91,12 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
 
         <label className={styles.editLabel}>
           Опис
-          <textarea
-            className={styles.editTextarea}
-            name="description"
-            value={form.description}
-            onChange={handleChange}
+          <RichTextArea
+            id="task-description"
             rows={3}
             placeholder="Детальний опис завдання…"
+            value={form.description}
+            onChange={(e) => { setForm((f) => ({ ...f, description: e.target.value })); setError(""); }}
           />
         </label>
 

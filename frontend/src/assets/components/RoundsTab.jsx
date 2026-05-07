@@ -11,6 +11,7 @@ import {
   roundStatus,
   getRoundStatusStyle,
 } from "./tournamentHelpers";
+import { RichTextArea } from "./RichTextArea";
 
 const EMPTY_FORM = { title: "", description: "", start_date: "", end_date: "" };
 
@@ -219,13 +220,12 @@ export default function RoundsTab({
             </label>
             <label className={styles.editLabel}>
               Опис
-              <textarea
-                className={styles.editTextarea}
-                name="description"
-                value={form.description}
-                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+              <RichTextArea
+                id="new-round-description"
                 rows={2}
                 placeholder="Короткий опис раунду…"
+                value={form.description}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               />
             </label>
             <div className={styles.editRow}>
@@ -348,7 +348,7 @@ export default function RoundsTab({
                 </div>
 
                 {activeRound.description && (
-                  <p className={styles.roundInfoDesc}>{activeRound.description}</p>
+                  <div className={styles.roundInfoDesc} dangerouslySetInnerHTML={{ __html: activeRound.description }} />
                 )}
 
                 {/* Посилання та файли раунду */}

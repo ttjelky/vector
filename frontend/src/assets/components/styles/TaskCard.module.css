@@ -244,8 +244,37 @@
   color: #3d3d3f;
   line-height: 1.75;
   margin: 0;
+}
+.drawerDesc b, .drawerDesc strong { font-weight: 700; }
+.drawerDesc i, .drawerDesc em { font-style: italic; }
+.drawerDesc u { text-decoration: underline; text-underline-offset: 2px; }
+.drawerDesc s, .drawerDesc strike { text-decoration: line-through; }
+.drawerDesc h2 { font-size: 16px; font-weight: 700; margin: 10px 0 4px; color: #1d1d1f; }
+.drawerDesc h3 { font-size: 14px; font-weight: 700; margin: 8px 0 3px; color: #1d1d1f; }
+.drawerDesc p { margin: 0 0 6px; }
+.drawerDesc ul, .drawerDesc ol { padding-left: 22px; margin: 4px 0 8px; }
+.drawerDesc li { margin-bottom: 3px; line-height: 1.6; }
+.drawerDesc ul li { list-style-type: disc; }
+.drawerDesc ol li { list-style-type: decimal; }
+.drawerDesc blockquote {
+  border-left: 3px solid #1d1d1f;
+  margin: 8px 0;
+  padding: 4px 0 4px 12px;
+  color: #6e6e73;
+  font-style: italic;
+}
+.drawerDesc pre {
+  background: #f3f3f3;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  overflow-x: auto;
+  margin: 6px 0;
   white-space: pre-wrap;
 }
+.drawerDesc a { color: #1d1d1f; text-decoration: underline; text-underline-offset: 2px; }
 
 .drawerSection {
   display: flex;
@@ -395,8 +424,37 @@
   color: #1d1d1f;
   line-height: 1.75;
   margin: 0;
+}
+.submissionText b, .submissionText strong { font-weight: 700; }
+.submissionText i, .submissionText em { font-style: italic; }
+.submissionText u { text-decoration: underline; text-underline-offset: 2px; }
+.submissionText s, .submissionText strike { text-decoration: line-through; }
+.submissionText h2 { font-size: 16px; font-weight: 700; margin: 10px 0 4px; }
+.submissionText h3 { font-size: 14px; font-weight: 700; margin: 8px 0 3px; }
+.submissionText p { margin: 0 0 6px; }
+.submissionText ul, .submissionText ol { padding-left: 22px; margin: 4px 0 8px; }
+.submissionText li { margin-bottom: 3px; line-height: 1.6; }
+.submissionText ul li { list-style-type: disc; }
+.submissionText ol li { list-style-type: decimal; }
+.submissionText blockquote {
+  border-left: 3px solid #1d1d1f;
+  margin: 8px 0;
+  padding: 4px 0 4px 12px;
+  color: #6e6e73;
+  font-style: italic;
+}
+.submissionText pre {
+  background: #f3f3f3;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  overflow-x: auto;
+  margin: 6px 0;
   white-space: pre-wrap;
 }
+.submissionText a { color: #1d1d1f; text-decoration: underline; text-underline-offset: 2px; }
 .submissionExtras { display: flex; flex-direction: column; gap: 5px; }
 .submissionExtrasLabel {
   font-size: 11px;
