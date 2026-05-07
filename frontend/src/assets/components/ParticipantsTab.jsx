@@ -23,35 +23,45 @@ const INVITE_LABELS = {
   admin:       "Запросити адміна",
 };
 
-/**
- * Props:
- *  - tournamentId  {string|number}
- *  - myRole        {string|null}   — "owner" | "participant" | "jury" | "admin" | null
- *  - loading       {boolean}
- */
+// ── Аватарка учасника ─────────────────────────────────────────────────────
+function MemberAvatar({ member }) {
+  const src = member.avatar
+    ? (member.avatar.startsWith("http") ? member.avatar : `http://127.0.0.1:8000${member.avatar}`)
+    : null;
+
+  const initials = (member.full_name || member.username || "?")
+    .split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+
+  if (src) {
+    return <img src={src} alt={initials} className={styles.memberAvatar} />;
+  }
+  return (
+    <div className={styles.memberAvatarPlaceholder}>
+      {initials}
+    </div>
+  );
+}
+
 export default function ParticipantsTab({ tournamentId, myRole, loading }) {
   const [members,        setMembers]        = useState([]);
   const [membersLoading, setMembersLoading] = useState(true);
   const [activeTab,      setActiveTab]      = useState("participant");
 
-  // Invite state — по одному об'єкту на роль
   const [invites, setInvites] = useState({
     participant: { url: null, pin: null },
     jury:        { url: null, pin: null },
     admin:       { url: null, pin: null },
   });
-  const [showPin,      setShowPin]      = useState(null);   // яка роль показує PIN
-  const [copied,       setCopied]       = useState(null);   // яка роль скопійована
-  const [regenRole,    setRegenRole]    = useState(null);   // роль у стані підтвердження
+  const [showPin,      setShowPin]      = useState(null);
+  const [copied,       setCopied]       = useState(null);
+  const [regenRole,    setRegenRole]    = useState(null);
   const [regenLoading, setRegenLoading] = useState(false);
 
-  // Delete state
   const [memberToDelete,  setMemberToDelete]  = useState(null);
   const [deletingMember,  setDeletingMember]  = useState(false);
 
   const isOwner = myRole === "owner";
 
-  // ── Завантажити список учасників ──────────────────────────────────────────
   useEffect(() => {
     if (!tournamentId) return;
     setMembersLoading(true);
@@ -61,10 +71,8 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
       .finally(() => setMembersLoading(false));
   }, [tournamentId]);
 
-  // ── Завантажити invite дані для всіх ролей (тільки власнику) ─────────────
   useEffect(() => {
     if (!tournamentId || !isOwner) return;
-
     const roles = ["participant", "jury", "admin"];
     roles.forEach(role => {
       API.get(`/tournaments/${tournamentId}/invite-link/?role=${role}`)
@@ -76,7 +84,6 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
     });
   }, [tournamentId, isOwner]);
 
-  // ── Скопіювати посилання ──────────────────────────────────────────────────
   const handleInvite = useCallback((role) => {
     const url = invites[role]?.url;
     if (!url) return;
@@ -87,8 +94,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
       el.style.position = "fixed";
       el.style.opacity  = "0";
       document.body.appendChild(el);
-      el.focus();
-      el.select();
+      el.focus(); el.select();
       try { document.execCommand("copy"); } catch { window.prompt("Скопіюйте вручну:", url); }
       document.body.removeChild(el);
     };
@@ -104,15 +110,12 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
     setTimeout(() => setCopied(null), 2500);
   }, [invites]);
 
-  // ── Перегенерувати PIN ────────────────────────────────────────────────────
   const handleRegenerate = useCallback(async (role) => {
     if (regenRole !== role) {
-      // Перший клік — показати підтвердження
       setRegenRole(role);
       setTimeout(() => setRegenRole(r => r === role ? null : r), 4000);
       return;
     }
-    // Другий клік — виконати
     setRegenLoading(true);
     setRegenRole(null);
     try {
@@ -129,7 +132,6 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
     }
   }, [regenRole, tournamentId]);
 
-  // ── Видалити учасника ─────────────────────────────────────────────────────
   const handleRemoveMember = (member) => setMemberToDelete(member);
 
   const confirmRemoveMember = async () => {
@@ -146,13 +148,10 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
     }
   };
 
-  // ── Фільтрація по вкладці ─────────────────────────────────────────────────
-  // Власник відображається в усіх вкладках (або тільки в першій — на ваш вибір)
   const visibleMembers = members.filter(m =>
     m.role === activeTab || (activeTab === "participant" && m.role === "owner")
   );
 
-  // ── Рендер ────────────────────────────────────────────────────────────────
   if (loading || membersLoading) {
     return (
       <div className={styles.tabContent}>
@@ -169,7 +168,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
   return (
     <div className={styles.tabContent}>
 
-      {/* ── Підвкладки ──────────────────────────────────────────────────── */}
+      {/* ── Підвкладки ── */}
       <div className={styles.subTabs}>
         {TABS.map(tab => {
           const count = members.filter(m =>
@@ -189,7 +188,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
         })}
       </div>
 
-      {/* ── Заголовок + кнопка запрошення ───────────────────────────────── */}
+      {/* ── Заголовок + кнопка ── */}
       <div className={styles.participantsHeader}>
         <span className={styles.teamCount}>
           {TABS.find(t => t.key === activeTab)?.label}: {visibleMembers.length}
@@ -210,7 +209,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
         )}
       </div>
 
-      {/* ── PIN-секція ───────────────────────────────────────────────────── */}
+      {/* ── PIN ── */}
       {isOwner && pinVisible && invite?.pin && (
         <div className={styles.pinSection}>
           <div className={styles.pinInfo}>
@@ -244,7 +243,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
         </div>
       )}
 
-      {/* ── Список учасників ─────────────────────────────────────────────── */}
+      {/* ── Список ── */}
       <div className={styles.teamList}>
         {visibleMembers.length === 0 ? (
           <p className={styles.empty}>
@@ -253,14 +252,20 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
         ) : (
           visibleMembers.map((member, idx) => (
             <div key={member.id} className={styles.teamCard}>
-              <div className={styles.teamIndex}>{idx + 1}</div>
+
+              {/* Аватарка замість індексу */}
+              <MemberAvatar member={member} />
+
               <div className={styles.teamInfo}>
-                <span className={styles.teamName}>{member.username}</span>
+                <span className={styles.teamName}>
+                  {member.full_name || member.username}
+                </span>
                 <span className={styles.teamMeta}>
                   {ROLE_LABELS[member.role] ?? member.role}
                   {member.user_role && ` · ${member.user_role}`}
                 </span>
               </div>
+
               {isOwner && member.role !== "owner" && (
                 <button
                   className={styles.removeBtn}
@@ -270,6 +275,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
                   ✕
                 </button>
               )}
+
               {member.joined_at && (
                 <div className={styles.teamDate}>
                   {new Date(member.joined_at).toLocaleDateString("uk-UA")}
@@ -280,7 +286,6 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
         )}
       </div>
 
-      {/* ── Модальне вікно видалення ─────────────────────────────────────── */}
       {memberToDelete && (
         <ConfirmDeleteModal
           icon={TABS.find(t => t.key === memberToDelete.role)?.icon ?? "👤"}
