@@ -4,13 +4,7 @@
     padding: 32px 40px;
     max-width: 760px;
     font-family: inherit;
-}
-
-.settings-page h1 {
-    font-size: 22px;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0 0 28px 0;
+    margin: 0 auto;
 }
 
 /* Section card */
