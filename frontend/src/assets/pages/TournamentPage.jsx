@@ -12,6 +12,7 @@ import RoundsTab from "../components/RoundsTab";
 import JuryTab from "../components/JuryTab";
 import { useTabs } from "../../TabsContext";
 import useTournamentTabGuard from "../../useTournamentTabGuard";
+import LeaderboardTab from "../components/LeaderboardTab";
 
 export default function TournamentPage() {
   const { id }   = useParams();
@@ -110,6 +111,7 @@ export default function TournamentPage() {
   { id: "overview",     label: "Основна сторінка" },
   { id: "rounds",       label: "Раунди" },
   { id: "participants", label: "Учасники" },
+  { id: "leaderboard",  label: "Таблиця лідерів" },
   ...(isJury ? [{ id: "jury", label: "Панель журі" }] : []),
 ];
 
@@ -213,6 +215,16 @@ export default function TournamentPage() {
               tournamentId={id}
               rounds={rounds}
               loading={roundsLoading}
+            />
+          )}
+
+          {activeTab === "leaderboard" && (
+            <LeaderboardTab
+              tournamentId={id}
+              rounds={rounds}
+              loading={roundsLoading}
+              isOwner={isOwner}
+              myRole={myRole}
             />
           )}
         </div>

@@ -656,6 +656,116 @@ class SubmissionGradeView(APIView):
             'grades_count':    grades.count(),
         })
 
+class LeaderboardView(APIView):
+    """
+    GET  /tournaments/<tournament_pk>/leaderboard/
+         — owner/admin: завжди бачать, отримують is_published
+         — jury/participant: тільки якщо leaderboard_published=True, інакше 403
+
+    PATCH /tournaments/<tournament_pk>/leaderboard/
+          Body: { "is_published": true|false }
+          Тільки owner/admin.
+    """
+    permission_classes = [IsAuthenticated, IsTournamentParticipant]
+
+    def _get_tournament_and_membership(self, request, tournament_pk):
+        try:
+            tournament = Tournament.objects.get(pk=tournament_pk)
+        except Tournament.DoesNotExist:
+            return None, None, None
+        membership = TournamentMember.objects.filter(
+            tournament=tournament,
+            user=request.user,
+        ).first()
+        return tournament, membership, membership.role if membership else None
+
+    def get(self, request, tournament_pk):
+        tournament, membership, role = self._get_tournament_and_membership(request, tournament_pk)
+        if not tournament or not membership:
+            return Response({'detail': 'Турнір не знайдено.'}, status=status.HTTP_404_NOT_FOUND)
+
+        is_privileged = role in ('owner', 'admin')
+
+        # Учасники і журі не бачать неопубліковану таблицю
+        if not is_privileged and not tournament.leaderboard_published:
+            return Response(
+                {'detail': 'Таблиця лідерів ще не опублікована.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # ── Агрегація балів ────────────────────────────────────────────────────
+        # Для кожного учасника рахуємо середній бал від усіх журі по кожному раунду.
+        grades = (
+            Grade.objects
+            .filter(submission__task__round__tournament=tournament)
+            .select_related(
+                'submission__participant',
+                'submission__task__round',
+            )
+        )
+
+        # Структура: { participant_id: { round_id: [totals...] } }
+        data  = {}
+        names = {}
+
+        for grade in grades:
+            sub         = grade.submission
+            participant = sub.participant
+            pid         = participant.id
+            rid         = sub.task.round_id
+
+            if pid not in data:
+                full_name = f"{participant.first_name} {participant.last_name}".strip()
+                names[pid] = full_name or participant.username or f"Учасник #{pid}"
+                data[pid]  = {}
+
+            data[pid].setdefault(rid, []).append(grade.total)
+
+        # Будуємо список учасників з усередненими балами по раундах
+        participants = []
+        for pid, round_data in data.items():
+            round_scores = {}
+            total = 0
+            for rid, totals in round_data.items():
+                avg = round(sum(totals) / len(totals), 1)
+                round_scores[str(rid)] = avg
+                total += avg
+            participants.append({
+                'participant_id':   pid,
+                'participant_name': names[pid],
+                'round_scores':     round_scores,
+                'total':            round(total, 1),
+            })
+
+        return Response({
+            'is_published': tournament.leaderboard_published,
+            'participants': participants,
+        })
+
+    def patch(self, request, tournament_pk):
+        tournament, membership, role = self._get_tournament_and_membership(request, tournament_pk)
+        if not tournament or not membership:
+            return Response({'detail': 'Турнір не знайдено.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if role not in ('owner', 'admin'):
+            return Response(
+                {'detail': 'Тільки власник або адміністратор може керувати публікацією.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        is_published = request.data.get('is_published')
+        if not isinstance(is_published, bool):
+            return Response(
+                {'detail': 'Поле is_published має бути булевим значенням.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        tournament.leaderboard_published = is_published
+        tournament.save(update_fields=['leaderboard_published'])
+
+        return Response({'is_published': tournament.leaderboard_published})
+
+
 class ParticipantGradesNewsView(APIView):
     """
     GET /tournaments/my-grades/
