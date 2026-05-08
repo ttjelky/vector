@@ -89,8 +89,8 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
           />
         </label>
 
-        <label className={styles.editLabel}>
-          Опис
+        <div className={styles.editLabel}>
+        <label>Опис</label>
           <RichTextArea
             id="task-description"
             rows={3}
@@ -98,7 +98,7 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
             value={form.description}
             onChange={(e) => { setForm((f) => ({ ...f, description: e.target.value })); setError(""); }}
           />
-        </label>
+        </div>
 
         {/* ── Посилання ── */}
         <div className={styles.attachSection}>

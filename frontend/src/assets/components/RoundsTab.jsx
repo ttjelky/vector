@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import styles from "./styles/RoundsTab.module.css";
-
 import API from "../../api";
 import { ConfirmDeleteModal, Toast } from "./TournamentShared";
 import { RoundCard } from "./RoundCard";
@@ -12,6 +11,7 @@ import {
   getRoundStatusStyle,
 } from "./tournamentHelpers";
 import { RichTextArea } from "./RichTextArea";
+import "./styles/richContent.css";
 
 const EMPTY_FORM = { title: "", description: "", start_date: "", end_date: "" };
 
@@ -69,6 +69,25 @@ export default function RoundsTab({
   }, [initialRounds]);
 
   const activeRound = rounds.find((r) => r.id === activeRoundId) ?? null;
+
+  // ── Права доступу залежно від ролі та статусу раунду ──────────────────────
+  // Адмін і журі бачать усе завжди.
+  // Учасник (readOnly):
+  //   "Очікується" → бачить банер, але не бачить завдань
+  //   "Активний"   → бачить і може здавати роботи
+  //   "Завершено"  → бачить завдання, але здача заблокована
+  const isPrivileged = !readOnly || myRole === "jury" || myRole === "admin";
+
+  const getParticipantAccess = (round) => {
+    if (isPrivileged) return { showTasks: true, canSubmit: true };
+    const status = roundStatus(round);
+    // підтримуємо різні варіанти рядків статусу
+    const isUpcoming  = /очікує|upcoming|pending|scheduled/i.test(status);
+    const isCompleted = /завершен|completed|finished|ended|closed/i.test(status);
+    if (isUpcoming)  return { showTasks: false, canSubmit: false };
+    if (isCompleted) return { showTasks: true,  canSubmit: false };
+    return { showTasks: true, canSubmit: true }; // активний
+  };
 
   // ── Форма завдання ─────────────────────────────────────────────────────────
 
@@ -208,7 +227,7 @@ export default function RoundsTab({
           </div>
           <div className={styles.editForm}>
             <label className={styles.editLabel}>
-              Назва <span className={styles.editRequired}>*</span>
+              Назва
               <input
                 className={styles.editInput}
                 name="title"
@@ -218,8 +237,8 @@ export default function RoundsTab({
                 autoFocus
               />
             </label>
-            <label className={styles.editLabel}>
-              Опис
+            <div className={styles.editLabel}>
+            <label>Опис</label>
               <RichTextArea
                 id="new-round-description"
                 rows={2}
@@ -227,7 +246,7 @@ export default function RoundsTab({
                 value={form.description}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               />
-            </label>
+            </div>
             <div className={styles.editRow}>
               <label className={styles.editLabel}>
                 Початок
@@ -381,45 +400,70 @@ export default function RoundsTab({
               </div>
 
               {/* ── Список завдань ── */}
-              <div className={styles.taskListSection}>
-                <div className={styles.taskListHeader}>
-                  <span className={styles.taskListTitle}>
-                    Завдання
-                    {(activeRound.tasks?.length ?? 0) > 0 && ` (${activeRound.tasks.length})`}
-                  </span>
-                  {!readOnly && !taskForms.has(activeRound.id) && (
-                    <button className={styles.addTaskInlineBtn} onClick={openTaskForm}>
-                      + Завдання
-                    </button>
-                  )}
-                </div>
+              {(() => {
+                const { showTasks, canSubmit } = getParticipantAccess(activeRound);
 
-                {(activeRound.tasks?.length ?? 0) === 0 && !taskForms.has(activeRound.id) && (
-                  <p className={styles.empty}>Завдань у цьому раунді ще немає.</p>
-                )}
+                if (!showTasks) {
+                  // Раунд очікується — учасник бачить тільки банер, завдання приховані
+                  return (
+                    <div className={styles.upcomingNotice}>
+                      <span className={styles.upcomingNoticeIcon}>🔒</span>
+                      <p>Завдання стануть доступні після початку раунду.</p>
+                    </div>
+                  );
+                }
 
-                {(activeRound.tasks || []).map((task) => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    tournamentId={tournamentId}
-                    roundId={activeRound.id}
-                    readOnly={readOnly}
-                    myRole={myRole}
-                    roundEndDate={activeRound.end_date}
-                    onDeleted={(taskId) => handleTaskDeleted(activeRound.id, taskId)}
-                  />
-                ))}
+                return (
+                  <div className={styles.taskListSection}>
+                    <div className={styles.taskListHeader}>
+                      <span className={styles.taskListTitle}>
+                        Завдання
+                        {(activeRound.tasks?.length ?? 0) > 0 && ` (${activeRound.tasks.length})`}
+                      </span>
+                      {!readOnly && !taskForms.has(activeRound.id) && (
+                        <button className={styles.addTaskInlineBtn} onClick={openTaskForm}>
+                          + Завдання
+                        </button>
+                      )}
+                    </div>
 
-                {!readOnly && taskForms.has(activeRound.id) && (
-                  <TaskForm
-                    roundId={activeRound.id}
-                    tournamentId={tournamentId}
-                    onCreated={(task) => handleTaskCreated(activeRound.id, task)}
-                    onCancel={() => closeTaskForm(activeRound.id)}
-                  />
-                )}
-              </div>
+                    {/* Банер «здача закрита» для завершеного раунду */}
+                    {!canSubmit && (
+                      <div className={styles.submissionClosedBanner}>
+                        <span>🏁</span>
+                        Раунд завершено — здача робіт закрита.
+                      </div>
+                    )}
+
+                    {(activeRound.tasks?.length ?? 0) === 0 && !taskForms.has(activeRound.id) && (
+                      <p className={styles.empty}>Завдань у цьому раунді ще немає.</p>
+                    )}
+
+                    {(activeRound.tasks || []).map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        tournamentId={tournamentId}
+                        roundId={activeRound.id}
+                        readOnly={readOnly || !canSubmit}
+                        myRole={myRole}
+                        roundEndDate={activeRound.end_date}
+                        canSubmit={canSubmit}
+                        onDeleted={(taskId) => handleTaskDeleted(activeRound.id, taskId)}
+                      />
+                    ))}
+
+                    {!readOnly && taskForms.has(activeRound.id) && (
+                      <TaskForm
+                        roundId={activeRound.id}
+                        tournamentId={tournamentId}
+                        onCreated={(task) => handleTaskCreated(activeRound.id, task)}
+                        onCancel={() => closeTaskForm(activeRound.id)}
+                      />
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
         </>

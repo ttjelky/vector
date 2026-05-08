@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import styles from "./styles/OverviewTab.module.css";
+import "./styles/richContent.css";           // ← глобальні стилі RichContent
 import { ImagePicker } from "./CreateTournamentModal";
 import { RichTextArea } from "./RichTextArea";
 import { StatusBadge, InfoRow } from "./TournamentShared";
@@ -15,13 +16,27 @@ const FORMAT_LABELS = { solo: "Одиночний", team: "Командний" }
 
 // ─── RichContent — безпечний рендер HTML з редактора ─────────────────────────
 
+/**
+ * Рендерить HTML із RichTextArea.
+ *
+ * Стилі для таблиць, заголовків, списків тощо задані у richContent.css.
+ * Клас "richContent" — глобальний (не CSS-module), щоб правила з того файлу
+ * потрапляли на вкладені елементи через звичайні CSS-селектори (.richContent table і т.д.).
+ */
 function RichContent({ html, emptyText = "Відсутній.", className }) {
-  if (!html || html === "<br>" || html === "<p><br></p>") {
+  const isEmpty =
+    !html ||
+    html === "<br>" ||
+    html === "<p><br></p>" ||
+    html.replace(/<p>(\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, "").trim() === "";
+
+  if (isEmpty) {
     return <p className={styles.emptyText}>{emptyText}</p>;
   }
+
   return (
     <div
-      className={`richContent ${className || ""}`}
+      className={`richContent${className ? ` ${className}` : ""}`}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
@@ -101,7 +116,7 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
               Назва
               <input className={styles.editInput} name="name" value={form.name} onChange={handleChange} />
             </label>
-            <label className={styles.editLabel}>
+            <div className={styles.editLabel}>
               Опис
               <RichTextArea
                 id="description"
@@ -110,7 +125,7 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
                 onChange={(e) => handleChange({ target: { name: "description", value: e.target.value } })}
                 rows={4}
               />
-            </label>
+            </div>
 
             <ImagePicker
               imageMode={imageMode}       setImageMode={setImageMode}
@@ -135,10 +150,10 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
               <input className={styles.editInput} type="datetime-local" name="registration_end" value={form.registration_end} onChange={handleChange} />
             </label>
             <label className={styles.editLabel}>
-              Макс. команд
+              Макс. команд/учасників
               <input className={styles.editInput} type="number" name="max_teams" value={form.max_teams} onChange={handleChange} min={1} />
             </label>
-            <label className={styles.editLabel}>
+            <div className={styles.editLabel}>
               Правила
               <RichTextArea
                 id="rules"
@@ -147,7 +162,7 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
                 onChange={(e) => handleChange({ target: { name: "rules", value: e.target.value } })}
                 rows={5}
               />
-            </label>
+            </div>
             {error && <p className={styles.formError}>{error}</p>}
           </div>
           <div className={styles.editActions}>

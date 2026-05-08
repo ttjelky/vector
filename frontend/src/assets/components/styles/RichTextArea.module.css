@@ -3,12 +3,12 @@
   border: 1px solid rgba(0, 0, 0, 0.10);
   border-radius: 18px;
   background: #ffffff;
-  overflow: visible;
+  overflow: hidden;
   transition: border-color 0.18s, box-shadow 0.18s;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   position: relative;
   font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
-  min-height: 200px;
+  min-height: 160px;
 }
 
 .richEditorFocused {
@@ -23,10 +23,15 @@
   gap: 4px;
   padding: 6px 10px;
   background: transparent;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
   flex-wrap: wrap;
   min-height: 42px;
   border-radius: 12px 12px 0 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  pointer-events: none;
 }
 
 /* Each button is a floating glass pill/circle */
@@ -46,6 +51,7 @@
   transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
   padding: 0;
   flex-shrink: 0;
+  pointer-events: auto;
   box-shadow:
     0 1px 3px rgba(0, 0, 0, 0.10),
     0 0 0 0.5px rgba(0, 0, 0, 0.08),
@@ -300,6 +306,10 @@
 /* ── Editor area ── */
 .editorWrap {
   position: relative;
+  overflow: auto;
+  max-height: 360px;
+  /* prevent horizontal bleed */
+  max-width: 100%;
 }
 
 .editorPlaceholder {
@@ -307,7 +317,7 @@
   top: 0;
   left: 0;
   right: 0;
-  padding: 12px 14px;
+  padding: 54px 14px 12px;
   font-size: 14px;
   color: #c0bfb8;
   pointer-events: none;
@@ -325,8 +335,8 @@
   line-height: 1.65;
   color: #1a1a1a;
   outline: none;
-  overflow-y: auto;
-  max-height: 360px;
+  padding-top: 54px;
+  min-height: 200px;
   word-break: break-word;
   text-transform: none;
   letter-spacing: normal;
@@ -336,6 +346,9 @@
   -webkit-user-select: text;
   background: #ffffff;
   border-radius: 0 0 11px 11px;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .editorContent h1 {
@@ -413,10 +426,14 @@
 .editorContent table {
   border-collapse: collapse;
   width: 100%;
+  max-width: 100%;
   margin: 8px 0;
   font-size: 13px;
   border-radius: 8px;
   overflow: hidden;
+  /* prevent table from growing past editor */
+  table-layout: auto;
+  box-sizing: border-box;
 }
 
 .editorContent th {
@@ -426,13 +443,20 @@
   text-align: left;
   border: 1px solid rgba(0, 0, 0, 0.08);
   color: #1a1a1a;
+  min-width: 40px;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .editorContent td {
   padding: 6px 10px;
   border: 1px solid rgba(0, 0, 0, 0.07);
   color: #2a2a2a;
-  min-width: 60px;
+  min-width: 40px;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .editorContent tr:nth-child(even) td {
@@ -449,5 +473,67 @@
 
 .editorContent s,
 .editorContent strike { text-decoration: line-through; }
+
+/* ── Toolbar responsive ── */
+.toolbar {
+  flex-wrap: nowrap !important;
+  overflow: hidden;
+}
+
+/* ── Table drag handles ── */
+.colHandle,
+.rowHandle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  cursor: grab;
+  opacity: 0;
+  font-size: 10px;
+  color: #888;
+  transition: opacity 0.15s;
+  position: absolute;
+  user-select: none;
+  line-height: 1;
+  z-index: 10;
+}
+
+.colHandle {
+  top: 2px;
+  right: 2px;
+}
+
+.rowHandle {
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-lr;
+}
+
+/* Show handles on row/cell hover */
+.editorContent th:hover .colHandle,
+.editorContent td:hover .rowHandle,
+.editorContent th:hover ~ th .colHandle {
+  opacity: 0.5;
+}
+
+/* Drag-over highlight for cols/rows */
+.editorContent ._dragOver {
+  background: rgba(0, 122, 255, 0.10) !important;
+  outline: 1.5px solid rgba(0, 122, 255, 0.35);
+  outline-offset: -1px;
+}
+
+/* Make handles visible on table hover */
+.editorContent table:hover .colHandle,
+.editorContent table:hover .rowHandle {
+  opacity: 0.4;
+}
+
+.editorContent table th:hover .colHandle,
+.editorContent table td:hover .rowHandle {
+  opacity: 0.7;
+}
 
 /* ── No footer (char count removed) ── */

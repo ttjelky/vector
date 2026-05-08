@@ -291,6 +291,7 @@
   gap: 20px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.07);
   animation: fadeUp 0.2s ease;
+  margin-bottom: 30px;
 }
 .roundFormHeader {
   display: flex;
@@ -508,6 +509,50 @@
   transition: background 0.15s, color 0.15s;
 }
 .attachRemove:hover { background: #fff1f2; color: #dc2626; }
+
+/* ─── Access restriction notices ────────────────────────────────────────────── */
+.upcomingNotice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 20px;
+  text-align: center;
+  color: #86868b;
+  background: rgba(0,0,0,0.025);
+  border: 1px dashed rgba(0,0,0,0.1);
+  border-radius: 16px;
+  margin-top: 4px;
+}
+.upcomingNotice p {
+  margin: 0;
+  font-size: 14px;
+  color: #6e6e73;
+}
+.upcomingNoticeIcon {
+  font-size: 26px;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.04);
+  border-radius: 14px;
+}
+
+.submissionClosedBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6e6e73;
+  background: rgba(0,0,0,0.035);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 12px;
+  margin-bottom: 2px;
+}
 
 /* ─── Empty states ───────────────────────────────────────────────────────────── */
 .emptyBlock {

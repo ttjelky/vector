@@ -1,0 +1,197 @@
+/* ─── richContent.css ────────────────────────────────────────────────────────
+   Стилі для read-only перегляду HTML з RichTextArea.
+   Дзеркалить .editorContent з RichTextArea.module.css.
+   Клас .richContent — глобальний (не CSS-module).
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.richContent {
+  font-size: 14px;
+  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.65;
+  color: #1a1a1a;
+  word-break: break-word;
+  letter-spacing: normal;
+  font-weight: normal;
+}
+
+.richContent > *:first-child { margin-top: 0; }
+.richContent > *:last-child  { margin-bottom: 0; }
+
+/* ── Параграфи ── */
+.richContent p {
+  margin: 0 0 5px;
+}
+
+/* ── Заголовки ── */
+.richContent h1 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 12px 0 6px;
+  color: #1a1a1a;
+  letter-spacing: -0.4px;
+}
+
+.richContent h2 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 10px 0 4px;
+  color: #1a1a1a;
+  letter-spacing: -0.2px;
+}
+
+.richContent h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 8px 0 3px;
+  color: #1a1a1a;
+}
+
+/* ── Списки ── */
+.richContent ul,
+.richContent ol {
+  margin: 4px 0 8px;
+  padding-left: 22px;
+}
+
+.richContent li {
+  margin-bottom: 3px;
+  line-height: 1.6;
+}
+
+.richContent ul li { list-style-type: disc; }
+.richContent ol li { list-style-type: decimal; }
+
+/* ── Цитата ── */
+.richContent blockquote {
+  border-left: 3px solid rgba(0, 0, 0, 0.15);
+  margin: 8px 0;
+  padding: 4px 0 4px 12px;
+  color: #6a6a6a;
+  font-style: italic;
+  background: rgba(0, 0, 0, 0.025);
+  border-radius: 0 4px 4px 0;
+}
+
+/* ── Код ── */
+.richContent pre {
+  background: #f5f5f5;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-family: 'Menlo', 'Monaco', 'SF Mono', 'Courier New', monospace;
+  overflow-x: auto;
+  margin: 6px 0;
+  color: #2a2a2a;
+  white-space: pre-wrap;
+}
+
+.richContent code {
+  font-family: 'Menlo', 'Monaco', 'SF Mono', 'Courier New', monospace;
+  font-size: 12.5px;
+  background: #f5f5f5;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  color: #2a2a2a;
+}
+
+.richContent pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* ── Посилання ── */
+.richContent a {
+  color: #007aff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+.richContent a:hover {
+  color: #0055cc;
+}
+
+/* ── Таблиця ── */
+/*
+  border-collapse: collapse ламає border-radius — браузер його ігнорує.
+  Рішення: border-separate + border-spacing: 0 + overflow: hidden на таблиці.
+  Щоб уникнути подвійних рамок — прибираємо ліву/верхню границю клітинки,
+  залишаємо лише праву/нижню, а зовнішня рамка — на самій таблиці.
+*/
+.richContent table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  margin: 8px 0;
+  font-size: 13px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 640px) {
+  .richContent table {
+    display: table;
+  }
+}
+
+.richContent th,
+.richContent td {
+  border-top: none;
+  border-left: none;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* остання колонка — без правої рамки (вже є у таблиці) */
+.richContent th:last-child,
+.richContent td:last-child {
+  border-right: none;
+}
+
+/* останній рядок — без нижньої рамки (вже є у таблиці) */
+.richContent tr:last-child th,
+.richContent tr:last-child td {
+  border-bottom: none;
+}
+
+.richContent th {
+  background: #f5f5f5;
+  font-weight: 600;
+  padding: 7px 10px;
+  text-align: left;
+  color: #1a1a1a;
+}
+
+.richContent td {
+  padding: 6px 10px;
+  color: #2a2a2a;
+  min-width: 60px;
+}
+
+.richContent tr:nth-child(even) td {
+  background: rgba(0, 0, 0, 0.018);
+}
+
+/* ── Виділення ── */
+.richContent b,
+.richContent strong { font-weight: 700; }
+
+.richContent i,
+.richContent em { font-style: italic; }
+
+.richContent u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.richContent s,
+.richContent strike { text-decoration: line-through; }

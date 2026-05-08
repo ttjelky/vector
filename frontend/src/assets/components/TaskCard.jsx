@@ -250,7 +250,7 @@ function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed }) {
           </div>
 
           {submission.text && (
-            <div className={styles.submissionText} dangerouslySetInnerHTML={{ __html: submission.text }} />
+            <div className={`${styles.submissionText} richContent`} dangerouslySetInnerHTML={{ __html: submission.text }} />
           )}
 
           {submission.links?.length > 0 && (
@@ -353,7 +353,7 @@ function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
 
           {expanded === sub.id && (
             <div className={styles.submissionCardBody}>
-              {sub.text && <div className={styles.submissionText} dangerouslySetInnerHTML={{ __html: sub.text }} />}
+              {sub.text && <div className={`${styles.submissionText} richContent`} dangerouslySetInnerHTML={{ __html: sub.text }} />}
 
               {sub.links?.length > 0 && (
                 <div className={styles.submissionExtras}>
@@ -477,7 +477,7 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
               {task.description && (
                 <div className={styles.drawerSection}>
                   <span className={styles.drawerSectionLabel}>Опис</span>
-                  <div className={styles.drawerDesc} dangerouslySetInnerHTML={{ __html: task.description }} />
+                  <div className={`${styles.drawerDesc} richContent`} dangerouslySetInnerHTML={{ __html: task.description }} />
                 </div>
               )}
 
@@ -549,6 +549,28 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
   );
 }
 
+// ─── Rich-text preview helper ─────────────────────────────────────────────────
+// Замінює таблиці на "Таблиця", списки → перший елемент, решту тегів прибирає.
+
+function getDescriptionPreview(html, maxLen = 80) {
+  if (!html) return "";
+  let result = html.replace(/<table[\s\S]*?<\/table>/gi, " Таблиця ");
+  result = result.replace(/<ul[\s\S]*?<\/ul>/gi, (match) => {
+    const firstLi = match.match(/<li[^>]*>([\s\S]*?)<\/li>/i);
+    if (!firstLi) return "";
+    const text = firstLi[1].replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    return " " + text + "… ";
+  });
+  result = result.replace(/<ol[\s\S]*?<\/ol>/gi, (match) => {
+    const firstLi = match.match(/<li[^>]*>([\s\S]*?)<\/li>/i);
+    if (!firstLi) return "";
+    const text = firstLi[1].replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    return " " + text + "… ";
+  });
+  const plain = result.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+  return plain.length > maxLen ? plain.slice(0, maxLen) + "…" : plain;
+}
+
 // ─── TaskCard ─────────────────────────────────────────────────────────────────
 // Slim row card → відкриває Drawer при кліку.
 // Пропс roundEndDate передається з RoundsTab для перевірки дедлайну.
@@ -600,7 +622,7 @@ export function TaskCard({
           <span className={styles.taskTitle}>{task.title}</span>
           {task.description && (
             <p className={styles.taskDesc}>
-              {task.description.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 80) + (task.description.replace(/<[^>]*>/g, "").length > 80 ? "…" : "")}
+              {getDescriptionPreview(task.description, 80)}
             </p>
           )}
         </div>
