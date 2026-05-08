@@ -21,7 +21,6 @@ import NewsIcon        from "./static/icons/News.svg?react";
 import { ComposeModal, NotificationDropdown } from './Notifications';
 
 const API = 'http://127.0.0.1:8000/api';
-const WS_BASE = 'ws://127.0.0.1:8000/ws';
 const getToken = () => localStorage.getItem('accessToken');
 
 const ICON_MAP = {
@@ -103,65 +102,35 @@ const TournamentTab = ({ tab, onClose, animate }) => {
   );
 };
 
-/* ─── Хук: WebSocket для подій виключення з турніру ─────────────────────────
- *
- * Бекенд надсилає повідомлення формату:
- *   { type: "tournament_removed", tournament_id: <id> }
- *
- * При отриманні такого повідомлення вкладка учасника автоматично закривається.
- *
- * Якщо WebSocket недоступний — хук тихо завершує роботу без помилок.
- * Reconnect відбувається через 3 секунди після обриву з'єднання.
+/* ─── Хук: polling для авто-закриття вкладок турніру ────────────────────────
+ * Замість WebSocket використовує polling кожні 15 секунд.
+ * Перевіряє чи є турніри у вкладках доступні для поточного юзера.
  */
-const useTournamentRemovalWS = (removeTabById) => {
-  const wsRef       = useRef(null);
-  const mountedRef  = useRef(true);
-  const retryTimer  = useRef(null);
-
+const useTournamentRemovalPolling = (openTabs, removeTabById) => {
   useEffect(() => {
-    mountedRef.current = true;
+    if (!openTabs.length) return;
 
-    const connect = () => {
+    const check = async () => {
       const token = getToken();
-      if (!token || !mountedRef.current) return;
+      if (!token) return;
 
-      try {
-        const ws = new WebSocket(`${WS_BASE}/user-events/?token=${token}`);
-        wsRef.current = ws;
-
-        ws.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            if (data.type === 'tournament_removed' && data.tournament_id != null) {
-              removeTabById(data.tournament_id);
-            }
-          } catch {
-            // некоректний JSON — ігноруємо
+      for (const tab of openTabs) {
+        try {
+          const res = await fetch(`${API}/tournaments/${tab.id}/my-role/`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.status === 403 || res.status === 404) {
+            removeTabById(tab.id);
           }
-        };
-
-        ws.onclose = () => {
-          if (!mountedRef.current) return;
-          // Перепідключення через 3 секунди
-          retryTimer.current = setTimeout(connect, 3000);
-        };
-
-        ws.onerror = () => {
-          ws.close(); // onclose спрацює і запустить retry
-        };
-      } catch {
-        // WebSocket не підтримується або невалідний URL
+        } catch {
+          // ігноруємо помилки мережі
+        }
       }
     };
 
-    connect();
-
-    return () => {
-      mountedRef.current = false;
-      clearTimeout(retryTimer.current);
-      wsRef.current?.close();
-    };
-  }, [removeTabById]);
+    const interval = setInterval(check, 15000);
+    return () => clearInterval(interval);
+  }, [openTabs, removeTabById]);
 };
 
 /* ─── Головний компонент ─── */
@@ -176,7 +145,6 @@ const NavBar = ({ children }) => {
   const [notifs, setNotifs]               = useState([]);
   const [notifsLoading, setNotifsLoading] = useState(false);
 
-  // mobile sidebar
   const [sidebarOpen, setSidebarOpen]       = useState(false);
   const [sidebarClosing, setSidebarClosing] = useState(false);
 
@@ -187,8 +155,8 @@ const NavBar = ({ children }) => {
     () => JSON.parse(localStorage.getItem("setting_logout") ?? "true")
   );
 
-  // ── Підключаємо WS-хук для авто-закриття вкладок ────────────────────────
-  useTournamentRemovalWS(removeTabById);
+  // ── Polling замість WebSocket ─────────────────────────────────────────────
+  useTournamentRemovalPolling(openTabs, removeTabById);
 
   useEffect(() => {
     const syncLogout = () =>
@@ -213,12 +181,14 @@ const NavBar = ({ children }) => {
     if (token) {
       fetch(`${API}/users/profile/`, { headers: { Authorization: `Bearer ${token}` } })
         .then(r => r.ok ? r.json() : null)
-        .then(d => { if (d?.avatar) setAvatar(`http://127.0.0.1:8000${d.avatar}`); })
+        .then(d => {
+          if (d?.avatar) setAvatar(`http://127.0.0.1:8000${d.avatar}`);
+        })
         .catch(() => {});
     }
   }, []);
 
-  // ── Реалтайм-оновлення після збереження профілю ───────────────────────
+  // ── Реалтайм-оновлення після збереження профілю ───────────────────────────
   useEffect(() => {
     const handler = (e) => {
       if (e.detail?.fullUserName) setFullUserName(e.detail.fullUserName);
@@ -244,7 +214,6 @@ const NavBar = ({ children }) => {
     };
   }, []);
 
-  // ── Закрити sidebar по кліку поза ────────────────────────────────────────
   useEffect(() => {
     if (!sidebarOpen) return;
     const handler = (e) => {
@@ -268,7 +237,6 @@ const NavBar = ({ children }) => {
     }, 320);
   };
 
-  // ── Сповіщення ───────────────────────────────────────────────────────────
   const fetchNotifs = async () => {
     setNotifsLoading(true);
     try {
@@ -309,14 +277,12 @@ const NavBar = ({ children }) => {
     setNotifs(n => n.map(x => x.id === id ? { ...x, is_read: true } : x));
   };
 
-  // ── Logout ───────────────────────────────────────────────────────────────
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem('accessToken');
     localStorage.removeItem('fullUserName');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userId');
-    // Сповіщаємо TabsContext про зміну акаунту — він скине всі вкладки
     window.dispatchEvent(new Event('auth-changed'));
     navigate('/');
   };
@@ -326,9 +292,7 @@ const NavBar = ({ children }) => {
   return (
     <div className={styles.vectorApp}>
 
-      {/* ── Верхня панель ── */}
       <header className={styles.topNavbar}>
-
         <div className={styles.navbarLogo}>
           <img src={Logo} alt="Vector" className={styles.logo} />
         </div>
@@ -337,40 +301,36 @@ const NavBar = ({ children }) => {
           <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" style={{opacity:0.4,flexShrink:0}}>
             <circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/>
           </svg>
-          <input
-            type="search"
-            placeholder="Пошук..."
-            className={styles.searchInput}
-          />
+          <input type="search" placeholder="Пошук..." className={styles.searchInput} />
         </div>
 
         <div className={styles.navbarUserActions}>
           <span className={styles.userName}>{fullUserName}</span>
           {avatar
-              ? <img src={avatar} alt="avatar" className={styles.navbarAvatar} />
-              : (
-                <div className={styles.navbarAvatarPlaceholder}>
-                  {fullUserName?.[0]?.toUpperCase() || '?'}
-                </div>
-              )
-            }
+            ? <img src={avatar} alt="avatar" className={styles.navbarAvatar} />
+            : (
+              <div className={styles.navbarAvatarPlaceholder}>
+                {fullUserName?.[0]?.toUpperCase() || '?'}
+              </div>
+            )
+          }
           <div className={nStyles.bellWrap} ref={bellRef}>
-              <button className={nStyles.bellBtn} aria-label="Сповіщення" onClick={handleBellClick}>
-                <BellIcon className={styles.notificationIcon} />
-                {hasUnread && <span className={nStyles.badge} />}
-              </button>
-              {bellOpen && (
-                <NotificationDropdown
-                  notifs={notifs}
-                  loading={notifsLoading}
-                  onClose={() => setBellOpen(false)}
-                  onCompose={() => { setBellOpen(false); setCompose(true); }}
-                  onMarkAllRead={markAllRead}
-                  onMarkOne={markOneRead}
-                />
-              )}
-            </div>
+            <button className={nStyles.bellBtn} aria-label="Сповіщення" onClick={handleBellClick}>
+              <BellIcon className={styles.notificationIcon} />
+              {hasUnread && <span className={nStyles.badge} />}
+            </button>
+            {bellOpen && (
+              <NotificationDropdown
+                notifs={notifs}
+                loading={notifsLoading}
+                onClose={() => setBellOpen(false)}
+                onCompose={() => { setBellOpen(false); setCompose(true); }}
+                onMarkAllRead={markAllRead}
+                onMarkOne={markOneRead}
+              />
+            )}
           </div>
+        </div>
       </header>
 
       <div className={styles.mainWrapper}>
@@ -409,14 +369,10 @@ const NavBar = ({ children }) => {
 
           <div className={styles.logoutSection}>
             {showLogout && (
-            <button
-              onClick={handleLogout}
-              className={styles.logoutBtn}
-              type="button"
-            >
-              <LogoutIcon className={styles.logoutIcon} style={{ color: 'rgb(215,125,126)', fill: 'rgb(215,125,126)' }} />
-              <span className={styles.logoutText}>Вийти</span>
-            </button>
+              <button onClick={handleLogout} className={styles.logoutBtn} type="button">
+                <LogoutIcon className={styles.logoutIcon} style={{ color: 'rgb(215,125,126)', fill: 'rgb(215,125,126)' }} />
+                <span className={styles.logoutText}>Вийти</span>
+              </button>
             )}
           </div>
 
@@ -426,6 +382,7 @@ const NavBar = ({ children }) => {
           {children}
         </main>
       </div>
+
       {compose && (
         <ComposeModal onClose={() => setCompose(false)} onSent={fetchNotifs} />
       )}

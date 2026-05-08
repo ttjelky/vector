@@ -8,22 +8,42 @@
   position: relative;
 }
 
-/* ── Card ───────────────────────────────────────────────────────── */
+/* ── Layout: side by side on wide screens ───────────────────────── */
+.profileLayout {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  max-width: 960px;
+  align-items: flex-start;
+}
+
+/* ── Card (shared) ──────────────────────────────────────────────── */
 .profileCard {
   background: #ffffff;
   border-radius: 20px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   padding: 36px 40px 32px;
   width: 100%;
-  max-width: 480px;
+  max-width: 380px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+
+.detailsCard {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 32px 36px 28px;
+  flex: 1;
+  min-width: 0;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
 }
 
 .cardTitle {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: #111;
-  margin: 0 0 28px 0;
+  margin: 0 0 24px 0;
   letter-spacing: -0.3px;
 }
 
@@ -84,9 +104,7 @@
   opacity: 1;
 }
 
-.fileInput {
-  display: none;
-}
+.fileInput { display: none; }
 
 .avatarHint {
   font-size: 12px;
@@ -107,10 +125,6 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.07);
 }
 
-.infoRow:last-child {
-  border-bottom: none;
-}
-
 .infoLabel {
   font-size: 13px;
   color: #888;
@@ -124,11 +138,10 @@
   color: #111;
 }
 
-/* ── Form (edit mode) ───────────────────────────────────────────── */
+/* ── Form ───────────────────────────────────────────────────────── */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 .fieldRow {
@@ -145,15 +158,12 @@
   margin-bottom: 14px;
 }
 
-.fieldRow .fieldGroup {
-  margin-bottom: 0;
-}
+.fieldRow .fieldGroup { margin-bottom: 0; }
 
 .fieldLabel {
   font-size: 12px;
   color: #666;
   font-weight: 500;
-  letter-spacing: 0.01em;
 }
 
 .fieldInput {
@@ -182,7 +192,7 @@
   cursor: default;
 }
 
-/* ── Footer (buttons) ───────────────────────────────────────────── */
+/* ── Footer ─────────────────────────────────────────────────────── */
 .cardFooter {
   display: flex;
   gap: 10px;
@@ -209,9 +219,7 @@
   gap: 6px;
 }
 
-.btnPrimary:hover {
-  opacity: 0.82;
-}
+.btnPrimary:hover { opacity: 0.82; }
 
 .btnSecondary {
   height: 40px;
@@ -227,8 +235,221 @@
   transition: background 0.15s;
 }
 
-.btnSecondary:hover {
+.btnSecondary:hover { background: #f5f5f5; }
+
+/* ── Stats row ──────────────────────────────────────────────────── */
+.statsRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.statChip {
+  flex: 1;
+  background: #f7f8fa;
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.statChipSuccess { background: #f0faf4; border-color: rgba(34,139,75,0.15); }
+.statChipWarning { background: #fffbf0; border-color: rgba(180,130,0,0.15); }
+
+.statValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+  line-height: 1;
+}
+
+.statChipSuccess .statValue { color: #1a7a45; }
+.statChipWarning .statValue { color: #996800; }
+
+.statLabel {
+  font-size: 11px;
+  color: #888;
+  font-weight: 500;
+}
+
+/* ── Filter row ─────────────────────────────────────────────────── */
+.filterRow {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.filterBtn {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.12s;
+}
+
+.filterBtn:hover { background: #f5f5f5; }
+
+.filterBtnActive {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+/* ── Submission list ────────────────────────────────────────────── */
+.submissionList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.submissionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #f7f8fa;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.06);
+  transition: background 0.12s;
+}
+
+.submissionItem:hover { background: #f0f1f4; }
+
+.submissionMain {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.submissionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.submissionRound {
+  font-size: 11px;
+  color: #888;
+}
+
+.submissionMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.submissionDate {
+  font-size: 11px;
+  color: #aaa;
+}
+
+/* ── Tournament list ────────────────────────────────────────────── */
+.tournamentList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tournamentItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #f7f8fa;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.06);
+  transition: background 0.12s;
+}
+
+.tournamentItem:hover { background: #f0f1f4; }
+
+.tournamentItemMain {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.tournamentItemName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tournamentItemDesc {
+  font-size: 11px;
+  color: #888;
+}
+
+.tournamentItemMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.tournamentItemDate {
+  font-size: 11px;
+  color: #aaa;
+}
+
+/* ── Status pills ───────────────────────────────────────────────── */
+.statusPill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.statusGraded {
+  background: #f0faf4;
+  color: #1a7a45;
+}
+
+.statusPending {
+  background: #fffbf0;
+  color: #996800;
+}
+
+.statusActive {
+  background: #f0f4ff;
+  color: #3355bb;
+}
+
+.statusClosed {
   background: #f5f5f5;
+  color: #777;
+}
+
+/* ── Empty / loading states ─────────────────────────────────────── */
+.detailsLoading,
+.detailsEmpty {
+  font-size: 14px;
+  color: #aaa;
+  text-align: center;
+  padding: 32px 0;
 }
 
 /* ── Toast ──────────────────────────────────────────────────────── */
@@ -264,4 +485,16 @@
   margin-top: 60px;
   font-size: 15px;
   color: #888;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .profileLayout {
+    flex-direction: column;
+    max-width: 480px;
+  }
+
+  .profileCard {
+    max-width: 100%;
+  }
 }
