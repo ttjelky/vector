@@ -1,0 +1,193 @@
+/* ─── Page ────────────────────────────────────────────────────────────────── */
+
+.page {
+  min-height: 100%;
+  background: #fff;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+}
+
+/* ─── Cover — з відступами з усіх боків ──────────────────────────────────── */
+
+.cover {
+  margin: 10px 10px 0;
+  height: 200px;
+  background: #e8e8ec;
+  overflow: hidden;
+  border-radius: 18px;
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.08),
+    0 16px 40px rgba(0,0,0,0.07);
+  position: relative;
+  z-index: 2;
+}
+
+.coverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ─── Header — чистий білий, без зайвих карток ───────────────────────────── */
+
+.header {
+  padding: 20px 28px 0;
+  background: #fff;
+}
+
+.headerContent {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title {
+  font-size: 21px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 4px;
+  letter-spacing: -0.022em;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #999;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 520px;
+}
+
+/* ─── Tab bar — underline навігація ──────────────────────────────────────── */
+
+.tabBar {
+  display: flex;
+  margin: 20px 0 0;
+  padding: 0 28px;
+  gap: 0;
+  border-bottom: 1px solid #ebebeb;
+  /* прокрутка на вузьких екранах */
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabBar::-webkit-scrollbar {
+  display: none;
+}
+
+.tabBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 4px 11px;
+  margin-right: 28px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #999;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: color 0.16s;
+  outline: none;
+}
+
+.tabBtn:last-child {
+  margin-right: 0;
+}
+
+.tabBtn:hover {
+  color: #444;
+}
+
+.tabBtn:focus-visible {
+  color: #111;
+  border-radius: 4px 4px 0 0;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.12);
+}
+
+.tabBtnActive {
+  color: #111;
+  font-weight: 600;
+  border-bottom-color: #111;
+}
+
+/* ─── Лічильник у вкладці (напр. кількість учасників) ────────────────────── */
+
+.tabCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: #888;
+  background: #f0f0f3;
+  border-radius: 100px;
+  transition: background 0.16s, color 0.16s;
+}
+
+.tabBtnActive .tabCount {
+  color: #fff;
+  background: #111;
+}
+
+/* ─── Content ─────────────────────────────────────────────────────────────── */
+
+.content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 28px 60px;
+}
+
+/* ─── Danger zone ─────────────────────────────────────────────────────────── */
+
+.dangerZone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 48px;
+  padding: 16px 20px;
+  background: #fff8f8;
+  border: 1px solid #fde8e8;
+  border-radius: 16px;
+  gap: 16px;
+}
+
+.dangerInfo { display: flex; flex-direction: column; gap: 3px; }
+
+.dangerTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e76b6b;
+}
+
+.dangerHint {
+  font-size: 12.5px;
+  color: #ccc;
+}
+
+.deleteBtn {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #ea5c5c;
+  background: #fff;
+  border: 1px solid #fcd7d7;
+  border-radius: 100px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.deleteBtn:hover  { background: #fee2e2; border-color: #f89595; }
+.deleteBtn:active { transform: scale(0.97); }

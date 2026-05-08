@@ -1,0 +1,108 @@
+
+:global(body) {
+    background-color: #fbfbfb;
+    margin: 0;
+    padding: 0;
+}
+
+.contentArea {
+    padding: 40px;
+}
+
+.statscontainer {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 40px;
+    font-family: "'Arial', sans-serif";
+    background-color: "#f8f8f8";
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.infocard {
+    font-family: "Google Sans", sans-serif;
+    background-color: #fff;
+    color: #111;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    min-width: 150px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.infotitle {
+        font-size: 16px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        color: #333;
+}
+
+.infovalue {
+        font-size: 28px;
+        font-weight: bold;
+}
+
+.createBtn {
+    width: 100%;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Світлий, ледь помітний фон */
+    background: #ffffff;
+    /* Тонка пунктирна або суцільна лінія */
+    border: 2px dashed #e1e1e1; 
+    border-radius: 20px;
+    
+    color: #888; /* Спокійний колір тексту */
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    margin: 20px 0;
+}
+
+.tournamentGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.tournamentCard {
+  flex: 1 1 400px;
+  max-width: 100%;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tournamentCard:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  transform: translateY(-3px);
+ 
+}
+
+.createBtn:hover {
+    background: #fcfcfc;
+  border-color: #d1d1d1;
+  color: #444;
+  
+  /* М'яка тінь, що додає глибини */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+  transform: translateY(-2px);
+}
+
+.createBigBtn:active {
+  transform: translateY(0);
+}
+
+
+.createBtnContainer {
+    display: flex;
+    justify-content: center;
+}

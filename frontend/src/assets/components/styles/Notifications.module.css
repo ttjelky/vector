@@ -1,0 +1,520 @@
+/* ═══════════════════════════════════════════
+   BELL
+═══════════════════════════════════════════ */
+.bellWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.bellBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background 0.18s ease;
+  color: #444;
+}
+.bellBtn:hover { background: #e4e4e4; }
+
+.badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  background: #ef4444;
+  border-radius: 50%;
+  border: 1.5px solid #f8f9fa;
+}
+
+/* ═══════════════════════════════════════════
+   DROPDOWN — не чіпаємо
+═══════════════════════════════════════════ */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 290px;
+  min-height: 240px;
+  background: #ffffff;
+  border: none;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  z-index: 500;
+  overflow: hidden;
+  animation: dropIn 0.2s cubic-bezier(.22,.68,0,1.2) both;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.dropHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+}
+
+.dropTitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #aab0bc;
+  margin-bottom: 8px;
+  margin-left: 12px;
+  margin-top: 0;
+}
+
+.composeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  background: #1a1a1a;
+  border: none;
+  border-radius: 100px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.composeBtn:hover { background: #333; }
+
+.markReadBtn {
+  font-size: 12px;
+  font-weight: 500;
+  color: #999;
+  background: #f2f2f2;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.markReadBtn:hover { background: #e8e8e8; }
+
+.dropBody { max-height: 420px; overflow-y: auto; }
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 52px 20px 32px;
+  color: #c8c8c8;
+  font-size: 12px;
+  font-weight: 400;
+}
+.empty p { margin: 0; }
+
+.notifItem {
+  padding: 11px 16px;
+  transition: background 0.15s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-radius: 10px;
+  margin: 2px 6px;
+}
+.notifItem:hover  { background: #f0f0f0; }
+.unread           { background: #f0fdf4; }
+.unread:hover     { background: #e6faf0; }
+
+.notifSender     { font-size: 11px; color: #bbb; font-weight: 500; }
+.notifSubject    { font-size: 13px; font-weight: 600; color: #1a1a1a; margin: 0; }
+.notifText       { font-size: 12px; color: #666; margin: 0; line-height: 1.4; }
+.notifTournament { font-size: 11px; color: #aaa; }
+.notifLinks      { display: flex; flex-direction: column; gap: 3px; margin-top: 2px; }
+.notifLink       { font-size: 12px; color: #3b82f6; text-decoration: none; }
+.notifLink:hover { text-decoration: underline; }
+.notifTime       { font-size: 11px; color: #ccc; margin-top: 2px; }
+
+/* ═══════════════════════════════════════════
+   COMPOSE OVERLAY — як у CreateTournamentModal
+═══════════════════════════════════════════ */
+.composeOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 9999;
+  animation: overlayIn 0.32s ease forwards;
+}
+.composeOverlayOut { animation: overlayOut 0.32s ease forwards !important; }
+
+@keyframes overlayIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
+
+/* ═══════════════════════════════════════════
+   COMPOSE MODAL
+═══════════════════════════════════════════ */
+.composeModal {
+  background: #ffffff;
+  border-radius: 28px;
+  border: 1px solid lightgray;
+  width: min(560px, 96vw);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  animation: modalIn 0.44s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.composeModalOut { animation: modalOut 0.32s cubic-bezier(0.4, 0, 1, 1) forwards !important; }
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.92) translateY(20px); filter: blur(2px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+}
+@keyframes modalOut {
+  from { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+  to   { opacity: 0; transform: scale(0.94) translateY(12px); filter: blur(1px); }
+}
+
+/* ── Floating header (як у CreateTournamentModal) ── */
+.composeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px;
+  z-index: 10;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.4) 40%, transparent 100%);
+  animation: headerIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+@keyframes headerIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.composeTitle {
+  padding: 6px 18px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #111;
+  background: rgba(255,255,255,0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.05);
+  border-radius: 1000px;
+  pointer-events: auto;
+}
+
+.composeClose {
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.05);
+  border-radius: 1000px;
+  cursor: pointer;
+  color: #555;
+  pointer-events: auto;
+  transition: background 0.15s, transform 0.15s;
+  box-sizing: content-box;
+}
+.composeClose:hover  { background: #ececec; transform: scale(1.08); }
+.composeClose:active { transform: scale(0.94); }
+
+/* ── Body ── */
+.composeBody {
+  flex: 1;
+  padding: 72px 28px 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.composeBody::-webkit-scrollbar { display: none; }
+
+/* ── Fields — як .field у CreateTournamentModal ── */
+.composeField { display: flex; flex-direction: column; gap: 6px; }
+
+.composeField label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #6b6b6b;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.attachIcon { display: flex; align-items: center; color: #b0b0b0; }
+
+.composeField input,
+.composeField textarea {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 0.5px solid rgba(0,0,0,0.2);
+  border-radius: 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111;
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.12s, box-shadow 0.12s;
+  resize: vertical;
+}
+.composeField textarea {
+  padding: 12px 16px;
+  min-height: 96px;
+}
+.composeField input::placeholder,
+.composeField textarea::placeholder { color: #d0d0d0; }
+.composeField input:hover,
+.composeField textarea:hover         { border-color: #cacaca; }
+.composeField input:focus,
+.composeField textarea:focus {
+  box-shadow: 0 0 0 2px #378ADD55;
+  border-color: #378ADD;
+}
+
+/* ── Recipient autocomplete ── */
+.recipientWrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.recipientWrap input {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 0.5px solid rgba(0,0,0,0.2);
+  border-radius: 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111;
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.recipientWrap input::placeholder { color: #d0d0d0; }
+.recipientWrap input:hover  { border-color: #cacaca; }
+.recipientWrap input:focus  { box-shadow: 0 0 0 2px #378ADD55; border-color: #378ADD; }
+
+.selectedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0f0f0;
+  border-radius: 20px;
+  padding: 4px 10px 4px 12px;
+  font-size: 13px;
+  color: #222;
+  font-weight: 500;
+  align-self: flex-start;
+}
+.selectedBadge button {
+  display: flex; align-items: center;
+  background: none; border: none; cursor: pointer; color: #aaa; padding: 0;
+}
+
+.autocomplete {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: #fff;
+  border: 0.5px solid rgba(0,0,0,0.12);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  z-index: 200;
+  overflow: hidden;
+}
+.autocompleteItem {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 16px; cursor: pointer;
+  transition: background 0.12s;
+  border-bottom: 1px solid #f5f5f5;
+}
+.autocompleteItem:last-child { border-bottom: none; }
+.autocompleteItem:hover { background: #f5f5f5; }
+.acName { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.acSub  { font-size: 12px; color: #aaa; }
+
+/* ── Link row ── */
+.linkRow { display: flex; gap: 8px; align-items: center; }
+.linkRow input { flex: 1; }
+
+.addBtn {
+  white-space: nowrap;
+  padding: 0 18px;
+  height: 48px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 3px 10px rgba(0,0,0,0.1);
+  transition: background 0.13s, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.13s;
+}
+.addBtn:hover  { background: #222; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.22); }
+.addBtn:active { transform: translateY(0) scale(0.97); }
+
+/* ── Chips ── */
+.chipList { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.chip {
+  display: flex; align-items: center; gap: 5px;
+  background: #f2f2f2; border-radius: 20px;
+  padding: 4px 10px; font-size: 12px; color: #555;
+}
+.chip button {
+  display: flex; align-items: center;
+  background: none; border: none; cursor: pointer; color: #aaa; padding: 0;
+}
+
+/* ── Attach ── */
+.attachFileBtn {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border: 1.5px dashed rgba(0,0,0,0.15);
+  border-radius: 12px;
+  background: none;
+  font-size: 13px;
+  color: #888;
+  cursor: pointer;
+  transition: border-color 0.13s, background 0.13s;
+}
+.attachFileBtn:hover { border-color: #aaa; background: #f9f9f9; }
+
+.errorText {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #e05252;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Floating footer (як у CreateTournamentModal) ── */
+.composeFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px 24px 18px;
+  z-index: 10;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 40%, rgba(255,255,255,0.4) 70%, transparent 100%);
+  animation: footerIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+@keyframes footerIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.footerActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+  pointer-events: auto;
+}
+
+.cancelBtn {
+  padding: 8px 18px;
+  background: rgb(241,241,241);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid lightgray;
+  color: #999;
+  font-family: inherit;
+  transition: background 0.13s, transform 0.15s;
+}
+.cancelBtn:hover  { background: #ebebeb; transform: translateY(-1px); }
+.cancelBtn:active { transform: translateY(0) scale(0.97); }
+
+.sendBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: #111;
+  color: #fff;
+  font-family: inherit;
+  margin-left: 10px;
+  transition: background 0.13s, transform 0.15s;
+}
+.sendBtn:hover:not(:disabled)  { background: #222; transform: translateY(-1px); }
+.sendBtn:active                { transform: translateY(0) scale(0.97); }
+.sendBtn:disabled              { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ═══════════════════════════════════════════
+   MOBILE
+═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .composeOverlay { padding: 0; align-items: flex-end; }
+  .composeModal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 28px 28px 0 0;
+  }
+  .linkRow { flex-direction: column; }
+  .addBtn  { width: 100%; }
+  .dropdown {
+    position: fixed;
+    top: auto; bottom: 0; left: 0; right: 0;
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 390px) {
+  .composeBody    { padding: 68px 16px 84px; }
+  .composeHeader  { padding: 16px; }
+}

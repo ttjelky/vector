@@ -1,72 +1,94 @@
-import { useEffect, useState } from "react";
-import { getProfile } from "../../api";
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { getProfile } from "../../api";
 import NavBar from "../components/NavBar";
+import styles from "../components/styles/admindashboard.module.css";
 
-const Dashboard = () => {
-    const [stats, setStats] = useState({
-        total_users: 0,
-        active_users: 0,
-        new_users: 0,
-    });
+const placeholders = [
+  {
+    icon: "📊",
+    title: "Аналітика",
+    description: "Огляд статистики турнірів, учасників та активності — у розробці.",
+  },
+  {
+    icon: "👥",
+    title: "Управління користувачами",
+    description: "Перегляд, редагування та модерація акаунтів — у розробці.",
+  },
+  {
+    icon: "🔔",
+    title: "Сповіщення",
+    description: "Центр системних та ручних сповіщень для всіх ролей — у розробці.",
+  },
+  {
+    icon: "📋",
+    title: "Звіти",
+    description: "Автоматичне генерування звітів по турнірах та роботах — у розробці.",
+  },
+];
 
-    useEffect(() => {
-        getProfile()
-            .then(res => console.log(res.data))
-            .catch(err => console.error(err)); 
-    }, []);
+const AdminDashboard = () => {
+  return (
+    <NavBar>
+      <div className={styles.contentArea}>
+        <div className={styles.placeholderHeader} style={{ marginBottom: "2rem" }}>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "0.5rem" }}>
+            Головна панель адміністратора
+          </h2>
+          <p style={{ color: "var(--color-text-muted, #888)", fontSize: "0.95rem" }}>
+            Цей розділ зараз у розробці. Нижче — майбутні блоки функціональності.
+          </p>
+        </div>
 
-    return (
-        <NavBar>
-        <div style={styles.dashboard}>
-        <div style={styles.card}>
-            <h3 style={styles.title}>Загальна кількість користувачів</h3>
-            <p style={styles.value}>{stats.total_users}</p>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+            gap: "1.25rem",
+          }}
+        >
+          {placeholders.map((item) => (
+            <div
+              key={item.title}
+              style={{
+                border: "2px dashed var(--color-border, #d1d5db)",
+                borderRadius: "12px",
+                padding: "1.5rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.75rem",
+                opacity: 0.7,
+                background: "var(--color-surface, #f9fafb)",
+              }}
+            >
+              <span style={{ fontSize: "2rem" }}>{item.icon}</span>
+              <strong style={{ fontSize: "1rem" }}>{item.title}</strong>
+              <p style={{ fontSize: "0.85rem", color: "var(--color-text-muted, #888)", margin: 0 }}>
+                {item.description}
+              </p>
+              <span
+                style={{
+                  display: "inline-block",
+                  marginTop: "auto",
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  color: "var(--color-text-muted, #aaa)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  border: "1px solid currentColor",
+                  borderRadius: "4px",
+                  padding: "2px 8px",
+                  width: "fit-content",
+                }}
+              >
+                Незабаром
+              </span>
+            </div>
+          ))}
         </div>
-        <div style={styles.card}>
-            <h3 style={styles.title}>Активні користувачі</h3>
-            <p style={styles.value}>{stats.active_users}</p>
-        </div>
-        <div style={styles.card}>
-            <h3 style={styles.title}>Нові користувачі</h3>
-            <p style={styles.value}>{stats.new_users}</p>
-        </div>
-        </div>
-        </NavBar>
+      </div>
+    </NavBar>
   );
 };
 
-const styles = {
-    dashboard: {
-        display: "flex",
-        gap: "20px",
-        justifyContent: "center",
-        marginTop: "40px",
-        fontFamily: "'Arial', sans-serif",
-        backgroundColor: "#f8f8f8",
-        padding: "20px",
-        borderRadius: "12px",
-    },
-    card: {
-        backgroundColor: "#fff",
-        color: "#111",
-        padding: "30px",
-        borderRadius: "10px",
-        textAlign: "center",
-        minWidth: "150px",
-        boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-        border: "1px solid #e0e0e0",
-    },
-    title: {
-        fontSize: "16px",
-        marginBottom: "10px",
-        textTransform: "uppercase",
-        color: "#333",
-    },
-    value: {
-        fontSize: "28px",
-        fontWeight: "bold",
-    },
-};
-
-export default Dashboard
+export default AdminDashboard;

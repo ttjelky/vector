@@ -1,193 +1,161 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styles from "../components/styles/loginPage.module.css";
 import cross from "../components/static/icons/cross.svg";
-import { registerUser, loginUser } from '../../api';
+import { loginUser } from '../../api';
 import { useNavigate } from "react-router-dom";
+import { ROLE_HOME } from "../../navConfig";
 
-const Login = ({isOpen, onClose, onSwitchToRegister, onSwitchToForgot}) => {
-
+/**
+ * Props:
+ *  - isOpen              {boolean}
+ *  - onClose             {function}
+ *  - onSwitchToRegister  {function}
+ *  - onSwitchToForgot    {function}
+ *  - onLoginSuccess      {function|undefined} — якщо передано, викликається після
+ *                        успішного логіну замість navigate (для flow JoinTournamentPage)
+ */
+const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginSuccess }) => {
   const navigate = useNavigate();
 
-  const [loginData, setLoginData] = useState({
-    email: '',
-    password: ''
-});
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [errors,    setErrors]    = useState({});
 
-const [errors, setErrors] = useState({});
-
-const handleChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setLoginData((prev) => ({
-        ...prev,
-        [name]: value,
-    }));
-};
+    setLoginData((prev) => ({ ...prev, [name]: value }));
+  };
 
-const handleSubmit = async (e) => {
-<<<<<<< HEAD
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
 
     try {
-        const response = await loginUser({
-            username: loginData.email,
-            password: loginData.password
-        });
-        
-        localStorage.setItem('accessToken', response.data.access);
-        const firstName = response.data.first_name || '';
-        const lastName = response.data.last_name || '';
-        const fullUserName = `${firstName} ${lastName}`.trim();
-        localStorage.setItem('fullUserName', `${response.data.first_name} ${response.data.last_name}`);
-        onClose();
-        navigate('/admindashboard');
+      const response = await loginUser({
+        username: loginData.email,
+        password: loginData.password,
+      });
+
+      const { access, first_name, last_name, role = "participant" } = response.data;
+
+      // ── Зберігаємо дані у localStorage ──────────────────────────
+      localStorage.setItem("accessToken", access);
+      localStorage.setItem("userRole", role);
+      localStorage.setItem(
+        "fullUserName",
+        `${first_name || ""} ${last_name || ""}`.trim()
+      );
+
+      onClose();
+
+      // ── Redirect ─────────────────────────────────────────────────
+      if (onLoginSuccess) {
+        onLoginSuccess();
+        return;
+      }
+
+      const pendingToken = localStorage.getItem("pendingJoinToken");
+      if (pendingToken) {
+        localStorage.removeItem("pendingJoinToken");
+        navigate(`/join/${pendingToken}`);
+        return;
+      }
+
+      // Редіректимо на головну сторінку відповідної ролі
+      navigate(ROLE_HOME[role] ?? ROLE_HOME.participant);
+
     } catch (error) {
-        const serverMessage = error.response?.data?.detail;
-        
-        const translations = {
-            "No active account found with the given credentials": "Невірна пошта або пароль",
-            "User is inactive": "Акаунт не активовано"
-        };
-
-        const finalMessage = translations[serverMessage] || "Помилка підключення до сервера";
-        setErrors({ detail: finalMessage });
+      const serverMessage = error.response?.data?.detail;
+      const translations = {
+        "No active account found with the given credentials": "Невірна пошта або пароль",
+        "User is inactive": "Акаунт не активовано",
+      };
+      setErrors({ detail: translations[serverMessage] || "Помилка підключення до сервера" });
     }
-=======
-  e.preventDefault();
-  setErrors({});
+  };
 
-  try {
-    const response = await loginUser({
-      username: loginData.email,
-      password: loginData.password,
-    });
+  if (!isOpen) return null;
 
-    console.log("RESPONSE:", response.data);
-
-    const access = response.data.access;
-    const refresh = response.data.refresh;
-
-    if (!access) {
-      throw new Error("No access token");
-    }
-
-    localStorage.setItem("accessToken", access);
-    localStorage.setItem("refreshToken", refresh);
-
-    localStorage.setItem("username", response.data.username);
-    localStorage.setItem(
-      "fullUserName",
-      `${response.data.first_name} ${response.data.last_name}`.trim()
-    );
-    localStorage.setItem("email", response.data.email);
-
-    console.log("LOGIN SUCCESS:", access);
-
-    onClose();
-    navigate("/admindashboard");
-
-  } catch (error) {
-    console.error("LOGIN ERROR:", error);
-
-    const serverMessage = error.response?.data?.detail;
-
-    const translations = {
-      "No active account found with the given credentials":
-        "Невірна пошта або пароль",
-      "User is inactive": "Акаунт не активовано",
-    };
-
-    setErrors({
-      detail: translations[serverMessage] || "Помилка підключення до сервера",
-    });
-  }
->>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
-};
-
-if (!isOpen) return null;
-
-return (
-  <form onSubmit={handleSubmit} noValidate>
+  return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.login} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={styles.login}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-title"
+      >
+        {/* Floating header */}
+        <div className={styles.header}>
+          <h2 id="login-title" className={styles.logintitle}>Вхід на сайт</h2>
+          <img src={cross} alt="Закрити" className={styles.cross} onClick={onClose} />
+        </div>
 
-        <img src={cross} alt="back" className={styles.cross} onClick={onClose} />
+        {/* Form */}
+        <form onSubmit={handleSubmit} noValidate className={styles.form}>
 
-        <div className={styles.form}>
-          <h1 className={styles.logintitle}>Вхід на сайт</h1>
+          <div>
+            <p className={styles.fieldLabel}>Email</p>
+            <input
+              type="email"
+              className={styles.input}
+              name="email"
+              value={loginData.email}
+              onChange={handleChange}
+              required
+            />
+            {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
+          </div>
 
-          <section style={{marginTop: "32px"}}>
-
-            <div style={{marginBottom: "20px"}}>
-              <p style={{color: "gray"}}>Email</p>
-              <input
-                type="email"
-                className={styles.input}
-                name="email"
-<<<<<<< HEAD
-                placeholder="Електронна пошта" 
-=======
->>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
-                value={loginData.email}
-                onChange={handleChange}
-                required 
-              />
-              {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
-            </div>
-
-            <div style={{marginBottom: "10px"}}>
-              <p style={{color: "gray"}}>Пароль</p>
-              <input
-                type="password" 
-                className={styles.input}
-<<<<<<< HEAD
-                name="password" 
-                placeholder="Пароль" 
-=======
-                name="password"
->>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
-                value={loginData.password}
-                onChange={handleChange}
-                required
-              />
-              {errors.password && <span className={styles.errorText}>{errors.password[0]}</span>}
-            </div>
-
-          </section>
+          <div style={{ marginTop: "16px" }}>
+            <p className={styles.fieldLabel}>Пароль</p>
+            <input
+              type="password"
+              className={styles.input}
+              name="password"
+              value={loginData.password}
+              onChange={handleChange}
+              required
+            />
+            {errors.password && <span className={styles.errorText}>{errors.password[0]}</span>}
+          </div>
 
           {errors.detail && (
-            <p className={styles.errorText} style={{margin: '10px 0' }}>
-              {errors.detail}
-            </p>
+            <p className={styles.errorText} style={{ marginTop: "8px" }}>{errors.detail}</p>
           )}
 
-          <div className={styles.rememberme}>
+          <div className={styles.rememberme} style={{ marginTop: "16px" }}>
             <input type="checkbox" id="remember" name="remember" />
             <label htmlFor="remember">Запам'ятати мене</label>
           </div>
 
-          <div style={{marginBottom: "20px"}}>
-            <button type="submit" disabled={!loginData.email || !loginData.password} className={styles.thebutton}>
+          <div className={styles.sectionDivider} />
+
+          <div className={styles.underform} style={{ marginBottom: "16px" }}>
+            <div onClick={onSwitchToRegister} style={{ cursor: "pointer" }}>
+              <span>Не маєте акаунту? </span>
+              <a>Зареєструватися</a>
+            </div>
+            <a className={styles.forgot} onClick={onSwitchToForgot}>Забули пароль?</a>
+          </div>
+
+          {/* Floating footer */}
+          <div className={styles.footer}>
+            <button type="button" className={styles.btnCancel} onClick={onClose}>
+              Скасувати
+            </button>
+            <button
+              type="submit"
+              className={styles.btnSubmit}
+              disabled={!loginData.email || !loginData.password}
+            >
               Увійти
             </button>
           </div>
 
-          <section className={styles.underform}>
-            <div onClick={onSwitchToRegister} style={{cursor: "pointer"}}>
-              <span>Не маєте акаунту? </span>
-              <a>Зареєструватися</a>
-            </div>
-
-          <div onClick={onSwitchToForgot}>
-            <a className={styles.forgot} style={{cursor: "pointer"}}>Забули пароль?</a>
-          </div>
-
-          </section>
-        </div>
+        </form>
       </div>
     </div>
-  </form>
   );
 };
 
-export default Login
+export default Login;

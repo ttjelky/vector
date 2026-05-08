@@ -1,120 +1,424 @@
-import React, { useState, useEffect } from 'react';
-import { href, useNavigate } from 'react-router-dom';
-import { Link, NavLink } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, NavLink } from 'react-router-dom';
+import { useTabs } from '../../TabsContext';
+import { getTabsForRole, COMMON_TABS } from '../../navConfig';
 import styles from './styles/NavBar.module.css';
-import HomeIcon from './static/icons/Home.svg?react';
-import TournamentsIcon from './static/icons/Tournaments.svg?react';
-import WorksIcon from './static/icons/Works.svg?react';
-import SettingsIcon from './static/icons/Settings.svg?react';
-import ProfileIcon from './static/icons/Profile.svg?react';
-import InfoIcon from './static/icons/Info.svg?react';
-import LogoutIcon from './static/icons/Logout.svg?react';
-import BellIcon from './static/icons/Bell.svg?react';
-import Logo from './static/VectorLogo.svg';
+import nStyles from './styles/Notifications.module.css'
 
-const NavBar = ({children}) => {
+import HomeIcon        from './static/icons/Home.svg?react';
+import TournamentsIcon from './static/icons/Tournaments.svg?react';
+import WorksIcon       from './static/icons/Works.svg?react';
+import StatsIcon       from './static/icons/Stats.svg?react';
+import SettingsIcon    from './static/icons/Settings.svg?react';
+import ProfileIcon     from './static/icons/Profile.svg?react';
+import InfoIcon        from './static/icons/Info.svg?react';
+import LogoutIcon      from './static/icons/Logout.svg?react';
+import BellIcon        from './static/icons/Bell.svg?react';
+import Logo            from './static/VectorLogo.svg';
+import cross           from './static/icons/cross.svg';
+import NewsIcon        from "./static/icons/News.svg?react";
+
+import { ComposeModal, NotificationDropdown } from './Notifications';
+
+const API = 'http://127.0.0.1:8000/api';
+const WS_BASE = 'ws://127.0.0.1:8000/ws';
+const getToken = () => localStorage.getItem('accessToken');
+
+const ICON_MAP = {
+  home:        HomeIcon,
+  tournaments: TournamentsIcon,
+  works:       WorksIcon,
+  stats:       StatsIcon,
+  settings:    SettingsIcon,
+  profile:     ProfileIcon,
+  help:        InfoIcon,
+  news:        NewsIcon,
+};
+
+const renderIcon = (key) => {
+  const Icon = ICON_MAP[key] ?? HomeIcon;
+  return <Icon className={styles.sidebarIcon} />;
+};
+
+/* ─── Один пункт меню ─── */
+const NavItem = ({ tabKey, label, path, children }) => (
+  <li className={styles.sidebarEl}>
+    <NavLink
+      to={path}
+      className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}
+    >
+      {renderIcon(tabKey)}
+      <span className={styles.sidebarText}>{label}</span>
+    </NavLink>
+    {children}
+  </li>
+);
+
+/* ─── Вкладка турніру з анімацією ─── */
+const TournamentTab = ({ tab, onClose, animate }) => {
+  const [phase, setPhase] = useState(animate ? 'hidden' : 'open');
+
+  useEffect(() => {
+    if (!animate) return;
+    const raf = requestAnimationFrame(() => {
+      setPhase('opening');
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleClose = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setPhase('closing');
+    setTimeout(() => onClose(tab.id), 250);
+  };
+
+  const cls = [
+    styles.nestedTournament,
+    phase === 'hidden'  ? styles.tabHidden  : '',
+    phase === 'opening' ? styles.tabOpening : '',
+    phase === 'closing' ? styles.tabClosing : '',
+  ].filter(Boolean).join(' ');
+
+  return (
+    <div className={cls}>
+      <NavLink
+        to={`/tournament/${tab.id}`}
+        className={({ isActive }) =>
+          isActive ? styles.activeNestedLink : styles.nestedLink
+        }
+        title={tab.name}
+      >
+        <span className={styles.tabName}>└ {tab.name}</span>
+        <button
+          className={styles.closeIconWrapper}
+          onClick={handleClose}
+          aria-label={`Закрити ${tab.name}`}
+          type="button"
+        >
+          <img src={cross} className={styles.closeIcon} alt="" />
+        </button>
+      </NavLink>
+    </div>
+  );
+};
+
+/* ─── Хук: WebSocket для подій виключення з турніру ─────────────────────────
+ *
+ * Бекенд надсилає повідомлення формату:
+ *   { type: "tournament_removed", tournament_id: <id> }
+ *
+ * При отриманні такого повідомлення вкладка учасника автоматично закривається.
+ *
+ * Якщо WebSocket недоступний — хук тихо завершує роботу без помилок.
+ * Reconnect відбувається через 3 секунди після обриву з'єднання.
+ */
+const useTournamentRemovalWS = (removeTabById) => {
+  const wsRef       = useRef(null);
+  const mountedRef  = useRef(true);
+  const retryTimer  = useRef(null);
+
+  useEffect(() => {
+    mountedRef.current = true;
+
+    const connect = () => {
+      const token = getToken();
+      if (!token || !mountedRef.current) return;
+
+      try {
+        const ws = new WebSocket(`${WS_BASE}/user-events/?token=${token}`);
+        wsRef.current = ws;
+
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'tournament_removed' && data.tournament_id != null) {
+              removeTabById(data.tournament_id);
+            }
+          } catch {
+            // некоректний JSON — ігноруємо
+          }
+        };
+
+        ws.onclose = () => {
+          if (!mountedRef.current) return;
+          // Перепідключення через 3 секунди
+          retryTimer.current = setTimeout(connect, 3000);
+        };
+
+        ws.onerror = () => {
+          ws.close(); // onclose спрацює і запустить retry
+        };
+      } catch {
+        // WebSocket не підтримується або невалідний URL
+      }
+    };
+
+    connect();
+
+    return () => {
+      mountedRef.current = false;
+      clearTimeout(retryTimer.current);
+      wsRef.current?.close();
+    };
+  }, [removeTabById]);
+};
+
+/* ─── Головний компонент ─── */
+const NavBar = ({ children }) => {
+  const { openTabs, closeTab, removeTabById } = useTabs();
   const navigate = useNavigate();
   const [fullUserName, setFullUserName] = useState('');
 
-  useEffect(() => {
-        const storedName = localStorage.getItem('fullUserName');
-        if (storedName) {
-            setFullUserName(storedName.trim());
-        }
-    }, []);
+  const [avatar, setAvatar]               = useState(null);
+  const [bellOpen, setBellOpen]           = useState(false);
+  const [compose, setCompose]             = useState(false);
+  const [notifs, setNotifs]               = useState([]);
+  const [notifsLoading, setNotifsLoading] = useState(false);
 
-    const handleLogout = () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('fullUserName');
-        navigate('/');
+  // mobile sidebar
+  const [sidebarOpen, setSidebarOpen]       = useState(false);
+  const [sidebarClosing, setSidebarClosing] = useState(false);
+
+  const bellRef    = useRef();
+  const sidebarRef = useRef();
+
+  const [showLogout, setShowLogout] = useState(
+    () => JSON.parse(localStorage.getItem("setting_logout") ?? "true")
+  );
+
+  // ── Підключаємо WS-хук для авто-закриття вкладок ────────────────────────
+  useTournamentRemovalWS(removeTabById);
+
+  useEffect(() => {
+    const syncLogout = () =>
+      setShowLogout(JSON.parse(localStorage.getItem("setting_logout") ?? "true"));
+    window.addEventListener("settings-updated", syncLogout);
+    window.addEventListener("storage", syncLogout);
+    return () => {
+      window.removeEventListener("settings-updated", syncLogout);
+      window.removeEventListener("storage", syncLogout);
     };
+  }, []);
+
+  const role = localStorage.getItem('userRole') ?? 'participant';
+  const roleTabs = getTabsForRole(role);
+
+  const initialTabIds = useRef(new Set(openTabs.map(t => String(t.id))));
+
+  useEffect(() => {
+    const storedName = localStorage.getItem('fullUserName');
+    if (storedName) setFullUserName(storedName.trim());
+    const token = getToken();
+    if (token) {
+      fetch(`${API}/users/profile/`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d?.avatar) setAvatar(`http://127.0.0.1:8000${d.avatar}`); })
+        .catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
+    const applyWarm = () => {
+      const warm = JSON.parse(localStorage.getItem("setting_warm") ?? "false");
+      document.documentElement.style.filter = warm
+        ? "sepia(0.25) saturate(1.1) brightness(0.98)"
+        : "";
+    };
+    applyWarm();
+    window.addEventListener("settings-updated", applyWarm);
+    window.addEventListener("storage", applyWarm);
+    return () => {
+      window.removeEventListener("settings-updated", applyWarm);
+      window.removeEventListener("storage", applyWarm);
+    };
+  }, []);
+
+  // ── Закрити sidebar по кліку поза ────────────────────────────────────────
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const handler = (e) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+        closeSidebar();
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [sidebarOpen]);
+
+  const closeSidebar = () => {
+    setSidebarClosing(true);
+    setTimeout(() => {
+      setSidebarOpen(false);
+      setSidebarClosing(false);
+    }, 320);
+  };
+
+  // ── Сповіщення ───────────────────────────────────────────────────────────
+  const fetchNotifs = async () => {
+    setNotifsLoading(true);
+    try {
+      const res = await fetch(`${API}/notifications/`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (res.ok) setNotifs(await res.json());
+    } catch {}
+    finally { setNotifsLoading(false); }
+  };
+
+  const handleBellClick = () => {
+    const next = !bellOpen;
+    setBellOpen(next);
+    if (next) fetchNotifs();
+  };
+
+  useEffect(() => {
+    if (!bellOpen) return;
+    const handler = (e) => {
+      if (bellRef.current && !bellRef.current.contains(e.target)) setBellOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [bellOpen]);
+
+  const markAllRead = async () => {
+    await fetch(`${API}/notifications/mark-read/`, {
+      method: 'POST', headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    setNotifs(n => n.map(x => ({ ...x, is_read: true })));
+  };
+
+  const markOneRead = async (id) => {
+    await fetch(`${API}/notifications/mark-read/${id}/`, {
+      method: 'POST', headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    setNotifs(n => n.map(x => x.id === id ? { ...x, is_read: true } : x));
+  };
+
+  // ── Logout ───────────────────────────────────────────────────────────────
+  const handleLogout = (e) => {
+    e.preventDefault();
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('fullUserName');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userId');
+    // Сповіщаємо TabsContext про зміну акаунту — він скине всі вкладки
+    window.dispatchEvent(new Event('auth-changed'));
+    navigate('/');
+  };
+
+  const hasUnread = notifs.some(n => !n.is_read);
+
   return (
     <div className={styles.vectorApp}>
-      
+
+      {/* ── Верхня панель ── */}
       <header className={styles.topNavbar}>
+
         <div className={styles.navbarLogo}>
-          <img src={Logo} alt="Vector" style={{scale: 0.85}} />
+          <img src={Logo} alt="Vector" className={styles.logo} />
         </div>
 
-        {/* Пошук */}
         <div className={styles.search}>
-          <input type="search" placeholder="Пошук..." className={styles.searchInput} />
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" style={{opacity:0.4,flexShrink:0}}>
+            <circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/>
+          </svg>
+          <input
+            type="search"
+            placeholder="Пошук..."
+            className={styles.searchInput}
+          />
         </div>
 
         <div className={styles.navbarUserActions}>
           <span className={styles.userName}>{fullUserName}</span>
-          <button className={styles.notificationBtn} aria-label="Сповіщення">
-            <BellIcon alt="Сповіщення" className={styles.notificationIcon} />
-          </button>
-        </div>
+          {avatar
+              ? <img src={avatar} alt="avatar" className={styles.navbarAvatar} />
+              : (
+                <div className={styles.navbarAvatarPlaceholder}>
+                  {fullUserName?.[0]?.toUpperCase() || '?'}
+                </div>
+              )
+            }
+          <div className={nStyles.bellWrap} ref={bellRef}>
+              <button className={nStyles.bellBtn} aria-label="Сповіщення" onClick={handleBellClick}>
+                <BellIcon className={styles.notificationIcon} />
+                {hasUnread && <span className={nStyles.badge} />}
+              </button>
+              {bellOpen && (
+                <NotificationDropdown
+                  notifs={notifs}
+                  loading={notifsLoading}
+                  onClose={() => setBellOpen(false)}
+                  onCompose={() => { setBellOpen(false); setCompose(true); }}
+                  onMarkAllRead={markAllRead}
+                  onMarkOne={markOneRead}
+                />
+              )}
+            </div>
+          </div>
       </header>
 
-      {/* --- ОСНОВНА ОБЛАСТЬ, ПОДІЛЕНА НА САЙДБАР ТА КОНТЕНТ --- */}
       <div className={styles.mainWrapper}>
-        
-        {/* --- 2. ЛІВИЙ САЙДБАР (LEFT SIDEBAR) --- */}
         <aside className={styles.leftSidebar}>
-          {/* Основне меню (Меню) */}
+
           <nav className={styles.primaryNav}>
             <h3 className={styles.sidebarSectionTitle}>Меню</h3>
             <ul>
-              <li className={styles.sidebarEl}>
-<<<<<<< HEAD
-                <NavLink to="/dashboard" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>
-=======
-                <NavLink to="/admindashboard" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>
->>>>>>> 6604d3b (Сделав имя, аватарку в профиле)
-                  <HomeIcon className={styles.sidebarIcon}/> <span className={styles.sidebarText}>Головна</span>
-                </NavLink>
-              </li>
-              <li className={styles.sidebarEl}>
-                <NavLink to="/tournaments" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>
-                  <TournamentsIcon className={styles.sidebarIcon} /> <span className={styles.sidebarText}>Турніри</span>
-                </NavLink>
-              </li>
-              <li className={styles.sidebarEl}>
-                <NavLink to="/works" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>
-                  <WorksIcon className={styles.sidebarIcon} /> <span className={styles.sidebarText}>Мої роботи</span>
-                </NavLink>
-              </li>
+              {roleTabs.map(({ key, label, path }) => (
+                <NavItem key={key} tabKey={key} label={label} path={path}>
+                  {key === 'tournaments' && openTabs.length > 0 && (
+                    <div className={styles.openedList}>
+                      {openTabs.map((tab) => (
+                        <TournamentTab
+                          key={tab.id}
+                          tab={tab}
+                          onClose={closeTab}
+                          animate={!initialTabIds.current.has(String(tab.id))}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </NavItem>
+              ))}
             </ul>
           </nav>
 
-          {/* Розділ "Інше" */}
           <nav className={styles.secondaryNav}>
             <h3 className={styles.sidebarSectionTitle}>Інше</h3>
             <ul>
-              <li className={styles.sidebarEl}>
-                <NavLink to="/settings" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>
-                  <SettingsIcon className={styles.sidebarIcon} /> <span className={styles.sidebarText}>Налаштування</span>
-                </NavLink>
-              </li>
-              <li className={styles.sidebarEl}>
-                <NavLink to="/profile" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>
-                  <ProfileIcon className={styles.sidebarIcon} /> <span className={styles.sidebarText}>Мій профіль</span>
-                </NavLink>
-              </li>
-              <li className={styles.sidebarEl}>
-                <NavLink to="/help" className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}>
-                  <InfoIcon className={styles.sidebarIcon} /> <span className={styles.sidebarText}>Допомога</span>
-                </NavLink>
-              </li>
+              {COMMON_TABS.map(({ key, label, path }) => (
+                <NavItem key={key} tabKey={key} label={label} path={path} />
+              ))}
             </ul>
           </nav>
 
-          {/* Розділ "Вийти" у самому низу */}
           <div className={styles.logoutSection}>
-            <a href="/" className={styles.logoutBtn}>
-              <LogoutIcon className={styles.logoutIcon}/> <span className={styles.logoutText}>Вийти</span>
-            </a>
+            {showLogout && (
+            <button
+              onClick={handleLogout}
+              className={styles.logoutBtn}
+              type="button"
+            >
+              <LogoutIcon className={styles.logoutIcon} style={{ color: 'rgb(215,125,126)', fill: 'rgb(215,125,126)' }} />
+              <span className={styles.logoutText}>Вийти</span>
+            </button>
+            )}
           </div>
+
         </aside>
 
-      <main className={styles.contentArea}>
-        {children}
-      </main>
-    </div>
-
+        <main className={styles.contentArea}>
+          {children}
+        </main>
+      </div>
+      {compose && (
+        <ComposeModal onClose={() => setCompose(false)} onSent={fetchNotifs} />
+      )}
     </div>
   );
 };
