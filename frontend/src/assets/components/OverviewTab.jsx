@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import styles from "./styles/OverviewTab.module.css";
-import { RichTextArea, ImagePicker } from "./CreateTournamentModal";
+import { ImagePicker } from "./CreateTournamentModal";
+import { RichTextArea } from "./RichTextArea";
 import { StatusBadge, InfoRow } from "./TournamentShared";
 import { formatDate, toInputDatetime } from "./tournamentHelpers";
 import { STOCK_IMAGES } from "./TournamentCard";
@@ -20,7 +21,7 @@ function RichContent({ html, emptyText = "Відсутній.", className }) {
   }
   return (
     <div
-      className={`${styles.richContent} ${className || ""}`}
+      className={`richContent ${className || ""}`}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

@@ -560,10 +560,6 @@ export function RichTextArea({ id, rows = 4, placeholder, value, onChange }) {
         />
       </div>
 
-      {/* Footer */}
-      <div className={styles.editorFooter}>
-        <span className={styles.editorCharCount}>{charCount} символів</span>
-      </div>
     </div>
   );
 }

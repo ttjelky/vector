@@ -348,7 +348,7 @@ export default function RoundsTab({
                 </div>
 
                 {activeRound.description && (
-                  <div className={styles.roundInfoDesc} dangerouslySetInnerHTML={{ __html: activeRound.description }} />
+                  <div className={`${styles.roundInfoDesc} richContent`} dangerouslySetInnerHTML={{ __html: activeRound.description }} />
                 )}
 
                 {/* Посилання та файли раунду */}
