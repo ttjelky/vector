@@ -25,11 +25,14 @@ class Tournament(models.Model):
 
     # Дати
     start_date         = models.DateTimeField(null=True, blank=True)
+    end_date           = models.DateTimeField(null=True, blank=True)
     registration_start = models.DateTimeField(null=True, blank=True)
     registration_end   = models.DateTimeField(null=True, blank=True)
 
     # Числові значення
-    max_teams = models.IntegerField(null=True, blank=True)
+    max_teams     = models.IntegerField(null=True, blank=True)
+    min_team_size = models.IntegerField(null=True, blank=True)
+    max_team_size = models.IntegerField(null=True, blank=True)
 
     # ── Інвайт для учасників ──────────────────────────────────────────────────
     invite_token = models.UUIDField(

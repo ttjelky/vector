@@ -85,8 +85,8 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
       const payload = new FormData();
       payload.append("name",               form.name.trim());
       payload.append("description",        form.description || "");
-      payload.append("format",             form.format.trim()      || "");
       payload.append("start_date",         form.start_date         || "");
+      payload.append("end_date",           form.end_date           || "");
       payload.append("registration_start", form.registration_start || "");
       payload.append("registration_end",   form.registration_end   || "");
       payload.append("max_teams",          form.max_teams !== "" ? Number(form.max_teams) : "");
@@ -134,12 +134,12 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
             />
 
             <label className={styles.editLabel}>
-              Формат
-              <input className={styles.editInput} name="format" value={form.format} onChange={handleChange} />
-            </label>
-            <label className={styles.editLabel}>
               Початок турніру
               <input className={styles.editInput} type="datetime-local" name="start_date" value={form.start_date} onChange={handleChange} />
+            </label>
+            <label className={styles.editLabel}>
+              Кінець турніру
+              <input className={styles.editInput} type="datetime-local" name="end_date" value={form.end_date} onChange={handleChange} min={form.start_date || undefined} />
             </label>
             <label className={styles.editLabel}>
               Початок реєстрації
@@ -198,12 +198,54 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Деталі</h2>
-        <div className={styles.infoGrid}>
-          <InfoRow label="Формат"             value={FORMAT_LABELS[tournament.format] || "Не вказано"} />
-          <InfoRow label="Початок турніру"    value={formatDate(tournament.start_date)} />
-          <InfoRow label="Початок реєстрації" value={formatDate(tournament.registration_start)} />
-          <InfoRow label="Кінець реєстрації"  value={formatDate(tournament.registration_end)} />
-          {tournament.max_teams && <InfoRow label="Макс. команд" value={tournament.max_teams} />}
+        <div className={styles.detailCards}>
+
+          <div className={styles.detailCard}>
+            <span className={styles.detailCardLabel}>Формат</span>
+            <span className={styles.detailCardValue}>{FORMAT_LABELS[tournament.format] || "Не вказано"}</span>
+          </div>
+
+          <div className={styles.detailCard}>
+            <span className={styles.detailCardLabel}>Початок турніру</span>
+            <span className={styles.detailCardValue}>{formatDate(tournament.start_date) || "—"}</span>
+          </div>
+
+          <div className={styles.detailCard}>
+            <span className={styles.detailCardLabel}>Кінець турніру</span>
+            <span className={styles.detailCardValue}>{formatDate(tournament.end_date) || "—"}</span>
+          </div>
+
+          <div className={styles.detailCard}>
+            <span className={styles.detailCardLabel}>Початок реєстрації</span>
+            <span className={styles.detailCardValue}>{formatDate(tournament.registration_start) || "—"}</span>
+          </div>
+
+          <div className={styles.detailCard}>
+            <span className={styles.detailCardLabel}>Кінець реєстрації</span>
+            <span className={styles.detailCardValue}>{formatDate(tournament.registration_end) || "—"}</span>
+          </div>
+
+          <div className={styles.detailCard}>
+            <span className={styles.detailCardLabel}>
+              {tournament.format === "team" ? "Макс. команд" : "Макс. учасників"}
+            </span>
+            <span className={styles.detailCardValue}>{tournament.max_teams || "Без обмежень"}</span>
+          </div>
+
+          {tournament.format === "team" && (
+            <div className={styles.detailCard}>
+              <span className={styles.detailCardLabel}>Розмір команди</span>
+              <span className={styles.detailCardValue}>
+                {tournament.min_team_size && tournament.max_team_size
+                  ? `${tournament.min_team_size} – ${tournament.max_team_size} гравців`
+                  : tournament.max_team_size
+                    ? `до ${tournament.max_team_size} гравців`
+                    : "Не вказано"
+                }
+              </span>
+            </div>
+          )}
+
         </div>
       </section>
 
@@ -228,8 +270,8 @@ function buildForm(tournament) {
   return {
     name:               tournament.name               || "",
     description:        tournament.description        || "",
-    format:             tournament.format             || "",
     start_date:         toInputDatetime(tournament.start_date),
+    end_date:           toInputDatetime(tournament.end_date),
     registration_start: toInputDatetime(tournament.registration_start),
     registration_end:   toInputDatetime(tournament.registration_end),
     max_teams:          tournament.max_teams          || "",

@@ -15,6 +15,18 @@ import "./styles/richContent.css";
 
 const EMPTY_FORM = { title: "", description: "", start_date: "", end_date: "" };
 
+// ─── Єдина функція кольорів статусу ───────────────────────────────────────────
+// Використовується і для pill-tabs/бейджа, і для банерів адміна —
+// щоб кольори скрізь були однакові.
+function getStatusColors(status) {
+  const isUpcoming  = /очікує|upcoming|pending|scheduled/i.test(status);
+  const isCompleted = /завершен|completed|finished|ended|closed/i.test(status);
+  if (isUpcoming)  return { color: "#b45309", background: "#fffbeb", border: "#fde68a" };
+  if (isCompleted) return { color: "#991b1b", background: "#fff1f2", border: "#fecdd3" };
+  // активний або без дат — завжди зелений
+  return { color: "#15803d", background: "#f0fdf4", border: "#bbf7d0" };
+}
+
 // ─── Icon helpers ──────────────────────────────────────────────────────────────
 
 function EditIcon() {
@@ -80,6 +92,8 @@ export default function RoundsTab({
 
   const getParticipantAccess = (round) => {
     if (isPrivileged) return { showTasks: true, canSubmit: true };
+    // Якщо дати не вказані — раунд відкритий безстроково
+    if (!round.start_date && !round.end_date) return { showTasks: true, canSubmit: true };
     const status = roundStatus(round);
     // підтримуємо різні варіанти рядків статусу
     const isUpcoming  = /очікує|upcoming|pending|scheduled/i.test(status);
@@ -295,8 +309,9 @@ export default function RoundsTab({
           {/* ── Pill-tabs раундів ── */}
           <div className={styles.pillTabsWrapper}>
             {rounds.map((round) => {
-              const rstatus = roundStatus(round);
-              const rstyle  = getRoundStatusStyle(rstatus);
+              const rstatus  = roundStatus(round);
+              const noDates  = !round.start_date && !round.end_date;
+              const sc       = getStatusColors(noDates ? "active" : rstatus);
               const isActive = round.id === activeRoundId;
               return (
                 <button
@@ -306,7 +321,7 @@ export default function RoundsTab({
                 >
                   <span
                     className={styles.pillTabDot}
-                    style={{ background: isActive ? "rgba(255,255,255,0.7)" : rstyle.color }}
+                    style={{ background: isActive ? "rgba(255,255,255,0.7)" : sc.color }}
                   />
                   {round.title}
                 </button>
@@ -333,14 +348,16 @@ export default function RoundsTab({
                     {/* Статус бейдж */}
                     {(() => {
                       const rstatus = roundStatus(activeRound);
-                      const rstyle  = getRoundStatusStyle(rstatus);
+                      const noDates = !activeRound.start_date && !activeRound.end_date;
+                      const sc      = getStatusColors(noDates ? "active" : rstatus);
+                      const label   = noDates ? "Завжди активний" : rstatus;
                       return (
                         <span
                           className={styles.roundStatus}
-                          style={{ color: rstyle.color, background: rstyle.background ?? "rgba(0,0,0,0.05)" }}
+                          style={{ color: sc.color, background: sc.background, border: `1px solid ${sc.border}` }}
                         >
-                          <span className={styles.statusDot} style={{ background: rstyle.color }} />
-                          {rstatus}
+                          <span className={styles.statusDot} style={{ background: sc.color }} />
+                          {label}
                         </span>
                       );
                     })()}
@@ -427,13 +444,47 @@ export default function RoundsTab({
                       )}
                     </div>
 
-                    {/* Банер «здача закрита» для завершеного раунду */}
+                    {/* Банер «здача закрита» для завершеного раунду (учасники) */}
                     {!canSubmit && (
                       <div className={styles.submissionClosedBanner}>
                         <span>🏁</span>
                         Раунд завершено — здача робіт закрита.
                       </div>
                     )}
+
+                    {/* Інфо-банер для адміна/журі про поточний стан для учасників */}
+                    {isPrivileged && (() => {
+                      const noDates = !activeRound.start_date && !activeRound.end_date;
+                      const status = roundStatus(activeRound);
+                      const isUpcoming  = /очікує|upcoming|pending|scheduled/i.test(status);
+                      const isCompleted = /завершен|completed|finished|ended|closed/i.test(status);
+                      const sc = getStatusColors(noDates ? "active" : status);
+                      const bannerStyle = { color: sc.color, background: sc.background, borderColor: sc.border };
+                      if (noDates) return (
+                        <div className={styles.privilegedNoticeBanner} style={bannerStyle}>
+                          <span>✅</span>
+                          <span>Дати не вказані — учасники <strong>завжди бачать завдання і можуть здавати роботи</strong>.</span>
+                        </div>
+                      );
+                      if (isUpcoming) return (
+                        <div className={styles.privilegedNoticeBanner} style={bannerStyle}>
+                          <span>👁</span>
+                          <span>Учасники бачать цей раунд, але <strong>не бачать завдань</strong> — раунд ще не розпочався.</span>
+                        </div>
+                      );
+                      if (isCompleted) return (
+                        <div className={styles.privilegedNoticeBanner} style={bannerStyle}>
+                          <span>🔒</span>
+                          <span>Учасники бачать завдання, але <strong>не можуть здавати роботи</strong> — раунд завершено.</span>
+                        </div>
+                      );
+                      return (
+                        <div className={styles.privilegedNoticeBanner} style={bannerStyle}>
+                          <span>✅</span>
+                          <span>Учасники <strong>можуть здавати роботи</strong> — раунд активний.</span>
+                        </div>
+                      );
+                    })()}
 
                     {(activeRound.tasks?.length ?? 0) === 0 && !taskForms.has(activeRound.id) && (
                       <p className={styles.empty}>Завдань у цьому раунді ще немає.</p>

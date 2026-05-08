@@ -225,6 +225,7 @@ export default function TournamentPage() {
               tournamentId={id}
               myRole={myRole}
               loading={false}
+              maxParticipants={tournament.max_teams}
             />
           )}
 

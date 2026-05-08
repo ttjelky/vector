@@ -554,6 +554,20 @@
   margin-bottom: 2px;
 }
 
+.privilegedNoticeBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  font-size: 12.5px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+}
+.privilegedNoticeBanner strong { font-weight: 600; }
+
+
+
 /* ─── Empty states ───────────────────────────────────────────────────────────── */
 .emptyBlock {
   display: flex;

@@ -160,9 +160,13 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
   const [description,    setDescription]    = useState("");
   const [rules,          setRules]          = useState("");
   const [startDate,      setStartDate]      = useState("");
+  const [endDate,        setEndDate]        = useState("");
   const [maxTeams,       setMaxTeams]       = useState("");
   const [regStart,       setRegStart]       = useState("");
   const [regEnd,         setRegEnd]         = useState("");
+
+  const [minTeamSize,    setMinTeamSize]    = useState("");
+  const [maxTeamSize,    setMaxTeamSize]    = useState("");
 
   const [imageMode,      setImageMode]      = useState("stock");
   const [stockImage,     setStockImage]     = useState(STOCK_IMAGES[0].id);
@@ -172,6 +176,8 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
   const [tournamentType, setTournamentType] = useState("");
   const [typeError,      setTypeError]      = useState(false);
   const [nameError,      setNameError]      = useState(false);
+  const [endDateError,   setEndDateError]   = useState(false);
+  const [maxTeamSizeError, setMaxTeamSizeError] = useState(false);
   const [imageConverting, setImageConverting] = useState(false);
   const [convertError,    setConvertError]    = useState(false);
 
@@ -195,8 +201,10 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
   const handleNext = () => {
     if (step === 1 && !name.trim()) { setNameError(true); return; }
     if (step === 1 && !tournamentType) { setTypeError(true); return; }
+    if (step === 1 && !endDate) { setEndDateError(true); return; }
     setNameError(false);
     setTypeError(false);
+    setEndDateError(false);
     setPrevStep(step);
     setStep(s => Math.min(s + 1, TOTAL_STEPS));
   };
@@ -220,6 +228,7 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tournamentType) { setTypeError(true); return; }
+    if (tournamentType === "team" && !maxTeamSize) { setMaxTeamSizeError(true); return; }
     if (imageConverting) return; // чекаємо завершення конвертації HEIC
     const body = new FormData();
     body.append("name",               name);
@@ -227,12 +236,17 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
     body.append("rules",              rules);
     body.append("accent_color",       accentColor);
     body.append("image_mode",         imageMode);
-    body.append("start_date",         startDate);
+    body.append("start_date",         startDate ? startDate + "T00:00:00" : "");
+    body.append("end_date",           endDate   ? endDate   + "T00:00:00" : "");
     body.append("max_teams",          maxTeams);
     body.append("tournament_type",    tournamentType);
     body.append("format",             tournamentType);
     body.append("registration_start", regStart);
     body.append("registration_end",   regEnd);
+    if (tournamentType === "team") {
+      body.append("min_team_size", minTeamSize || "3");
+      body.append("max_team_size", maxTeamSize);
+    }
     if (imageMode === "stock")                body.append("stock_image",  stockImage);
     if (imageMode === "custom" && customFile) body.append("custom_image", customFile);
     try {
@@ -334,14 +348,16 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                       />
                     </div>
                     <div className={styles.field}>
-                      <label htmlFor="maxTeams" className={styles.label}>
-                        Макс. учасників <span className={styles.optional}>необов'язково</span>
+                      <label htmlFor="endDate" className={styles.label}>
+                        Дата кінця <span className={styles.editRequired}>*</span>
                       </label>
                       <input
-                        id="maxTeams" type="number" placeholder="Без обмежень"
-                        min={2} className={styles.input}
-                        value={maxTeams} onChange={(e) => setMaxTeams(e.target.value)}
+                        id="endDate" type="date" className={`${styles.input} ${endDateError ? styles.inputError : ""}`}
+                        value={endDate} onChange={(e) => { setEndDate(e.target.value); setEndDateError(false); }}
+                        min={startDate || undefined}
+                        required
                       />
+                      {endDateError && <p className={styles.fieldError}>Дата кінця турніру обов'язкова</p>}
                     </div>
                   </div>
 
@@ -372,6 +388,18 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                     </div>
                     {typeError && <p className={styles.fieldError}>Оберіть тип турніру</p>}
                   </div>
+
+                  <div className={`${styles.field} ${styles.stagger3}`}>
+                    <label htmlFor="maxTeams" className={styles.label}>
+                      {tournamentType === "team" ? "Макс. команд" : "Макс. учасників"}{" "}
+                      <span className={styles.optional}>необов'язково</span>
+                    </label>
+                    <input
+                      id="maxTeams" type="number" placeholder="Без обмежень"
+                      min={2} className={styles.input}
+                      value={maxTeams} onChange={(e) => setMaxTeams(e.target.value)}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -395,7 +423,9 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                     />
                   </div>
                   <div className={`${styles.sectionDivider} ${styles.stagger3}`}>
-                    <span className={styles.sectionTitle}>Реєстрація команд, учасників</span>
+                    <span className={styles.sectionTitle}>
+                      {tournamentType === "team" ? "Реєстрація команд" : "Реєстрація учасників"}
+                    </span>
                     <span className={styles.sectionLine} />
                   </div>
                   <div className={`${styles.regBlock} ${styles.stagger4}`}>
@@ -418,6 +448,44 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                       </div>
                     </div>
                   </div>
+
+                  {tournamentType === "team" && (
+                    <>
+                      <div className={`${styles.sectionDivider} ${styles.stagger4}`}>
+                        <span className={styles.sectionTitle}>Розмір команди</span>
+                        <span className={styles.sectionLine} />
+                      </div>
+                      <div className={`${styles.regBlock} ${styles.stagger4}`}>
+                        <div className={styles.twoCol}>
+                          <div className={styles.field}>
+                            <label htmlFor="minTeamSize" className={styles.label}>
+                              Мін. гравців <span className={styles.optional}>необов'язково</span>
+                            </label>
+                            <input
+                              id="minTeamSize" type="number" min={3}
+                              placeholder="За замовч.: 3"
+                              className={styles.input}
+                              value={minTeamSize} onChange={(e) => setMinTeamSize(e.target.value)}
+                            />
+                          </div>
+                          <div className={styles.field}>
+                            <label htmlFor="maxTeamSize" className={styles.label}>
+                              Макс. гравців <span className={styles.editRequired}>*</span>
+                            </label>
+                            <input
+                              id="maxTeamSize" type="number" min={minTeamSize || 3}
+                              placeholder="Вкажіть ліміт"
+                              className={`${styles.input} ${maxTeamSizeError ? styles.inputError : ""}`}
+                              value={maxTeamSize}
+                              onChange={(e) => { setMaxTeamSize(e.target.value); setMaxTeamSizeError(false); }}
+                              required
+                            />
+                            {maxTeamSizeError && <p className={styles.fieldError}>Вкажіть макс. кількість гравців</p>}
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>

@@ -42,7 +42,7 @@ function MemberAvatar({ member }) {
   );
 }
 
-export default function ParticipantsTab({ tournamentId, myRole, loading }) {
+export default function ParticipantsTab({ tournamentId, myRole, loading, maxParticipants }) {
   const [members,        setMembers]        = useState([]);
   const [membersLoading, setMembersLoading] = useState(true);
   const [activeTab,      setActiveTab]      = useState("participant");
@@ -197,6 +197,9 @@ export default function ParticipantsTab({ tournamentId, myRole, loading }) {
       <div className={styles.participantsHeader}>
         <span className={styles.teamCount}>
           {TABS.find(t => t.key === activeTab)?.label}: {visibleMembers.length}
+          {activeTab === "participant" && maxParticipants
+            ? ` / ${maxParticipants}`
+            : ""}
         </span>
 
         {isOwner && (

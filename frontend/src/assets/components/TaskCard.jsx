@@ -147,7 +147,7 @@ function GradeResultPanel({ submissionId, taskId, roundId, tournamentId }) {
 
 // ─── MySubmissionPanel ────────────────────────────────────────────────────────
 
-function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed }) {
+function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed, canSubmit = true }) {
   const [submission,  setSubmission]  = useState(undefined);
   const [loading,     setLoading]     = useState(true);
   const [showForm,    setShowForm]    = useState(false);
@@ -234,18 +234,27 @@ function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed }) {
               {new Date(submission.submitted_at).toLocaleString("uk-UA")}
             </span>
             <div className={styles.mySubmissionActions}>
-              {!deadlinePassed && (
+              {!deadlinePassed && canSubmit && (
                 <button className={styles.editSubmissionBtn} onClick={() => setShowForm(true)}>
                   Редагувати
                 </button>
               )}
-              <button
-                className={styles.deleteSubmissionBtn}
-                onClick={() => setShowConfirm(true)}
-                title="Видалити здачу"
-              >
-                <TrashIconSm />
-              </button>
+              {canSubmit && (
+                <button
+                  className={styles.deleteSubmissionBtn}
+                  onClick={() => setShowConfirm(true)}
+                  title="Видалити здачу"
+                >
+                  <TrashIconSm />
+                </button>
+              )}
+              {!canSubmit && (
+                <span style={{
+                  fontSize: 12, fontWeight: 500, color: "#991b1b",
+                  background: "#fff1f2", border: "1px solid #fecdd3",
+                  borderRadius: 100, padding: "3px 10px", whiteSpace: "nowrap"
+                }}>🔒 Раунд завершено</span>
+              )}
             </div>
           </div>
 
@@ -390,7 +399,7 @@ function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
 
 // ─── Task Drawer ───────────────────────────────────────────────────────────────
 
-function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDate, onClose }) {
+function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDate, canSubmit = true, onClose }) {
   const [activeTab, setActiveTab] = useState("details");
 
   const isOwnerOrAdmin = myRole === "owner" || myRole === "admin";
@@ -532,6 +541,7 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
               roundId={roundId}
               tournamentId={tournamentId}
               deadlinePassed={deadlinePassed}
+              canSubmit={canSubmit}
             />
           )}
 
@@ -583,6 +593,7 @@ export function TaskCard({
   readOnly = false,
   myRole,
   roundEndDate,
+  canSubmit = true,
   // Legacy пропси (ігноруємо, залишаємо для сумісності)
   isOpen: _isOpen,
   onToggle: _onToggle,
@@ -662,6 +673,7 @@ export function TaskCard({
           readOnly={readOnly}
           myRole={myRole}
           roundEndDate={endDate}
+          canSubmit={canSubmit}
           onClose={() => setDrawerOpen(false)}
         />
       )}
