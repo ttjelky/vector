@@ -11,10 +11,10 @@
   padding: 60px 20px;
   text-align: center;
 }
-.stateIcon  { font-size: 32px; margin-bottom: 4px; }
-.errorText  { color: #e76b6b; font-weight: 500; font-size: 14px; }
-.emptyText  { color: #888; font-weight: 500; font-size: 15px; }
-.emptyHint  { color: #bbb; font-size: 13px; max-width: 300px; line-height: 1.5; }
+.stateIcon { font-size: 32px; margin-bottom: 4px; }
+.errorText { color: #e76b6b; font-weight: 500; font-size: 14px; }
+.emptyText { color: #888; font-weight: 500; font-size: 15px; }
+.emptyHint { color: #bbb; font-size: 13px; max-width: 300px; line-height: 1.5; }
 
 .spinner {
   width: 22px; height: 22px;
@@ -26,7 +26,30 @@
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ─── Team badge ──────────────────────────────────────────────────────────── */
+
+.teamBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #6366f1;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 100px;
+  animation: fadeInSlideUp 0.25s ease-out;
+}
+
+@keyframes fadeInSlideUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ─── Publish bar ─────────────────────────────────────────────────────────── */
+
 .publishBar {
   display: flex;
   align-items: center;
@@ -36,46 +59,21 @@
   border-radius: 14px;
   border: 1px solid;
 }
+.publishBarDraft  { background: #fafafa; border-color: #e8e8e8; }
+.publishBarActive { background: #f0faf4; border-color: #c3e8d1; }
 
-.publishBarDraft {
-  background: #fafafa;
-  border-color: #e8e8e8;
-}
-
-.publishBarActive {
-  background: #f0faf4;
-  border-color: #c3e8d1;
-}
-
-.publishInfo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+.publishInfo { display: flex; align-items: center; gap: 12px; }
 
 .publishDot {
-  width: 8px;
-  height: 8px;
+  width: 8px; height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
-
 .publishBarDraft  .publishDot { background: #ccc; }
 .publishBarActive .publishDot { background: #4caf7d; box-shadow: 0 0 0 3px rgba(76,175,125,0.18); }
 
-.publishStatus {
-  display: block;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #222;
-}
-
-.publishHint {
-  display: block;
-  font-size: 12px;
-  color: #aaa;
-  margin-top: 1px;
-}
+.publishStatus { display: block; font-size: 13.5px; font-weight: 600; color: #222; }
+.publishHint   { display: block; font-size: 12px; color: #aaa; margin-top: 1px; }
 
 .publishBtn {
   padding: 7px 16px;
@@ -86,29 +84,21 @@
   cursor: pointer;
   font-family: inherit;
   white-space: nowrap;
-  transition: background 0.14s, transform 0.1s;
   flex-shrink: 0;
+  transition: background 0.14s, transform 0.1s;
 }
-.publishBtn:active { transform: scale(0.97); }
+.publishBtn:active   { transform: scale(0.97); }
 .publishBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.publishBtnShow {
-  background: #111;
-  border-color: #111;
-  color: #fff;
-}
+.publishBtnShow { background: #111; border-color: #111; color: #fff; }
 .publishBtnShow:hover:not(:disabled) { background: #333; }
 
-.publishBtnHide {
-  background: #fff;
-  border-color: #ddd;
-  color: #666;
-}
+.publishBtnHide { background: #fff; border-color: #ddd; color: #666; }
 .publishBtnHide:hover:not(:disabled) { background: #f5f5f5; border-color: #ccc; }
 
 /* ─── Controls ────────────────────────────────────────────────────────────── */
-.controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
+.controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .controlsLabel { font-size: 13px; font-weight: 500; color: #999; white-space: nowrap; }
 
 .pills { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -123,8 +113,8 @@
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.14s, color 0.14s;
   white-space: nowrap;
+  transition: background 0.14s, color 0.14s;
 }
 .pill:hover { background: #ebebed; color: #333; }
 .pillActive {
@@ -136,6 +126,7 @@
 }
 
 /* ─── Table ───────────────────────────────────────────────────────────────── */
+
 .tableWrap {
   overflow-x: auto;
   border-radius: 16px;
@@ -145,7 +136,6 @@
 }
 
 .table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-
 .table thead tr { border-bottom: 1px solid #ebebeb; background: #fafafa; }
 
 .thRank, .thName, .thScore {
@@ -177,30 +167,72 @@
 .tdRank { text-align: center; padding: 12px 16px 12px 20px; font-size: 18px; width: 52px; }
 .rankNum { font-size: 13px; font-weight: 600; color: #ccc; }
 
-.tdName { padding: 10px 16px; min-width: 180px; }
+.tdName  { padding: 10px 16px; min-width: 180px; }
+.tdScore { text-align: center; padding: 12px 20px; white-space: nowrap; }
+.tdActive { background: #f3f4f8; }
+.tdTotal  { font-weight: 700; }
+
+/* ─── Participant / Team cell ─────────────────────────────────────────────── */
 
 .participant { display: flex; align-items: center; gap: 10px; }
 
 .avatar {
   width: 32px; height: 32px;
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #444;
   flex-shrink: 0;
 }
 
-.participantName { font-weight: 500; color: #111; font-size: 13.5px; }
+/* Для команд — квадратний аватар з заокругленими кутами */
+.teamAvatar {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #444;
+  flex-shrink: 0;
+}
 
-.tdScore { text-align: center; padding: 12px 20px; white-space: nowrap; }
-.tdActive { background: #f3f4f8; }
-.tdTotal  { font-weight: 700; }
+.participantInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.participantName {
+  font-weight: 500;
+  color: #111;
+  font-size: 13.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.participantSub {
+  font-size: 11.5px;
+  color: #aaa;
+}
+
+/* ─── Score cells ─────────────────────────────────────────────────────────── */
 
 .scoreValue { font-size: 13.5px; font-weight: 500; color: #444; }
 .totalValue { font-size: 14px; font-weight: 700; color: #111; }
 .noScore    { color: #ccc; font-size: 13px; }
 
 /* ─── Footnote ────────────────────────────────────────────────────────────── */
+
 .footnote { font-size: 12px; color: #ccc; margin: 0; padding-left: 2px; }
+
+/* ─── Export button ───────────────────────────────────────────────────────── */
 
 .exportBtn {
   display: flex;
@@ -211,14 +243,15 @@
   border: 1.5px solid #121212;
   border-radius: 100px;
   background: transparent;
-  color: #000000;
+  color: #000;
   font-size: 13px;
   font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
-.exportBtn:hover:not(:disabled) { background: #000000; color: #fff; }
+.exportBtn:hover:not(:disabled) { background: #000; color: #fff; }
 .exportBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .exportIcon { width: 16px; height: 16px; flex-shrink: 0; }
@@ -231,4 +264,3 @@
   animation: spin 0.7s linear infinite;
   flex-shrink: 0;
 }
-@keyframes spin { to { transform: rotate(360deg); } }

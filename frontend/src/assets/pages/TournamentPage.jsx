@@ -207,6 +207,7 @@ export default function TournamentPage() {
               tournamentId={id}
               myRole={myRole}
               loading={false}
+              tournamentType={tournament?.tournament_type}
             />
           )}
 
