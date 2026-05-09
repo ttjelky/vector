@@ -4,7 +4,7 @@ from .models import (
     Round, RoundLink, RoundAttachment,
     Task, TaskLink, TaskAttachment,
     Submission, SubmissionLink, SubmissionAttachment,
-    Grade,
+    Grade, JuryAssignment,
 )
 
 
@@ -206,12 +206,50 @@ class GradeWriteSerializer(serializers.Serializer):
     comment = serializers.CharField(allow_blank=True, default="")
 
 
+# ── JuryAssignment serializers ────────────────────────────────────────────────
+
+class JuryAssignmentSerializer(serializers.ModelSerializer):
+    """
+    Призначення журі для конкретного подання.
+    Використовується для перегляду/управління розподілом (admin/owner).
+    """
+    juror_username  = serializers.CharField(source='juror.username',   read_only=True)
+    juror_full_name = serializers.SerializerMethodField()
+    submission_info = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = JuryAssignment
+        fields = [
+            'id',
+            'tournament', 'juror', 'juror_username', 'juror_full_name',
+            'submission', 'submission_info',
+            'assigned_at',
+        ]
+        read_only_fields = ['tournament', 'assigned_at']
+
+    def get_juror_full_name(self, obj):
+        u = obj.juror
+        return f"{u.first_name} {u.last_name}".strip() or u.username
+
+    def get_submission_info(self, obj):
+        sub = obj.submission
+        return {
+            'id':         sub.id,
+            'task_title': sub.task.title,
+            'round_title': sub.task.round.title,
+            'author':     (
+                f"{sub.participant.first_name} {sub.participant.last_name}".strip()
+                or sub.participant.username
+            ),
+        }
+
+
 # ── Jury panel serializers ────────────────────────────────────────────────────
 
 class JurySubmissionSerializer(serializers.ModelSerializer):
     """
     Подання для журі — без особистих даних учасника (анонімізовано).
-    Містить my_grade поточного журі.
+    Містить my_grade поточного журі та кількість призначених рецензентів.
     """
     task_title  = serializers.CharField(source='task.title',        read_only=True)
     round_id    = serializers.IntegerField(source='task.round.id',  read_only=True)
@@ -228,6 +266,9 @@ class JurySubmissionSerializer(serializers.ModelSerializer):
     # Оцінка поточного журі
     my_grade = serializers.SerializerMethodField()
 
+    # Кількість призначених рецензентів (корисно для admin/owner)
+    assignment_count = serializers.SerializerMethodField()
+
     class Meta:
         model  = Submission
         fields = [
@@ -237,6 +278,7 @@ class JurySubmissionSerializer(serializers.ModelSerializer):
             'content_text', 'content_links', 'content_files',
             'submitted_at',
             'my_grade',
+            'assignment_count',
         ]
 
     def get_author_name(self, obj):
@@ -260,3 +302,7 @@ class JurySubmissionSerializer(serializers.ModelSerializer):
             'total':      grade.total,
             'updated_at': grade.updated_at,
         }
+
+    def get_assignment_count(self, obj):
+        """Скільки журі призначено на цю роботу."""
+        return obj.jury_assignments.count()

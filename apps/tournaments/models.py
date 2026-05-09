@@ -334,7 +334,7 @@ class Grade(models.Model):
     """
     Оцінка журі для конкретного подання.
     Одне журі — одна оцінка на одне подання (unique_together).
-    Бали зберігаються як JSON-словник: { "originality": 8, "execution": 7, ... }
+    Бали зберігаються як JSON-словник: { "backend_quality": 8, "database": 7, ... }
     """
     submission = models.ForeignKey(
         Submission,
@@ -368,3 +368,47 @@ class Grade(models.Model):
         """Перераховує та зберігає загальний бал."""
         self.total = sum(self.scores.values()) if self.scores else 0
         self.save(update_fields=['total'])
+
+
+# ── JuryAssignment ────────────────────────────────────────────────────────────
+
+class JuryAssignment(models.Model):
+    """
+    Призначення конкретного подання конкретному члену журі.
+
+    Формується автоматично через DistributeSubmissionsView або вручну
+    адміністратором/власником турніру.
+
+    Обмеження:
+      - одне журі не може отримати ту саму роботу двічі (unique_together)
+      - кількість призначень на журі і мінімальна кількість рецензентів
+        контролюються логікою розподілу у views.py
+    """
+    tournament = models.ForeignKey(
+        Tournament,
+        on_delete=models.CASCADE,
+        related_name='jury_assignments',
+        verbose_name='Турнір',
+    )
+    juror = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name='jury_assignments',
+        verbose_name='Журі',
+    )
+    submission = models.ForeignKey(
+        Submission,
+        on_delete=models.CASCADE,
+        related_name='jury_assignments',
+        verbose_name='Подання',
+    )
+    assigned_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата призначення')
+
+    class Meta:
+        unique_together = ('juror', 'submission')
+        ordering = ['assigned_at']
+        verbose_name = 'Призначення журі'
+        verbose_name_plural = 'Призначення журі'
+
+    def __str__(self):
+        return f'{self.juror.username} → {self.submission}'

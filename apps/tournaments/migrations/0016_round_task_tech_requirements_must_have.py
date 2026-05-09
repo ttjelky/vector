@@ -6,7 +6,7 @@ class Migration(migrations.Migration):
     dependencies = [
         # Вкажи назву свого додатку і номер попередньої міграції
         # Наприклад: ('tournaments', '0001_initial')
-        ('tournaments', '0001_initial'),
+        ('tournaments', '0015_merge_20260508_2051'),
     ]
 
     operations = [

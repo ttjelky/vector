@@ -52,7 +52,8 @@ export default function TournamentPage() {
   const [error,       setError]       = useState(null);
 
   const isOwner = myRole === "owner";
-  const isJury  = myRole === "jury";
+  const isJury      = myRole === "jury";
+  const isJuryPanel = myRole === "jury" || myRole === "admin" || myRole === "owner";
 
   useEffect(() => {
     API.get(`/tournaments/${id}/`)
@@ -132,7 +133,7 @@ export default function TournamentPage() {
     { id: "rounds",       label: "Раунди" },
     { id: "participants", label: "Учасники" },
     { id: "leaderboard",  label: "Таблиця лідерів" },
-    ...(isJury ? [{ id: "jury", label: "Панель журі" }] : []),
+    ...(isJuryPanel ? [{ id: "jury", label: "Панель журі" }] : []),
   ];
 
   return (
@@ -156,7 +157,7 @@ export default function TournamentPage() {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <StatusBadge status={status} />
-              {isJury && (
+              {isJuryPanel && (
                 <span style={{
                   fontSize: 11.5,
                   fontWeight: 600,
@@ -231,11 +232,12 @@ export default function TournamentPage() {
             />
           )}
 
-          {activeTab === "jury" && isJury && (
+            {activeTab === "jury" && (myRole === "jury" || myRole === "admin" || myRole === "owner") && (
             <JuryTab
               tournamentId={id}
               rounds={rounds}
               loading={roundsLoading}
+              myRole={myRole}
             />
           )}
 
