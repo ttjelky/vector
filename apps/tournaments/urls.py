@@ -18,6 +18,7 @@ from .views import (
     SubmissionGradeView, ParticipantGradesNewsView,
     LeaderboardView,
 )
+from .jury_views import JuryPendingSubmissionsView  # ← нове
 
 urlpatterns = [
     # ── Tournaments ────────────────────────────────────────────────────────────
@@ -41,6 +42,7 @@ urlpatterns = [
     # ── Jury panel ─────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/jury/submissions/', JurySubmissionsView.as_view(), name='jury-submissions'),
     path('<int:tournament_pk>/jury/submissions/<int:submission_pk>/grade/', JuryGradeView.as_view(), name='jury-grade'),
+    path('jury/pending-submissions/', JuryPendingSubmissionsView.as_view(), name='jury-pending-submissions'),  # ← нове
 
     # ── Leaderboard ────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/leaderboard/', LeaderboardView.as_view(), name='leaderboard'),
@@ -77,7 +79,7 @@ urlpatterns = [
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/links/', SubmissionLinkCreateView.as_view(), name='submission-link-create'),
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/links/<int:pk>/', SubmissionLinkDeleteView.as_view(), name='submission-link-delete'),
 
-    # ── Submission grade (for participant)
+    # ── Submission grade (for participant) ────────────────────────────────────
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/grade/', SubmissionGradeView.as_view(), name='submission-grade'),
 
     # ── Submission attachments ────────────────────────────────────────────────
