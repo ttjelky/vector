@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import styles from "./styles/TaskCard.module.css";
 import API from "../../api";
@@ -52,6 +53,14 @@ function formatDeadline(endDate) {
   });
 }
 
+// ─── Score color helper ────────────────────────────────────────────────────────
+
+function scoreColorClass(pct) {
+  if (pct >= 75) return { bar: styles.barHigh, text: styles.scoreHigh };
+  if (pct >= 40) return { bar: styles.barMid,  text: styles.scoreMid  };
+  return           { bar: styles.barLow,  text: styles.scoreLow  };
+}
+
 // ─── GradeResultPanel ──────────────────────────────────────────────────────────
 
 function GradeResultPanel({ submissionId, taskId, roundId, tournamentId }) {
@@ -66,7 +75,7 @@ function GradeResultPanel({ submissionId, taskId, roundId, tournamentId }) {
       .then((r) => setGrade(r.data))
       .catch(() => setGrade(null))
       .finally(() => setLoading(false));
-  }, [submissionId]);
+  }, [submissionId]); // eslint-disable-line
 
   if (loading) return <p className={styles.empty}>Завантаження оцінки…</p>;
 
@@ -108,14 +117,15 @@ function GradeResultPanel({ submissionId, taskId, roundId, tournamentId }) {
             const max   = grade.criteria_max?.[key] ?? 10;
             const pct   = max > 0 ? Math.min(100, Math.round((val / max) * 100)) : 0;
             const label = criteriaLabels[key] ?? key;
-            const isMax = val === max;
+            const { bar, text } = scoreColorClass(pct);
+
             return (
               <div key={key} className={styles.gradeResultScoreRow}>
                 <span className={styles.gradeResultScoreLabel}>{label}</span>
                 <div className={styles.gradeResultScoreBarTrack} title={`${pct}%`}>
-                  <div className={styles.gradeResultScoreBarFill} style={{ width: `${pct}%` }} />
+                  <div className={`${styles.gradeResultScoreBarFill} ${bar}`} style={{ width: `${pct}%` }} />
                 </div>
-                <span className={`${styles.gradeResultScoreValue} ${isMax ? styles.gradeResultScoreValueMax : ""}`}>
+                <span className={`${styles.gradeResultScoreValue} ${text}`}>
                   {val} / {max}
                 </span>
               </div>
@@ -163,7 +173,7 @@ function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed }) {
       .then((r) => setSubmission(r.data.length > 0 ? r.data[0] : null))
       .catch(() => setSubmission(null))
       .finally(() => setLoading(false));
-  }, [taskId]);
+  }, [taskId]); // eslint-disable-line
 
   const handleSaved = (sub) => { setSubmission(sub); setShowForm(false); };
 
@@ -318,7 +328,7 @@ function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
       .then((r) => setSubmissions(r.data))
       .catch(() => setSubmissions([]))
       .finally(() => setLoading(false));
-  }, [taskId]);
+  }, [taskId]); // eslint-disable-line
 
   if (loading) return <p className={styles.empty}>Завантаження здач…</p>;
   if (submissions.length === 0) return <p className={styles.empty}>Жодних здач ще немає.</p>;
@@ -353,7 +363,9 @@ function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
 
           {expanded === sub.id && (
             <div className={styles.submissionCardBody}>
-              {sub.text && <div className={styles.submissionText} dangerouslySetInnerHTML={{ __html: sub.text }} />}
+              {sub.text && (
+                <div className={styles.submissionText} dangerouslySetInnerHTML={{ __html: sub.text }} />
+              )}
 
               {sub.links?.length > 0 && (
                 <div className={styles.submissionExtras}>
@@ -397,55 +409,43 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
   const isJury         = myRole === "jury";
   const isParticipant  = readOnly && !isJury;
 
-  const hasDetails  = task.description || task.links?.length > 0 || task.attachments?.length > 0;
+  const hasDetails     = task.description || task.links?.length > 0 || task.attachments?.length > 0;
   const deadlinePassed = isDeadlinePassed(roundEndDate ?? task.end_date);
   const deadlineLabel  = formatDeadline(roundEndDate ?? task.end_date);
 
   const tabs = [];
-  if (hasDetails)    tabs.push({ id: "details",  label: "Деталі" });
-  if (isParticipant) tabs.push({ id: "submit",   label: "Моя здача" });
-  if (isOwnerOrAdmin || isJury) tabs.push({ id: "allSubs", label: "Здачі учасників" });
+  if (hasDetails)               tabs.push({ id: "details",  label: "Деталі" });
+  if (isParticipant)            tabs.push({ id: "submit",   label: "Моя здача" });
+  if (isOwnerOrAdmin || isJury) tabs.push({ id: "allSubs",  label: "Здачі учасників" });
 
-  // Якщо поточна вкладка недоступна — беремо першу
   const validTab = tabs.find((t) => t.id === activeTab) ? activeTab : (tabs[0]?.id ?? "details");
-
-  // Зупиняємо клік усередині drawer від закриття
-  const handleDrawerClick = (e) => e.stopPropagation();
 
   return (
     <>
-      {/* Backdrop з blur */}
       <div className={styles.drawerBackdrop} onClick={onClose} />
 
-      {/* Сам Drawer */}
       <div
         className={styles.drawer}
         role="dialog"
         aria-modal="true"
         aria-label={task.title}
-        onClick={handleDrawerClick}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Шапка */}
         <div className={styles.drawerHeader}>
           <div className={styles.drawerTitleGroup}>
             <span className={styles.drawerTitle}>{task.title}</span>
             {deadlineLabel && (
-              <span className={styles.drawerSubtitle}>
-                Дедлайн: {deadlineLabel}
-              </span>
+              <span className={styles.drawerSubtitle}>Дедлайн: {deadlineLabel}</span>
             )}
           </div>
-          <button
-            className={styles.drawerCloseBtn}
-            onClick={onClose}
-            aria-label="Закрити"
-          >
+          <button className={styles.drawerCloseBtn} onClick={onClose} aria-label="Закрити">
             ✕
           </button>
         </div>
 
         {/* Банер простроченого дедлайну */}
-        {deadlinePassed && (isParticipant) && (
+        {deadlinePassed && isParticipant && (
           <div style={{ padding: "0 24px" }}>
             <div className={`${styles.drawerDeadlineBanner} ${styles.drawerDeadlineExpired}`}>
               ⏰ Дедлайн минув — нові здачі не приймаються
@@ -471,7 +471,6 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
         {/* Тіло */}
         <div className={styles.drawerBody}>
 
-          {/* ── Деталі ── */}
           {(validTab === "details" || tabs.length === 0) && (
             <>
               {task.description && (
@@ -486,13 +485,7 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
                   <span className={styles.drawerSectionLabel}>Посилання</span>
                   <div className={styles.chipList}>
                     {task.links.map((link) => (
-                      <a
-                        key={link.id}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.chip}
-                      >
+                      <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className={styles.chip}>
                         🔗 {link.label || link.url}
                       </a>
                     ))}
@@ -505,13 +498,7 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
                   <span className={styles.drawerSectionLabel}>Файли</span>
                   <div className={styles.chipList}>
                     {task.attachments.map((att) => (
-                      <a
-                        key={att.id}
-                        href={att.file}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.chip}
-                      >
+                      <a key={att.id} href={att.file} target="_blank" rel="noopener noreferrer" className={styles.chip}>
                         {fileIcon(att.name)} {att.name}
                       </a>
                     ))}
@@ -525,7 +512,6 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
             </>
           )}
 
-          {/* ── Моя здача (учасник) ── */}
           {validTab === "submit" && isParticipant && (
             <MySubmissionPanel
               taskId={task.id}
@@ -535,7 +521,6 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
             />
           )}
 
-          {/* ── Всі здачі (власник / адмін / журі) ── */}
           {validTab === "allSubs" && (isOwnerOrAdmin || isJury) && (
             <AllSubmissionsPanel
               taskId={task.id}
@@ -550,8 +535,6 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
 }
 
 // ─── TaskCard ─────────────────────────────────────────────────────────────────
-// Slim row card → відкриває Drawer при кліку.
-// Пропс roundEndDate передається з RoundsTab для перевірки дедлайну.
 
 export function TaskCard({
   task,
@@ -561,7 +544,6 @@ export function TaskCard({
   readOnly = false,
   myRole,
   roundEndDate,
-  // Legacy пропси (ігноруємо, залишаємо для сумісності)
   isOpen: _isOpen,
   onToggle: _onToggle,
 }) {
@@ -587,7 +569,6 @@ export function TaskCard({
 
   return (
     <>
-      {/* ── Slim row card ── */}
       <div
         className={styles.taskCard}
         onClick={() => setDrawerOpen(true)}
@@ -600,7 +581,8 @@ export function TaskCard({
           <span className={styles.taskTitle}>{task.title}</span>
           {task.description && (
             <p className={styles.taskDesc}>
-              {task.description.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 80) + (task.description.replace(/<[^>]*>/g, "").length > 80 ? "…" : "")}
+              {task.description.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 80) +
+                (task.description.replace(/<[^>]*>/g, "").length > 80 ? "…" : "")}
             </p>
           )}
         </div>
@@ -608,8 +590,7 @@ export function TaskCard({
         <div className={styles.taskCardRight}>
           {deadlineStr && (
             <span className={`${styles.taskDeadline} ${deadlinePast ? styles.taskDeadlinePast : ""}`}>
-              {deadlinePast ? "⏰ " : ""}
-              {deadlineStr}
+              {deadlinePast ? "⏰ " : ""}{deadlineStr}
             </span>
           )}
 
@@ -625,13 +606,10 @@ export function TaskCard({
             </button>
           )}
 
-          <span className={styles.taskArrow}>
-            <ChevronRight />
-          </span>
+          <span className={styles.taskArrow}><ChevronRight /></span>
         </div>
       </div>
 
-      {/* ── Slide-over Drawer ── */}
       {drawerOpen && (
         <TaskDrawer
           task={task}
@@ -644,7 +622,6 @@ export function TaskCard({
         />
       )}
 
-      {/* ── Confirm delete modal ── */}
       {showConfirm && (
         <ConfirmDeleteModal
           icon="📋"

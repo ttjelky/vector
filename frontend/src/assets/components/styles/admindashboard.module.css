@@ -387,3 +387,49 @@
   font-size: 28px;
   font-weight: bold;
 }
+
+
+/* ── Tournament grid (ParticipantTournaments) ─────────────────────────────── */
+
+.tournamentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.tournamentCard {
+  cursor: pointer;
+  border-radius: 16px;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.tournamentCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+.tournamentCard:active { transform: translateY(0); }
+
+/* ── Join button ──────────────────────────────────────────────────────────── */
+
+.createBtnContainer {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 16px;
+}
+
+.createBtn {
+  padding: 11px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: #111;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.createBtn:hover  { background: #2a2a2a; box-shadow: 0 4px 16px rgba(0,0,0,0.16); }
+.createBtn:active { transform: scale(0.97); box-shadow: none; }

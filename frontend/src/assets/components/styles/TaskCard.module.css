@@ -1,7 +1,3 @@
-/* ════════════════════════════════════════════════════════════════════════════
-   TaskCard — task row card, slide-over drawer, grade result, submissions
-   ════════════════════════════════════════════════════════════════════════════ */
-
 /* ─── Task card (slim row) ───────────────────────────────────────────────────── */
 .taskCard {
   background: #ffffff;
@@ -481,8 +477,8 @@
 
 /* ─── Grade result block ─────────────────────────────────────────────────────── */
 .gradeResultBlock {
-  background: #faf5ff;
-  border: 1px solid #e9d5ff;
+  background: #fafafa;
+  border: 1px solid #e8e8ec;
   border-radius: 14px;
   padding: 16px 18px;
   display: flex;
@@ -498,7 +494,7 @@
 .gradeResultTitle {
   font-size: 11px;
   font-weight: 700;
-  color: #7c3aed;
+  color: #aaa;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -506,11 +502,12 @@
 .gradeResultTotal {
   font-size: 24px;
   font-weight: 800;
-  color: #6d28d9;
+  color: #111;
   letter-spacing: -0.04em;
   line-height: 1;
 }
-.gradeResultTotalMax { font-size: 14px; font-weight: 500; color: #a78bfa; }
+.gradeResultTotalMax { font-size: 14px; font-weight: 500; color: #bbb; }
+
 .gradeResultScores { display: flex; flex-direction: column; gap: 10px; }
 .gradeResultScoreRow {
   display: grid;
@@ -518,30 +515,39 @@
   align-items: center;
   gap: 12px;
 }
-.gradeResultScoreLabel { font-size: 13px; color: #374151; font-weight: 500; }
+.gradeResultScoreLabel { font-size: 13px; color: #444; font-weight: 500; }
 .gradeResultScoreBarTrack {
-  height: 6px;
-  background: #ede9fe;
+  height: 7px;
+  background: #ebebed;
   border-radius: 100px;
   overflow: hidden;
 }
 .gradeResultScoreBarFill {
   height: 100%;
-  background: linear-gradient(90deg, #7c3aed, #a78bfa);
   border-radius: 100px;
   transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
   min-width: 2px;
+  /* колір задається inline через JS залежно від відсотка */
 }
 .gradeResultScoreValue {
   font-size: 13px;
   font-weight: 700;
-  color: #6d28d9;
   min-width: 44px;
   text-align: right;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  /* колір задається inline через JS залежно від відсотка */
 }
-.gradeResultScoreValueMax { color: #059669; }
+
+/* ── Кольори за рівнем ── */
+.scoreLow    { color: #e53e3e; } /* < 40%  — червоний */
+.scoreMid    { color: #d97706; } /* 40-74% — жовтий   */
+.scoreHigh   { color: #16a34a; } /* ≥ 75%  — зелений  */
+
+.barLow  { background: #e53e3e; }
+.barMid  { background: #d97706; }
+.barHigh { background: #16a34a; }
+
 .gradeResultComment {
   font-size: 13.5px;
   color: #374151;
@@ -550,7 +556,7 @@
   padding: 12px 14px;
   background: #fff;
   border-radius: 10px;
-  border: 1px solid #ede9fe;
+  border: 1px solid #e8e8ec;
 }
 .gradeResultCommentAuthor {
   display: flex;
@@ -559,9 +565,9 @@
   margin-bottom: 6px;
   font-size: 11.5px;
   font-weight: 600;
-  color: #7c3aed;
+  color: #888;
 }
-.gradeResultDate { font-size: 11.5px; color: #a78bfa; }
+.gradeResultDate { font-size: 11.5px; color: #bbb; }
 
 /* ─── All submissions (owner / jury view) ────────────────────────────────────── */
 .allSubmissionsList { display: flex; flex-direction: column; gap: 5px; }
@@ -631,7 +637,30 @@
   gap: 10px;
 }
 
-/* ─── Empty state (inside drawer) ───────────────────────────────────────────── */
+/* ─── Links / files inside submissions ───────────────────────────────────────── */
+.taskLinkList, .taskFileList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.taskLink, .taskFile {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #1d1d1f;
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 100px;
+  text-decoration: none;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.taskLink:hover, .taskFile:hover { background: rgba(0,0,0,0.08); }
+
+/* ─── Empty state ────────────────────────────────────────────────────────────── */
 .empty {
   font-size: 13.5px;
   color: #aeaeb2;

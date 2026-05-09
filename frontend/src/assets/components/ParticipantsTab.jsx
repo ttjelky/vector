@@ -79,14 +79,26 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
     } catch { } finally { setDeleting(false); }
   };
 
+  const [asCaptain, setAsCaptain] = useState(false);
+
   const handleAddMember = async () => {
     if (!addUserId) return;
     setAdding(true); setAddError("");
     try {
-      await API.post(`/tournaments/${tournamentId}/teams/${team.id}/members/`, { user_id: Number(addUserId) });
+      if (isPrivileged && asCaptain) {
+        // Адмін призначає капітана через assign-member
+        await API.post(`/tournaments/${tournamentId}/teams/${team.id}/assign-member/`, {
+          user_id: Number(addUserId),
+          as_captain: true,
+        });
+      } else {
+        await API.post(`/tournaments/${tournamentId}/teams/${team.id}/members/`, {
+          user_id: Number(addUserId),
+        });
+      }
       const res = await API.get(`/tournaments/${tournamentId}/teams/${team.id}/`);
       onTeamUpdated(res.data);
-      setAddUserId("");
+      setAddUserId(""); setAsCaptain(false);
     } catch (e) {
       setAddError(e?.response?.data?.detail || "Помилка додавання");
     } finally { setAdding(false); }
@@ -207,6 +219,20 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
                   </option>
                 ))}
               </select>
+
+              {/* Чекбокс "Зробити капітаном" — тільки для адміна/власника */}
+              {isPrivileged && addUserId && (
+                <label className={styles.captainCheckbox}>
+                  <input
+                    type="checkbox"
+                    checked={asCaptain}
+                    onChange={e => setAsCaptain(e.target.checked)}
+                  />
+                  <Crown size={12} />
+                  Капітан
+                </label>
+              )}
+
               <button
                 className={styles.addMemberBtn}
                 onClick={handleAddMember}

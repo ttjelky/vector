@@ -252,7 +252,10 @@ class AdminAssignTeamView(APIView):
     """
     POST /tournaments/<id>/teams/<team_id>/assign-member/
     Адмін/власник може вручну розподілити учасника в команду.
-    Body: { "user_id": 5 }
+    Body: { "user_id": 5, "as_captain": false }
+
+    Якщо as_captain=true — користувач стає новим капітаном,
+    старий капітан залишається звичайним учасником.
     """
     permission_classes = [IsAuthenticated]
 
@@ -265,7 +268,12 @@ class AdminAssignTeamView(APIView):
         if not team:
             return Response({'detail': 'Команду не знайдено.'}, status=404)
 
-        user_id = request.data.get('user_id')
+        user_id   = request.data.get('user_id')
+        as_captain = request.data.get('as_captain', False)
+
+        if not user_id:
+            return Response({'detail': 'user_id обов\'язковий.'}, status=400)
+
         target = TournamentMember.objects.filter(
             tournament_id=tournament_pk, user_id=user_id
         ).first()
@@ -273,14 +281,28 @@ class AdminAssignTeamView(APIView):
             return Response({'detail': 'Користувач не є учасником турніру.'}, status=400)
 
         # Видалити з попередньої команди якщо є
-        Team.objects.filter(tournament_id=tournament_pk, members=user_id).exclude(pk=team_pk).first()
         for old_team in Team.objects.filter(tournament_id=tournament_pk, members=user_id):
             if old_team.pk != team.pk:
                 old_team.members.remove(user_id)
                 TeamUploadPermission.objects.filter(team=old_team, user_id=user_id).delete()
 
         team.members.add(user_id)
-        return Response({'detail': 'Учасника розподілено в команду.'})
+
+        if as_captain:
+            # Старому капітану видаємо дозвіл на завантаження щоб не втратив доступ
+            old_captain_id = team.captain_id
+            if old_captain_id != int(user_id):
+                TeamUploadPermission.objects.get_or_create(team=team, user_id=old_captain_id)
+
+            # Новий капітан — прибираємо його з upload_permissions (капітан і так може)
+            TeamUploadPermission.objects.filter(team=team, user_id=user_id).delete()
+            team.captain_id = user_id
+            team.save(update_fields=['captain'])
+
+        return Response({
+            'detail': 'Капітана призначено.' if as_captain else 'Учасника розподілено в команду.',
+            'captain_id': team.captain_id,
+        })
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
