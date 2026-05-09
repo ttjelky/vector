@@ -361,7 +361,7 @@ function JuryIcon() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoading, isOwner, myRole }) {
+export default function LeaderboardTab({ tournamentId, tournamentType, rounds = [], roundsLoading, isOwner, myRole }) {
   const [leaderboard,   setLeaderboard]   = useState([]);
   const [published,     setPublished]     = useState(null);
   const [loading,       setLoading]       = useState(true);
@@ -375,6 +375,8 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
   const [selectedPid,   setSelectedPid]   = useState(null); // participant_id або null
 
   const canAlwaysSee = isOwner || myRole === "admin";
+  const isTeam = tournamentType === "team";
+  const getRowName = (p) => isTeam ? (p.team_name ?? p.participant_name) : p.participant_name;
 
   const fetchLeaderboard = useCallback((silent = false) => {
     if (silent) setRefreshing(true);
@@ -408,21 +410,26 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
         }
       })
       .finally(() => { setLoading(false); setRefreshing(false); });
-  }, [tournamentId, canAlwaysSee]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tournamentId, canAlwaysSee]);
 
   useEffect(() => {
     if (!tournamentId) return;
     fetchLeaderboard();
     const timer = setInterval(() => fetchLeaderboard(true), POLL_INTERVAL);
     return () => clearInterval(timer);
-  }, [tournamentId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tournamentId, fetchLeaderboard]);
 
   const handleTogglePublish = async () => {
+    if (published === null) return;
     setPublishing(true);
     try {
       const res = await API.patch(`/tournaments/${tournamentId}/leaderboard/`, { is_published: !published });
       setPublished(res.data.is_published ?? !published);
-    } catch { } finally { setPublishing(false); }
+    } catch (err) {
+      console.error("Помилка публікації:", err);
+    } finally {
+      setPublishing(false);
+    }
   };
 
   // Обчислення roundIds / roundMap (тільки раунди що є в leaderboard)
@@ -450,7 +457,7 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
   const handleExportExcel = async () => {
     setExporting(true);
     try {
-      await exportToExcel({ ranked, roundIds, roundMap, tournamentId });
+      await exportToExcel({ ranked, roundIds, roundMap, tournamentId, isTeam });
     } catch (err) {
       console.error("Помилка експорту:", err);
     } finally {
