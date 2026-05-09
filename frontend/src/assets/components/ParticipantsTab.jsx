@@ -1,9 +1,10 @@
-
 import { useState, useEffect, useCallback } from "react";
 import styles from "./styles/ParticipantsTab.module.css";
 import API from "../../api";
 import { X, Shield, Users, Crown, Upload, UserPlus } from "lucide-react";
 import { ConfirmDeleteModal } from "./TournamentShared";
+
+// ─── Константи ────────────────────────────────────────────────────────────────
 
 const TABS = [
   { key: "participant", label: "Учасники" },
@@ -12,8 +13,10 @@ const TABS = [
 ];
 
 const ROLE_LABELS = {
-  owner: "Власник", participant: "Учасник",
-  jury: "Журі",     admin: "Адмін",
+  owner:       "Власник",
+  participant: "Учасник",
+  jury:        "Журі",
+  admin:       "Адмін",
 };
 
 const INVITE_LABELS = {
@@ -22,7 +25,6 @@ const INVITE_LABELS = {
   admin:       "Запросити адміна",
 };
 
-// ─── Повідомлення про статус реєстрації для учасників ─────────────────────────
 const REGISTRATION_STATUS_BANNERS = {
   upcoming: {
     icon: "🔒",
@@ -54,45 +56,53 @@ const REGISTRATION_STATUS_BANNERS = {
   },
 };
 
-// ── Аватарка учасника ─────────────────────────────────────────────────────────
-function MemberAvatar({ member }) {
-  const src = member.avatar
-    ? (member.avatar.startsWith("http") ? member.avatar : `http://127.0.0.1:8000${member.avatar}`)
-    : null;
-  const initials = (member.full_name || member.username || "?")
-    .split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
-  if (src) return <img src={src} alt={initials} className={styles.memberAvatar} />;
-  return <div className={styles.memberAvatarPlaceholder}>{initials}</div>;
-}
+// ─── Утиліти ──────────────────────────────────────────────────────────────────
 
 function getDisplayName(member) {
   const fullName = `${member.first_name || ""} ${member.last_name || ""}`.trim();
   return fullName || member.username || member.email || "Анонімний";
 }
 
-// ── Картка команди ────────────────────────────────────────────────────────────
+// ─── Аватарка учасника ────────────────────────────────────────────────────────
+
+function MemberAvatar({ member }) {
+  const src = member.avatar
+    ? (member.avatar.startsWith("http") ? member.avatar : `http://127.0.0.1:8000${member.avatar}`)
+    : null;
+  const initials = (member.full_name || member.username || "?")
+    .split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+
+  if (src) return <img src={src} alt={initials} className={styles.memberAvatar} />;
+  return <div className={styles.memberAvatarPlaceholder}>{initials}</div>;
+}
+
+// ─── Картка команди ───────────────────────────────────────────────────────────
 
 function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated, onTeamDeleted }) {
-  const [expanded,       setExpanded]       = useState(false);
-  const [renaming,       setRenaming]       = useState(false);
-  const [newName,        setNewName]        = useState(team.name);
-  const [saving,         setSaving]         = useState(false);
-  const [confirmDelete,  setConfirmDelete]  = useState(false);
-  const [deleting,       setDeleting]       = useState(false);
-  const [addUserId,      setAddUserId]      = useState("");
-  const [addError,       setAddError]       = useState("");
-  const [adding,         setAdding]         = useState(false);
+  const [expanded,      setExpanded]      = useState(false);
+  const [renaming,      setRenaming]      = useState(false);
+  const [newName,       setNewName]       = useState(team.name);
+  const [saving,        setSaving]        = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting,      setDeleting]      = useState(false);
+  const [addUserId,     setAddUserId]     = useState("");
+  const [addError,      setAddError]      = useState("");
+  const [adding,        setAdding]        = useState(false);
+  const [asCaptain,     setAsCaptain]     = useState(false);
 
-  const isCaptain   = team.captain_id === myUserId;
+  const isCaptain    = team.captain_id === myUserId;
   const isPrivileged = myRole === "owner" || myRole === "admin";
 
-  // Учасники без капітана
   const nonCaptainMembers = (team.members || []).filter(m => m.id !== team.captain_id);
-  // Список вільних учасників турніру (не в жодній команді)
   const freeMembers = members.filter(m =>
     m.role === "participant" &&
     !team.members?.find(tm => tm.id === m.user)
   );
+
+  const refreshTeam = async () => {
+    const res = await API.get(`/tournaments/${tournamentId}/teams/${team.id}/`);
+    onTeamUpdated(res.data);
+  };
 
   const handleRename = async () => {
     if (!newName.trim()) return;
@@ -101,7 +111,11 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
       await API.patch(`/tournaments/${tournamentId}/teams/${team.id}/`, { name: newName.trim() });
       onTeamUpdated({ ...team, name: newName.trim() });
       setRenaming(false);
-    } catch { } finally { setSaving(false); }
+    } catch {
+      // помилка перейменування
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -109,17 +123,19 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
     try {
       await API.delete(`/tournaments/${tournamentId}/teams/${team.id}/`);
       onTeamDeleted(team.id);
-    } catch { } finally { setDeleting(false); }
+    } catch {
+      // помилка видалення
+    } finally {
+      setDeleting(false);
+    }
   };
-
-  const [asCaptain, setAsCaptain] = useState(false);
 
   const handleAddMember = async () => {
     if (!addUserId) return;
-    setAdding(true); setAddError("");
+    setAdding(true);
+    setAddError("");
     try {
       if (isPrivileged && asCaptain) {
-        // Адмін призначає капітана через assign-member
         await API.post(`/tournaments/${tournamentId}/teams/${team.id}/assign-member/`, {
           user_id: Number(addUserId),
           as_captain: true,
@@ -129,20 +145,23 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
           user_id: Number(addUserId),
         });
       }
-      const res = await API.get(`/tournaments/${tournamentId}/teams/${team.id}/`);
-      onTeamUpdated(res.data);
-      setAddUserId(""); setAsCaptain(false);
+      await refreshTeam();
+      setAddUserId("");
+      setAsCaptain(false);
     } catch (e) {
       setAddError(e?.response?.data?.detail || "Помилка додавання");
-    } finally { setAdding(false); }
+    } finally {
+      setAdding(false);
+    }
   };
 
   const handleRemoveMember = async (userId) => {
     try {
       await API.delete(`/tournaments/${tournamentId}/teams/${team.id}/members/${userId}/`);
-      const res = await API.get(`/tournaments/${tournamentId}/teams/${team.id}/`);
-      onTeamUpdated(res.data);
-    } catch { }
+      await refreshTeam();
+    } catch {
+      // помилка видалення учасника
+    }
   };
 
   const handleToggleUploadPerm = async (member) => {
@@ -152,9 +171,10 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
       } else {
         await API.post(`/tournaments/${tournamentId}/teams/${team.id}/upload-permission/`, { user_id: member.id });
       }
-      const res = await API.get(`/tournaments/${tournamentId}/teams/${team.id}/`);
-      onTeamUpdated(res.data);
-    } catch { }
+      await refreshTeam();
+    } catch {
+      // помилка зміни дозволу
+    }
   };
 
   return (
@@ -177,6 +197,7 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
           )}
           <span className={styles.teamMemberCount}>{team.members?.length || 0} уч.</span>
         </div>
+
         <div className={styles.teamCardRight} onClick={e => e.stopPropagation()}>
           {(isCaptain || isPrivileged) && !renaming && (
             <button className={styles.teamActionBtn} onClick={() => setRenaming(true)} title="Перейменувати">✏️</button>
@@ -202,7 +223,9 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
           {/* Капітан */}
           <div className={styles.teamMemberRow}>
             <Crown size={13} className={styles.captainIcon} />
-            <span className={styles.teamMemberName}>{team.captain?.first_name} {team.captain?.last_name || team.captain?.username}</span>
+            <span className={styles.teamMemberName}>
+              {team.captain?.first_name} {team.captain?.last_name || team.captain?.username}
+            </span>
             <span className={styles.uploadTag} title="Капітан завжди може завантажувати">
               <Upload size={11} /> Завантаження
             </span>
@@ -213,8 +236,7 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
             <div key={m.id} className={styles.teamMemberRow}>
               <span className={styles.teamMemberName}>{m.first_name} {m.last_name || m.username}</span>
 
-              {/* Дозвіл на завантаження — тільки капітан керує */}
-              {isCaptain && (
+              {isCaptain ? (
                 <button
                   className={`${styles.uploadToggle} ${m.can_upload ? styles.uploadToggleOn : ""}`}
                   onClick={() => handleToggleUploadPerm(m)}
@@ -223,21 +245,25 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
                   <Upload size={11} />
                   {m.can_upload ? "Дозвіл є" : "Дати дозвіл"}
                 </button>
-              )}
-              {!isCaptain && m.can_upload && (
-                <span className={styles.uploadTag}><Upload size={11} /> Завантаження</span>
+              ) : (
+                m.can_upload && (
+                  <span className={styles.uploadTag}><Upload size={11} /> Завантаження</span>
+                )
               )}
 
-              {/* Видалити учасника */}
               {(isCaptain || isPrivileged) && (
-                <button className={styles.removeMemberBtn} onClick={() => handleRemoveMember(m.id)} title="Видалити з команди">
+                <button
+                  className={styles.removeMemberBtn}
+                  onClick={() => handleRemoveMember(m.id)}
+                  title="Видалити з команди"
+                >
                   <X size={12} />
                 </button>
               )}
             </div>
           ))}
 
-          {/* Додати учасника (капітан або адмін/власник) */}
+          {/* Додати учасника */}
           {(isCaptain || isPrivileged) && (
             <div className={styles.addMemberRow}>
               <select
@@ -253,7 +279,6 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
                 ))}
               </select>
 
-              {/* Чекбокс "Зробити капітаном" — тільки для адміна/власника */}
               {isPrivileged && addUserId && (
                 <label className={styles.captainCheckbox}>
                   <input
@@ -295,7 +320,7 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
   );
 }
 
-// ── Вкладка "Команди" ─────────────────────────────────────────────────────────
+// ─── Вкладка "Команди" ────────────────────────────────────────────────────────
 
 function TeamsSubTab({ tournamentId, myRole, members, myUserId }) {
   const [teams,        setTeams]        = useState([]);
@@ -307,8 +332,6 @@ function TeamsSubTab({ tournamentId, myRole, members, myUserId }) {
 
   const isParticipant = myRole === "participant";
   const isPrivileged  = myRole === "owner" || myRole === "admin";
-
-  // Чи юзер вже капітан
   const alreadyCaptain = teams.some(t => t.captain_id === myUserId);
 
   useEffect(() => {
@@ -322,22 +345,27 @@ function TeamsSubTab({ tournamentId, myRole, members, myUserId }) {
 
   const handleCreate = async () => {
     if (!newTeamName.trim()) return;
-    setCreating(true); setCreateError("");
+    setCreating(true);
+    setCreateError("");
     try {
       const res = await API.post(`/tournaments/${tournamentId}/teams/`, { name: newTeamName.trim() });
       setTeams(prev => [...prev, res.data]);
-      setNewTeamName(""); setShowCreate(false);
+      setNewTeamName("");
+      setShowCreate(false);
     } catch (e) {
       setCreateError(e?.response?.data?.detail || "Помилка створення команди");
-    } finally { setCreating(false); }
+    } finally {
+      setCreating(false);
+    }
   };
 
   if (teamsLoading) return <p className={styles.empty}>Завантаження команд…</p>;
 
+  const canCreate = isPrivileged || (isParticipant && !alreadyCaptain);
+
   return (
     <div>
-      {/* Кнопка "Створити команду" */}
-      {(isParticipant && !alreadyCaptain) || isPrivileged ? (
+      {canCreate && (
         <div className={styles.createTeamBar}>
           {showCreate ? (
             <div className={styles.createTeamForm}>
@@ -349,10 +377,17 @@ function TeamsSubTab({ tournamentId, myRole, members, myUserId }) {
                 onKeyDown={e => e.key === "Enter" && handleCreate()}
                 autoFocus
               />
-              <button className={styles.createTeamBtn} onClick={handleCreate} disabled={creating || !newTeamName.trim()}>
+              <button
+                className={styles.createTeamBtn}
+                onClick={handleCreate}
+                disabled={creating || !newTeamName.trim()}
+              >
                 {creating ? "Створення…" : "Створити"}
               </button>
-              <button className={styles.cancelCreateBtn} onClick={() => { setShowCreate(false); setCreateError(""); }}>
+              <button
+                className={styles.cancelCreateBtn}
+                onClick={() => { setShowCreate(false); setCreateError(""); }}
+              >
                 Скасувати
               </button>
               {createError && <span className={styles.addError}>{createError}</span>}
@@ -363,9 +398,8 @@ function TeamsSubTab({ tournamentId, myRole, members, myUserId }) {
             </button>
           )}
         </div>
-      ) : null}
+      )}
 
-      {/* Список команд */}
       {teams.length === 0 ? (
         <p className={styles.empty}>Команд ще немає. Будьте першими!</p>
       ) : (
@@ -388,9 +422,9 @@ function TeamsSubTab({ tournamentId, myRole, members, myUserId }) {
   );
 }
 
-// ── Головний компонент ────────────────────────────────────────────────────────
+// ─── Головний компонент ───────────────────────────────────────────────────────
 
-export default function ParticipantsTab({ tournamentId, myRole, loading, tournamentType }) {
+export default function ParticipantsTab({ tournamentId, myRole, loading, tournamentType, tournamentStatus, maxParticipants }) {
   const [members,        setMembers]        = useState([]);
   const [membersLoading, setMembersLoading] = useState(true);
   const [activeTab,      setActiveTab]      = useState("participant");
@@ -405,19 +439,16 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
   const [memberToDelete, setMemberToDelete] = useState(null);
   const [deletingMember, setDeletingMember] = useState(false);
 
-  const isOwner      = myRole === "owner";
-  const isTeamTourn  = tournamentType === "team";
-
-  // Реєстрація нових учасників дозволена лише на етапі "registration"
-  const canRegister = tournamentStatus === "registration";
-
-  // ── Тимчасовий виняток реєстрації (через API) ────────────────────────────
-  const [exceptionUntil,   setExceptionUntilState] = useState(null); // ISO string | null
+  const [exceptionUntil,   setExceptionUntilState] = useState(null);
   const [exceptionLoading, setExceptionLoading]    = useState(false);
   const [exceptionMinutes, setExceptionMinutes]    = useState(30);
   const [showException,    setShowException]       = useState(false);
 
-  // Завантажуємо поточний стан винятку при монтуванні
+  const isOwner     = myRole === "owner";
+  const isTeamTourn = tournamentType === "team";
+  const canRegister = tournamentStatus === "registration";
+
+  // ── Завантаження стану винятку реєстрації ────────────────────────────────
   useEffect(() => {
     if (!tournamentId || !isOwner) return;
     API.get(`/tournaments/${tournamentId}/registration-exception/`)
@@ -428,7 +459,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
   const exceptionActive = exceptionUntil && new Date() < new Date(exceptionUntil);
   const canRegisterNow  = canRegister || exceptionActive;
 
-  // Автоматично очищаємо локально коли час вийшов
+  // Автоматично очищаємо виняток після закінчення часу
   useEffect(() => {
     if (!exceptionUntil) return;
     const ms = new Date(exceptionUntil) - new Date();
@@ -464,11 +495,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
     }
   };
 
-  const getDisplayName = (member) => {
-    const fullName = `${member.first_name || ""} ${member.last_name || ""}`.trim();
-    return fullName || member.username || member.email || "Анонімний користувач";
-  };
-
+  // ── Завантаження учасників ────────────────────────────────────────────────
   useEffect(() => {
     if (!tournamentId) return;
     setMembersLoading(true);
@@ -478,6 +505,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
       .finally(() => setMembersLoading(false));
   }, [tournamentId]);
 
+  // ── Завантаження посилань-запрошень ───────────────────────────────────────
   useEffect(() => {
     if (!tournamentId || !isOwner) return;
     ["participant", "jury", "admin"].forEach(role => {
@@ -493,17 +521,26 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
   const handleInvite = useCallback((role) => {
     const url = invites[role]?.url;
     if (!url) return;
-    const doCopy = () => {
+
+    const fallbackCopy = () => {
       const el = document.createElement("textarea");
-      el.value = url; el.style.position = "fixed"; el.style.opacity = "0";
-      document.body.appendChild(el); el.focus(); el.select();
+      el.value = url;
+      el.style.cssText = "position:fixed;opacity:0";
+      document.body.appendChild(el);
+      el.focus();
+      el.select();
       try { document.execCommand("copy"); } catch { window.prompt("Скопіюйте вручну:", url); }
       document.body.removeChild(el);
     };
+
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(url).catch(doCopy);
-    } else { doCopy(); }
-    setCopied(role); setShowPin(role);
+      navigator.clipboard.writeText(url).catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+
+    setCopied(role);
+    setShowPin(role);
     setTimeout(() => setCopied(null), 2500);
   }, [invites]);
 
@@ -513,12 +550,17 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
       setTimeout(() => setRegenRole(r => r === role ? null : r), 4000);
       return;
     }
-    setRegenLoading(true); setRegenRole(null);
+    setRegenLoading(true);
+    setRegenRole(null);
     try {
       const res = await API.post(`/tournaments/${tournamentId}/regenerate-pin/?role=${role}`);
       setInvites(prev => ({ ...prev, [role]: { ...prev[role], pin: res.data.invite_pin } }));
       setShowPin(role);
-    } catch { } finally { setRegenLoading(false); }
+    } catch {
+      // помилка регенерації
+    } finally {
+      setRegenLoading(false);
+    }
   }, [regenRole, tournamentId]);
 
   const confirmRemoveMember = async () => {
@@ -528,8 +570,14 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
       await API.delete(`/tournaments/${tournamentId}/members/${memberToDelete.id}/`);
       setMembers(prev => prev.filter(m => m.id !== memberToDelete.id));
       setMemberToDelete(null);
-    } catch { } finally { setDeletingMember(false); }
+    } catch {
+      // помилка видалення
+    } finally {
+      setDeletingMember(false);
+    }
   };
+
+  // ── Похідні значення ──────────────────────────────────────────────────────
 
   const visibleMembers = members.filter(m =>
     m.role === activeTab || (activeTab === "participant" && m.role === "owner")
@@ -540,24 +588,26 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
   const isCopied   = copied  === activeTab;
   const isRegen    = regenRole === activeTab;
 
-  // Вкладки: для командного — додаємо "Команди"
   const subTabs = [
     ...TABS,
     ...(isTeamTourn ? [{ key: "teams", label: "Команди" }] : []),
   ];
 
-  if (loading || membersLoading) return (
-    <div className={styles.tabContent}><p className={styles.empty}>Завантаження...</p></div>
-  // Показуємо статусний банер лише на вкладці учасників і лише для власника
   const statusBanner = isOwner && activeTab === "participant"
     ? REGISTRATION_STATUS_BANNERS[tournamentStatus]
     : null;
 
-  // Кнопка запрошення: власник може копіювати посилання завжди,
-  // але для учасників — тільки коли реєстрація відкрита
-  const showInviteBtn = isOwner && (
-    activeTab !== "participant" || canRegisterNow
-  );
+  const showInviteBtn = isOwner && (activeTab !== "participant" || canRegisterNow);
+
+  // ── Рендер ────────────────────────────────────────────────────────────────
+
+  if (loading || membersLoading) {
+    return (
+      <div className={styles.tabContent}>
+        <p className={styles.empty}>Завантаження...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.tabContent}>
@@ -567,7 +617,9 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
         {subTabs.map(tab => {
           const count = tab.key === "teams"
             ? undefined
-            : members.filter(m => m.role === tab.key || (tab.key === "participant" && m.role === "owner")).length;
+            : members.filter(m =>
+                m.role === tab.key || (tab.key === "participant" && m.role === "owner")
+              ).length;
           return (
             <button
               key={tab.key}
@@ -591,180 +643,131 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
         />
       ) : (
         <>
-          {/* Заголовок + кнопка запрошення */}
+          {/* Статусний банер */}
+          {statusBanner && (
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "10px 14px",
+              marginBottom: 16,
+              borderRadius: 12,
+              fontSize: 13,
+              color: statusBanner.color,
+              background: statusBanner.bg,
+              border: `1px solid ${statusBanner.border}`,
+            }}>
+              <span style={{ fontSize: 16 }}>{statusBanner.icon}</span>
+              <span>{statusBanner.text}</span>
+            </div>
+          )}
+
+          {/* Заголовок + кнопки */}
           <div className={styles.participantsHeader}>
             <span className={styles.teamCount}>
-              {subTabs.find(t => t.key === activeTab)?.label}: {visibleMembers.length}
+              {TABS.find(t => t.key === activeTab)?.label}: {visibleMembers.length}
+              {activeTab === "participant" && maxParticipants ? ` / ${maxParticipants}` : ""}
             </span>
-            {isOwner && activeTab !== "teams" && (
-              <button
-                className={styles.inviteBtn}
-                onClick={() => handleInvite(activeTab)}
-                disabled={!invite?.url}
-              >
-                {!invite?.url ? "Завантаження…" : isCopied ? "✓ Скопійовано!" : `+ ${INVITE_LABELS[activeTab]}`}
-              </button>
-            )}
-      {/* ── Статусний банер реєстрації (тільки власнику, тільки для учасників) ── */}
-      {statusBanner && (
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          padding: "10px 14px",
-          marginBottom: 16,
-          borderRadius: 12,
-          fontSize: 13,
-          color: statusBanner.color,
-          background: statusBanner.bg,
-          border: `1px solid ${statusBanner.border}`,
-        }}>
-          <span style={{ fontSize: 16 }}>{statusBanner.icon}</span>
-          <span>{statusBanner.text}</span>
-        </div>
-      )}
 
-      {/* ── Заголовок + кнопки ── */}
-      <div className={styles.participantsHeader}>
-        <span className={styles.teamCount}>
-          {TABS.find(t => t.key === activeTab)?.label}: {visibleMembers.length}
-          {activeTab === "participant" && maxParticipants
-            ? ` / ${maxParticipants}`
-            : ""}
-        </span>
+            <div className={styles.headerActions}>
+              {/* Кнопка винятку — тільки ongoing/finished */}
+              {isOwner && activeTab === "participant" &&
+                (tournamentStatus === "ongoing" || tournamentStatus === "finished") && (
+                exceptionActive ? (
+                  <button
+                    className={styles.exceptionActiveBtn}
+                    onClick={handleCancelException}
+                    disabled={exceptionLoading}
+                    title="Натисніть щоб скасувати"
+                  >
+                    <span className={styles.exceptionDot} />
+                    До {new Date(exceptionUntil).toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}
+                  </button>
+                ) : (
+                  <button
+                    className={styles.exceptionBtn}
+                    onClick={() => setShowException(v => !v)}
+                    disabled={exceptionLoading}
+                  >
+                    Зробити виняток
+                  </button>
+                )
+              )}
 
-        <div className={styles.headerActions}>
-          {/* Кнопка винятку — тільки ongoing/finished */}
-          {isOwner && activeTab === "participant" && (tournamentStatus === "ongoing" || tournamentStatus === "finished") && (
-            exceptionActive ? (
-              <button
-                className={styles.exceptionActiveBtn}
-                onClick={handleCancelException}
-                disabled={exceptionLoading}
-                title="Натисніть щоб скасувати"
-              >
-                <span className={styles.exceptionDot} />
-                До {new Date(exceptionUntil).toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}
-              </button>
-            ) : (
-              <button
-                className={styles.exceptionBtn}
-                onClick={() => setShowException(v => !v)}
-                disabled={exceptionLoading}
-              >
-                Зробити виняток
-              </button>
-            )
+              {/* Кнопка запрошення (активна) */}
+              {showInviteBtn && (
+                <button
+                  className={styles.inviteBtn}
+                  onClick={() => handleInvite(activeTab)}
+                  disabled={!invite?.url}
+                >
+                  {!invite?.url
+                    ? "Завантаження…"
+                    : isCopied
+                    ? "✓ Скопійовано!"
+                    : `+ ${INVITE_LABELS[activeTab]}`}
+                </button>
+              )}
+
+              {/* Заблокована кнопка запрошення */}
+              {isOwner && activeTab === "participant" && !canRegisterNow && (
+                <button
+                  className={styles.inviteBtn}
+                  disabled
+                  title={
+                    tournamentStatus === "upcoming"  ? "Реєстрація ще не відкрита" :
+                    tournamentStatus === "ongoing"   ? "Турнір розпочато — реєстрація закрита" :
+                    tournamentStatus === "finished"  ? "Турнір завершено" :
+                    "Реєстрація закрита"
+                  }
+                  style={{ opacity: 0.45, cursor: "not-allowed" }}
+                >
+                  + {INVITE_LABELS[activeTab]}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Панель налаштування винятку */}
+          {showException && isOwner && activeTab === "participant" && (
+            <div className={styles.exceptionPanel}>
+              <span className={styles.exceptionPanelTitle}>Тимчасово відкрити реєстрацію</span>
+              <div className={styles.exceptionPanelRow}>
+                <span className={styles.exceptionPanelLabel}>Тривалість:</span>
+                {[15, 30, 60].map(m => (
+                  <button
+                    key={m}
+                    className={`${styles.exceptionPill} ${exceptionMinutes === m ? styles.exceptionPillActive : ""}`}
+                    onClick={() => setExceptionMinutes(m)}
+                  >
+                    {m} хв
+                  </button>
+                ))}
+              </div>
+              <div className={styles.exceptionPanelActions}>
+                <button
+                  className={styles.exceptionConfirmBtn}
+                  onClick={handleActivateException}
+                  disabled={exceptionLoading}
+                >
+                  {exceptionLoading ? "Збереження…" : "Активувати"}
+                </button>
+                <button className={styles.exceptionCancelBtn} onClick={() => setShowException(false)}>
+                  Скасувати
+                </button>
+              </div>
+              <span className={styles.exceptionPanelHint}>
+                Реєстрація відкриється на {exceptionMinutes} хв для всіх адмінів і закриється автоматично
+              </span>
+            </div>
           )}
 
-          {/* Кнопка запрошення */}
-          {showInviteBtn && (
-            <button
-              className={styles.inviteBtn}
-              onClick={() => handleInvite(activeTab)}
-              disabled={!invite?.url}
-            >
-              {!invite?.url
-                ? "Завантаження…"
-                : isCopied
-                ? "✓ Скопійовано!"
-                : `+ ${INVITE_LABELS[activeTab]}`}
-            </button>
-          )}
-
-          {/* Заблокована кнопка запрошення коли реєстрація закрита */}
-          {isOwner && activeTab === "participant" && !canRegisterNow && (
-            <button
-              className={styles.inviteBtn}
-              disabled
-              title={
-                tournamentStatus === "upcoming"   ? "Реєстрація ще не відкрита" :
-                tournamentStatus === "ongoing"    ? "Турнір розпочато — реєстрація закрита" :
-                tournamentStatus === "finished"   ? "Турнір завершено" :
-                "Реєстрація закрита"
-              }
-              style={{ opacity: 0.45, cursor: "not-allowed" }}
-            >
-              + {INVITE_LABELS[activeTab]}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── Панель налаштування винятку ── */}
-      {showException && isOwner && activeTab === "participant" && (
-        <div className={styles.exceptionPanel}>
-          <span className={styles.exceptionPanelTitle}>Тимчасово відкрити реєстрацію</span>
-          <div className={styles.exceptionPanelRow}>
-            <span className={styles.exceptionPanelLabel}>Тривалість:</span>
-            {[15, 30, 60].map(m => (
-              <button
-                key={m}
-                className={`${styles.exceptionPill} ${exceptionMinutes === m ? styles.exceptionPillActive : ""}`}
-                onClick={() => setExceptionMinutes(m)}
-              >
-                {m} хв
-              </button>
-            ))}
-          </div>
-          <div className={styles.exceptionPanelActions}>
-            <button
-              className={styles.exceptionConfirmBtn}
-              onClick={handleActivateException}
-              disabled={exceptionLoading}
-            >
-              {exceptionLoading ? "Збереження…" : "Активувати"}
-            </button>
-            <button className={styles.exceptionCancelBtn} onClick={() => setShowException(false)}>
-              Скасувати
-            </button>
-          </div>
-          <span className={styles.exceptionPanelHint}>
-            Реєстрація відкриється на {exceptionMinutes} хв для всіх адмінів і закриється автоматично
-          </span>
-        </div>
-      )}
-
-      {/* ── PIN ── */}
-      {isOwner && pinVisible && invite?.pin && (
-        <div className={styles.pinSection}>
-          <div className={styles.pinInfo}>
-            <span className={styles.pinText}>Надайте <strong>PIN-код:</strong></span>
-            <div className={styles.pinCode}>{invite.pin}</div>
-          </div>
-          <button
-            onClick={() => handleRegenerate(activeTab)}
-            disabled={regenLoading}
-            className={`${styles.regenBtn} ${isRegen ? styles.regenConfirm : ""}`}
-          >
-            {regenLoading ? "Оновлення…" : isRegen ? "Підтвердити?" : "Змінити PIN"}
-          </button>
-          <div className={styles.crossIcon} onClick={() => setShowPin(null)}>
-            <X size={20} />
-          </div>
-
-          {/* PIN */}
+          {/* PIN-секція */}
           {isOwner && pinVisible && invite?.pin && (
             <div className={styles.pinSection}>
               <div className={styles.pinInfo}>
-                <span className={styles.pinText}>PIN-код: </span>
+                <span className={styles.pinText}>Надайте <strong>PIN-код:</strong></span>
                 <div className={styles.pinCode}>{invite.pin}</div>
-      {/* ── Список ── */}
-      <div className={styles.teamList}>
-        {visibleMembers.length === 0 ? (
-          <p className={styles.empty}>Список порожній.</p>
-        ) : (
-          visibleMembers.map((member) => (
-            <div key={member.id} className={styles.teamCard}>
-
-              <MemberAvatar member={member} />
-
-              <div className={styles.teamInfo}>
-                <span className={styles.teamName}>{getDisplayName(member)}</span>
-                <span className={styles.teamMeta}>
-                  {ROLE_LABELS[member.role] ?? member.role}
-                  {member.user_role && ` · ${member.user_role}`}
-                </span>
               </div>
               <button
                 onClick={() => handleRegenerate(activeTab)}
@@ -773,7 +776,9 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
               >
                 {regenLoading ? "Оновлення…" : isRegen ? "Підтвердити?" : "Змінити PIN"}
               </button>
-              <div className={styles.crossIcon} onClick={() => setShowPin(null)}><X size={20} /></div>
+              <div className={styles.crossIcon} onClick={() => setShowPin(null)}>
+                <X size={20} />
+              </div>
             </div>
           )}
 
@@ -781,30 +786,33 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
           <div className={styles.teamList}>
             {visibleMembers.length === 0 ? (
               <p className={styles.empty}>Список порожній.</p>
-            ) : visibleMembers.map(member => (
-              <div key={member.id} className={styles.teamCard}>
-                <MemberAvatar member={member} />
-                <div className={styles.teamInfo}>
-                  <span className={styles.teamName}>{getDisplayName(member)}</span>
-                  <span className={styles.teamMeta}>
-                    {ROLE_LABELS[member.role] ?? member.role}
-                    {member.user_role && ` · ${member.user_role}`}
-                  </span>
-                </div>
-                {isOwner && member.role !== "owner" && (
-                  <button className={styles.removeBtn} onClick={() => setMemberToDelete(member)}>✕</button>
-                )}
-                {member.joined_at && (
-                  <div className={styles.teamDate}>
-                    {new Date(member.joined_at).toLocaleDateString("uk-UA")}
+            ) : (
+              visibleMembers.map(member => (
+                <div key={member.id} className={styles.teamCard}>
+                  <MemberAvatar member={member} />
+                  <div className={styles.teamInfo}>
+                    <span className={styles.teamName}>{getDisplayName(member)}</span>
+                    <span className={styles.teamMeta}>
+                      {ROLE_LABELS[member.role] ?? member.role}
+                      {member.user_role && ` · ${member.user_role}`}
+                    </span>
                   </div>
-                )}
-              </div>
-            ))}
+                  {isOwner && member.role !== "owner" && (
+                    <button className={styles.removeBtn} onClick={() => setMemberToDelete(member)}>✕</button>
+                  )}
+                  {member.joined_at && (
+                    <div className={styles.teamDate}>
+                      {new Date(member.joined_at).toLocaleDateString("uk-UA")}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </>
       )}
 
+      {/* Модалка підтвердження видалення учасника */}
       {memberToDelete && (
         <ConfirmDeleteModal
           icon="👤"
