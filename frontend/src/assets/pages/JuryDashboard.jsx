@@ -6,7 +6,7 @@ import NavBar from "../components/NavBar";
 import TournamentCard from "../components/TournamentCard";
 import styles from "../components/styles/jurydashboard.module.css";
 
-// ── Pending card — турнір з лічильником нeoцінених ───────────────────────────
+// ── Pending card ──────────────────────────────────────────────────────────────
 function PendingCard({ item, onClick }) {
   const urgency = item.pending_count >= 10 ? "high"
                 : item.pending_count >= 3  ? "mid"
@@ -24,12 +24,19 @@ function PendingCard({ item, onClick }) {
   );
 }
 
-// ── Notification tile (compact) ───────────────────────────────────────────────
+// ── Notification tile ─────────────────────────────────────────────────────────
 function NotifTile({ n, onRead }) {
+  const handleClick = () => {
+    // БАГ 3 ФІК: завжди викликаємо onRead, навіть якщо вже прочитане
+    // щоб уникнути проблем з подіями
+    if (!n.is_read) onRead(n.id);
+  };
+
   return (
     <div
       className={`${styles.notifTile} ${n.is_read ? styles.notif_read : styles.notif_unread}`}
-      onClick={() => !n.is_read && onRead(n.id)}
+      onClick={handleClick}
+      style={{ cursor: n.is_read ? "default" : "pointer" }}
     >
       {!n.is_read && <span className={styles.notifDot} />}
       <div className={styles.notifContent}>
@@ -48,7 +55,7 @@ const JuryDashboard = () => {
   const { addTab } = useTabs();
 
   const [tournaments,   setTournaments]   = useState([]);
-  const [pending,       setPending]       = useState([]); // [{tournament_id, tournament_name, pending_count}]
+  const [pending,       setPending]       = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loadingT,      setLoadingT]      = useState(true);
   const [loadingP,      setLoadingP]      = useState(true);
@@ -60,7 +67,6 @@ const JuryDashboard = () => {
   const [animDir,      setAnimDir]      = useState("next");
   const timerRef = useRef(null);
 
-  // ── fetch ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     API.get("/tournaments/")
       .then(r => setTournaments(r.data))
@@ -79,15 +85,25 @@ const JuryDashboard = () => {
   }, []);
 
   // ── mark read ──────────────────────────────────────────────────────────────
-  const markOneRead = async (id) => {
-    await API.post(`/notifications/mark-read/${id}/`);
+  const markOneRead = useCallback(async (id) => {
+    // БАГ 3 ФІК: оновлюємо стан ПЕРЕД запитом для миттєвого UI
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
-  };
+    try {
+      await API.post(`/notifications/mark-read/${id}/`);
+    } catch {
+      // якщо помилка — відкатуємо
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: false } : n));
+    }
+  }, []);
 
-  const markAllRead = async () => {
-    await API.post("/notifications/mark-read/");
+  const markAllRead = useCallback(async () => {
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-  };
+    try {
+      await API.post("/notifications/mark-read/");
+    } catch {
+      // тихо
+    }
+  }, []);
 
   // ── carousel ───────────────────────────────────────────────────────────────
   const goTo = useCallback((dir) => {
@@ -120,7 +136,6 @@ const JuryDashboard = () => {
   const totalPending = pending.reduce((s, p) => s + p.pending_count, 0);
   const unreadCount  = notifications.filter(n => !n.is_read).length;
 
-  // ── render ─────────────────────────────────────────────────────────────────
   return (
     <NavBar>
       <div className={styles.contentArea}>
@@ -131,8 +146,8 @@ const JuryDashboard = () => {
           <p className={styles.pageSubtitle}>Ваші турніри та роботи що очікують оцінки</p>
         </div>
 
-        {/* ── Top stat strip ── */}
-        {!loadingP && totalPending > 0 && (
+        {/* Stat strip */}
+        {!loadingP && (totalPending > 0 || tournaments.length > 0) && (
           <div className={styles.statStrip}>
             <div className={styles.statChip}>
               <span className={styles.statNum}>{totalPending}</span>
@@ -151,7 +166,7 @@ const JuryDashboard = () => {
           </div>
         )}
 
-        {/* ── Main grid ── */}
+        {/* Main grid */}
         <div className={styles.mainGrid}>
 
           {/* LEFT — Tournament carousel */}
@@ -193,10 +208,12 @@ const JuryDashboard = () => {
                   }}
                   style={{ cursor: "pointer" }}
                 >
+                  {/* БАГ 2 ФІК: передаємо status */}
                   <TournamentCard
                     name={current.name}
                     info={current.description}
                     date={current.start_date}
+                    status={current.status}
                     accentColor={current.accent_color}
                     imageMode={current.image_mode}
                     stockImage={current.stock_image}
@@ -260,12 +277,15 @@ const JuryDashboard = () => {
           </section>
         </div>
 
-        {/* ── Notifications strip ── */}
+        {/* Notifications strip */}
         <section className={styles.notifSection}>
           <div className={styles.sectionHeader}>
             <h3 className={styles.sectionTitle}>
               Сповіщення
-              {unreadCount > 0 && <span className={styles.notifCount}>{unreadCount}</span>}
+              {/* БАГ 3 ФІК: key примушує ре-рендер при зміні unreadCount */}
+              {unreadCount > 0 && (
+                <span key={unreadCount} className={styles.notifCount}>{unreadCount}</span>
+              )}
             </h3>
             {unreadCount > 0 && (
               <button className={styles.markAllBtn} onClick={markAllRead}>
