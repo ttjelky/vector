@@ -1,49 +1,48 @@
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import parser_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
-
 from .serializers import RegisterSerializer, MyTokenObtainPairSerializer
-from .models import Profile, IsAdmin
 
 User = get_user_model()
 
-
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
 def profile(request):
     user = request.user
 
-    if request.method == "GET":
-        try:
-            profile_obj = Profile.objects.get(user=user)
-            avatar_url = profile_obj.avatar.url if profile_obj.avatar else None
-        except Profile.DoesNotExist:
-            avatar_url = None
-
+    if request.method == 'GET':
         return Response({
-            "username": user.username,
             "email": user.email,
-            "avatar": avatar_url,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "avatar": user.profile.avatar.url if hasattr(user, "profile") and user.profile.avatar else None
         })
 
-    if request.method == "POST":
-        user.username = request.POST.get("username", user.username)
-        user.email = request.POST.get("email", user.email)
+    if request.method == 'PUT':
+        user.first_name = request.data.get("first_name", user.first_name)
+        user.last_name = request.data.get("last_name", user.last_name)
+        user.email = request.data.get("email", user.email)
         user.save()
 
-        try:
-            profile_obj = Profile.objects.get(user=user)
-            if 'avatar' in request.FILES:
-                profile_obj.avatar = request.FILES['avatar']
-            profile_obj.save()
-        except Profile.DoesNotExist:
-            pass
+        avatar = request.FILES.get("avatar")
 
-        return Response({"status": "updated"})
+        if avatar:
+            user.profile.avatar = avatar
+            user.profile.save()
+
+        return Response({
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "avatar": user.profile.avatar.url if user.profile.avatar else None
+        })
 
 
 def dashboard_data(request):

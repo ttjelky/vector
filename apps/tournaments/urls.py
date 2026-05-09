@@ -19,6 +19,7 @@ from .views import (
     LeaderboardView, LeaderboardDetailView,
     RegistrationExceptionView,
 )
+from .jury_views import JuryPendingSubmissionsView  # ← нове
 
 urlpatterns = [
     # ── Tournaments ────────────────────────────────────────────────────────────
@@ -42,6 +43,7 @@ urlpatterns = [
     # ── Jury panel ─────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/jury/submissions/', JurySubmissionsView.as_view(), name='jury-submissions'),
     path('<int:tournament_pk>/jury/submissions/<int:submission_pk>/grade/', JuryGradeView.as_view(), name='jury-grade'),
+    path('jury/pending-submissions/', JuryPendingSubmissionsView.as_view(), name='jury-pending-submissions'),  # ← нове
 
     # ── Leaderboard ────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/leaderboard/', LeaderboardView.as_view(), name='leaderboard'),
