@@ -128,12 +128,12 @@ export default function TournamentPage() {
   })();
 
   const tabs = [
-  { id: "overview",     label: "Основна сторінка" },
-  { id: "rounds",       label: "Раунди" },
-  { id: "participants", label: "Учасники" },
-  { id: "leaderboard",  label: "Таблиця лідерів" },
-  ...(isJury ? [{ id: "jury", label: "Панель журі" }] : []),
-];
+    { id: "overview",     label: "Основна сторінка" },
+    { id: "rounds",       label: "Раунди" },
+    { id: "participants", label: "Учасники" },
+    { id: "leaderboard",  label: "Таблиця лідерів" },
+    ...(isJury ? [{ id: "jury", label: "Панель журі" }] : []),
+  ];
 
   return (
     <NavBar>
@@ -217,6 +217,7 @@ export default function TournamentPage() {
               onRoundCreated={handleRoundCreated}
               readOnly={!isOwner}
               myRole={myRole}
+              tournamentStatus={status}
             />
           )}
 
@@ -226,6 +227,7 @@ export default function TournamentPage() {
               myRole={myRole}
               loading={false}
               maxParticipants={tournament.max_teams}
+              tournamentStatus={status}
             />
           )}
 

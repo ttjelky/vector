@@ -175,6 +175,20 @@ class VerifyInvitePinView(APIView):
                     },
                     status=status.HTTP_403_FORBIDDEN,
                 )
+            # Для учасників перевіряємо чи відкрита реєстрація
+            if role == 'participant':
+                already = (
+                    request.user.is_authenticated and
+                    TournamentMember.objects.filter(
+                        tournament=tournament, user=request.user
+                    ).exists()
+                )
+                if not already and not tournament.registration_open():
+                    return Response(
+                        {'detail': 'Реєстрація учасників зараз закрита.'},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+
             return Response({
                 'valid':            True,
                 'tournament_name':  tournament.name,
@@ -244,6 +258,17 @@ class JoinByTokenView(APIView):
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
+
+        # Перевірка реєстрації для учасників
+        if role == 'participant':
+            already = TournamentMember.objects.filter(
+                tournament=tournament, user=request.user
+            ).exists()
+            if not already and not tournament.registration_open():
+                return Response(
+                    {'detail': 'Реєстрація учасників зараз закрита.'},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
         member, created = TournamentMember.objects.get_or_create(
             tournament=tournament,
@@ -696,6 +721,75 @@ class SubmissionGradeView(APIView):
             'updated_at':      latest_grade.updated_at if latest_grade else None,
             'grades_count':    grades.count(),
         })
+
+class RegistrationExceptionView(APIView):
+    """
+    GET  /tournaments/<pk>/registration-exception/
+         Повертає поточний стан винятку (is_active, until).
+         Доступно owner/admin.
+
+    POST /tournaments/<pk>/registration-exception/
+         Body: { "minutes": 15|30|60 }  — активувати виняток
+         Body: { "minutes": 0 }         — скасувати виняток
+         Доступно owner/admin.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def _get_tournament_and_role(self, request, pk):
+        try:
+            t = Tournament.objects.get(pk=pk)
+        except Tournament.DoesNotExist:
+            return None, None
+        m = TournamentMember.objects.filter(tournament=t, user=request.user).first()
+        return t, (m.role if m else None)
+
+    def get(self, request, tournament_pk):
+        from django.utils import timezone
+        tournament, role = self._get_tournament_and_role(request, tournament_pk)
+        if not tournament:
+            return Response({'detail': 'Турнір не знайдено.'}, status=status.HTTP_404_NOT_FOUND)
+        if role not in ('owner', 'admin'):
+            return Response({'detail': 'Доступ заборонено.'}, status=status.HTTP_403_FORBIDDEN)
+
+        until = tournament.registration_exception_until
+        now = timezone.now()
+        is_active = bool(until and until > now)
+        return Response({
+            'is_active': is_active,
+            'until':     until.isoformat() if is_active else None,
+        })
+
+    def post(self, request, tournament_pk):
+        from django.utils import timezone
+        tournament, role = self._get_tournament_and_role(request, tournament_pk)
+        if not tournament:
+            return Response({'detail': 'Турнір не знайдено.'}, status=status.HTTP_404_NOT_FOUND)
+        if role not in ('owner', 'admin'):
+            return Response({'detail': 'Доступ заборонено.'}, status=status.HTTP_403_FORBIDDEN)
+
+        minutes = request.data.get('minutes')
+        try:
+            minutes = int(minutes)
+        except (TypeError, ValueError):
+            return Response({'detail': 'minutes має бути цілим числом.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if minutes == 0:
+            tournament.registration_exception_until = None
+            tournament.save(update_fields=['registration_exception_until'])
+            return Response({'is_active': False, 'until': None})
+
+        if minutes not in (15, 30, 60):
+            return Response({'detail': 'Допустимі значення: 15, 30, 60.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        until = timezone.now() + timezone.timedelta(minutes=minutes)
+        tournament.registration_exception_until = until
+        tournament.save(update_fields=['registration_exception_until'])
+
+        return Response({
+            'is_active': True,
+            'until':     until.isoformat(),
+        })
+
 
 class LeaderboardView(APIView):
     """

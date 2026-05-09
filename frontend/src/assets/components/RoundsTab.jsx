@@ -16,14 +16,11 @@ import "./styles/richContent.css";
 const EMPTY_FORM = { title: "", description: "", start_date: "", end_date: "" };
 
 // ─── Єдина функція кольорів статусу ───────────────────────────────────────────
-// Використовується і для pill-tabs/бейджа, і для банерів адміна —
-// щоб кольори скрізь були однакові.
 function getStatusColors(status) {
   const isUpcoming  = /очікує|upcoming|pending|scheduled/i.test(status);
   const isCompleted = /завершен|completed|finished|ended|closed/i.test(status);
   if (isUpcoming)  return { color: "#b45309", background: "#fffbeb", border: "#fde68a" };
   if (isCompleted) return { color: "#991b1b", background: "#fff1f2", border: "#fecdd3" };
-  // активний або без дат — завжди зелений
   return { color: "#15803d", background: "#f0fdf4", border: "#bbf7d0" };
 }
 
@@ -57,10 +54,11 @@ export default function RoundsTab({
   onRoundCreated,
   readOnly = false,
   myRole,
+  tournamentStatus,
 }) {
   const [rounds,         setRounds]         = useState(initialRounds);
   const [activeRoundId,  setActiveRoundId]  = useState(null);
-  const [editingRound,   setEditingRound]   = useState(null);  // id раунду для редагування
+  const [editingRound,   setEditingRound]   = useState(null);
   const [taskForms,      setTaskForms]      = useState(new Set());
   const [showForm,       setShowForm]       = useState(false);
   const [form,           setForm]           = useState(EMPTY_FORM);
@@ -82,25 +80,26 @@ export default function RoundsTab({
 
   const activeRound = rounds.find((r) => r.id === activeRoundId) ?? null;
 
-  // ── Права доступу залежно від ролі та статусу раунду ──────────────────────
-  // Адмін і журі бачать усе завжди.
-  // Учасник (readOnly):
-  //   "Очікується" → бачить банер, але не бачить завдань
-  //   "Активний"   → бачить і може здавати роботи
-  //   "Завершено"  → бачить завдання, але здача заблокована
+  // ── Права доступу ─────────────────────────────────────────────────────────
+  // Власник, адмін, журі — завжди бачать усе
   const isPrivileged = !readOnly || myRole === "jury" || myRole === "admin";
+
+  // Учасники бачать раунди лише коли турнір "ongoing" або "finished"
+  const canSeeRounds = isPrivileged
+    || tournamentStatus === "ongoing"
+    || tournamentStatus === "finished";
 
   const getParticipantAccess = (round) => {
     if (isPrivileged) return { showTasks: true, canSubmit: true };
-    // Якщо дати не вказані — раунд відкритий безстроково
     if (!round.start_date && !round.end_date) return { showTasks: true, canSubmit: true };
     const status = roundStatus(round);
-    // підтримуємо різні варіанти рядків статусу
     const isUpcoming  = /очікує|upcoming|pending|scheduled/i.test(status);
     const isCompleted = /завершен|completed|finished|ended|closed/i.test(status);
+    // Якщо турнір завершено — здавати не можна навіть у активному раунді
+    if (tournamentStatus === "finished") return { showTasks: true, canSubmit: false };
     if (isUpcoming)  return { showTasks: false, canSubmit: false };
     if (isCompleted) return { showTasks: true,  canSubmit: false };
-    return { showTasks: true, canSubmit: true }; // активний
+    return { showTasks: true, canSubmit: true };
   };
 
   // ── Форма завдання ─────────────────────────────────────────────────────────
@@ -206,6 +205,29 @@ export default function RoundsTab({
     );
   }
 
+  // ── Блокуючий банер для учасників (upcoming / registration) ───────────────
+
+  if (!canSeeRounds) {
+    const isRegistration = tournamentStatus === "registration";
+    return (
+      <div className={styles.tabContent}>
+        <div className={styles.tabHeader}>
+          <span className={styles.tabTitle}>Раунди</span>
+        </div>
+        <div className={styles.upcomingNotice}>
+          <span className={styles.upcomingNoticeIcon}>
+            {isRegistration ? "📋" : "🔒"}
+          </span>
+          <p>
+            {isRegistration
+              ? "Раунди стануть доступні після завершення реєстрації команд."
+              : "Раунди стануть доступні після початку турніру."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // ── Рендер ─────────────────────────────────────────────────────────────────
 
   return (
@@ -252,7 +274,7 @@ export default function RoundsTab({
               />
             </label>
             <div className={styles.editLabel}>
-            <label>Опис</label>
+              <label>Опис</label>
               <RichTextArea
                 id="new-round-description"
                 rows={2}
@@ -382,46 +404,73 @@ export default function RoundsTab({
                     )}
                   </div>
                 </div>
+              </div>
 
-                {activeRound.description && (
-                  <div className={`${styles.roundInfoDesc} richContent`} dangerouslySetInnerHTML={{ __html: activeRound.description }} />
-                )}
+              {activeRound.description && (
+                <div className={`${styles.roundInfoDesc} richContent`} dangerouslySetInnerHTML={{ __html: activeRound.description }} />
+              )}
 
-                {/* Посилання та файли раунду */}
-                {(activeRound.links?.length > 0 || activeRound.attachments?.length > 0) && (
-                  <div className={styles.roundMetaRow}>
-                    {activeRound.links?.map((link) => (
-                      <a
-                        key={link.id}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.roundLink}
-                      >
-                        🔗 {link.label || link.url}
-                      </a>
-                    ))}
-                    {activeRound.attachments?.map((att) => (
-                      <a
-                        key={att.id}
-                        href={att.file}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.roundFile}
-                      >
-                        📎 {att.name}
-                      </a>
+              {activeRound.tech_requirements?.length > 0 && (
+                <div className={styles.roundInfoSection}>
+                  <span className={styles.roundInfoSectionLabel}>Вимоги до технологій</span>
+                  <div className={styles.roundTechReqGrid}>
+                    {activeRound.tech_requirements.map((req, i) => (
+                      <div key={i} className={styles.roundTechReqCard}>
+                        <span className={styles.roundTechReqCategory}>{req.category}</span>
+                        <span className={styles.roundTechReqValue}>{req.value}</span>
+                      </div>
                     ))}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+
+              {activeRound.must_have?.length > 0 && (
+                <div className={styles.roundInfoSection}>
+                  <span className={styles.roundInfoSectionLabel}>Must have</span>
+                  <ul className={styles.roundMustHaveList}>
+                    {activeRound.must_have.map((item, i) => (
+                      <li key={i} className={styles.roundMustHaveItem}>
+                        <span className={styles.roundMustHaveCheck}>✓</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Посилання та файли раунду */}
+              {(activeRound.links?.length > 0 || activeRound.attachments?.length > 0) && (
+                <div className={styles.roundMetaRow}>
+                  {activeRound.links?.map((link) => (
+                    <a
+                      key={link.id}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.roundLink}
+                    >
+                      🔗 {link.label || link.url}
+                    </a>
+                  ))}
+                  {activeRound.attachments?.map((att) => (
+                    <a
+                      key={att.id}
+                      href={att.file}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.roundFile}
+                    >
+                      📎 {att.name}
+                    </a>
+                  ))}
+                </div>
+              )}
 
               {/* ── Список завдань ── */}
               {(() => {
                 const { showTasks, canSubmit } = getParticipantAccess(activeRound);
 
                 if (!showTasks) {
-                  // Раунд очікується — учасник бачить тільки банер, завдання приховані
                   return (
                     <div className={styles.upcomingNotice}>
                       <span className={styles.upcomingNoticeIcon}>🔒</span>
@@ -444,11 +493,13 @@ export default function RoundsTab({
                       )}
                     </div>
 
-                    {/* Банер «здача закрита» для завершеного раунду (учасники) */}
-                    {!canSubmit && (
+                    {/* Банер «здача закрита» для завершеного раунду або завершеного турніру */}
+                    {!canSubmit && !isPrivileged && (
                       <div className={styles.submissionClosedBanner}>
                         <span>🏁</span>
-                        Раунд завершено — здача робіт закрита.
+                        {tournamentStatus === "finished"
+                          ? "Турнір завершено — здача робіт закрита."
+                          : "Раунд завершено — здача робіт закрита."}
                       </div>
                     )}
 
@@ -460,6 +511,14 @@ export default function RoundsTab({
                       const isCompleted = /завершен|completed|finished|ended|closed/i.test(status);
                       const sc = getStatusColors(noDates ? "active" : status);
                       const bannerStyle = { color: sc.color, background: sc.background, borderColor: sc.border };
+
+                      // Якщо турнір завершено — повідомляємо про це
+                      if (tournamentStatus === "finished") return (
+                        <div className={styles.privilegedNoticeBanner} style={{ color: "#6b7280", background: "#f9fafb", borderColor: "#e5e7eb" }}>
+                          <span>🏁</span>
+                          <span>Турнір завершено — учасники бачать завдання, але <strong>не можуть здавати роботи</strong>.</span>
+                        </div>
+                      );
                       if (noDates) return (
                         <div className={styles.privilegedNoticeBanner} style={bannerStyle}>
                           <span>✅</span>

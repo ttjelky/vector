@@ -198,53 +198,71 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Деталі</h2>
-        <div className={styles.detailCards}>
+        <div className={styles.detailGrid} {...(tournament.format === "team" ? {"data-team": true} : {})}>
 
-          <div className={styles.detailCard}>
-            <span className={styles.detailCardLabel}>Формат</span>
-            <span className={styles.detailCardValue}>{FORMAT_LABELS[tournament.format] || "Не вказано"}</span>
-          </div>
-
-          <div className={styles.detailCard}>
-            <span className={styles.detailCardLabel}>Початок турніру</span>
-            <span className={styles.detailCardValue}>{formatDate(tournament.start_date) || "—"}</span>
-          </div>
-
-          <div className={styles.detailCard}>
-            <span className={styles.detailCardLabel}>Кінець турніру</span>
-            <span className={styles.detailCardValue}>{formatDate(tournament.end_date) || "—"}</span>
-          </div>
-
-          <div className={styles.detailCard}>
-            <span className={styles.detailCardLabel}>Початок реєстрації</span>
-            <span className={styles.detailCardValue}>{formatDate(tournament.registration_start) || "—"}</span>
-          </div>
-
-          <div className={styles.detailCard}>
-            <span className={styles.detailCardLabel}>Кінець реєстрації</span>
-            <span className={styles.detailCardValue}>{formatDate(tournament.registration_end) || "—"}</span>
-          </div>
-
-          <div className={styles.detailCard}>
-            <span className={styles.detailCardLabel}>
-              {tournament.format === "team" ? "Макс. команд" : "Макс. учасників"}
+          <div className={`${styles.dc} ${styles.dcBlue}`}>
+            <span className={styles.dcIcon}>
+              <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5"/></svg>
             </span>
-            <span className={styles.detailCardValue}>{tournament.max_teams || "Без обмежень"}</span>
+            <span className={styles.dcLabel}>Формат</span>
+            <span className={styles.dcValue}>{FORMAT_LABELS[tournament.format] || "—"}</span>
+          </div>
+
+          <div className={`${styles.dc} ${styles.dcBlue}`}>
+            <span className={styles.dcIcon}>
+              <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="3" stroke="currentColor" strokeWidth="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+            </span>
+            <span className={styles.dcLabel}>{tournament.format === "team" ? "Макс. команд" : "Макс. учасників"}</span>
+            <span className={styles.dcValue}>{tournament.max_teams || "Без обмежень"}</span>
           </div>
 
           {tournament.format === "team" && (
-            <div className={styles.detailCard}>
-              <span className={styles.detailCardLabel}>Розмір команди</span>
-              <span className={styles.detailCardValue}>
+            <div className={`${styles.dc} ${styles.dcBlue}`}>
+              <span className={styles.dcIcon}>
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="5" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.5"/><circle cx="11" cy="5" r="2" stroke="currentColor" strokeWidth="1.5"/><path d="M1 14c0-2.485 2.015-4 4.5-4s4.5 1.515 4.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M10.5 10.5c1.5-.1 4 .7 4 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              </span>
+              <span className={styles.dcLabel}>Розмір команди</span>
+              <span className={styles.dcValue}>
                 {tournament.min_team_size && tournament.max_team_size
-                  ? `${tournament.min_team_size} – ${tournament.max_team_size} гравців`
+                  ? `${tournament.min_team_size}–${tournament.max_team_size} гравців`
                   : tournament.max_team_size
                     ? `до ${tournament.max_team_size} гравців`
-                    : "Не вказано"
-                }
+                    : "—"}
               </span>
             </div>
           )}
+
+          <div className={`${styles.dc} ${styles.dcGreen}`}>
+            <span className={styles.dcIcon}>
+              <svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="11" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M5 1.5V4M11 1.5V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M1.5 6.5H14.5" stroke="currentColor" strokeWidth="1.5"/></svg>
+            </span>
+            <span className={styles.dcLabel}>Початок турніру</span>
+            <span className={styles.dcValue}>{formatDate(tournament.start_date) || "—"}</span>
+          </div>
+
+          <div className={`${styles.dc} ${styles.dcGreen}`}>
+            <span className={styles.dcIcon}>
+              <svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="11" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M5 1.5V4M11 1.5V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M1.5 6.5H14.5" stroke="currentColor" strokeWidth="1.5"/><path d="M5 10l2 2 4-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </span>
+            <span className={styles.dcLabel}>Кінець турніру</span>
+            <span className={styles.dcValue}>{formatDate(tournament.end_date) || "—"}</span>
+          </div>
+
+          <div className={`${styles.dc} ${styles.dcOrange}`}>
+            <span className={styles.dcIcon}>
+              <svg viewBox="0 0 16 16" fill="none"><path d="M10.5 2H12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="5.5" y="1" width="5" height="3" rx="1" stroke="currentColor" strokeWidth="1.5"/><path d="M5 9l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </span>
+            <span className={styles.dcLabel}>Початок реєстрації</span>
+            <span className={styles.dcValue}>{formatDate(tournament.registration_start) || "—"}</span>
+          </div>
+
+          <div className={`${styles.dc} ${styles.dcOrange}`}>
+            <span className={styles.dcIcon}>
+              <svg viewBox="0 0 16 16" fill="none"><path d="M10.5 2H12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="5.5" y="1" width="5" height="3" rx="1" stroke="currentColor" strokeWidth="1.5"/><path d="M8 8v4M6 10h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+            </span>
+            <span className={styles.dcLabel}>Кінець реєстрації</span>
+            <span className={styles.dcValue}>{formatDate(tournament.registration_end) || "—"}</span>
+          </div>
 
         </div>
       </section>

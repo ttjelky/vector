@@ -58,13 +58,43 @@ class TaskAttachmentSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    links       = TaskLinkSerializer(many=True, read_only=True)
-    attachments = TaskAttachmentSerializer(many=True, read_only=True)
+    links             = TaskLinkSerializer(many=True, read_only=True)
+    attachments       = TaskAttachmentSerializer(many=True, read_only=True)
+    tech_requirements = serializers.JSONField(required=False, allow_null=True)
+    must_have         = serializers.JSONField(required=False, allow_null=True)
 
     class Meta:
         model  = Task
-        fields = ['id', 'round', 'title', 'description', 'created_at', 'links', 'attachments']
+        fields = [
+            'id', 'round', 'title', 'description',
+            'tech_requirements', 'must_have',
+            'created_at', 'links', 'attachments',
+        ]
         read_only_fields = ['round', 'created_at']
+
+    def validate_tech_requirements(self, value):
+        """Переконуємось що це список об'єктів {category, value} або null."""
+        if value is None:
+            return value
+        if not isinstance(value, list):
+            raise serializers.ValidationError("tech_requirements має бути списком.")
+        for item in value:
+            if not isinstance(item, dict) or 'category' not in item or 'value' not in item:
+                raise serializers.ValidationError(
+                    "Кожен елемент tech_requirements має містити поля 'category' і 'value'."
+                )
+        return value
+
+    def validate_must_have(self, value):
+        """Переконуємось що це список рядків або null."""
+        if value is None:
+            return value
+        if not isinstance(value, list):
+            raise serializers.ValidationError("must_have має бути списком.")
+        for item in value:
+            if not isinstance(item, str):
+                raise serializers.ValidationError("Кожен елемент must_have має бути рядком.")
+        return value
 
 
 # ── Round serializers ─────────────────────────────────────────────────────────
@@ -85,18 +115,43 @@ class RoundAttachmentSerializer(serializers.ModelSerializer):
 
 
 class RoundSerializer(serializers.ModelSerializer):
-    tasks       = TaskSerializer(many=True, read_only=True)
-    links       = RoundLinkSerializer(many=True, read_only=True)
-    attachments = RoundAttachmentSerializer(many=True, read_only=True)
+    tasks             = TaskSerializer(many=True, read_only=True)
+    links             = RoundLinkSerializer(many=True, read_only=True)
+    attachments       = RoundAttachmentSerializer(many=True, read_only=True)
+    tech_requirements = serializers.JSONField(required=False, allow_null=True)
+    must_have         = serializers.JSONField(required=False, allow_null=True)
 
     class Meta:
         model  = Round
         fields = [
             'id', 'tournament', 'title', 'description',
+            'tech_requirements', 'must_have',
             'start_date', 'end_date', 'created_at',
             'tasks', 'links', 'attachments',
         ]
         read_only_fields = ['tournament', 'created_at']
+
+    def validate_tech_requirements(self, value):
+        if value is None:
+            return value
+        if not isinstance(value, list):
+            raise serializers.ValidationError("tech_requirements має бути списком.")
+        for item in value:
+            if not isinstance(item, dict) or 'category' not in item or 'value' not in item:
+                raise serializers.ValidationError(
+                    "Кожен елемент tech_requirements має містити поля 'category' і 'value'."
+                )
+        return value
+
+    def validate_must_have(self, value):
+        if value is None:
+            return value
+        if not isinstance(value, list):
+            raise serializers.ValidationError("must_have має бути списком.")
+        for item in value:
+            if not isinstance(item, str):
+                raise serializers.ValidationError("Кожен елемент must_have має бути рядком.")
+        return value
 
 
 # ── Submission serializers ────────────────────────────────────────────────────

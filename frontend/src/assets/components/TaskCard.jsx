@@ -399,19 +399,28 @@ function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
 
 // ─── Task Drawer ───────────────────────────────────────────────────────────────
 
-function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDate, canSubmit = true, onClose }) {
-  const [activeTab, setActiveTab] = useState("details");
+function TaskDrawer({ task: taskProp, roundId, tournamentId, readOnly, myRole, roundEndDate, canSubmit = true, onClose }) {
+  const [activeTab,   setActiveTab]   = useState("details");
+  const [task,        setTask]        = useState(taskProp);
+
+  // Підвантажуємо повні дані завдання при відкритті —
+  // список tasks у раунді може не містити нових полів (tech_requirements, must_have).
+  useEffect(() => {
+    API.get(`/tournaments/${tournamentId}/rounds/${roundId}/tasks/${taskProp.id}/`)
+      .then((r) => setTask(r.data))
+      .catch(() => { /* залишаємо дані з пропсу */ });
+  }, [taskProp.id, roundId, tournamentId]);
 
   const isOwnerOrAdmin = myRole === "owner" || myRole === "admin";
   const isJury         = myRole === "jury";
   const isParticipant  = readOnly && !isJury;
 
-  const hasDetails  = task.description || task.links?.length > 0 || task.attachments?.length > 0;
+  const hasDetails     = true; // завжди показуємо вкладку Деталі
   const deadlinePassed = isDeadlinePassed(roundEndDate ?? task.end_date);
   const deadlineLabel  = formatDeadline(roundEndDate ?? task.end_date);
 
   const tabs = [];
-  if (hasDetails)    tabs.push({ id: "details",  label: "Деталі" });
+  tabs.push({ id: "details", label: "Деталі" });
   if (isParticipant) tabs.push({ id: "submit",   label: "Моя здача" });
   if (isOwnerOrAdmin || isJury) tabs.push({ id: "allSubs", label: "Здачі учасників" });
 
@@ -490,6 +499,34 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
                 </div>
               )}
 
+              {task.tech_requirements?.length > 0 && (
+                <div className={styles.drawerSection}>
+                  <span className={styles.drawerSectionLabel}>Вимоги до технологій</span>
+                  <div className={styles.techReqGrid}>
+                    {task.tech_requirements.map((req, i) => (
+                      <div key={i} className={styles.techReqCard}>
+                        <span className={styles.techReqCategory}>{req.category}</span>
+                        <span className={styles.techReqValue}>{req.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {task.must_have?.length > 0 && (
+                <div className={styles.drawerSection}>
+                  <span className={styles.drawerSectionLabel}>Must have</span>
+                  <ul className={styles.mustHaveViewList}>
+                    {task.must_have.map((item, i) => (
+                      <li key={i} className={styles.mustHaveViewItem}>
+                        <span className={styles.mustHaveCheck}>✓</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {task.links?.length > 0 && (
                 <div className={styles.drawerSection}>
                   <span className={styles.drawerSectionLabel}>Посилання</span>
@@ -528,7 +565,8 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
                 </div>
               )}
 
-              {!task.description && !task.links?.length && !task.attachments?.length && (
+              {!task.description && !task.links?.length && !task.attachments?.length
+               && !task.tech_requirements?.length && !task.must_have?.length && (
                 <p className={styles.empty}>Опис завдання відсутній.</p>
               )}
             </>

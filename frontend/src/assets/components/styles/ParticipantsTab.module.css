@@ -88,6 +88,12 @@
   color: #888;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .inviteBtn {
   padding: 8px 18px;
   background: #1f1e1e;
@@ -293,4 +299,147 @@
 @keyframes fadeInSlideUp {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Exception (тимчасова реєстрація) ───────────────────────────────────── */
+
+.exceptionBtn {
+  padding: 8px 16px;
+  background: transparent;
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid #e0e0e4;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.exceptionBtn:hover {
+  background: #f5f5f7;
+  color: #111;
+  border-color: #ccc;
+}
+
+.exceptionActiveBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  background: #f5f5f7;
+  color: #111;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid #e0e0e4;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.exceptionActiveBtn:hover {
+  background: #ebebed;
+}
+
+.exceptionDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #34c759;
+  flex-shrink: 0;
+  animation: exceptionPulse 2s infinite;
+}
+
+.exceptionPanel {
+  background: #f5f5f7;
+  border: 1px solid #e8e8ec;
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeInSlideUp 0.2s ease-out forwards;
+}
+
+.exceptionPanelTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+}
+
+.exceptionPanelRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exceptionPanelLabel {
+  font-size: 13px;
+  color: #888;
+  margin-right: 2px;
+}
+
+.exceptionPill {
+  padding: 5px 14px;
+  border-radius: 100px;
+  border: 1px solid #e0e0e4;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.exceptionPill:hover {
+  background: #ebebed;
+  color: #111;
+}
+.exceptionPillActive {
+  background: #1f1e1e;
+  color: #fff;
+  border-color: #1f1e1e;
+}
+
+.exceptionPanelActions {
+  display: flex;
+  gap: 8px;
+}
+
+.exceptionConfirmBtn {
+  padding: 8px 20px;
+  background: #1f1e1e;
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.exceptionConfirmBtn:hover {
+  background: #2a2a2a;
+}
+
+.exceptionCancelBtn {
+  padding: 8px 16px;
+  background: transparent;
+  color: #888;
+  border: 1px solid #e0e0e4;
+  border-radius: 100px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.exceptionCancelBtn:hover {
+  background: #ebebed;
+  color: #111;
+}
+
+.exceptionPanelHint {
+  font-size: 12px;
+  color: #aaa;
+}
+
+@keyframes exceptionPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
 }

@@ -5,23 +5,22 @@ import { getStatusStyle, getRoundStatusStyle } from "./tournamentHelpers";
 
 // ─── StatusBadge ──────────────────────────────────────────────────────────────
 
-export function StatusBadge({ status, variant = "tournament" }) {
-  const style = variant === "round"
-    ? getRoundStatusStyle(status)
-    : getStatusStyle(status);
-
+export function StatusBadge({ status }) {
+  const map = {
+    upcoming:     { label: "Очікується",          color: "#b45309", bg: "#fffbeb", border: "#fde68a" },
+    registration: { label: "Реєстрація команд",   color: "#1d4ed8", bg: "#eff6ff", border: "#bfdbfe" },
+    ongoing:      { label: "Триває",              color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0" },
+    finished:     { label: "Завершено",           color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb" },
+  };
+  const s = map[status] ?? map.upcoming;
   return (
-    <span
-      style={{
-        display: "inline-block",
-        padding: "3px 10px",
-        borderRadius: "20px",
-        fontSize: "12px",
-        fontWeight: 500,
-        ...style,
-      }}
-    >
-      {status}
+    <span style={{
+      fontSize: 11.5, fontWeight: 600,
+      color: s.color, background: s.bg,
+      border: `1px solid ${s.border}`,
+      borderRadius: 100, padding: "3px 10px",
+    }}>
+      {s.label}
     </span>
   );
 }

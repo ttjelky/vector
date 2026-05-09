@@ -136,6 +136,8 @@ async function exportToExcel({ ranked, roundIds, roundMap, tournamentId }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+const POLL_INTERVAL = 30_000; // 30 секунд
+
 export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoading, isOwner, myRole }) {
   const [leaderboard,  setLeaderboard]  = useState([]);
   const [published,    setPublished]    = useState(null);
@@ -144,48 +146,53 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
   const [sortBy,       setSortBy]       = useState("total");
   const [publishing,   setPublishing]   = useState(false);
   const [exporting,    setExporting]    = useState(false);
+  const [lastUpdated,  setLastUpdated]  = useState(null);
+  const [refreshing,   setRefreshing]   = useState(false);
 
   const canAlwaysSee = isOwner || myRole === "admin";
 
-  const fetchLeaderboard = () => {
-    setLoading(true);
-    setError(null);
+  const fetchLeaderboard = (silent = false) => {
+    if (silent) setRefreshing(true);
+    else { setLoading(true); setError(null); }
 
     API.get(`/tournaments/${tournamentId}/leaderboard/`)
       .then(r => {
         const data = r.data;
         setPublished(data.is_published ?? true);
         setLeaderboard(data.participants ?? data ?? []);
-        setLoading(false);
+        setLastUpdated(new Date());
       })
       .catch(err => {
         const status = err?.response?.status;
         if (status === 403) {
           setPublished(false);
-          setLoading(false);
         } else if (status === 404) {
           if (canAlwaysSee) {
             API.get(`/tournaments/${tournamentId}/jury/submissions/`)
               .then(r => {
                 setPublished(true);
                 setLeaderboard(aggregateFromSubmissions(r.data.submissions ?? []));
+                setLastUpdated(new Date());
               })
-              .catch(() => setError("Не вдалося завантажити дані."))
-              .finally(() => setLoading(false));
+              .catch(() => { if (!silent) setError("Не вдалося завантажити дані."); });
           } else {
             setPublished(false);
-            setLoading(false);
           }
         } else {
-          setError("Не вдалося завантажити таблицю лідерів.");
-          setLoading(false);
+          if (!silent) setError("Не вдалося завантажити таблицю лідерів.");
         }
+      })
+      .finally(() => {
+        setLoading(false);
+        setRefreshing(false);
       });
   };
 
   useEffect(() => {
     if (!tournamentId) return;
     fetchLeaderboard();
+    const timer = setInterval(() => fetchLeaderboard(true), POLL_INTERVAL);
+    return () => clearInterval(timer);
   }, [tournamentId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTogglePublish = async () => {
@@ -417,6 +424,27 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
             </table>
           </div>
 
+          <div className={styles.realtimeBar}>
+            <span className={styles.realtimeDot} />
+            <span className={styles.realtimeText}>
+              {refreshing
+                ? "Оновлення…"
+                : lastUpdated
+                ? `Оновлено о ${lastUpdated.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`
+                : ""}
+            </span>
+            <button
+              className={styles.refreshBtn}
+              onClick={() => fetchLeaderboard(true)}
+              disabled={refreshing}
+              title="Оновити таблицю"
+            >
+              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={`${styles.refreshIcon} ${refreshing ? styles.refreshIconSpin : ""}`}>
+                <path d="M4 4.5A7 7 0 1 1 3 10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                <path d="M1 5l3 .5L4 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
           <p className={styles.footnote}>
             * Бали підраховані на основі оцінок журі за всіма завданнями раунду
           </p>

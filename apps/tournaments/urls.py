@@ -17,6 +17,7 @@ from .views import (
     JurySubmissionsView, JuryGradeView,
     SubmissionGradeView, ParticipantGradesNewsView,
     LeaderboardView,
+    RegistrationExceptionView,
 )
 
 urlpatterns = [
@@ -44,6 +45,9 @@ urlpatterns = [
 
     # ── Leaderboard ────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/leaderboard/', LeaderboardView.as_view(), name='leaderboard'),
+
+    # ── Registration exception ─────────────────────────────────────────────────
+    path('<int:tournament_pk>/registration-exception/', RegistrationExceptionView.as_view(), name='registration-exception'),
 
     # ── Rounds ────────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/rounds/', RoundListCreateView.as_view(), name='round-list-create'),

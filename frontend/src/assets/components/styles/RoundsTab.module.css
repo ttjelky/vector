@@ -611,3 +611,40 @@
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ─── Round info sections (tech_requirements, must_have) ─────────────────────── */
+.roundInfoSection { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+.roundInfoSectionLabel {
+  font-size: 11px; font-weight: 600; color: #86868b;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+.roundTechReqGrid { display: flex; flex-direction: column; gap: 5px; }
+
+.roundTechReqCard {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 13px;
+  background: rgba(0,0,0,0.025); border: 1px solid rgba(0,0,0,0.06); border-radius: 10px;
+}
+.roundTechReqCategory {
+  flex: 0 0 auto; min-width: 90px;
+  font-size: 11px; font-weight: 700; color: #86868b;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.roundTechReqValue { flex: 1; font-size: 14px; font-weight: 500; color: #1d1d1f; }
+
+.roundMustHaveList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+
+.roundMustHaveItem {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 9px 13px;
+  background: rgba(0,0,0,0.025); border: 1px solid rgba(0,0,0,0.06); border-radius: 10px;
+  font-size: 14px; color: #1d1d1f; line-height: 1.5;
+}
+.roundMustHaveCheck {
+  flex-shrink: 0; width: 18px; height: 18px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff;
+  background: #34c759; border-radius: 50%; margin-top: 1px;
+}

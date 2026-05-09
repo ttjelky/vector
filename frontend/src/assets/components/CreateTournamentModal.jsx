@@ -7,6 +7,7 @@ import User from "./static/icons/Profile.svg?react";
 import Users from "./static/icons/Users.svg?react";
 import { RichTextArea } from "./RichTextArea";
 import heic2any from "heic2any";
+import { computeStatus } from "../components/tournamentHelpers";
 
 const ACCENT_COLORS = ["#82b3e4", "#4ad44c", "#ca7979", "#c76db0", "#8e5edf", "#eccb5c"];
 
@@ -288,6 +289,10 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                   name={name} info={descFirstLine} date={startDate}
                   accentColor={accentColor} imageMode={imageMode}
                   stockImage={stockImage} customImage={customPreview}
+                  status={computeStatus({
+                    start_date: startDate ? startDate + "T00:00:00" : null,
+                    end_date: endDate ? endDate + "T00:00:00" : null,
+                  })}
                 />
               </div>
 

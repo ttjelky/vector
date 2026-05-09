@@ -11,12 +11,9 @@ export const STOCK_IMAGES = [
 ];
 
 // ─── Rich-text preview helper ─────────────────────────────────────────────────
-// Таблиці → "Таблиця", списки → перший елемент, решту тегів прибирає.
 export function getDescriptionPreview(html, maxLen = 80) {
   if (!html) return "";
-  // Таблиці → "Таблиця"
   let result = html.replace(/<table[\s\S]*?<\/table>/gi, " Таблиця ");
-  // Списки: витягуємо лише перший <li>
   result = result.replace(/<ul[\s\S]*?<\/ul>/gi, (match) => {
     const firstLi = match.match(/<li[^>]*>([\s\S]*?)<\/li>/i);
     if (!firstLi) return "";
@@ -29,9 +26,35 @@ export function getDescriptionPreview(html, maxLen = 80) {
     const text = firstLi[1].replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
     return " " + text + "… ";
   });
-  // Прибираємо решту тегів
   const plain = result.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
   return plain.length > maxLen ? plain.slice(0, maxLen) + "…" : plain;
+}
+
+// ─── Статусний бейдж ──────────────────────────────────────────────────────────
+// Статуси: "upcoming" | "registration" | "ongoing" | "finished"
+const STATUS_CONFIG = {
+  upcoming:     { label: "Очікується",        color: "#b45309", bg: "#fffbeb", border: "#fde68a" },
+  registration: { label: "Реєстрація команд", color: "#1d4ed8", bg: "#eff6ff", border: "#bfdbfe" },
+  ongoing:      { label: "Триває",            color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0" },
+  finished:     { label: "Завершено",         color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb" },
+};
+
+export function StatusBadge({ status }) {
+  const s = STATUS_CONFIG[status] ?? STATUS_CONFIG.upcoming;
+  return (
+    <span style={{
+      fontSize: 11.5,
+      fontWeight: 600,
+      color: s.color,
+      background: s.bg,
+      border: `1px solid ${s.border}`,
+      borderRadius: 100,
+      padding: "3px 10px",
+      whiteSpace: "nowrap",
+    }}>
+      {s.label}
+    </span>
+  );
 }
 
 const formatDate = (value) => {
@@ -42,7 +65,7 @@ const formatDate = (value) => {
 };
 
 export default function TournamentCard({
-  name, info, date, accentColor,
+  name, info, date, accentColor, status,
   imageMode = "none", stockImage, customImage,
 }) {
   const renderImage = () => {
@@ -67,7 +90,7 @@ export default function TournamentCard({
       <div className={styles.previewContent}>
         <div className={styles.previewHeader}>
           <h3 className={styles.previewName}>{name || "Назва вашого турніру"}</h3>
-          <div className={styles.previewBadge}>Реєстрація відкрита</div>
+          <StatusBadge status={status ?? "upcoming"} />
         </div>
         <p className={styles.previewInfo} style={{
           overflow: "hidden",
