@@ -1,6 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import styles from "./styles/LeaderboardTab.module.css";
+import detailStyles from "./styles/LeaderboardDetail.module.css";
 import API from "../../api";
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getInitials(name = "") {
   return name.trim().split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase() || "?";
@@ -14,14 +17,14 @@ function getAvatarColor(str = "") {
 }
 
 const MEDAL = { 1: "🥇", 2: "🥈", 3: "🥉" };
-const MEDAL_LABELS = { 1: "1", 2: "2", 3: "3" };
 
 function aggregateFromSubmissions(submissions) {
   const byParticipant = {};
   submissions.forEach(sub => {
     const name = sub.author_name || "Невідомий";
-    if (!byParticipant[name]) {
-      byParticipant[name] = { participant_name: name, round_scores: {}, total: 0 };
+    const pid  = sub.participant_id || name;
+    if (!byParticipant[pid]) {
+      byParticipant[pid] = { participant_id: pid, participant_name: name, round_scores: {}, total: 0 };
     }
     const grade = sub.my_grade;
     if (!grade) return;
@@ -31,8 +34,8 @@ function aggregateFromSubmissions(submissions) {
         : 0
     );
     const roundId = String(sub.round_id);
-    byParticipant[name].round_scores[roundId] = (byParticipant[name].round_scores[roundId] ?? 0) + score;
-    byParticipant[name].total += score;
+    byParticipant[pid].round_scores[roundId] = (byParticipant[pid].round_scores[roundId] ?? 0) + score;
+    byParticipant[pid].total += score;
   });
   return Object.values(byParticipant);
 }
@@ -40,152 +43,379 @@ function aggregateFromSubmissions(submissions) {
 // ── Excel export ──────────────────────────────────────────────────────────────
 
 async function exportToExcel({ ranked, roundIds, roundMap, tournamentId }) {
-  // Dynamic import — не впливає на початковий бандл
   const XLSX = await import("xlsx");
-
-  const wb = XLSX.utils.book_new();
-
-  // ── Заголовки ──
+  const wb   = XLSX.utils.book_new();
   const header = ["#", "Учасник", ...roundIds.map(id => roundMap[id]), "Разом"];
-
-  // ── Рядки даних ──
-  const rows = ranked.map(p => [
+  const rows   = ranked.map(p => [
     p.rank,
     p.participant_name,
     ...roundIds.map(id => p.round_scores?.[id] ?? ""),
     p.total,
   ]);
 
-  const wsData = [header, ...rows];
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  ws["!cols"] = [{ wch: 5 }, { wch: 30 }, ...roundIds.map(() => ({ wch: 16 })), { wch: 12 }];
 
-  // ── Ширина колонок ──
-  ws["!cols"] = [
-    { wch: 5 },                                              // #
-    { wch: 30 },                                             // Учасник
-    ...roundIds.map(() => ({ wch: 16 })),                   // Раунди
-    { wch: 12 },                                             // Разом
-  ];
-
-  // ── Стилі заголовка ──
   const headerStyle = {
     font: { bold: true, color: { rgb: "FFFFFF" }, name: "Arial", sz: 11 },
     fill: { fgColor: { rgb: "4F46E5" }, patternType: "solid" },
     alignment: { horizontal: "center", vertical: "center" },
-    border: {
-      bottom: { style: "thin", color: { rgb: "3730A3" } },
-    },
+    border: { bottom: { style: "thin", color: { rgb: "3730A3" } } },
   };
-
-  header.forEach((_, colIdx) => {
-    const cellAddr = XLSX.utils.encode_cell({ r: 0, c: colIdx });
-    if (!ws[cellAddr]) ws[cellAddr] = {};
-    ws[cellAddr].s = headerStyle;
+  header.forEach((_, c) => {
+    const addr = XLSX.utils.encode_cell({ r: 0, c });
+    if (!ws[addr]) ws[addr] = {};
+    ws[addr].s = headerStyle;
   });
 
-  // ── Стилі рядків (медалі + зебра) ──
   const medalFills = {
-    1: { fgColor: { rgb: "FFF9C4" }, patternType: "solid" }, // золото
-    2: { fgColor: { rgb: "F0F0F0" }, patternType: "solid" }, // срібло
-    3: { fgColor: { rgb: "FFE0CC" }, patternType: "solid" }, // бронза
+    1: { fgColor: { rgb: "FFF9C4" }, patternType: "solid" },
+    2: { fgColor: { rgb: "F0F0F0" }, patternType: "solid" },
+    3: { fgColor: { rgb: "FFE0CC" }, patternType: "solid" },
   };
-
-  const zebraFill   = { fgColor: { rgb: "F8F7FF" }, patternType: "solid" };
-  const centerAlign = { horizontal: "center", vertical: "center" };
-  const leftAlign   = { horizontal: "left",   vertical: "center" };
+  const zebraFill = { fgColor: { rgb: "F8F7FF" }, patternType: "solid" };
 
   ranked.forEach((p, rowIdx) => {
-    const excelRow = rowIdx + 1; // +1 через заголовок
+    const excelRow = rowIdx + 1;
     const fill = medalFills[p.rank] ?? (rowIdx % 2 === 1 ? zebraFill : undefined);
-
-    header.forEach((_, colIdx) => {
-      const cellAddr = XLSX.utils.encode_cell({ r: excelRow, c: colIdx });
-      if (!ws[cellAddr]) ws[cellAddr] = { v: "", t: "s" };
-
-      const isName  = colIdx === 1;
-      const isTotal = colIdx === header.length - 1;
-
-      ws[cellAddr].s = {
-        font: {
-          name: "Arial",
-          sz: 10,
-          bold: isTotal,
-          color: isTotal ? { rgb: "1E1B4B" } : undefined,
-        },
-        alignment: isName ? leftAlign : centerAlign,
+    header.forEach((_, c) => {
+      const addr = XLSX.utils.encode_cell({ r: excelRow, c });
+      if (!ws[addr]) ws[addr] = { v: "", t: "s" };
+      ws[addr].s = {
+        font: { name: "Arial", sz: 10, bold: c === header.length - 1 },
+        alignment: { horizontal: c === 1 ? "left" : "center", vertical: "center" },
         ...(fill ? { fill } : {}),
-        border: {
-          bottom: { style: "hair", color: { rgb: "E5E7EB" } },
-          right:  colIdx === header.length - 1
-            ? undefined
-            : { style: "hair", color: { rgb: "E5E7EB" } },
-        },
+        border: { bottom: { style: "hair", color: { rgb: "E5E7EB" } } },
       };
     });
   });
 
-  // ── Закріпити перший рядок ──
   ws["!freeze"] = { xSplit: 0, ySplit: 1, topLeftCell: "A2", activePane: "bottomLeft" };
-
   XLSX.utils.book_append_sheet(wb, ws, "Таблиця лідерів");
-
-  // ── Зберегти ──
   const date = new Date().toISOString().slice(0, 10);
   XLSX.writeFile(wb, `leaderboard_${tournamentId}_${date}.xlsx`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+const POLL_INTERVAL = 30_000;
+
+// ── ScoreBar ──────────────────────────────────────────────────────────────────
+
+function ScoreBar({ value, max = 10, color = "#6366f1" }) {
+  const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
+  return (
+    <div className={detailStyles.scoreBar}>
+      <div
+        className={detailStyles.scoreBarFill}
+        style={{ width: `${pct}%`, background: color }}
+      />
+    </div>
+  );
+}
+
+// ── ParticipantDetail ─────────────────────────────────────────────────────────
+
+function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose }) {
+  const [data,          setData]          = useState(null);
+  const [loading,       setLoading]       = useState(true);
+  const [error,         setError]         = useState(null);
+  const [showJuryBreak, setShowJuryBreak] = useState(false);
+  const [activeRound,   setActiveRound]   = useState(null); // null = всі раунди
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    API.get(`/tournaments/${tournamentId}/leaderboard/${participantId}/`)
+      .then(r => {
+        setData(r.data);
+        // Якщо тільки один раунд — одразу його показуємо
+        if (r.data.rounds?.length === 1) setActiveRound(r.data.rounds[0].round_id);
+      })
+      .catch(() => setError("Не вдалося завантажити деталізацію."))
+      .finally(() => setLoading(false));
+  }, [tournamentId, participantId]);
+
+  // Колір для кожного критерію (стабільний)
+  const criteriaColors = useMemo(() => {
+    const palette = [
+      "#6366f1", "#0ea5e9", "#10b981", "#f59e0b",
+      "#ec4899", "#8b5cf6", "#14b8a6",
+    ];
+    if (!data?.criteria_meta) return {};
+    return Object.fromEntries(
+      data.criteria_meta.map((c, i) => [c.key, palette[i % palette.length]])
+    );
+  }, [data]);
+
+  if (loading) return (
+    <div className={detailStyles.panel}>
+      <div className={detailStyles.panelHeader}>
+        <button className={detailStyles.backBtn} onClick={onClose}>
+          <BackIcon /> Назад
+        </button>
+      </div>
+      <div className={detailStyles.stateBox}>
+        <div className={detailStyles.spinner} />
+        <span>Завантаження…</span>
+      </div>
+    </div>
+  );
+
+  if (error) return (
+    <div className={detailStyles.panel}>
+      <div className={detailStyles.panelHeader}>
+        <button className={detailStyles.backBtn} onClick={onClose}>
+          <BackIcon /> Назад
+        </button>
+      </div>
+      <div className={detailStyles.stateBox}>
+        <span className={detailStyles.errorText}>{error}</span>
+      </div>
+    </div>
+  );
+
+  const { participant_name, rounds = [], grand_total, criteria_avg = {}, criteria_meta = [] } = data;
+
+  const visibleRounds = activeRound
+    ? rounds.filter(r => r.round_id === activeRound)
+    : rounds;
+
+  return (
+    <div className={detailStyles.panel}>
+      {/* Header */}
+      <div className={detailStyles.panelHeader}>
+        <button className={detailStyles.backBtn} onClick={onClose}>
+          <BackIcon /> Назад до таблиці
+        </button>
+
+        <div className={detailStyles.headerRight}>
+          {/* Перемикач журі — тільки для owner/admin */}
+          {isPrivileged && rounds.some(r => r.jury_breakdown?.length > 0) && (
+            <button
+              className={`${detailStyles.juryToggle} ${showJuryBreak ? detailStyles.juryToggleOn : ""}`}
+              onClick={() => setShowJuryBreak(v => !v)}
+            >
+              <EyeIcon />
+              {showJuryBreak ? "Сховати оцінки журі" : "Показати оцінки журі"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Participant hero */}
+      <div className={detailStyles.hero}>
+        <div
+          className={detailStyles.heroAvatar}
+          style={{ background: getAvatarColor(participant_name) }}
+        >
+          {getInitials(participant_name)}
+        </div>
+        <div className={detailStyles.heroInfo}>
+          <h2 className={detailStyles.heroName}>{participant_name}</h2>
+          <span className={detailStyles.heroTotal}>
+            Загальний бал: <strong>{grand_total}</strong>
+          </span>
+        </div>
+      </div>
+
+      {/* Round filter pills */}
+      {rounds.length > 1 && (
+        <div className={detailStyles.roundPills}>
+          <button
+            className={`${detailStyles.roundPill} ${activeRound === null ? detailStyles.roundPillActive : ""}`}
+            onClick={() => setActiveRound(null)}
+          >
+            Всі раунди
+          </button>
+          {rounds.map(r => (
+            <button
+              key={r.round_id}
+              className={`${detailStyles.roundPill} ${activeRound === r.round_id ? detailStyles.roundPillActive : ""}`}
+              onClick={() => setActiveRound(r.round_id)}
+            >
+              {r.round_title}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Overall criteria bar chart — показується коли всі раунди */}
+      {activeRound === null && criteria_meta.length > 0 && (
+        <div className={detailStyles.section}>
+          <h3 className={detailStyles.sectionTitle}>Середнє по критеріях (всі раунди)</h3>
+          <div className={detailStyles.criteriaGrid}>
+            {criteria_meta.map(c => {
+              const val = criteria_avg[c.key] ?? 0;
+              return (
+                <div key={c.key} className={detailStyles.criteriaRow}>
+                  <div className={detailStyles.criteriaLabelRow}>
+                    <span className={detailStyles.criteriaLabel}>{c.label}</span>
+                    <span className={detailStyles.criteriaValue} style={{ color: criteriaColors[c.key] }}>
+                      {val} <span className={detailStyles.criteriaMax}>/ {c.max}</span>
+                    </span>
+                  </div>
+                  <ScoreBar value={val} max={c.max} color={criteriaColors[c.key]} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Per-round sections */}
+      {visibleRounds.map(round => (
+        <div key={round.round_id} className={detailStyles.roundSection}>
+          <div className={detailStyles.roundSectionHeader}>
+            <h3 className={detailStyles.roundTitle}>{round.round_title}</h3>
+            <span className={detailStyles.roundAvg}>
+              Середній бал: <strong>{round.avg_total}</strong>
+            </span>
+          </div>
+
+          {/* Criteria breakdown */}
+          {criteria_meta.length > 0 && (
+            <div className={detailStyles.criteriaGrid}>
+              {criteria_meta.map(c => {
+                const val = round.criteria_avg?.[c.key] ?? null;
+                if (val === null) return null;
+                return (
+                  <div key={c.key} className={detailStyles.criteriaRow}>
+                    <div className={detailStyles.criteriaLabelRow}>
+                      <span className={detailStyles.criteriaLabel}>{c.label}</span>
+                      <span className={detailStyles.criteriaValue} style={{ color: criteriaColors[c.key] }}>
+                        {val} <span className={detailStyles.criteriaMax}>/ {c.max}</span>
+                      </span>
+                    </div>
+                    <ScoreBar value={val} max={c.max} color={criteriaColors[c.key]} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Jury breakdown — тільки для owner/admin і коли увімкнено */}
+          {isPrivileged && showJuryBreak && round.jury_breakdown?.length > 0 && (
+            <div className={detailStyles.jurySection}>
+              <p className={detailStyles.jurySectionTitle}>
+                <JuryIcon /> Оцінки журі
+              </p>
+              <div className={detailStyles.juryTable}>
+                <div className={detailStyles.juryTableHead}>
+                  <span className={detailStyles.juryTableThName}>Журі</span>
+                  {criteria_meta.map(c => (
+                    <span key={c.key} className={detailStyles.juryTableTh} title={c.label}>
+                      {c.label.split(" ")[0]}
+                    </span>
+                  ))}
+                  <span className={detailStyles.juryTableThTotal}>Разом</span>
+                </div>
+                {round.jury_breakdown.map(j => (
+                  <div key={j.juror_id} className={detailStyles.juryTableRow}>
+                    <span className={detailStyles.juryTableName}>{j.juror_name}</span>
+                    {criteria_meta.map(c => (
+                      <span key={c.key} className={detailStyles.juryTableCell}>
+                        {j.scores?.[c.key] ?? <span className={detailStyles.noScore}>—</span>}
+                      </span>
+                    ))}
+                    <span className={detailStyles.juryTableTotal}>{j.total}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── SVG icons ─────────────────────────────────────────────────────────────────
+
+function BackIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <path d="m15 18-6-6 6-6"/>
+    </svg>
+  );
+}
+
+function EyeIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  );
+}
+
+function JuryIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoading, isOwner, myRole }) {
-  const [leaderboard,  setLeaderboard]  = useState([]);
-  const [published,    setPublished]    = useState(null);
-  const [loading,      setLoading]      = useState(true);
-  const [error,        setError]        = useState(null);
-  const [sortBy,       setSortBy]       = useState("total");
-  const [publishing,   setPublishing]   = useState(false);
-  const [exporting,    setExporting]    = useState(false);
+  const [leaderboard,   setLeaderboard]   = useState([]);
+  const [published,     setPublished]     = useState(null);
+  const [loading,       setLoading]       = useState(true);
+  const [error,         setError]         = useState(null);
+  const [sortBy,        setSortBy]        = useState("total");
+  const [publishing,    setPublishing]    = useState(false);
+  const [exporting,     setExporting]     = useState(false);
+  const [lastUpdated,   setLastUpdated]   = useState(null);
+  const [refreshing,    setRefreshing]    = useState(false);
+  // Деталізація
+  const [selectedPid,   setSelectedPid]   = useState(null); // participant_id або null
 
   const canAlwaysSee = isOwner || myRole === "admin";
 
-  const fetchLeaderboard = () => {
-    setLoading(true);
-    setError(null);
+  const fetchLeaderboard = useCallback((silent = false) => {
+    if (silent) setRefreshing(true);
+    else { setLoading(true); setError(null); }
 
     API.get(`/tournaments/${tournamentId}/leaderboard/`)
       .then(r => {
         const data = r.data;
         setPublished(data.is_published ?? true);
         setLeaderboard(data.participants ?? data ?? []);
-        setLoading(false);
+        setLastUpdated(new Date());
       })
       .catch(err => {
-        const status = err?.response?.status;
-        if (status === 403) {
+        const st = err?.response?.status;
+        if (st === 403) {
           setPublished(false);
-          setLoading(false);
-        } else if (status === 404) {
+        } else if (st === 404) {
           if (canAlwaysSee) {
             API.get(`/tournaments/${tournamentId}/jury/submissions/`)
               .then(r => {
                 setPublished(true);
                 setLeaderboard(aggregateFromSubmissions(r.data.submissions ?? []));
+                setLastUpdated(new Date());
               })
-              .catch(() => setError("Не вдалося завантажити дані."))
-              .finally(() => setLoading(false));
+              .catch(() => { if (!silent) setError("Не вдалося завантажити дані."); });
           } else {
             setPublished(false);
-            setLoading(false);
           }
         } else {
-          setError("Не вдалося завантажити таблицю лідерів.");
-          setLoading(false);
+          if (!silent) setError("Не вдалося завантажити таблицю лідерів.");
         }
-      });
-  };
+      })
+      .finally(() => { setLoading(false); setRefreshing(false); });
+  }, [tournamentId, canAlwaysSee]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!tournamentId) return;
     fetchLeaderboard();
+    const timer = setInterval(() => fetchLeaderboard(true), POLL_INTERVAL);
+    return () => clearInterval(timer);
   }, [tournamentId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTogglePublish = async () => {
@@ -202,6 +432,28 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
     }
   };
 
+  // Обчислення roundIds / roundMap (тільки раунди що є в leaderboard)
+  const { roundIds, roundMap } = useMemo(() => {
+    const ids = new Set();
+    leaderboard.forEach(p => Object.keys(p.round_scores ?? {}).forEach(id => ids.add(id)));
+    const sorted = [...ids].sort((a, b) => Number(a) - Number(b));
+    const map = {};
+    sorted.forEach(id => {
+      const r = rounds.find(r => String(r.id) === id);
+      map[id] = r?.title ?? `Раунд ${id}`;
+    });
+    return { roundIds: sorted, roundMap: map };
+  }, [leaderboard, rounds]);
+
+  const ranked = useMemo(() => {
+    return [...leaderboard]
+      .sort((a, b) => {
+        if (sortBy === "total") return b.total - a.total;
+        return (b.round_scores?.[sortBy] ?? 0) - (a.round_scores?.[sortBy] ?? 0);
+      })
+      .map((p, i) => ({ ...p, rank: i + 1 }));
+  }, [leaderboard, sortBy]);
+
   const handleExportExcel = async () => {
     setExporting(true);
     try {
@@ -213,31 +465,20 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
     }
   };
 
-  const roundIds = useMemo(() => {
-    const ids = new Set();
-    leaderboard.forEach(p => Object.keys(p.round_scores ?? {}).forEach(id => ids.add(id)));
-    const sorted = rounds.map(r => String(r.id)).filter(id => ids.has(id));
-    ids.forEach(id => { if (!sorted.includes(id)) sorted.push(id); });
-    return sorted;
-  }, [leaderboard, rounds]);
+  // ── Якщо обрано учасника — показуємо деталізацію ──────────────────────────
 
-  const roundMap = useMemo(() => {
-    const map = {};
-    rounds.forEach(r => { map[String(r.id)] = r.name || r.title || `Раунд ${r.id}`; });
-    roundIds.forEach(id => { if (!map[id]) map[id] = `Раунд ${id}`; });
-    return map;
-  }, [rounds, roundIds]);
+  if (selectedPid !== null) {
+    return (
+      <ParticipantDetail
+        tournamentId={tournamentId}
+        participantId={selectedPid}
+        isPrivileged={canAlwaysSee}
+        onClose={() => setSelectedPid(null)}
+      />
+    );
+  }
 
-  const ranked = useMemo(() => {
-    return [...leaderboard]
-      .sort((a, b) => {
-        if (sortBy === "total") return b.total - a.total;
-        return (b.round_scores?.[sortBy] ?? 0) - (a.round_scores?.[sortBy] ?? 0);
-      })
-      .map((p, i) => ({ ...p, rank: i + 1 }));
-  }, [leaderboard, sortBy]);
-
-  // ── Render ──
+  // ── Render ────────────────────────────────────────────────────────────────
 
   if (loading || roundsLoading) return (
     <div className={styles.stateBox}>
@@ -264,7 +505,7 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
   return (
     <div className={styles.wrap}>
 
-      {/* Панель публікації — тільки для owner/admin */}
+      {/* Publish bar */}
       {canAlwaysSee && (
         <div className={`${styles.publishBar} ${published ? styles.publishBarActive : styles.publishBarDraft}`}>
           <div className={styles.publishInfo}>
@@ -286,17 +527,11 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
             onClick={handleTogglePublish}
             disabled={publishing}
           >
-            {publishing
-              ? "Збереження…"
-              : published
-              ? "Приховати таблицю"
-              : "Опублікувати таблицю"
-            }
+            {publishing ? "Збереження…" : published ? "Приховати таблицю" : "Опублікувати таблицю"}
           </button>
         </div>
       )}
 
-      {/* Порожня таблиця */}
       {leaderboard.length === 0 ? (
         <div className={styles.stateBox}>
           <span className={styles.stateIcon}>🏆</span>
@@ -305,7 +540,7 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
         </div>
       ) : (
         <>
-          {/* Controls row: sort pills + export button */}
+          {/* Controls */}
           <div className={styles.controls}>
             <span className={styles.controlsLabel}>Сортувати за:</span>
             <div className={styles.pills}>
@@ -325,8 +560,6 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
                 </button>
               ))}
             </div>
-
-            {/* Excel export button */}
             <button
               className={styles.exportBtn}
               onClick={handleExportExcel}
@@ -334,26 +567,12 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
               title="Завантажити таблицю лідерів у форматі Excel"
             >
               {exporting ? (
-                <>
-                  <span className={styles.exportSpinner} />
-                  Експорт…
-                </>
+                <><span className={styles.exportSpinner} /> Експорт…</>
               ) : (
                 <>
-                  <svg
-                    className={styles.exportIcon}
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M3 14.5V16a1 1 0 001 1h12a1 1 0 001-1v-1.5M10 3v9m0 0l-3-3m3 3l3-3"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                  <svg className={styles.exportIcon} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 14.5V16a1 1 0 001 1h12a1 1 0 001-1v-1.5M10 3v9m0 0l-3-3m3 3l3-3"
+                      stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                   Excel
                 </>
@@ -376,21 +595,25 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
                   <th className={`${styles.thScore} ${styles.thTotal} ${sortBy === "total" ? styles.thActive : ""}`}>
                     Разом
                   </th>
+                  <th className={styles.thAction} />
                 </tr>
               </thead>
               <tbody>
                 {ranked.map((p, idx) => (
                   <tr
-                    key={p.participant_name}
+                    key={p.participant_id ?? p.participant_name}
                     className={[
                       styles.row,
+                      styles.rowClickable,
                       idx === 0 ? styles.rowGold   : "",
                       idx === 1 ? styles.rowSilver : "",
                       idx === 2 ? styles.rowBronze : "",
                     ].join(" ")}
+                    onClick={() => setSelectedPid(p.participant_id ?? p.participant_name)}
+                    title="Переглянути деталізацію"
                   >
                     <td className={styles.tdRank}>
-                      {MEDAL_LABELS[p.rank] ?? <span className={styles.rankNum}>{p.rank}</span>}
+                      {MEDAL[p.rank] ?? <span className={styles.rankNum}>{p.rank}</span>}
                     </td>
                     <td className={styles.tdName}>
                       <div className={styles.participant}>
@@ -411,14 +634,42 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
                     <td className={`${styles.tdScore} ${styles.tdTotal} ${sortBy === "total" ? styles.tdActive : ""}`}>
                       <span className={styles.totalValue}>{p.total}</span>
                     </td>
+                    <td className={styles.tdAction}>
+                      <span className={styles.detailArrow}>›</span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
+          {/* Realtime bar */}
+          <div className={styles.realtimeBar}>
+            <span className={styles.realtimeDot} />
+            <span className={styles.realtimeText}>
+              {refreshing
+                ? "Оновлення…"
+                : lastUpdated
+                ? `Оновлено о ${lastUpdated.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`
+                : ""}
+            </span>
+            <button
+              className={styles.refreshBtn}
+              onClick={() => fetchLeaderboard(true)}
+              disabled={refreshing}
+              title="Оновити таблицю"
+            >
+              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+                className={`${styles.refreshIcon} ${refreshing ? styles.refreshIconSpin : ""}`}>
+                <path d="M4 4.5A7 7 0 1 1 3 10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                <path d="M1 5l3 .5L4 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
           <p className={styles.footnote}>
-            * Бали підраховані на основі оцінок журі за всіма завданнями раунду
+            * Бали підраховані на основі середнього між оцінками журі за всіма завданнями раунду.
+            Натисніть на рядок для деталізації.
           </p>
         </>
       )}

@@ -25,11 +25,14 @@ class Tournament(models.Model):
 
     # Дати
     start_date         = models.DateTimeField(null=True, blank=True)
+    end_date           = models.DateTimeField(null=True, blank=True)
     registration_start = models.DateTimeField(null=True, blank=True)
     registration_end   = models.DateTimeField(null=True, blank=True)
 
     # Числові значення
-    max_teams = models.IntegerField(null=True, blank=True)
+    max_teams     = models.IntegerField(null=True, blank=True)
+    min_team_size = models.IntegerField(null=True, blank=True)
+    max_team_size = models.IntegerField(null=True, blank=True)
 
     # ── Інвайт для учасників ──────────────────────────────────────────────────
     invite_token = models.UUIDField(
@@ -66,6 +69,30 @@ class Tournament(models.Model):
         default=False,
         verbose_name="Таблиця лідерів опублікована",
     )
+
+    # ── Тимчасовий виняток реєстрації ────────────────────────────────────────
+    registration_exception_until = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name="Реєстрація відкрита до (виняток)",
+    )
+
+    def registration_open(self):
+        """
+        True якщо зараз дозволена реєстрація учасників:
+          — або статус турніру 'registration'
+          — або активний тимчасовий виняток адміна
+        """
+        from django.utils import timezone
+        now = timezone.now()
+        # Звичайна реєстрація
+        start = self.start_date
+        reg_end = self.registration_end
+        if start and now >= start and (not reg_end or now <= reg_end):
+            return True
+        # Тимчасовий виняток
+        if self.registration_exception_until and now < self.registration_exception_until:
+            return True
+        return False
 
     def __str__(self):
         return self.name
@@ -152,12 +179,22 @@ class TournamentMember(models.Model):
 # ── Round ─────────────────────────────────────────────────────────────────────
 
 class Round(models.Model):
-    tournament  = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name="rounds")
-    title       = models.CharField(max_length=255, verbose_name="Назва")
-    description = models.TextField(null=True, blank=True, verbose_name="Опис")
-    start_date  = models.DateTimeField(null=True, blank=True, verbose_name="Початок")
-    end_date    = models.DateTimeField(null=True, blank=True, verbose_name="Кінець")
-    created_at  = models.DateTimeField(auto_now_add=True)
+    tournament         = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name="rounds")
+    title              = models.CharField(max_length=255, verbose_name="Назва")
+    description        = models.TextField(null=True, blank=True, verbose_name="Опис")
+    start_date         = models.DateTimeField(null=True, blank=True, verbose_name="Початок")
+    end_date           = models.DateTimeField(null=True, blank=True, verbose_name="Кінець")
+    tech_requirements  = models.JSONField(
+        null=True, blank=True,
+        verbose_name="Вимоги до технологій",
+        help_text="Список об'єктів [{category, value}]",
+    )
+    must_have          = models.JSONField(
+        null=True, blank=True,
+        verbose_name="Must have — обов'язкові критерії",
+        help_text="Список рядків [\"вимога 1\", \"вимога 2\"]",
+    )
+    created_at         = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["created_at"]
@@ -198,10 +235,12 @@ class RoundAttachment(models.Model):
 
 
 class Task(models.Model):
-    round       = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="tasks")
-    title       = models.CharField(max_length=255, verbose_name="Назва завдання")
-    description = models.TextField(null=True, blank=True, verbose_name="Опис завдання")
-    created_at  = models.DateTimeField(auto_now_add=True)
+    round              = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="tasks")
+    title              = models.CharField(max_length=255, verbose_name="Назва завдання")
+    description        = models.TextField(null=True, blank=True, verbose_name="Опис завдання")
+    tech_requirements  = models.JSONField(null=True, blank=True, verbose_name="Вимоги до технологій")
+    must_have          = models.JSONField(null=True, blank=True, verbose_name="Must have")
+    created_at         = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["created_at"]
@@ -295,7 +334,7 @@ class Grade(models.Model):
     """
     Оцінка журі для конкретного подання.
     Одне журі — одна оцінка на одне подання (unique_together).
-    Бали зберігаються як JSON-словник: { "originality": 8, "execution": 7, ... }
+    Бали зберігаються як JSON-словник: { "backend_quality": 8, "database": 7, ... }
     """
     submission = models.ForeignKey(
         Submission,
@@ -329,3 +368,47 @@ class Grade(models.Model):
         """Перераховує та зберігає загальний бал."""
         self.total = sum(self.scores.values()) if self.scores else 0
         self.save(update_fields=['total'])
+
+
+# ── JuryAssignment ────────────────────────────────────────────────────────────
+
+class JuryAssignment(models.Model):
+    """
+    Призначення конкретного подання конкретному члену журі.
+
+    Формується автоматично через DistributeSubmissionsView або вручну
+    адміністратором/власником турніру.
+
+    Обмеження:
+      - одне журі не може отримати ту саму роботу двічі (unique_together)
+      - кількість призначень на журі і мінімальна кількість рецензентів
+        контролюються логікою розподілу у views.py
+    """
+    tournament = models.ForeignKey(
+        Tournament,
+        on_delete=models.CASCADE,
+        related_name='jury_assignments',
+        verbose_name='Турнір',
+    )
+    juror = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name='jury_assignments',
+        verbose_name='Журі',
+    )
+    submission = models.ForeignKey(
+        Submission,
+        on_delete=models.CASCADE,
+        related_name='jury_assignments',
+        verbose_name='Подання',
+    )
+    assigned_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата призначення')
+
+    class Meta:
+        unique_together = ('juror', 'submission')
+        ordering = ['assigned_at']
+        verbose_name = 'Призначення журі'
+        verbose_name_plural = 'Призначення журі'
+
+    def __str__(self):
+        return f'{self.juror.username} → {self.submission}'

@@ -26,6 +26,8 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
     start_date:  toInputDatetime(round.start_date),
     end_date:    toInputDatetime(round.end_date),
   });
+  const [techReqs,     setTechReqs]     = useState(round.tech_requirements || [{ category: "", value: "" }]);
+  const [mustHave,     setMustHave]     = useState(round.must_have || [""]);
   const [links,        setLinks]        = useState(round.links || []);
   const [attachments,  setAttachments]  = useState(round.attachments || []);
   const [linkForm,     setLinkForm]     = useState({ label: "", url: "" });
@@ -69,15 +71,31 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
     setFileInputKey((k) => k + 1);
   };
 
+  // ── Tech requirements helpers ──
+  const addTechReq    = () => setTechReqs((r) => [...r, { category: "", value: "" }]);
+  const removeTechReq = (i) => setTechReqs((r) => r.filter((_, idx) => idx !== i));
+  const updateTechReq = (i, field, val) =>
+    setTechReqs((r) => r.map((item, idx) => idx === i ? { ...item, [field]: val } : item));
+
+  // ── Must have helpers ──
+  const addMustHave    = () => setMustHave((m) => [...m, ""]);
+  const removeMustHave = (i) => setMustHave((m) => m.filter((_, idx) => idx !== i));
+  const updateMustHave = (i, val) =>
+    setMustHave((m) => m.map((item, idx) => idx === i ? val : item));
+
   const handleSave = async () => {
     if (!form.title.trim()) { setError("Назва раунду обов'язкова."); return; }
     setSaving(true);
     try {
+      const filteredTechReqs = techReqs.filter((r) => r.category.trim() || r.value.trim());
+      const filteredMustHave = mustHave.filter((m) => m.trim());
       const payload = {
-        title:       form.title.trim(),
-        description: form.description.trim() || null,
-        start_date:  form.start_date || null,
-        end_date:    form.end_date   || null,
+        title:             form.title.trim(),
+        description:       form.description.trim() || null,
+        start_date:        form.start_date || null,
+        end_date:          form.end_date   || null,
+        tech_requirements: filteredTechReqs.length > 0 ? filteredTechReqs : null,
+        must_have:         filteredMustHave.length > 0 ? filteredMustHave : null,
       };
       await API.patch(`/tournaments/${tournamentId}/rounds/${round.id}/`, payload);
 
@@ -130,6 +148,75 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
             Кінець
             <input className={styles.editInput} type="datetime-local" name="end_date" value={form.end_date} onChange={handleChange} />
           </label>
+        </div>
+
+        {/* ── Вимоги до технологій ── */}
+        <div className={styles.attachSection}>
+          <span className={styles.attachSectionLabel}>Вимоги до технологій</span>
+          <div className={styles.techReqList}>
+            {techReqs.map((req, i) => (
+              <div key={i} className={styles.techReqRow}>
+                <input
+                  className={styles.editInput}
+                  placeholder="Категорія (напр. Backend)"
+                  value={req.category}
+                  onChange={(e) => updateTechReq(i, "category", e.target.value)}
+                />
+                <input
+                  className={styles.editInput}
+                  placeholder="Вимога (напр. Node.js ≥ 18)"
+                  value={req.value}
+                  onChange={(e) => updateTechReq(i, "value", e.target.value)}
+                />
+                <button
+                  className={styles.techReqRemove}
+                  onClick={() => removeTechReq(i)}
+                  type="button"
+                  title="Видалити"
+                  disabled={techReqs.length === 1}
+                >
+                  <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+          <button className={styles.addRowBtn} onClick={addTechReq} type="button">
+            + Додати категорію
+          </button>
+        </div>
+
+        {/* ── Must have ── */}
+        <div className={styles.attachSection}>
+          <span className={styles.attachSectionLabel}>Must have — обов'язкові критерії</span>
+          <div className={styles.mustHaveList}>
+            {mustHave.map((item, i) => (
+              <div key={i} className={styles.mustHaveRow}>
+                <span className={styles.mustHaveIdx}>{i + 1}</span>
+                <input
+                  className={styles.editInput}
+                  placeholder="Обов'язкова вимога…"
+                  value={item}
+                  onChange={(e) => updateMustHave(i, e.target.value)}
+                />
+                <button
+                  className={styles.techReqRemove}
+                  onClick={() => removeMustHave(i)}
+                  type="button"
+                  title="Видалити"
+                  disabled={mustHave.length === 1}
+                >
+                  <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+          <button className={styles.addRowBtn} onClick={addMustHave} type="button">
+            + Додати критерій
+          </button>
         </div>
 
         {/* Посилання */}

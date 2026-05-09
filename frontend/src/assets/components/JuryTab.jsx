@@ -41,9 +41,160 @@ function isImageFile(nameOrUrl = "") {
   return /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(nameOrUrl);
 }
 
+// ─── DistributePanel ──────────────────────────────────────────────────────────
+
+function DistributePanel({ tournamentId }) {
+  const [minReviews,   setMinReviews]   = useState(2);
+  const [maxPerJuror,  setMaxPerJuror]  = useState(5);
+  const [reset,        setReset]        = useState(false);
+  const [loading,      setLoading]      = useState(false);
+  const [result,       setResult]       = useState(null);   // { assignments_created, juror_summary }
+  const [error,        setError]        = useState("");
+  const [open,         setOpen]         = useState(false);
+
+  const handleDistribute = async () => {
+    if (!window.confirm(
+      reset
+        ? "Поточний розподіл буде ВИДАЛЕНО і сформований заново. Продовжити?"
+        : "Запустити рандомний розподіл робіт між журі?"
+    )) return;
+
+    setLoading(true);
+    setError("");
+    setResult(null);
+    try {
+      const res = await API.post(`/tournaments/${tournamentId}/jury/distribute/`, {
+        min_reviews:   minReviews,
+        max_per_juror: maxPerJuror,
+        reset,
+      });
+      setResult(res.data);
+    } catch (err) {
+      setError(err?.response?.data?.detail || "Помилка при розподілі. Спробуйте ще раз.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className={styles.distributePanel}>
+      <button
+        className={styles.distributePanelToggle}
+        onClick={() => { setOpen(o => !o); setResult(null); setError(""); }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="18" cy="5" r="3"/>
+          <circle cx="6"  cy="12" r="3"/>
+          <circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+        Розподіл робіт між журі
+        <svg
+          width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+          style={{ marginLeft: "auto", transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "none" }}
+        >
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      </button>
+
+      {open && (
+        <div className={styles.distributePanelBody}>
+          <p className={styles.distributeDescription}>
+            Система рандомно призначить кожному члену журі кілька робіт для оцінювання.
+            Кожна робота отримає мінімум вказану кількість рецензентів.
+          </p>
+
+          <div className={styles.distributeControls}>
+            <label className={styles.distributeLabel}>
+              <span>Мін. рецензентів на роботу</span>
+              <div className={styles.distributeInputRow}>
+                <input
+                  type="number" min={1} max={10}
+                  className={styles.distributeInput}
+                  value={minReviews}
+                  onChange={e => setMinReviews(Math.max(1, Number(e.target.value)))}
+                />
+                <span className={styles.distributeHint}>рецензент(ів)</span>
+              </div>
+            </label>
+
+            <label className={styles.distributeLabel}>
+              <span>Макс. робіт на одне журі</span>
+              <div className={styles.distributeInputRow}>
+                <input
+                  type="number" min={1} max={50}
+                  className={styles.distributeInput}
+                  value={maxPerJuror}
+                  onChange={e => setMaxPerJuror(Math.max(1, Number(e.target.value)))}
+                />
+                <span className={styles.distributeHint}>робіт</span>
+              </div>
+            </label>
+          </div>
+
+          <label className={styles.distributeCheckbox}>
+            <input
+              type="checkbox"
+              checked={reset}
+              onChange={e => setReset(e.target.checked)}
+            />
+            <span>Скинути поточний розподіл і сформувати заново</span>
+          </label>
+
+          {error && <p className={styles.gradeError}>{error}</p>}
+
+          {result && (
+            <div className={styles.distributeResult}>
+              <p className={styles.distributeResultTitle}>
+                ✓ Успішно! Створено {result.assignments_created} призначень
+              </p>
+              {result.juror_summary?.length > 0 && (
+                <div className={styles.distributeResultList}>
+                  {result.juror_summary.map(j => (
+                    <div key={j.juror_id} className={styles.distributeResultRow}>
+                      <span className={styles.distributeResultName}>{j.username}</span>
+                      <span className={styles.distributeResultCount}>{j.assigned_count} робіт</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <button
+            className={styles.distributeBtn}
+            onClick={handleDistribute}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <svg className={styles.spinnerIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                Розподіляємо...
+              </>
+            ) : (
+              <>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="16 3 21 3 21 8"/>
+                  <line x1="4" y1="20" x2="21" y2="3"/>
+                  <polyline points="21 16 21 21 16 21"/>
+                  <line x1="15" y1="15" x2="21" y2="21"/>
+                </svg>
+                {reset ? "Перерозподілити роботи" : "Запустити розподіл"}
+              </>
+            )}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── JuryTab ──────────────────────────────────────────────────────────────────
 
-export default function JuryTab({ tournamentId, rounds = [], loading }) {
+export default function JuryTab({ tournamentId, rounds = [], loading, myRole }) {
   const [submissions,   setSubmissions]   = useState([]);
   const [criteria,      setCriteria]      = useState([]);
   const [subsLoading,   setSubsLoading]   = useState(true);
@@ -56,6 +207,8 @@ export default function JuryTab({ tournamentId, rounds = [], loading }) {
   const [savingGrade,   setSavingGrade]   = useState(false);
   const [gradeError,    setGradeError]    = useState("");
   const [gradeSuccess,  setGradeSuccess]  = useState(false);
+
+  const isPrivileged = myRole === "owner" || myRole === "admin";
 
   useEffect(() => {
     if (!tournamentId) return;
@@ -174,6 +327,12 @@ export default function JuryTab({ tournamentId, rounds = [], loading }) {
 
   return (
     <div className={styles.tabContent}>
+
+      {/* ── Admin: розподіл робіт ── */}
+      {isPrivileged && (
+        <DistributePanel tournamentId={tournamentId} />
+      )}
+
       {/* Stats */}
       <div className={styles.statsRow}>
         <StatCard label="Всього робіт" value={submissions.length} icon={
@@ -209,7 +368,6 @@ export default function JuryTab({ tournamentId, rounds = [], loading }) {
 
       {/* Filters */}
       <div className={styles.filtersBar}>
-        {/* Row 1: search */}
         <div className={styles.searchWrap}>
           <svg className={styles.searchIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -222,7 +380,6 @@ export default function JuryTab({ tournamentId, rounds = [], loading }) {
           />
         </div>
 
-        {/* Row 2: round + status tabs + sort */}
         <div className={styles.filtersRow}>
           <select className={styles.filterSelect} value={selectedRound} onChange={e => setSelectedRound(e.target.value)}>
             <option value="all">Всі раунди</option>
@@ -369,6 +526,14 @@ function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, 
   const otherFiles = files.filter(f => !isImageFile(f.name || f.file || ""));
   const hasContent = sub.content_text || links.length > 0 || files.length > 0;
 
+  // Group criteria by group for display
+  const criteriaGroups = criteria.reduce((acc, c) => {
+    const g = c.group || "Загальне";
+    if (!acc[g]) acc[g] = [];
+    acc[g].push(c);
+    return acc;
+  }, {});
+
   return (
     <div className={styles.detailWrap}>
       <button className={styles.backBtn} onClick={onClose}>
@@ -480,34 +645,42 @@ function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, 
             <>
               <div className={styles.gradePanelBody}>
                 <div className={styles.criteriaList}>
-                  {criteria.map(c => {
-                    const val = Number(gradeForm.scores[c.key]) || 0;
-                    const pct = Math.min(100, (val / c.max) * 100);
-                    return (
-                      <div key={c.key} className={styles.criteriaItem}>
-                        <div className={styles.criteriaHeader}>
-                          <span className={styles.criteriaLabel}>{c.label}</span>
-                          <span className={styles.criteriaMax}>макс. {c.max}</span>
-                        </div>
-                        <div className={styles.scoreInputRow}>
-                          <input
-                            type="number"
-                            min={0}
-                            max={c.max}
-                            step={1}
-                            className={styles.scoreInput}
-                            value={gradeForm.scores[c.key]}
-                            onChange={e => setGradeForm(f => ({ ...f, scores: { ...f.scores, [c.key]: e.target.value } }))}
-                            placeholder="0"
-                          />
-                          <span className={styles.scoreSlash}>/ {c.max}</span>
-                        </div>
-                        <div className={styles.scoreBar}>
-                          <div className={styles.scoreBarFill} style={{ width: `${pct}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {Object.entries(criteriaGroups).map(([groupName, groupCriteria]) => (
+                    <div key={groupName} className={styles.criteriaGroup}>
+                      <p className={styles.criteriaGroupTitle}>{groupName}</p>
+                      {groupCriteria.map(c => {
+                        const val = Number(gradeForm.scores[c.key]) || 0;
+                        const pct = Math.min(100, (val / c.max) * 100);
+                        return (
+                          <div key={c.key} className={styles.criteriaItem}>
+                            <div className={styles.criteriaHeader}>
+                              <div className={styles.criteriaLabelWrap}>
+                                <span className={styles.criteriaLabel}>{c.label}</span>
+                                {c.hint && <span className={styles.criteriaHint}>{c.hint}</span>}
+                              </div>
+                              <span className={styles.criteriaMax}>макс. {c.max}</span>
+                            </div>
+                            <div className={styles.scoreInputRow}>
+                              <input
+                                type="number"
+                                min={0}
+                                max={c.max}
+                                step={1}
+                                className={styles.scoreInput}
+                                value={gradeForm.scores[c.key]}
+                                onChange={e => setGradeForm(f => ({ ...f, scores: { ...f.scores, [c.key]: e.target.value } }))}
+                                placeholder="0"
+                              />
+                              <span className={styles.scoreSlash}>/ {c.max}</span>
+                            </div>
+                            <div className={styles.scoreBar}>
+                              <div className={styles.scoreBarFill} style={{ width: `${pct}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
                 </div>
 
                 <div className={styles.totalScore}>

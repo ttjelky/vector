@@ -4,7 +4,7 @@ from .models import (
     Round, RoundLink, RoundAttachment,
     Task, TaskLink, TaskAttachment,
     Submission, SubmissionLink, SubmissionAttachment,
-    Grade,
+    Grade, JuryAssignment,
 )
 
 
@@ -58,13 +58,43 @@ class TaskAttachmentSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    links       = TaskLinkSerializer(many=True, read_only=True)
-    attachments = TaskAttachmentSerializer(many=True, read_only=True)
+    links             = TaskLinkSerializer(many=True, read_only=True)
+    attachments       = TaskAttachmentSerializer(many=True, read_only=True)
+    tech_requirements = serializers.JSONField(required=False, allow_null=True)
+    must_have         = serializers.JSONField(required=False, allow_null=True)
 
     class Meta:
         model  = Task
-        fields = ['id', 'round', 'title', 'description', 'created_at', 'links', 'attachments']
+        fields = [
+            'id', 'round', 'title', 'description',
+            'tech_requirements', 'must_have',
+            'created_at', 'links', 'attachments',
+        ]
         read_only_fields = ['round', 'created_at']
+
+    def validate_tech_requirements(self, value):
+        """Переконуємось що це список об'єктів {category, value} або null."""
+        if value is None:
+            return value
+        if not isinstance(value, list):
+            raise serializers.ValidationError("tech_requirements має бути списком.")
+        for item in value:
+            if not isinstance(item, dict) or 'category' not in item or 'value' not in item:
+                raise serializers.ValidationError(
+                    "Кожен елемент tech_requirements має містити поля 'category' і 'value'."
+                )
+        return value
+
+    def validate_must_have(self, value):
+        """Переконуємось що це список рядків або null."""
+        if value is None:
+            return value
+        if not isinstance(value, list):
+            raise serializers.ValidationError("must_have має бути списком.")
+        for item in value:
+            if not isinstance(item, str):
+                raise serializers.ValidationError("Кожен елемент must_have має бути рядком.")
+        return value
 
 
 # ── Round serializers ─────────────────────────────────────────────────────────
@@ -85,18 +115,43 @@ class RoundAttachmentSerializer(serializers.ModelSerializer):
 
 
 class RoundSerializer(serializers.ModelSerializer):
-    tasks       = TaskSerializer(many=True, read_only=True)
-    links       = RoundLinkSerializer(many=True, read_only=True)
-    attachments = RoundAttachmentSerializer(many=True, read_only=True)
+    tasks             = TaskSerializer(many=True, read_only=True)
+    links             = RoundLinkSerializer(many=True, read_only=True)
+    attachments       = RoundAttachmentSerializer(many=True, read_only=True)
+    tech_requirements = serializers.JSONField(required=False, allow_null=True)
+    must_have         = serializers.JSONField(required=False, allow_null=True)
 
     class Meta:
         model  = Round
         fields = [
             'id', 'tournament', 'title', 'description',
+            'tech_requirements', 'must_have',
             'start_date', 'end_date', 'created_at',
             'tasks', 'links', 'attachments',
         ]
         read_only_fields = ['tournament', 'created_at']
+
+    def validate_tech_requirements(self, value):
+        if value is None:
+            return value
+        if not isinstance(value, list):
+            raise serializers.ValidationError("tech_requirements має бути списком.")
+        for item in value:
+            if not isinstance(item, dict) or 'category' not in item or 'value' not in item:
+                raise serializers.ValidationError(
+                    "Кожен елемент tech_requirements має містити поля 'category' і 'value'."
+                )
+        return value
+
+    def validate_must_have(self, value):
+        if value is None:
+            return value
+        if not isinstance(value, list):
+            raise serializers.ValidationError("must_have має бути списком.")
+        for item in value:
+            if not isinstance(item, str):
+                raise serializers.ValidationError("Кожен елемент must_have має бути рядком.")
+        return value
 
 
 # ── Submission serializers ────────────────────────────────────────────────────
@@ -151,12 +206,50 @@ class GradeWriteSerializer(serializers.Serializer):
     comment = serializers.CharField(allow_blank=True, default="")
 
 
+# ── JuryAssignment serializers ────────────────────────────────────────────────
+
+class JuryAssignmentSerializer(serializers.ModelSerializer):
+    """
+    Призначення журі для конкретного подання.
+    Використовується для перегляду/управління розподілом (admin/owner).
+    """
+    juror_username  = serializers.CharField(source='juror.username',   read_only=True)
+    juror_full_name = serializers.SerializerMethodField()
+    submission_info = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = JuryAssignment
+        fields = [
+            'id',
+            'tournament', 'juror', 'juror_username', 'juror_full_name',
+            'submission', 'submission_info',
+            'assigned_at',
+        ]
+        read_only_fields = ['tournament', 'assigned_at']
+
+    def get_juror_full_name(self, obj):
+        u = obj.juror
+        return f"{u.first_name} {u.last_name}".strip() or u.username
+
+    def get_submission_info(self, obj):
+        sub = obj.submission
+        return {
+            'id':         sub.id,
+            'task_title': sub.task.title,
+            'round_title': sub.task.round.title,
+            'author':     (
+                f"{sub.participant.first_name} {sub.participant.last_name}".strip()
+                or sub.participant.username
+            ),
+        }
+
+
 # ── Jury panel serializers ────────────────────────────────────────────────────
 
 class JurySubmissionSerializer(serializers.ModelSerializer):
     """
     Подання для журі — без особистих даних учасника (анонімізовано).
-    Містить my_grade поточного журі.
+    Містить my_grade поточного журі та кількість призначених рецензентів.
     """
     task_title  = serializers.CharField(source='task.title',        read_only=True)
     round_id    = serializers.IntegerField(source='task.round.id',  read_only=True)
@@ -173,6 +266,9 @@ class JurySubmissionSerializer(serializers.ModelSerializer):
     # Оцінка поточного журі
     my_grade = serializers.SerializerMethodField()
 
+    # Кількість призначених рецензентів (корисно для admin/owner)
+    assignment_count = serializers.SerializerMethodField()
+
     class Meta:
         model  = Submission
         fields = [
@@ -182,6 +278,7 @@ class JurySubmissionSerializer(serializers.ModelSerializer):
             'content_text', 'content_links', 'content_files',
             'submitted_at',
             'my_grade',
+            'assignment_count',
         ]
 
     def get_author_name(self, obj):
@@ -205,3 +302,7 @@ class JurySubmissionSerializer(serializers.ModelSerializer):
             'total':      grade.total,
             'updated_at': grade.updated_at,
         }
+
+    def get_assignment_count(self, obj):
+        """Скільки журі призначено на цю роботу."""
+        return obj.jury_assignments.count()

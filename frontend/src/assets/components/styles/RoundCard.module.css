@@ -291,3 +291,44 @@
   transition: background 0.15s, color 0.15s;
 }
 .attachRemove:hover { background: #fff1f2; color: #dc2626; }
+
+/* ─── Tech requirements (форма в drawer) ────────────────────────────────────── */
+.techReqList { display: flex; flex-direction: column; gap: 6px; }
+
+.techReqRow { display: flex; gap: 6px; align-items: center; }
+.techReqRow .editInput:first-of-type { flex: 0 0 36%; min-width: 0; }
+.techReqRow .editInput:nth-of-type(2) { flex: 1; min-width: 0; }
+
+.techReqRemove {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; flex-shrink: 0;
+  background: rgba(0,0,0,0.04); border: none; border-radius: 8px;
+  cursor: pointer; color: #aeaeb2; padding: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.techReqRemove:hover:not(:disabled) { background: #fecdd3; color: #dc2626; }
+.techReqRemove:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ─── Must have (форма в drawer) ─────────────────────────────────────────────── */
+.mustHaveList { display: flex; flex-direction: column; gap: 6px; }
+
+.mustHaveRow { display: flex; align-items: center; gap: 8px; }
+.mustHaveRow .editInput { flex: 1; }
+
+.mustHaveIdx {
+  flex-shrink: 0; width: 20px; height: 20px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #86868b;
+  background: rgba(0,0,0,0.06); border-radius: 50%;
+}
+
+/* ─── Add row button ─────────────────────────────────────────────────────────── */
+.addRowBtn {
+  align-self: flex-start; padding: 6px 14px;
+  font-size: 12.5px; font-weight: 500; color: #6e6e73;
+  background: rgba(0,0,0,0.04);
+  border: 1.5px dashed rgba(0,0,0,0.13); border-radius: 10px;
+  cursor: pointer; font-family: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.addRowBtn:hover { background: rgba(0,0,0,0.07); color: #1d1d1f; border-color: rgba(0,0,0,0.25); }

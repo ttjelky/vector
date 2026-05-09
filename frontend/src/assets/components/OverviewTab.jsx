@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import styles from "./styles/OverviewTab.module.css";
-import { RichTextArea, ImagePicker } from "./CreateTournamentModal";
+import "./styles/richContent.css";           // ← глобальні стилі RichContent
+import { ImagePicker } from "./CreateTournamentModal";
+import { RichTextArea } from "./RichTextArea";
 import { StatusBadge, InfoRow } from "./TournamentShared";
 import { formatDate, toInputDatetime } from "./tournamentHelpers";
 import { STOCK_IMAGES } from "./TournamentCard";
@@ -14,13 +16,27 @@ const FORMAT_LABELS = { solo: "Одиночний", team: "Командний" }
 
 // ─── RichContent — безпечний рендер HTML з редактора ─────────────────────────
 
+/**
+ * Рендерить HTML із RichTextArea.
+ *
+ * Стилі для таблиць, заголовків, списків тощо задані у richContent.css.
+ * Клас "richContent" — глобальний (не CSS-module), щоб правила з того файлу
+ * потрапляли на вкладені елементи через звичайні CSS-селектори (.richContent table і т.д.).
+ */
 function RichContent({ html, emptyText = "Відсутній.", className }) {
-  if (!html || html === "<br>" || html === "<p><br></p>") {
+  const isEmpty =
+    !html ||
+    html === "<br>" ||
+    html === "<p><br></p>" ||
+    html.replace(/<p>(\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, "").trim() === "";
+
+  if (isEmpty) {
     return <p className={styles.emptyText}>{emptyText}</p>;
   }
+
   return (
     <div
-      className={`${styles.richContent} ${className || ""}`}
+      className={`richContent${className ? ` ${className}` : ""}`}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
@@ -69,8 +85,8 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
       const payload = new FormData();
       payload.append("name",               form.name.trim());
       payload.append("description",        form.description || "");
-      payload.append("format",             form.format.trim()      || "");
       payload.append("start_date",         form.start_date         || "");
+      payload.append("end_date",           form.end_date           || "");
       payload.append("registration_start", form.registration_start || "");
       payload.append("registration_end",   form.registration_end   || "");
       payload.append("max_teams",          form.max_teams !== "" ? Number(form.max_teams) : "");
@@ -100,7 +116,7 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
               Назва
               <input className={styles.editInput} name="name" value={form.name} onChange={handleChange} />
             </label>
-            <label className={styles.editLabel}>
+            <div className={styles.editLabel}>
               Опис
               <RichTextArea
                 id="description"
@@ -109,7 +125,7 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
                 onChange={(e) => handleChange({ target: { name: "description", value: e.target.value } })}
                 rows={4}
               />
-            </label>
+            </div>
 
             <ImagePicker
               imageMode={imageMode}       setImageMode={setImageMode}
@@ -118,12 +134,12 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
             />
 
             <label className={styles.editLabel}>
-              Формат
-              <input className={styles.editInput} name="format" value={form.format} onChange={handleChange} />
-            </label>
-            <label className={styles.editLabel}>
               Початок турніру
               <input className={styles.editInput} type="datetime-local" name="start_date" value={form.start_date} onChange={handleChange} />
+            </label>
+            <label className={styles.editLabel}>
+              Кінець турніру
+              <input className={styles.editInput} type="datetime-local" name="end_date" value={form.end_date} onChange={handleChange} min={form.start_date || undefined} />
             </label>
             <label className={styles.editLabel}>
               Початок реєстрації
@@ -134,10 +150,10 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
               <input className={styles.editInput} type="datetime-local" name="registration_end" value={form.registration_end} onChange={handleChange} />
             </label>
             <label className={styles.editLabel}>
-              Макс. команд
+              Макс. команд/учасників
               <input className={styles.editInput} type="number" name="max_teams" value={form.max_teams} onChange={handleChange} min={1} />
             </label>
-            <label className={styles.editLabel}>
+            <div className={styles.editLabel}>
               Правила
               <RichTextArea
                 id="rules"
@@ -146,7 +162,7 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
                 onChange={(e) => handleChange({ target: { name: "rules", value: e.target.value } })}
                 rows={5}
               />
-            </label>
+            </div>
             {error && <p className={styles.formError}>{error}</p>}
           </div>
           <div className={styles.editActions}>
@@ -182,12 +198,72 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Деталі</h2>
-        <div className={styles.infoGrid}>
-          <InfoRow label="Формат"             value={FORMAT_LABELS[tournament.format] || "Не вказано"} />
-          <InfoRow label="Початок турніру"    value={formatDate(tournament.start_date)} />
-          <InfoRow label="Початок реєстрації" value={formatDate(tournament.registration_start)} />
-          <InfoRow label="Кінець реєстрації"  value={formatDate(tournament.registration_end)} />
-          {tournament.max_teams && <InfoRow label="Макс. команд" value={tournament.max_teams} />}
+        <div className={styles.detailGrid} {...(tournament.format === "team" ? {"data-team": true} : {})}>
+
+          <div className={`${styles.dc} ${styles.dcBlue}`}>
+            <span className={styles.dcIcon}>
+              <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5"/></svg>
+            </span>
+            <span className={styles.dcLabel}>Формат</span>
+            <span className={styles.dcValue}>{FORMAT_LABELS[tournament.format] || "—"}</span>
+          </div>
+
+          <div className={`${styles.dc} ${styles.dcBlue}`}>
+            <span className={styles.dcIcon}>
+              <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="3" stroke="currentColor" strokeWidth="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+            </span>
+            <span className={styles.dcLabel}>{tournament.format === "team" ? "Макс. команд" : "Макс. учасників"}</span>
+            <span className={styles.dcValue}>{tournament.max_teams || "Без обмежень"}</span>
+          </div>
+
+          {tournament.format === "team" && (
+            <div className={`${styles.dc} ${styles.dcBlue}`}>
+              <span className={styles.dcIcon}>
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="5" cy="5" r="2.5" stroke="currentColor" strokeWidth="1.5"/><circle cx="11" cy="5" r="2" stroke="currentColor" strokeWidth="1.5"/><path d="M1 14c0-2.485 2.015-4 4.5-4s4.5 1.515 4.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M10.5 10.5c1.5-.1 4 .7 4 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              </span>
+              <span className={styles.dcLabel}>Розмір команди</span>
+              <span className={styles.dcValue}>
+                {tournament.min_team_size && tournament.max_team_size
+                  ? `${tournament.min_team_size}–${tournament.max_team_size} гравців`
+                  : tournament.max_team_size
+                    ? `до ${tournament.max_team_size} гравців`
+                    : "—"}
+              </span>
+            </div>
+          )}
+
+          <div className={`${styles.dc} ${styles.dcGreen}`}>
+            <span className={styles.dcIcon}>
+              <svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="11" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M5 1.5V4M11 1.5V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M1.5 6.5H14.5" stroke="currentColor" strokeWidth="1.5"/></svg>
+            </span>
+            <span className={styles.dcLabel}>Початок турніру</span>
+            <span className={styles.dcValue}>{formatDate(tournament.start_date) || "—"}</span>
+          </div>
+
+          <div className={`${styles.dc} ${styles.dcGreen}`}>
+            <span className={styles.dcIcon}>
+              <svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="11" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M5 1.5V4M11 1.5V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M1.5 6.5H14.5" stroke="currentColor" strokeWidth="1.5"/><path d="M5 10l2 2 4-3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </span>
+            <span className={styles.dcLabel}>Кінець турніру</span>
+            <span className={styles.dcValue}>{formatDate(tournament.end_date) || "—"}</span>
+          </div>
+
+          <div className={`${styles.dc} ${styles.dcOrange}`}>
+            <span className={styles.dcIcon}>
+              <svg viewBox="0 0 16 16" fill="none"><path d="M10.5 2H12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="5.5" y="1" width="5" height="3" rx="1" stroke="currentColor" strokeWidth="1.5"/><path d="M5 9l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </span>
+            <span className={styles.dcLabel}>Початок реєстрації</span>
+            <span className={styles.dcValue}>{formatDate(tournament.registration_start) || "—"}</span>
+          </div>
+
+          <div className={`${styles.dc} ${styles.dcOrange}`}>
+            <span className={styles.dcIcon}>
+              <svg viewBox="0 0 16 16" fill="none"><path d="M10.5 2H12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="5.5" y="1" width="5" height="3" rx="1" stroke="currentColor" strokeWidth="1.5"/><path d="M8 8v4M6 10h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+            </span>
+            <span className={styles.dcLabel}>Кінець реєстрації</span>
+            <span className={styles.dcValue}>{formatDate(tournament.registration_end) || "—"}</span>
+          </div>
+
         </div>
       </section>
 
@@ -212,8 +288,8 @@ function buildForm(tournament) {
   return {
     name:               tournament.name               || "",
     description:        tournament.description        || "",
-    format:             tournament.format             || "",
     start_date:         toInputDatetime(tournament.start_date),
+    end_date:           toInputDatetime(tournament.end_date),
     registration_start: toInputDatetime(tournament.registration_start),
     registration_end:   toInputDatetime(tournament.registration_end),
     max_teams:          tournament.max_teams          || "",

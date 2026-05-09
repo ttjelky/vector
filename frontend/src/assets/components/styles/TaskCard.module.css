@@ -95,8 +95,8 @@
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.28);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
   z-index: 100;
   animation: backdropIn 0.25s ease;
 }
@@ -110,7 +110,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(500px, 100vw);
+  width: min(700px, 90vw);
   background: rgba(255,255,255,0.97);
   backdrop-filter: blur(28px) saturate(200%);
   -webkit-backdrop-filter: blur(28px) saturate(200%);
@@ -133,7 +133,6 @@
   justify-content: space-between;
   gap: 12px;
   padding: 22px 24px 18px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
   flex-shrink: 0;
 }
 
@@ -145,11 +144,11 @@
 }
 
 .drawerTitle {
-  font-size: 17px;
+  font-size: 28px;
   font-weight: 700;
   color: #1d1d1f;
-  letter-spacing: -0.035em;
-  line-height: 1.2;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
 }
 
@@ -638,4 +637,35 @@
   margin: 0;
   padding: 10px 0;
   text-align: center;
+}
+
+/* ─── Tech requirements (перегляд у drawer) ─────────────────────────────────── */
+.techReqGrid { display: flex; flex-direction: column; gap: 5px; }
+
+.techReqCard {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 13px;
+  background: rgba(0,0,0,0.025); border: 1px solid rgba(0,0,0,0.06); border-radius: 10px;
+}
+.techReqCategory {
+  flex: 0 0 auto; min-width: 90px;
+  font-size: 11px; font-weight: 700; color: #86868b;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.techReqValue { flex: 1; font-size: 14px; font-weight: 500; color: #1d1d1f; }
+
+/* ─── Must have (перегляд у drawer) ─────────────────────────────────────────── */
+.mustHaveViewList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+
+.mustHaveViewItem {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 9px 13px;
+  background: rgba(0,0,0,0.025); border: 1px solid rgba(0,0,0,0.06); border-radius: 10px;
+  font-size: 14px; color: #1d1d1f; line-height: 1.5;
+}
+.mustHaveCheck {
+  flex-shrink: 0; width: 18px; height: 18px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff;
+  background: #34c759; border-radius: 50%; margin-top: 1px;
 }

@@ -232,3 +232,73 @@
   flex-shrink: 0;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Додай ці рядки в кінець LeaderboardTab.module.css ─────────────────── */
+
+/* Клікабельні рядки таблиці */
+.rowClickable {
+  cursor: pointer;
+}
+
+/* Стрілка деталізації */
+.thAction { width: 32px; }
+
+.tdAction {
+  padding: 0 12px 0 4px;
+  text-align: right;
+  width: 32px;
+}
+
+.detailArrow {
+  font-size: 18px;
+  color: #ccc;
+  line-height: 1;
+  transition: color 0.13s, transform 0.13s;
+  display: inline-block;
+}
+
+.rowClickable:hover .detailArrow {
+  color: #888;
+  transform: translateX(2px);
+}
+
+/* Realtime bar (якщо ще не додано) */
+.realtimeBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.realtimeDot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #4caf7d;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(76,175,125,0.18);
+}
+
+.realtimeText {
+  font-size: 12px;
+  color: #bbb;
+}
+
+.refreshBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #bbb;
+  border-radius: 6px;
+  transition: color 0.13s;
+  margin-left: auto;
+}
+.refreshBtn:hover:not(:disabled) { color: #666; }
+.refreshBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.refreshIcon { width: 14px; height: 14px; }
+
+.refreshIconSpin {
+  animation: spin 0.8s linear infinite;
+}

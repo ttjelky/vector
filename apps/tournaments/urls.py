@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    TournamentCreateView, TournamentDetailView,
+    DistributeSubmissionsView, TournamentCreateView, TournamentDetailView,
     MyTournamentRoleView,
     TournamentInviteLinkView, RegeneratePinView,
     JoinByTokenView, TournamentPreviewByTokenView, VerifyInvitePinView,
@@ -16,7 +16,8 @@ from .views import (
     SubmissionAttachmentCreateView, SubmissionAttachmentDeleteView,
     JurySubmissionsView, JuryGradeView,
     SubmissionGradeView, ParticipantGradesNewsView,
-    LeaderboardView,
+    LeaderboardView, LeaderboardDetailView,
+    RegistrationExceptionView,
 )
 from .jury_views import JuryPendingSubmissionsView  # ← нове
 
@@ -46,6 +47,10 @@ urlpatterns = [
 
     # ── Leaderboard ────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/leaderboard/', LeaderboardView.as_view(), name='leaderboard'),
+    path('<int:tournament_pk>/leaderboard/<int:participant_pk>/', LeaderboardDetailView.as_view(), name='leaderboard-detail'),
+
+    # ── Registration exception ─────────────────────────────────────────────────
+    path('<int:tournament_pk>/registration-exception/', RegistrationExceptionView.as_view(), name='registration-exception'),
 
     # ── Rounds ────────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/rounds/', RoundListCreateView.as_view(), name='round-list-create'),
@@ -87,4 +92,5 @@ urlpatterns = [
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/attachments/<int:pk>/', SubmissionAttachmentDeleteView.as_view(), name='submission-attachment-delete'),
 
     path('my-grades/', ParticipantGradesNewsView.as_view(), name='participant-grades-news'),
+    path('<int:tournament_pk>/jury/distribute/', DistributeSubmissionsView.as_view()),
 ]
