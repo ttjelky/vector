@@ -30,25 +30,12 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+  font-family: inherit;
   transition: background 0.15s, color 0.15s, box-shadow 0.15s;
   white-space: nowrap;
 }
-
-.subTab:hover {
-  background: #ebebed;
-  color: #444;
-}
-
-.subTabActive {
-  background: #fff;
-  color: #111;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-}
-
-.subTabIcon {
-  font-size: 14px;
-  line-height: 1;
-}
+.subTab:hover     { background: #ebebed; color: #444; }
+.subTabActive     { background: #fff; color: #111; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
 
 .subTabCount {
   background: #ebebed;
@@ -60,10 +47,7 @@
   min-width: 18px;
   text-align: center;
 }
-
-.subTabActive .subTabCount {
-  background: #f0f0f2;
-}
+.subTabActive .subTabCount { background: #f0f0f2; }
 
 /* ─── Empty ───────────────────────────────────────────────────────────────── */
 
@@ -71,7 +55,7 @@
   font-size: 13px;
   color: #bbb;
   margin: 0;
-  padding: 24px 0;
+  padding: 40px 0;
   text-align: center;
 }
 
@@ -83,10 +67,9 @@
   justify-content: space-between;
 }
 
-.teamCount {
-  font-size: 13px;
-  color: #888;
-}
+.teamCount { font-size: 13px; color: #888; }
+
+/* ─── Buttons ─────────────────────────────────────────────────────────────── */
 
 .headerActions {
   display: flex;
@@ -103,11 +86,11 @@
   border: none;
   border-radius: 100px;
   cursor: pointer;
+  font-family: inherit;
   transition: background 0.15s, transform 0.1s;
 }
-
-.inviteBtn:hover  { background: #2a2a2a; }
-.inviteBtn:active { transform: scale(0.97); }
+.inviteBtn:hover   { background: #2a2a2a; }
+.inviteBtn:active  { transform: scale(0.97); }
 .inviteBtn:disabled { opacity: 0.5; cursor: default; }
 
 /* ─── PIN section ─────────────────────────────────────────────────────────── */
@@ -115,96 +98,52 @@
 .pinSection {
   background: #f0f7ff;
   border: 1px solid #b3d4f5;
-  border-radius: 20px;
-  padding: 18px 20px;
+  border-radius: 16px;
+  padding: 16px 18px;
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  animation: fadeInSlideUp 0.4s ease-out forwards;
+  animation: fadeInSlideUp 0.3s ease-out forwards;
 }
 
-.pinInfo {
-  flex: 1;
-  min-width: 200px;
-}
-
-.pinText {
-  font-size: 13px;
-  color: #555;
-}
-
-.pinCode {
-  font-family: monospace;
-  font-size: 26px;
-  color: #378ADD;
-  font-weight: 700;
-  line-height: 1.3;
-  letter-spacing: 0.25em;
-}
+.pinInfo    { flex: 1; min-width: 180px; }
+.pinText    { font-size: 13px; color: #555; }
+.pinCode    { font-family: monospace; font-size: 26px; color: #378ADD; font-weight: 700; letter-spacing: 0.25em; line-height: 1.3; }
 
 .regenBtn {
   background: #fff;
   color: #555;
   border: 1px solid #ebebeb;
   border-radius: 100px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+  font-family: inherit;
   white-space: nowrap;
-  transition: all 0.2s;
+  transition: background 0.15s, border-color 0.15s;
 }
-
-.regenBtn:hover {
-  background: #f5f5f5;
-  border-color: #ddd;
-}
-
-.regenBtn.regenConfirm {
-  background: #e53e3e;
-  color: #fff;
-  border-color: #e53e3e;
-}
-
-.regenBtn.regenConfirm:hover {
-  background: #c53030;
-  border-color: #c53030;
-}
-
-.regenBtn:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
-}
+.regenBtn:hover          { background: #f5f5f5; border-color: #ddd; }
+.regenBtn.regenConfirm   { background: #e53e3e; color: #fff; border-color: #e53e3e; }
+.regenBtn.regenConfirm:hover { background: #c53030; border-color: #c53030; }
+.regenBtn:disabled       { opacity: 0.7; cursor: not-allowed; }
 
 .crossIcon {
-  width: 26px;
-  height: 26px;
+  width: 28px; height: 28px;
   background: #fff;
   color: #555;
   border: 1px solid #ebebeb;
-  border-radius: 1000px;
+  border-radius: 100px;
   cursor: pointer;
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-left: 4px;
-  transition: 0.2s ease-out;
+  justify-content: center;
+  transition: background 0.15s;
 }
+.crossIcon:hover { background: #f5f5f5; border-color: #ddd; }
 
-.crossIcon:hover {
-  background: #f5f5f5;
-  border-color: #ddd;
-}
-
-.regenWarning {
-  width: 100%;
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: #e53e3e;
-}
-
-/* ─── Team list ───────────────────────────────────────────────────────────── */
+/* ─── Members list ────────────────────────────────────────────────────────── */
 
 .teamList {
   background: #fff;
@@ -216,29 +155,23 @@
 .teamCard {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 13px 16px;
+  gap: 12px;
+  padding: 12px 16px;
   border-bottom: 1px solid #f2f2f4;
   transition: background 0.1s;
 }
-
 .teamCard:last-child { border-bottom: none; }
 .teamCard:hover      { background: #fafafa; }
 
-/* ─── Аватарка ────────────────────────────────────────────────────────────── */
-
 .memberAvatar {
-  width: 36px;
-  height: 36px;
+  width: 34px; height: 34px;
   border-radius: 50%;
   object-fit: cover;
   border: 1.5px solid #e8e8ec;
   flex-shrink: 0;
 }
-
 .memberAvatarPlaceholder {
-  width: 36px;
-  height: 36px;
+  width: 34px; height: 34px;
   border-radius: 50%;
   background: #f0f0f2;
   border: 1.5px solid #e8e8ec;
@@ -251,53 +184,405 @@
   flex-shrink: 0;
 }
 
-/* ─── (залишено для сумісності) ──────────────────────────────────────────── */
-.teamIndex {
-  width: 24px;
-  height: 24px;
-  background: #f0f0f2;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: #666;
-  flex-shrink: 0;
-}
-
-.teamInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.teamName { font-size: 14px; font-weight: 500; color: #111; }
-.teamMeta { font-size: 12px; color: #999; }
-.teamDate { font-size: 12px; color: #bbb; flex-shrink: 0; }
+.teamInfo   { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.teamName   { font-size: 13.5px; font-weight: 500; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.teamMeta   { font-size: 12px; color: #999; }
+.teamDate   { font-size: 12px; color: #bbb; flex-shrink: 0; }
 
 .removeBtn {
   background: none;
   border: none;
   color: #ccc;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 6px;
   transition: color 0.15s, background 0.15s;
   flex-shrink: 0;
 }
+.removeBtn:hover { color: #e53e3e; background: #fff5f5; }
 
-.removeBtn:hover {
-  color: #e53e3e;
-  background: #fff5f5;
+/* ══════════════════════════════════════════════════════
+   КОМАНДНІ ТУРНІРИ
+   ══════════════════════════════════════════════════════ */
+
+/* ─── Панель "Створити команду" ───────────────────────────────────────────── */
+
+.createTeamBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.createTeamForm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 14px 16px;
+  background: #fafafa;
+  border: 1px solid #e8e8ec;
+  border-radius: 14px;
+  animation: fadeInSlideUp 0.25s ease-out;
+}
+
+.createTeamInput {
+  flex: 1;
+  min-width: 180px;
+  padding: 9px 13px;
+  font-size: 14px;
+  color: #111;
+  background: #fff;
+  border: 1px solid #e4e4e8;
+  border-radius: 10px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.createTeamInput:focus {
+  border-color: #aaa;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+}
+.createTeamInput::placeholder { color: #ccc; }
+
+.createTeamBtn {
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: #111;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background 0.15s, transform 0.1s;
+}
+.createTeamBtn:hover    { background: #333; }
+.createTeamBtn:active   { transform: scale(0.97); }
+.createTeamBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.cancelCreateBtn {
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  background: transparent;
+  border: 1px solid #e4e4e8;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.cancelCreateBtn:hover { background: #f0f0f2; }
+
+.addError {
+  font-size: 12.5px;
+  color: #c53030;
+  margin: 0;
+  width: 100%;
+}
+
+/* ─── Картка команди ──────────────────────────────────────────────────────── */
+
+.teamCard {
+  background: #fff;
+  border: 1px solid #e8e8ec;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+  margin-bottom: 8px;
+}
+.teamCard:last-child { margin-bottom: 0; }
+.teamCard:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+
+/* Перевизначаємо старі стилі для рядків учасників — вони тепер у .teamList */
+.teamList .teamCard {
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid #f2f2f4;
+  margin-bottom: 0;
+  box-shadow: none;
+}
+.teamList .teamCard:last-child { border-bottom: none; }
+.teamList .teamCard:hover { box-shadow: none; background: #fafafa; }
+
+/* ─── Заголовок картки команди ────────────────────────────────────────────── */
+
+.teamCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s;
+}
+.teamCardHeader:hover { background: #fafafa; }
+
+.teamCardLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.teamCardIcon {
+  display: flex;
+  align-items: center;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.teamCardName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teamMemberCount {
+  font-size: 11.5px;
+  color: #aaa;
+  background: #f0f0f2;
+  padding: 2px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.teamCardRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.expandArrow { font-size: 10px; color: #bbb; }
+
+/* ─── Кнопки дій у заголовку ──────────────────────────────────────────────── */
+
+.teamActionBtn {
+  width: 28px; height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.04);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #666;
+  transition: background 0.15s, color 0.15s;
+}
+.teamActionBtn:hover { background: rgba(0,0,0,0.08); color: #111; }
+
+.teamActionBtnSave {
+  composes: teamActionBtn;
+  background: #111;
+  color: #fff;
+  font-weight: 700;
+}
+.teamActionBtnSave:hover { background: #333; }
+
+.teamActionBtnDanger {
+  composes: teamActionBtn;
+}
+.teamActionBtnDanger:hover { background: #fff1f2; color: #dc2626; }
+
+.renameInput {
+  padding: 5px 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  background: #fff;
+  border: 1px solid #e4e4e8;
+  border-radius: 8px;
+  outline: none;
+  font-family: inherit;
+  max-width: 220px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.renameInput:focus {
+  border-color: #aaa;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+}
+
+/* ─── Тіло картки команди (розгорнуте) ───────────────────────────────────── */
+
+.teamCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-top: 1px solid #f2f2f4;
+  padding: 6px 0 10px;
+  animation: fadeInSlideUp 0.2s ease-out;
+}
+
+/* ─── Рядок учасника всередині команди ───────────────────────────────────── */
+
+.teamMemberRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  transition: background 0.1s;
+}
+.teamMemberRow:hover { background: #fafafa; }
+
+.captainIcon { color: #f59e0b; flex-shrink: 0; }
+
+.teamMemberName {
+  flex: 1;
+  font-size: 13.5px;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Теги і кнопки дозволу завантаження ─────────────────────────────────── */
+
+.uploadTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #3b82f6;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.uploadToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #888;
+  background: #f4f4f6;
+  border: 1px solid #e4e4e8;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.uploadToggle:hover { background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; }
+.uploadToggleOn {
+  color: #3b82f6;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+.uploadToggleOn:hover { background: #dbeafe; border-color: #93c5fd; }
+
+.removeMemberBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: #ccc;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.removeMemberBtn:hover { background: #fff1f2; color: #dc2626; }
+
+/* ─── Рядок "Додати учасника" ─────────────────────────────────────────────── */
+
+.addMemberRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 4px;
+  flex-wrap: wrap;
+}
+
+.addMemberSelect {
+  flex: 1;
+  min-width: 160px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #333;
+  background: #fff;
+  border: 1px solid #e4e4e8;
+  border-radius: 10px;
+  outline: none;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+.addMemberSelect:focus { border-color: #aaa; }
+
+.addMemberBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  background: #111;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background 0.15s, transform 0.1s;
+}
+.addMemberBtn:hover    { background: #333; }
+.addMemberBtn:active   { transform: scale(0.97); }
+.addMemberBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ─── Чекбокс "Зробити капітаном" ────────────────────────────────────────── */
+
+.captainCheckbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 100px;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+.captainCheckbox:hover { background: #fef3c7; border-color: #fcd34d; }
+.captainCheckbox input[type="checkbox"] {
+  accent-color: #f59e0b;
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
 }
 
 /* ─── Animation ───────────────────────────────────────────────────────────── */
 
 @keyframes fadeInSlideUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 

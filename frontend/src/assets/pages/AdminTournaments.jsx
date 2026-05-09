@@ -4,6 +4,7 @@ import { useTabs } from "../../TabsContext";
 import API from "../../api";
 import React from "react";
 import NavBar from "../components/NavBar";
+import tStyles from "../components/styles/tournaments.module.css";
 import styles from "../components/styles/admindashboard.module.css";
 import CreateTournamentModal from "../components/CreateTournamentModal";
 import TournamentCard from "../components/TournamentCard";
@@ -36,10 +37,10 @@ const AdminTournaments = () => {
     return (
         <NavBar>
             <div className={styles.contentArea}>
-                <div className={styles.tournamentGrid}>
+                <div className={tStyles.tournamentGrid}>
                     {tournaments.map((tournament) => (
                         <div
-                            className={styles.tournamentCard}
+                            className={tStyles.tournamentCard}
                             key={tournament.id}
                             onClick={() => {
                                 addTab({ id: tournament.id, name: tournament.name });
@@ -60,10 +61,10 @@ const AdminTournaments = () => {
                         </div>
                     ))}
                 </div>
-                <div className={styles.createBtnContainer}>
+                <div className={tStyles.createBtnContainer}>
                     <button
                         onClick={() => setOpen(true)}
-                        className={styles.createBtn}
+                        className={tStyles.createBtn}
                     >
                         + Створити турнір
                     </button>

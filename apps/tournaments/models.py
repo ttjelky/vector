@@ -1,26 +1,41 @@
 import uuid
 import random
 from django.db import models
+from django.utils import timezone
 
 
 def generate_invite_pin():
-    """Генерує випадковий 6-значний PIN для запрошення."""
     return str(random.randint(100000, 999999))
 
 
 class Tournament(models.Model):
-    # Текстові поля
+    TOURNAMENT_TYPE_CHOICES = [
+        ('solo', 'Одиночний'),
+        ('team', 'Командний'),
+    ]
+
     name        = models.CharField(max_length=255, verbose_name="Назва турніру")
     description = models.TextField(verbose_name="Опис")
     rules       = models.TextField(null=True, blank=True, verbose_name="Правила")
 
-    # Поля вибору та налаштувань
     image_mode   = models.CharField(max_length=50, default="stock")
     stock_image  = models.CharField(max_length=255, null=True, blank=True)
     accent_color = models.CharField(max_length=20, default="#378ADD")
     format       = models.CharField(max_length=100, null=True, blank=True)
     custom_image = models.ImageField(
-        upload_to='tournaments/custom/', null=True, blank=True, verbose_name="Власна обкладинка"
+        upload_to='tournaments/custom/', null=True, blank=True
+    )
+
+    # ── Тип турніру ───────────────────────────────────────────────────────────
+    tournament_type = models.CharField(
+        max_length=10,
+        choices=TOURNAMENT_TYPE_CHOICES,
+        default='solo',
+        verbose_name="Тип турніру",
+    )
+    max_team_size = models.IntegerField(
+        null=True, blank=True,
+        verbose_name="Макс. учасників у команді",
     )
 
     # Дати
@@ -34,41 +49,17 @@ class Tournament(models.Model):
     min_team_size = models.IntegerField(null=True, blank=True)
     max_team_size = models.IntegerField(null=True, blank=True)
 
-    # ── Інвайт для учасників ──────────────────────────────────────────────────
-    invite_token = models.UUIDField(
-        default=uuid.uuid4, unique=True, editable=False,
-        verbose_name="Інвайт-токен (учасник)",
-    )
-    invite_pin = models.CharField(
-        max_length=6, default=generate_invite_pin,
-        verbose_name="PIN-код (учасник)",
-    )
+    # Інвайти
+    invite_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    invite_pin   = models.CharField(max_length=6, default=generate_invite_pin)
 
-    # ── Інвайт для журі ───────────────────────────────────────────────────────
-    jury_invite_token = models.UUIDField(
-        default=uuid.uuid4, unique=True, editable=False,
-        verbose_name="Інвайт-токен (журі)",
-    )
-    jury_invite_pin = models.CharField(
-        max_length=6, default=generate_invite_pin,
-        verbose_name="PIN-код (журі)",
-    )
+    jury_invite_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    jury_invite_pin   = models.CharField(max_length=6, default=generate_invite_pin)
 
-    # ── Інвайт для адмінів ────────────────────────────────────────────────────
-    admin_invite_token = models.UUIDField(
-        default=uuid.uuid4, unique=True, editable=False,
-        verbose_name="Інвайт-токен (адмін)",
-    )
-    admin_invite_pin = models.CharField(
-        max_length=6, default=generate_invite_pin,
-        verbose_name="PIN-код (адмін)",
-    )
+    admin_invite_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    admin_invite_pin   = models.CharField(max_length=6, default=generate_invite_pin)
 
-    # ── Таблиця лідерів ───────────────────────────────────────────────────────
-    leaderboard_published = models.BooleanField(
-        default=False,
-        verbose_name="Таблиця лідерів опублікована",
-    )
+    leaderboard_published = models.BooleanField(default=False)
 
     # ── Тимчасовий виняток реєстрації ────────────────────────────────────────
     registration_exception_until = models.DateTimeField(
@@ -97,86 +88,98 @@ class Tournament(models.Model):
     def __str__(self):
         return self.name
 
+    def is_registration_open(self):
+        now = timezone.now()
+        if self.registration_start and self.registration_end:
+            return self.registration_start <= now <= self.registration_end
+        return False
+
     def get_invite_token_for_role(self, role):
-        mapping = {
-            'participant': self.invite_token,
-            'jury':        self.jury_invite_token,
-            'admin':       self.admin_invite_token,
-        }
-        return mapping.get(role)
+        return {'participant': self.invite_token, 'jury': self.jury_invite_token, 'admin': self.admin_invite_token}.get(role)
 
     def get_invite_pin_for_role(self, role):
-        mapping = {
-            'participant': self.invite_pin,
-            'jury':        self.jury_invite_pin,
-            'admin':       self.admin_invite_pin,
-        }
-        return mapping.get(role)
+        return {'participant': self.invite_pin, 'jury': self.jury_invite_pin, 'admin': self.admin_invite_pin}.get(role)
 
     def set_invite_pin_for_role(self, role):
-        """Перегенерує PIN для вказаної ролі, повертає новий PIN."""
         new_pin = generate_invite_pin()
-        if role == 'participant':
-            self.invite_pin = new_pin
-            self.save(update_fields=['invite_pin'])
-        elif role == 'jury':
-            self.jury_invite_pin = new_pin
-            self.save(update_fields=['jury_invite_pin'])
-        elif role == 'admin':
-            self.admin_invite_pin = new_pin
-            self.save(update_fields=['admin_invite_pin'])
+        field_map = {'participant': 'invite_pin', 'jury': 'jury_invite_pin', 'admin': 'admin_invite_pin'}
+        if role in field_map:
+            setattr(self, field_map[role], new_pin)
+            self.save(update_fields=[field_map[role]])
         return new_pin
 
 
 # ── TournamentMember ──────────────────────────────────────────────────────────
 
 TOURNAMENT_ROLE_CHOICES = [
-    ('owner',       'Власник'),
-    ('participant', 'Учасник'),
-    ('jury',        'Журі'),
-    ('admin',       'Адміністратор'),
+    ('owner', 'Власник'), ('participant', 'Учасник'),
+    ('jury', 'Журі'),     ('admin', 'Адміністратор'),
 ]
 
-# Токен → роль при приєднанні (використовується у view)
 TOKEN_FIELD_TO_ROLE = {
-    'invite_token':       'participant',
-    'jury_invite_token':  'jury',
+    'invite_token': 'participant',
+    'jury_invite_token': 'jury',
     'admin_invite_token': 'admin',
 }
 
 
 class TournamentMember(models.Model):
-    tournament = models.ForeignKey(
-        Tournament,
-        on_delete=models.CASCADE,
-        related_name='members',
-        verbose_name="Турнір",
-    )
-    user = models.ForeignKey(
-        'users.User',
-        on_delete=models.CASCADE,
-        related_name='tournament_memberships',
-        verbose_name="Користувач",
-    )
-    role = models.CharField(
-        max_length=20,
-        choices=TOURNAMENT_ROLE_CHOICES,
-        default='participant',
-        verbose_name="Роль",
-    )
-    joined_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата приєднання")
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='members')
+    user       = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='tournament_memberships')
+    role       = models.CharField(max_length=20, choices=TOURNAMENT_ROLE_CHOICES, default='participant')
+    joined_at  = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('tournament', 'user')
         ordering = ['joined_at']
-        verbose_name = "Учасник турніру"
-        verbose_name_plural = "Учасники турніру"
 
     def __str__(self):
         return f"{self.user} — {self.tournament} [{self.role}]"
 
 
-# ── Round ─────────────────────────────────────────────────────────────────────
+# ── Team ──────────────────────────────────────────────────────────────────────
+
+class Team(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='teams')
+    name       = models.CharField(max_length=255, verbose_name="Назва команди")
+    captain    = models.ForeignKey(
+        'users.User', on_delete=models.CASCADE,
+        related_name='captained_teams', verbose_name="Капітан",
+    )
+    members    = models.ManyToManyField(
+        'users.User', related_name='teams', blank=True, verbose_name="Учасники",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Одна команда на турнір для кожного капітана
+        unique_together = ('tournament', 'captain')
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.tournament.name})"
+
+    def can_upload(self, user):
+        """Перевіряє чи може user завантажувати роботу від імені команди."""
+        if self.captain == user:
+            return True
+        return TeamUploadPermission.objects.filter(team=self, user=user).exists()
+
+
+class TeamUploadPermission(models.Model):
+    """Капітан може видати право завантаження іншому учаснику команди."""
+    team      = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='upload_permissions')
+    user      = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='team_upload_permissions')
+    granted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('team', 'user')
+
+    def __str__(self):
+        return f"{self.user} може завантажувати за {self.team.name}"
+
+
+# ── Round / Task ──────────────────────────────────────────────────────────────
 
 class Round(models.Model):
     tournament         = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name="rounds")
@@ -204,22 +207,19 @@ class Round(models.Model):
 
 
 class RoundLink(models.Model):
-    round = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="links")
-    label = models.CharField(max_length=255, verbose_name="Підпис посилання")
-    url   = models.URLField(max_length=2048, verbose_name="URL")
+    round      = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="links")
+    label      = models.CharField(max_length=255)
+    url        = models.URLField(max_length=2048)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["created_at"]
 
-    def __str__(self):
-        return f"{self.round.title} — {self.label}"
-
 
 class RoundAttachment(models.Model):
     round      = models.ForeignKey(Round, on_delete=models.CASCADE, related_name="attachments")
-    file       = models.FileField(upload_to="rounds/attachments/", verbose_name="Файл")
-    name       = models.CharField(max_length=255, verbose_name="Назва файлу", blank=True)
+    file       = models.FileField(upload_to="rounds/attachments/")
+    name       = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -229,9 +229,6 @@ class RoundAttachment(models.Model):
         if not self.name and self.file:
             self.name = self.file.name.split("/")[-1]
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.round.title} — {self.name}"
 
 
 class Task(models.Model):
@@ -250,9 +247,9 @@ class Task(models.Model):
 
 
 class TaskLink(models.Model):
-    task  = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="links")
-    label = models.CharField(max_length=255, verbose_name="Підпис")
-    url   = models.URLField(max_length=2048, verbose_name="URL")
+    task       = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="links")
+    label      = models.CharField(max_length=255)
+    url        = models.URLField(max_length=2048)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -261,8 +258,8 @@ class TaskLink(models.Model):
 
 class TaskAttachment(models.Model):
     task       = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="attachments")
-    file       = models.FileField(upload_to="tasks/attachments/", verbose_name="Файл")
-    name       = models.CharField(max_length=255, verbose_name="Назва файлу", blank=True)
+    file       = models.FileField(upload_to="tasks/attachments/")
+    name       = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -277,43 +274,42 @@ class TaskAttachment(models.Model):
 # ── Submission ────────────────────────────────────────────────────────────────
 
 class Submission(models.Model):
-    task = models.ForeignKey(
-        Task, on_delete=models.CASCADE, related_name="submissions", verbose_name="Завдання",
+    task        = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="submissions")
+    participant = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="submissions")
+    # Для командних турнірів — до якої команди належить ця здача
+    team        = models.ForeignKey(
+        Team, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="submissions",
+        verbose_name="Команда",
     )
-    participant = models.ForeignKey(
-        'users.User', on_delete=models.CASCADE, related_name="submissions", verbose_name="Учасник",
-    )
-    text         = models.TextField(null=True, blank=True, verbose_name="Текст відповіді")
-    submitted_at = models.DateTimeField(auto_now_add=True, verbose_name="Час здачі")
-    updated_at   = models.DateTimeField(auto_now=True,     verbose_name="Час оновлення")
+    text         = models.TextField(null=True, blank=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    updated_at   = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('task', 'participant')
+        # Для командних — унікальність по task+team, для solo — task+participant
         ordering = ['-submitted_at']
-        verbose_name = "Здача роботи"
-        verbose_name_plural = "Здачі робіт"
 
     def __str__(self):
+        if self.team:
+            return f"{self.team.name} → {self.task.title}"
         return f"{self.participant.username} → {self.task.title}"
 
 
 class SubmissionLink(models.Model):
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name="links")
-    label      = models.CharField(max_length=255, blank=True, verbose_name="Підпис")
-    url        = models.URLField(max_length=2048, verbose_name="URL")
+    label      = models.CharField(max_length=255, blank=True)
+    url        = models.URLField(max_length=2048)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["created_at"]
 
-    def __str__(self):
-        return f"{self.submission} — {self.label or self.url}"
-
 
 class SubmissionAttachment(models.Model):
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name="attachments")
-    file       = models.FileField(upload_to="submissions/attachments/", verbose_name="Файл")
-    name       = models.CharField(max_length=255, blank=True, verbose_name="Назва файлу")
+    file       = models.FileField(upload_to="submissions/attachments/")
+    name       = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -323,9 +319,6 @@ class SubmissionAttachment(models.Model):
         if not self.name and self.file:
             self.name = self.file.name.split("/")[-1]
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.submission} — {self.name}"
 
 
 # ── Grade ─────────────────────────────────────────────────────────────────────
@@ -358,14 +351,11 @@ class Grade(models.Model):
     class Meta:
         unique_together = ('submission', 'juror')
         ordering = ['-updated_at']
-        verbose_name = "Оцінка"
-        verbose_name_plural = "Оцінки"
 
     def __str__(self):
         return f"{self.juror.username} → {self.submission} [{self.total}]"
 
     def recalc_total(self):
-        """Перераховує та зберігає загальний бал."""
         self.total = sum(self.scores.values()) if self.scores else 0
         self.save(update_fields=['total'])
 

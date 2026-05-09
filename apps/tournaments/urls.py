@@ -19,6 +19,11 @@ from .views import (
     LeaderboardView, LeaderboardDetailView,
     RegistrationExceptionView,
 )
+from .team_views import (
+    TeamListCreateView, TeamDetailView,
+    TeamMemberView, TeamUploadPermissionView,
+    AdminAssignTeamView,
+)
 from .jury_views import JuryPendingSubmissionsView  # ← нове
 
 urlpatterns = [
@@ -39,6 +44,21 @@ urlpatterns = [
     # ── Members ────────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/members/', TournamentMemberListView.as_view(), name='tournament-members'),
     path('<int:tournament_pk>/members/<int:pk>/', TournamentMemberDeleteView.as_view(), name='tournament-member-delete'),
+
+    # ── Teams ─────────────────────────────────────────────────────────────────
+    path('<int:tournament_pk>/teams/', TeamListCreateView.as_view(), name='team-list-create'),
+    path('<int:tournament_pk>/teams/<int:team_pk>/', TeamDetailView.as_view(), name='team-detail'),
+
+    # ── Team members ──────────────────────────────────────────────────────────
+    path('<int:tournament_pk>/teams/<int:team_pk>/members/', TeamMemberView.as_view(), name='team-member-add'),
+    path('<int:tournament_pk>/teams/<int:team_pk>/members/<int:user_pk>/', TeamMemberView.as_view(), name='team-member-remove'),
+
+    # ── Upload permissions ────────────────────────────────────────────────────
+    path('<int:tournament_pk>/teams/<int:team_pk>/upload-permission/', TeamUploadPermissionView.as_view(), name='team-upload-perm-add'),
+    path('<int:tournament_pk>/teams/<int:team_pk>/upload-permission/<int:user_pk>/', TeamUploadPermissionView.as_view(), name='team-upload-perm-remove'),
+
+    # ── Admin assign ──────────────────────────────────────────────────────────
+    path('<int:tournament_pk>/teams/<int:team_pk>/assign-member/', AdminAssignTeamView.as_view(), name='team-admin-assign'),
 
     # ── Jury panel ─────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/jury/submissions/', JurySubmissionsView.as_view(), name='jury-submissions'),
@@ -91,6 +111,7 @@ urlpatterns = [
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/attachments/', SubmissionAttachmentCreateView.as_view(), name='submission-attachment-create'),
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/attachments/<int:pk>/', SubmissionAttachmentDeleteView.as_view(), name='submission-attachment-delete'),
 
+    # ── My grades ─────────────────────────────────────────────────────────────
     path('my-grades/', ParticipantGradesNewsView.as_view(), name='participant-grades-news'),
     path('<int:tournament_pk>/jury/distribute/', DistributeSubmissionsView.as_view()),
 ]

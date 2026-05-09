@@ -40,15 +40,14 @@ function aggregateFromSubmissions(submissions) {
   return Object.values(byParticipant);
 }
 
-// ── Excel export ──────────────────────────────────────────────────────────────
-
-async function exportToExcel({ ranked, roundIds, roundMap, tournamentId }) {
+async function exportToExcel({ ranked, roundIds, roundMap, tournamentId, isTeam }) {
   const XLSX = await import("xlsx");
-  const wb   = XLSX.utils.book_new();
-  const header = ["#", "Учасник", ...roundIds.map(id => roundMap[id]), "Разом"];
-  const rows   = ranked.map(p => [
+  const wb = XLSX.utils.book_new();
+  const nameCol = isTeam ? "Команда" : "Учасник";
+  const header = ["#", nameCol, ...roundIds.map(id => roundMap[id]), "Разом"];
+  const rows = ranked.map(p => [
     p.rank,
-    p.participant_name,
+    isTeam ? p.team_name : p.participant_name,
     ...roundIds.map(id => p.round_scores?.[id] ?? ""),
     p.total,
   ]);
@@ -421,15 +420,9 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
   const handleTogglePublish = async () => {
     setPublishing(true);
     try {
-      const res = await API.patch(`/tournaments/${tournamentId}/leaderboard/`, {
-        is_published: !published,
-      });
+      const res = await API.patch(`/tournaments/${tournamentId}/leaderboard/`, { is_published: !published });
       setPublished(res.data.is_published ?? !published);
-    } catch (err) {
-      console.error("Помилка зміни публікації:", err);
-    } finally {
-      setPublishing(false);
-    }
+    } catch { } finally { setPublishing(false); }
   };
 
   // Обчислення roundIds / roundMap (тільки раунди що є в leaderboard)
@@ -447,10 +440,10 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
 
   const ranked = useMemo(() => {
     return [...leaderboard]
-      .sort((a, b) => {
-        if (sortBy === "total") return b.total - a.total;
-        return (b.round_scores?.[sortBy] ?? 0) - (a.round_scores?.[sortBy] ?? 0);
-      })
+      .sort((a, b) => sortBy === "total"
+        ? b.total - a.total
+        : (b.round_scores?.[sortBy] ?? 0) - (a.round_scores?.[sortBy] ?? 0)
+      )
       .map((p, i) => ({ ...p, rank: i + 1 }));
   }, [leaderboard, sortBy]);
 
@@ -504,6 +497,10 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
 
   return (
     <div className={styles.wrap}>
+      {/* Тип турніру — бейдж */}
+      {isTeam && (
+        <div className={styles.teamBadge}>👥 Командний турнір — результати по командах</div>
+      )}
 
       {/* Publish bar */}
       {canAlwaysSee && (
@@ -515,10 +512,7 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
                 {published ? "Таблиця опублікована" : "Таблиця прихована від учасників і журі"}
               </span>
               <span className={styles.publishHint}>
-                {published
-                  ? "Учасники та журі бачать результати"
-                  : "Тільки адміністратори бачать таблицю зараз"
-                }
+                {published ? "Учасники та журі бачать результати" : "Тільки адміністратори бачать таблицю зараз"}
               </span>
             </div>
           </div>
@@ -536,7 +530,12 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
         <div className={styles.stateBox}>
           <span className={styles.stateIcon}>🏆</span>
           <span className={styles.emptyText}>Поки що немає оцінених робіт</span>
-          <span className={styles.emptyHint}>Таблиця заповниться після того, як журі виставить перші оцінки</span>
+          <span className={styles.emptyHint}>
+            {isTeam
+              ? "Таблиця заповниться після того, як журі оцінить роботи команд"
+              : "Таблиця заповниться після того, як журі виставить перші оцінки"
+            }
+          </span>
         </div>
       ) : (
         <>
@@ -564,7 +563,7 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
               className={styles.exportBtn}
               onClick={handleExportExcel}
               disabled={exporting}
-              title="Завантажити таблицю лідерів у форматі Excel"
+              title="Завантажити у форматі Excel"
             >
               {exporting ? (
                 <><span className={styles.exportSpinner} /> Експорт…</>
@@ -580,13 +579,12 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
             </button>
           </div>
 
-          {/* Table */}
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
                 <tr>
                   <th className={styles.thRank}>#</th>
-                  <th className={styles.thName}>Учасник</th>
+                  <th className={styles.thName}>{isTeam ? "Команда" : "Учасник"}</th>
                   {roundIds.map(id => (
                     <th key={id} className={`${styles.thScore} ${sortBy === id ? styles.thActive : ""}`}>
                       {roundMap[id]}
@@ -617,10 +615,15 @@ export default function LeaderboardTab({ tournamentId, rounds = [], roundsLoadin
                     </td>
                     <td className={styles.tdName}>
                       <div className={styles.participant}>
-                        <div className={styles.avatar} style={{ background: getAvatarColor(p.participant_name) }}>
-                          {getInitials(p.participant_name)}
+                        <div className={styles.avatar} style={{ background: getAvatarColor(getRowName(p)) }}>
+                          {getInitials(getRowName(p))}
                         </div>
-                        <span className={styles.participantName}>{p.participant_name}</span>
+                        <div className={styles.participantInfo}>
+                          <span className={styles.participantName}>{getRowName(p)}</span>
+                          {isTeam && p.members_count && (
+                            <span className={styles.participantSub}>{p.members_count} учасників</span>
+                          )}
+                        </div>
                       </div>
                     </td>
                     {roundIds.map(id => (

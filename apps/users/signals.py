@@ -20,4 +20,4 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
 
 def create_profile(sender, instance, created, **kwargs):
     if created:
-        profile, _ = Profile.objects.get_or_create(user=instance)
+        Profile.objects.create(user=instance)
