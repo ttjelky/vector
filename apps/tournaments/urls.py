@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    TournamentCreateView, TournamentDetailView,
+    DistributeSubmissionsView, TournamentCreateView, TournamentDetailView,
     MyTournamentRoleView,
     TournamentInviteLinkView, RegeneratePinView,
     JoinByTokenView, TournamentPreviewByTokenView, VerifyInvitePinView,
@@ -16,13 +16,15 @@ from .views import (
     SubmissionAttachmentCreateView, SubmissionAttachmentDeleteView,
     JurySubmissionsView, JuryGradeView,
     SubmissionGradeView, ParticipantGradesNewsView,
-    LeaderboardView,
+    LeaderboardView, LeaderboardDetailView,
+    RegistrationExceptionView,
 )
 from .team_views import (
     TeamListCreateView, TeamDetailView,
     TeamMemberView, TeamUploadPermissionView,
     AdminAssignTeamView,
 )
+from .jury_views import JuryPendingSubmissionsView  # ← нове
 
 urlpatterns = [
     # ── Tournaments ────────────────────────────────────────────────────────────
@@ -61,9 +63,14 @@ urlpatterns = [
     # ── Jury panel ─────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/jury/submissions/', JurySubmissionsView.as_view(), name='jury-submissions'),
     path('<int:tournament_pk>/jury/submissions/<int:submission_pk>/grade/', JuryGradeView.as_view(), name='jury-grade'),
+    path('jury/pending-submissions/', JuryPendingSubmissionsView.as_view(), name='jury-pending-submissions'),  # ← нове
 
     # ── Leaderboard ────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/leaderboard/', LeaderboardView.as_view(), name='leaderboard'),
+    path('<int:tournament_pk>/leaderboard/<int:participant_pk>/', LeaderboardDetailView.as_view(), name='leaderboard-detail'),
+
+    # ── Registration exception ─────────────────────────────────────────────────
+    path('<int:tournament_pk>/registration-exception/', RegistrationExceptionView.as_view(), name='registration-exception'),
 
     # ── Rounds ────────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/rounds/', RoundListCreateView.as_view(), name='round-list-create'),
@@ -97,7 +104,7 @@ urlpatterns = [
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/links/', SubmissionLinkCreateView.as_view(), name='submission-link-create'),
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/links/<int:pk>/', SubmissionLinkDeleteView.as_view(), name='submission-link-delete'),
 
-    # ── Submission grade ──────────────────────────────────────────────────────
+    # ── Submission grade (for participant) ────────────────────────────────────
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/grade/', SubmissionGradeView.as_view(), name='submission-grade'),
 
     # ── Submission attachments ────────────────────────────────────────────────
@@ -106,4 +113,5 @@ urlpatterns = [
 
     # ── My grades ─────────────────────────────────────────────────────────────
     path('my-grades/', ParticipantGradesNewsView.as_view(), name='participant-grades-news'),
+    path('<int:tournament_pk>/jury/distribute/', DistributeSubmissionsView.as_view()),
 ]

@@ -939,3 +939,222 @@
 @media (max-width: 400px) {
   .statsRow { grid-template-columns: 1fr; }
 }
+/* ─── Distribute panel ────────────────────────────────────────────────────── */
+
+.distributePanel {
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-lg);
+  overflow: hidden;
+}
+
+.distributePanelToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--jury-ink-mid);
+  background: var(--jury-canvas);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.distributePanelToggle:hover {
+  background: var(--jury-border-soft);
+  color: var(--jury-ink);
+}
+
+.distributePanelBody {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid var(--jury-border-soft);
+}
+
+.distributeDescription {
+  font-size: 12.5px;
+  color: var(--jury-ink-soft);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.distributeControls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .distributeControls { grid-template-columns: 1fr; }
+}
+
+.distributeLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--jury-ink-soft);
+}
+
+.distributeInputRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.distributeInput {
+  width: 70px;
+  padding: 8px 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--jury-ink);
+  background: var(--jury-surface);
+  border: 1px solid var(--jury-border);
+  border-radius: var(--jury-radius-sm);
+  outline: none;
+  font-family: inherit;
+  text-align: center;
+  -moz-appearance: textfield;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.distributeInput:focus {
+  border-color: #bbb;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+}
+
+.distributeInput::-webkit-inner-spin-button,
+.distributeInput::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+.distributeHint {
+  font-size: 12px;
+  color: var(--jury-ink-ghost);
+}
+
+.distributeCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--jury-ink-mid);
+  cursor: pointer;
+  user-select: none;
+}
+
+.distributeCheckbox input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--jury-ink);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.distributeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--jury-ink);
+  border: none;
+  border-radius: var(--jury-radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, transform 0.1s;
+  align-self: flex-start;
+}
+
+.distributeBtn:hover    { background: #2a2a2a; }
+.distributeBtn:active   { transform: scale(0.98); }
+.distributeBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── Distribute result ───────────────────────────────────────────────────── */
+
+.distributeResult {
+  background: var(--jury-green-bg);
+  border: 1px solid var(--jury-green-brd);
+  border-radius: var(--jury-radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.distributeResultTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--jury-green);
+  margin: 0;
+}
+
+.distributeResultList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.distributeResultRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--jury-green-brd);
+}
+
+.distributeResultRow:last-child { border-bottom: none; }
+
+.distributeResultName {
+  color: var(--jury-ink-mid);
+  font-weight: 500;
+}
+
+.distributeResultCount {
+  color: var(--jury-green);
+  font-weight: 600;
+}
+
+/* ─── Criteria groups ─────────────────────────────────────────────────────── */
+
+.criteriaGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.criteriaGroupTitle {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--jury-ink-ghost);
+  margin: 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--jury-border-soft);
+}
+
+.criteriaLabelWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.criteriaHint {
+  font-size: 11px;
+  color: var(--jury-ink-ghost);
+  font-weight: 400;
+  line-height: 1.4;
+}

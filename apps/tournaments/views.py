@@ -1,3 +1,6 @@
+import random
+from collections import defaultdict
+
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -10,7 +13,7 @@ from .models import (
     Round, RoundLink, RoundAttachment,
     Task, TaskLink, TaskAttachment,
     Submission, SubmissionLink, SubmissionAttachment,
-    Grade, Team, TeamUploadPermission,
+    Grade, Team, TeamUploadPermission, JuryAssignment,
     generate_invite_pin,
 )
 from .serializers import (
@@ -19,6 +22,7 @@ from .serializers import (
     TaskSerializer, TaskLinkSerializer, TaskAttachmentSerializer,
     SubmissionSerializer, SubmissionLinkSerializer, SubmissionAttachmentSerializer,
     GradeSerializer, GradeWriteSerializer, JurySubmissionSerializer,
+    JuryAssignmentSerializer,
 )
 from .permissions import IsTournamentOwner, IsTournamentMemberOrOwner, IsTournamentParticipant, IsTournamentJury
 
@@ -26,11 +30,179 @@ BASE_URL = "http://localhost:5173"
 
 INVITABLE_ROLES = ('participant', 'jury', 'admin')
 
+# ── Критерії оцінювання ───────────────────────────────────────────────────────
+#
+# Шкала: 0–10 балів по кожному з 6 критеріїв.
+# Максимум: 60 балів.
+# Формула підсумку: sum(scores.values())  — проста сума без ваг.
+#
+# Групи:
+#   I.  Технічна частина   (backend_quality, database, frontend_quality)
+#   II. Функціональність   (must_have_completion, stability, usability)
+#
 DEFAULT_CRITERIA = [
-    {"key": "originality",  "label": "Оригінальність",  "max": 10},
-    {"key": "execution",    "label": "Виконання",        "max": 10},
-    {"key": "presentation", "label": "Презентація",      "max": 10},
+    # ── I. Технічна частина ───────────────────────────────────────────────────
+    {
+        "key":   "backend_quality",
+        "label": "Backend якість коду",
+        "hint":  "Clean code, патерни, ООП, відсутність помилок, тести",
+        "max":   10,
+        "group": "Технічна частина",
+    },
+    {
+        "key":   "database",
+        "label": "Database",
+        "hint":  "Наявність і налаштування БД, структура схеми",
+        "max":   10,
+        "group": "Технічна частина",
+    },
+    {
+        "key":   "frontend_quality",
+        "label": "Frontend якість та UX/UI",
+        "hint":  "Clean code, патерни, відсутність помилок, тести, зручний інтерфейс",
+        "max":   10,
+        "group": "Технічна частина",
+    },
+    # ── II. Функціональність ──────────────────────────────────────────────────
+    {
+        "key":   "must_have_completion",
+        "label": "Виконання вимог завдання",
+        "hint":  "Наскільки повно реалізовані всі must-have вимоги",
+        "max":   10,
+        "group": "Функціональність",
+    },
+    {
+        "key":   "stability",
+        "label": "Роботоздатність та відсутність багів",
+        "hint":  "Проєкт стабільно запускається та працює без критичних помилок",
+        "max":   10,
+        "group": "Функціональність",
+    },
+    {
+        "key":   "usability",
+        "label": "Зручність використання",
+        "hint":  "Наскільки легко та інтуїтивно користуватись продуктом",
+        "max":   10,
+        "group": "Функціональність",
+    },
 ]
+
+MAX_TOTAL = sum(c["max"] for c in DEFAULT_CRITERIA)  # 60
+
+
+# ── Internal helpers ──────────────────────────────────────────────────────────
+
+def _is_owner_or_staff(request, tournament_pk):
+    """Повертає True якщо юзер є власником турніру або має роль admin/jury."""
+    membership = TournamentMember.objects.filter(
+        tournament_id=tournament_pk,
+        user=request.user,
+    ).first()
+    return membership and membership.role in ('owner', 'admin', 'jury')
+
+
+def _get_membership_role(request, tournament_pk):
+    """Повертає роль поточного юзера в турнірі або None."""
+    m = TournamentMember.objects.filter(
+        tournament_id=tournament_pk,
+        user=request.user,
+    ).first()
+    return m.role if m else None
+
+
+def _run_distribution(tournament_id, min_reviews: int, max_per_juror: int) -> list[JuryAssignment]:
+    """
+    Рандомний розподіл подань між членами журі.
+
+    Алгоритм:
+      1. Збираємо всі подання турніру та всіх членів з роллю 'jury'.
+      2. Перевіряємо здійсненність: total_slots <= max_capacity і min_reviews <= len(jurors).
+      3. Ітеруємось по перемішаних поданнях; для кожного обираємо min_reviews
+         журі з найменшим поточним навантаженням (з невеличкою випадковістю).
+      4. Повертаємо список створених об'єктів JuryAssignment.
+
+    Raises:
+      ValueError — якщо вхідні дані невалідні або розподіл неможливий.
+    """
+    submissions = list(
+        Submission.objects
+        .filter(task__round__tournament_id=tournament_id)
+        .select_related('task__round')
+    )
+    if not submissions:
+        raise ValueError("У турнірі ще немає жодного поданого завдання.")
+
+    juror_ids = list(
+        TournamentMember.objects
+        .filter(tournament_id=tournament_id, role='jury')
+        .values_list('user_id', flat=True)
+    )
+    if not juror_ids:
+        raise ValueError("У турнірі ще немає жодного члена журі.")
+
+    if min_reviews < 1:
+        raise ValueError("min_reviews має бути не менше 1.")
+    if max_per_juror < 1:
+        raise ValueError("max_per_juror має бути не менше 1.")
+    if min_reviews > len(juror_ids):
+        raise ValueError(
+            f"min_reviews ({min_reviews}) більше ніж кількість журі ({len(juror_ids)}). "
+            f"Зменшіть min_reviews або додайте більше членів журі."
+        )
+
+    total_slots   = len(submissions) * min_reviews
+    max_capacity  = len(juror_ids) * max_per_juror
+    if total_slots > max_capacity:
+        raise ValueError(
+            f"Недостатня місткість журі: потрібно {total_slots} слотів "
+            f"({len(submissions)} робіт × {min_reviews} рецензентів), "
+            f"але максимум журі може взяти {max_capacity} "
+            f"({len(juror_ids)} журі × {max_per_juror} робіт)."
+        )
+
+    # Перемішуємо для рандомності
+    random.shuffle(submissions)
+    random.shuffle(juror_ids)
+
+    juror_load = defaultdict(int)           # juror_id → кількість поточних призначень
+    sub_jurors: dict[int, set] = defaultdict(set)  # submission_id → множина juror_id
+
+    new_assignments = []
+
+    for sub in submissions:
+        # Доступні журі: ще не призначені на цю роботу + не перевищили ліміт
+        available = [
+            j for j in juror_ids
+            if j not in sub_jurors[sub.id] and juror_load[j] < max_per_juror
+        ]
+
+        if len(available) < min_reviews:
+            raise ValueError(
+                f"Неможливо призначити {min_reviews} журі для подання #{sub.id} "
+                f"(«{sub.task.title}»): вільно лише {len(available)} з {len(juror_ids)} журі."
+            )
+
+        # Сортуємо за навантаженням; беремо pool з найменш завантажених + перемішуємо
+        available.sort(key=lambda j: juror_load[j])
+        pool_size = min(min_reviews * 2, len(available))
+        pool = available[:pool_size]
+        random.shuffle(pool)
+        selected = pool[:min_reviews]
+
+        for juror_id in selected:
+            juror_load[juror_id] += 1
+            sub_jurors[sub.id].add(juror_id)
+            new_assignments.append(
+                JuryAssignment(
+                    tournament_id=tournament_id,
+                    juror_id=juror_id,
+                    submission=sub,
+                )
+            )
+
+    JuryAssignment.objects.bulk_create(new_assignments, ignore_conflicts=True)
+
+    return new_assignments
 
 
 # ── Tournament views ──────────────────────────────────────────────────────────
@@ -133,17 +305,38 @@ class VerifyInvitePinView(APIView):
         expected_pin = tournament.get_invite_pin_for_role(role)
         if str(expected_pin) == str(pin):
             if request.user.is_authenticated and request.user.role != role:
-                ROLE_UA = {'participant': 'учасника', 'jury': 'журі', 'admin': 'адміністратора'}
-                return Response({
-                    'detail': (
-                        f'Це посилання призначене для {ROLE_UA.get(role, role)}. '
-                        f'Ваша роль у системі — «{request.user.role}». '
-                        f'Зверніться до організатора, якщо вважаєте це помилкою.'
-                    ),
-                    'role_mismatch': True,
-                    'required_role': role,
-                    'user_role':     request.user.role,
-                }, status=status.HTTP_403_FORBIDDEN)
+                ROLE_UA = {
+                    'participant': 'учасника',
+                    'jury':        'журі',
+                    'admin':       'адміністратора',
+                }
+                return Response(
+                    {
+                        'detail': (
+                            f'Це посилання призначене для {ROLE_UA.get(role, role)}. '
+                            f'Ваша роль у системі — «{request.user.role}». '
+                            f'Зверніться до організатора, якщо вважаєте це помилкою.'
+                        ),
+                        'role_mismatch': True,
+                        'required_role': role,
+                        'user_role':     request.user.role,
+                    },
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            # Для учасників перевіряємо чи відкрита реєстрація
+            if role == 'participant':
+                already = (
+                    request.user.is_authenticated and
+                    TournamentMember.objects.filter(
+                        tournament=tournament, user=request.user
+                    ).exists()
+                )
+                if not already and not tournament.registration_open():
+                    return Response(
+                        {'detail': 'Реєстрація учасників зараз закрита.'},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+
             return Response({
                 'valid':           True,
                 'tournament_name': tournament.name,
@@ -196,6 +389,17 @@ class JoinByTokenView(APIView):
                 'required_role': role,
                 'user_role':     request.user.role,
             }, status=status.HTTP_403_FORBIDDEN)
+
+        # Перевірка реєстрації для учасників
+        if role == 'participant':
+            already = TournamentMember.objects.filter(
+                tournament=tournament, user=request.user
+            ).exists()
+            if not already and not tournament.registration_open():
+                return Response(
+                    {'detail': 'Реєстрація учасників зараз закрита.'},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
         member, created = TournamentMember.objects.get_or_create(
             tournament=tournament,
@@ -503,23 +707,85 @@ class SubmissionAttachmentDeleteView(generics.DestroyAPIView):
 # ── Jury panel ────────────────────────────────────────────────────────────────
 
 class JurySubmissionsView(APIView):
+    """
+    GET /tournaments/<tournament_pk>/jury/submissions/
+
+    Поведінка залежить від ролі:
+      — jury:        бачить тільки подання, призначені йому через JuryAssignment.
+      — owner/admin: бачить усі подання турніру (для контролю та оцінювання).
+
+    Відповідь:
+    {
+      "submissions": [...],
+      "criteria":    [...],   # DEFAULT_CRITERIA з group/hint
+      "max_total":   60,
+      "has_assignments": bool  # чи вже проводився розподіл
+    }
+    """
     permission_classes = [IsAuthenticated, IsTournamentJury]
 
     def get(self, request, tournament_pk):
-        submissions = (
+        role = _get_membership_role(request, tournament_pk)
+        is_privileged = role in ('owner', 'admin')
+
+        base_qs = (
             Submission.objects
-            .filter(task__round__tournament_id=tournament_pk)
-            .select_related('task', 'task__round', 'participant', 'team')
-            .prefetch_related('links', 'attachments', 'grades')
+            .select_related('task', 'task__round', 'participant')
+            .prefetch_related('links', 'attachments', 'grades', 'jury_assignments')
             .order_by('-submitted_at')
         )
+
+        if is_privileged:
+            # Owner/admin бачить усі подання
+            submissions = base_qs.filter(task__round__tournament_id=tournament_pk)
+        else:
+            # Журі бачить тільки призначені роботи
+            submissions = base_qs.filter(
+                jury_assignments__juror=request.user,
+                jury_assignments__tournament_id=tournament_pk,
+            ).distinct()
+
+        has_assignments = JuryAssignment.objects.filter(
+            tournament_id=tournament_pk
+        ).exists()
+
         serializer = JurySubmissionSerializer(
             submissions, many=True, context={'request': request},
         )
-        return Response({'submissions': serializer.data, 'criteria': DEFAULT_CRITERIA})
+
+        return Response({
+            'submissions':    serializer.data,
+            'criteria':       DEFAULT_CRITERIA,
+            'max_total':      MAX_TOTAL,
+            'has_assignments': has_assignments,
+        })
 
 
 class JuryGradeView(APIView):
+    """
+    POST /tournaments/<tournament_pk>/jury/submissions/<submission_pk>/grade/
+
+    Створює або оновлює оцінку журі для вказаного подання.
+
+    Body:
+    {
+      "scores": {
+        "backend_quality": 8,
+        "database": 7,
+        "frontend_quality": 9,
+        "must_have_completion": 10,
+        "stability": 8,
+        "usability": 7
+      },
+      "comment": "Гарна робота, але..."
+    }
+
+    Обмеження для ролі 'jury':
+      — журі може оцінювати тільки призначені йому роботи.
+      — owner/admin можуть оцінювати будь-яке подання турніру.
+
+    Підсумковий бал = сума всіх scores (max 60).
+    """
     permission_classes = [IsAuthenticated, IsTournamentJury]
 
     def post(self, request, tournament_pk, submission_pk):
@@ -531,6 +797,20 @@ class JuryGradeView(APIView):
             )
         except Submission.DoesNotExist:
             return Response({'detail': 'Подання не знайдено.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Журі може оцінювати тільки призначені роботи
+        role = _get_membership_role(request, tournament_pk)
+        if role == 'jury':
+            assigned = JuryAssignment.objects.filter(
+                tournament_id=tournament_pk,
+                juror=request.user,
+                submission=submission,
+            ).exists()
+            if not assigned:
+                return Response(
+                    {'detail': 'Ця робота не призначена вам для оцінювання.'},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
         serializer = GradeWriteSerializer(data=request.data)
         if not serializer.is_valid():
@@ -554,20 +834,259 @@ class JuryGradeView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+        total = sum(scores.values())
+
         grade, _ = Grade.objects.update_or_create(
             submission=submission,
             juror=request.user,
-            defaults={'scores': scores, 'comment': comment, 'total': sum(scores.values())},
+            defaults={
+                'scores':  scores,
+                'comment': comment,
+                'total':   total,
+            },
         )
 
         return Response({
-            'id': grade.id, 'scores': grade.scores,
-            'comment': grade.comment, 'total': grade.total,
+            'id':         grade.id,
+            'scores':     grade.scores,
+            'comment':    grade.comment,
+            'total':      grade.total,
+            'max_total':  MAX_TOTAL,
             'updated_at': grade.updated_at,
         }, status=status.HTTP_200_OK)
 
 
+# ── Jury assignment views ─────────────────────────────────────────────────────
+
+class DistributeSubmissionsView(APIView):
+    """
+    POST /tournaments/<tournament_pk>/jury/distribute/
+
+    Рандомний розподіл подань між членами журі (роль 'jury').
+    Доступно тільки owner та admin.
+
+    Body (все опціонально):
+    {
+      "min_reviews":  2,      # мінімум журі на одну роботу (default: 2)
+      "max_per_juror": 5,     # максимум робіт на одного журі (default: 5)
+      "reset": true           # видалити поточний розподіл перед новим (default: false)
+    }
+
+    Відповідь:
+    {
+      "assignments_created": N,
+      "juror_summary": [
+        {"juror_id": X, "username": "...", "assigned_count": 3},
+        ...
+      ],
+      "submission_coverage": [
+        {"submission_id": Y, "reviewers": 2},
+        ...
+      ]
+    }
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, tournament_pk):
+        role = _get_membership_role(request, tournament_pk)
+        if role not in ('owner', 'admin'):
+            return Response(
+                {'detail': 'Тільки власник або адміністратор може запустити розподіл.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            tournament = Tournament.objects.get(pk=tournament_pk)
+        except Tournament.DoesNotExist:
+            return Response({'detail': 'Турнір не знайдено.'}, status=status.HTTP_404_NOT_FOUND)
+
+        min_reviews  = int(request.data.get('min_reviews',  2))
+        max_per_juror = int(request.data.get('max_per_juror', 5))
+        reset         = bool(request.data.get('reset', False))
+
+        if reset:
+            JuryAssignment.objects.filter(tournament=tournament).delete()
+
+        try:
+            new_assignments = _run_distribution(tournament_pk, min_reviews, max_per_juror)
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Формуємо summary по журі
+        juror_counts: dict[int, int] = defaultdict(int)
+        for a in new_assignments:
+            juror_counts[a.juror_id] += 1
+
+        from apps.users.models import User
+        juror_ids = list(juror_counts.keys())
+        jurors = {u.id: u for u in User.objects.filter(id__in=juror_ids)}
+
+        juror_summary = [
+            {
+                'juror_id':      jid,
+                'username':      jurors[jid].username if jid in jurors else str(jid),
+                'assigned_count': cnt,
+            }
+            for jid, cnt in sorted(juror_counts.items(), key=lambda x: -x[1])
+        ]
+
+        # Coverage по поданнях
+        sub_counts: dict[int, int] = defaultdict(int)
+        for a in new_assignments:
+            sub_counts[a.submission_id] += 1
+
+        submission_coverage = [
+            {'submission_id': sid, 'reviewers': cnt}
+            for sid, cnt in sub_counts.items()
+        ]
+
+        return Response({
+            'assignments_created': len(new_assignments),
+            'juror_summary':       juror_summary,
+            'submission_coverage': submission_coverage,
+        }, status=status.HTTP_201_CREATED)
+
+
+class JuryAssignmentListView(APIView):
+    """
+    GET /tournaments/<tournament_pk>/jury/assignments/
+
+    Повертає всі призначення турніру.
+    Доступно тільки owner та admin.
+
+    Query params:
+      ?juror_id=<id>      — фільтр по журі
+      ?submission_id=<id> — фільтр по поданню
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, tournament_pk):
+        role = _get_membership_role(request, tournament_pk)
+        if role not in ('owner', 'admin'):
+            return Response(
+                {'detail': 'Тільки власник або адміністратор може переглядати призначення.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        qs = (
+            JuryAssignment.objects
+            .filter(tournament_id=tournament_pk)
+            .select_related('juror', 'submission__task__round')
+            .order_by('juror__username', 'assigned_at')
+        )
+
+        juror_id = request.query_params.get('juror_id')
+        if juror_id:
+            qs = qs.filter(juror_id=juror_id)
+
+        submission_id = request.query_params.get('submission_id')
+        if submission_id:
+            qs = qs.filter(submission_id=submission_id)
+
+        serializer = JuryAssignmentSerializer(qs, many=True)
+        return Response(serializer.data)
+
+
+class JuryAssignmentCreateView(APIView):
+    """
+    POST /tournaments/<tournament_pk>/jury/assignments/
+
+    Ручне призначення конкретного подання конкретному журі.
+    Доступно тільки owner та admin.
+
+    Body: { "juror_id": <int>, "submission_id": <int> }
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, tournament_pk):
+        role = _get_membership_role(request, tournament_pk)
+        if role not in ('owner', 'admin'):
+            return Response(
+                {'detail': 'Тільки власник або адміністратор може призначати роботи.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        juror_id      = request.data.get('juror_id')
+        submission_id = request.data.get('submission_id')
+
+        if not juror_id or not submission_id:
+            return Response(
+                {'detail': 'Потрібні поля juror_id та submission_id.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Перевірка що журі належить до турніру
+        jury_member = TournamentMember.objects.filter(
+            tournament_id=tournament_pk,
+            user_id=juror_id,
+            role__in=('jury', 'owner', 'admin'),
+        ).first()
+        if not jury_member:
+            return Response(
+                {'detail': 'Вказаний користувач не є членом журі цього турніру.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Перевірка що подання належить до турніру
+        submission = Submission.objects.filter(
+            pk=submission_id,
+            task__round__tournament_id=tournament_pk,
+        ).first()
+        if not submission:
+            return Response(
+                {'detail': 'Подання не знайдено в цьому турнірі.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        assignment, created = JuryAssignment.objects.get_or_create(
+            tournament_id=tournament_pk,
+            juror_id=juror_id,
+            submission=submission,
+        )
+
+        serializer = JuryAssignmentSerializer(assignment)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+
+class JuryAssignmentDeleteView(generics.DestroyAPIView):
+    """
+    DELETE /tournaments/<tournament_pk>/jury/assignments/<pk>/
+
+    Видаляє конкретне призначення (ручне скасування).
+    Доступно тільки owner та admin.
+    """
+    serializer_class   = JuryAssignmentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        role = _get_membership_role(self.request, self.kwargs['tournament_pk'])
+        if role not in ('owner', 'admin'):
+            return JuryAssignment.objects.none()
+        return JuryAssignment.objects.filter(tournament_id=self.kwargs['tournament_pk'])
+
+    def destroy(self, request, *args, **kwargs):
+        role = _get_membership_role(request, kwargs['tournament_pk'])
+        if role not in ('owner', 'admin'):
+            return Response(
+                {'detail': 'Тільки власник або адміністратор може видаляти призначення.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().destroy(request, *args, **kwargs)
+
+
+# ── Submission grades view ────────────────────────────────────────────────────
+
 class SubmissionGradeView(APIView):
+    """
+    GET /tournaments/<tournament_pk>/rounds/<round_pk>/tasks/<task_pk>/submissions/<submission_pk>/grade/
+
+    Повертає агреговану оцінку для конкретного подання.
+    Учасник бачить середній бал і перший коментар від журі.
+    Власник / адмін бачать всі оцінки від усіх журі.
+    """
     permission_classes = [IsAuthenticated, IsTournamentParticipant]
 
     def get(self, request, tournament_pk, round_pk, task_pk, submission_pk):
@@ -591,24 +1110,26 @@ class SubmissionGradeView(APIView):
         if not grades.exists():
             return Response(None, status=status.HTTP_200_OK)
 
-        all_scores = {}
+        # Агрегація балів
+        all_scores: dict[str, list] = {}
         for grade in grades:
             for key, val in (grade.scores or {}).items():
                 all_scores.setdefault(key, []).append(float(val))
 
         avg_scores = {k: round(sum(v) / len(v), 1) for k, v in all_scores.items()}
         avg_total  = round(sum(g.total for g in grades) / len(grades), 1)
-        comments   = [g.comment for g in grades if g.comment]
+
+        comments = [g.comment for g in grades if g.comment]
 
         criteria_labels = {c["key"]: c["label"] for c in DEFAULT_CRITERIA}
         criteria_max    = {c["key"]: c["max"]   for c in DEFAULT_CRITERIA}
-        max_total       = sum(c["max"] for c in DEFAULT_CRITERIA)
-        latest_grade    = grades.order_by('-updated_at').first()
+
+        latest_grade = grades.order_by('-updated_at').first()
 
         return Response({
             'scores':       avg_scores,
             'total':        avg_total,
-            'max_total':    max_total,
+            'max_total':    MAX_TOTAL,
             'comment':      comments[0] if comments else "",
             'criteria':     criteria_labels,
             'criteria_max': criteria_max,
@@ -617,9 +1138,77 @@ class SubmissionGradeView(APIView):
         })
 
 
-# ── Leaderboard ───────────────────────────────────────────────────────────────
+# ── Registration exception view ───────────────────────────────────────────────
+
+class RegistrationExceptionView(APIView):
+    """
+    GET  /tournaments/<pk>/registration-exception/
+    POST /tournaments/<pk>/registration-exception/
+         Body: { "minutes": 15|30|60 } або { "minutes": 0 } для скасування.
+    Доступно owner/admin.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def _get_tournament_and_role(self, request, pk):
+        try:
+            t = Tournament.objects.get(pk=pk)
+        except Tournament.DoesNotExist:
+            return None, None
+        m = TournamentMember.objects.filter(tournament=t, user=request.user).first()
+        return t, (m.role if m else None)
+
+    def get(self, request, tournament_pk):
+        from django.utils import timezone
+        tournament, role = self._get_tournament_and_role(request, tournament_pk)
+        if not tournament:
+            return Response({'detail': 'Турнір не знайдено.'}, status=status.HTTP_404_NOT_FOUND)
+        if role not in ('owner', 'admin'):
+            return Response({'detail': 'Доступ заборонено.'}, status=status.HTTP_403_FORBIDDEN)
+
+        until = tournament.registration_exception_until
+        now = timezone.now()
+        is_active = bool(until and until > now)
+        return Response({
+            'is_active': is_active,
+            'until':     until.isoformat() if is_active else None,
+        })
+
+    def post(self, request, tournament_pk):
+        from django.utils import timezone
+        tournament, role = self._get_tournament_and_role(request, tournament_pk)
+        if not tournament:
+            return Response({'detail': 'Турнір не знайдено.'}, status=status.HTTP_404_NOT_FOUND)
+        if role not in ('owner', 'admin'):
+            return Response({'detail': 'Доступ заборонено.'}, status=status.HTTP_403_FORBIDDEN)
+
+        minutes = request.data.get('minutes')
+        try:
+            minutes = int(minutes)
+        except (TypeError, ValueError):
+            return Response({'detail': 'minutes має бути цілим числом.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if minutes == 0:
+            tournament.registration_exception_until = None
+            tournament.save(update_fields=['registration_exception_until'])
+            return Response({'is_active': False, 'until': None})
+
+        if minutes not in (15, 30, 60):
+            return Response({'detail': 'Допустимі значення: 15, 30, 60.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        until = timezone.now() + timezone.timedelta(minutes=minutes)
+        tournament.registration_exception_until = until
+        tournament.save(update_fields=['registration_exception_until'])
+
+        return Response({'is_active': True, 'until': until.isoformat()})
+
+
+# ── Leaderboard view ──────────────────────────────────────────────────────────
 
 class LeaderboardView(APIView):
+    """
+    GET   /tournaments/<tournament_pk>/leaderboard/
+    PATCH /tournaments/<tournament_pk>/leaderboard/   Body: { "is_published": true|false }
+    """
     permission_classes = [IsAuthenticated, IsTournamentParticipant]
 
     def _get_tournament_and_membership(self, request, tournament_pk):
@@ -638,6 +1227,7 @@ class LeaderboardView(APIView):
             return Response({'detail': 'Турнір не знайдено.'}, status=404)
 
         is_privileged = role in ('owner', 'admin')
+
         if not is_privileged and not tournament.leaderboard_published:
             return Response({'detail': 'Таблиця лідерів ще не опублікована.'}, status=403)
 
@@ -731,9 +1321,13 @@ class LeaderboardView(APIView):
         return Response({'is_published': tournament.leaderboard_published})
 
 
-# ── Participant grades news ───────────────────────────────────────────────────
+# ── Participant grades news view ──────────────────────────────────────────────
 
 class ParticipantGradesNewsView(APIView):
+    """
+    GET /tournaments/my-grades/
+    Повертає всі оцінені подання поточного учасника по всіх турнірах.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -756,8 +1350,10 @@ class ParticipantGradesNewsView(APIView):
             round_     = task.round
             tournament = round_.tournament
 
-            criteria_list = [{"key": c["key"], "label": c["label"], "max": c["max"]} for c in DEFAULT_CRITERIA]
-            max_total = sum(c["max"] for c in DEFAULT_CRITERIA)
+            criteria_list = [
+                {"key": c["key"], "label": c["label"], "max": c["max"]}
+                for c in DEFAULT_CRITERIA
+            ]
 
             jury = grade.juror
             jury_name = f"{jury.first_name} {jury.last_name}".strip() or jury.username
@@ -771,10 +1367,164 @@ class ParticipantGradesNewsView(APIView):
                 "criteria":     criteria_list,
                 "scores":       grade.scores or {},
                 "total":        grade.total,
-                "max_total":    max_total,
+                "max_total":    MAX_TOTAL,
                 "comment":      grade.comment or "",
                 "graded_at":    grade.updated_at,
                 "read":         False,
             })
 
         return Response(result, status=status.HTTP_200_OK)
+
+# ── Leaderboard detail view ───────────────────────────────────────────────────
+
+class LeaderboardDetailView(APIView):
+    """
+    GET /tournaments/<tournament_pk>/leaderboard/<participant_pk>/
+
+    Деталізація учасника: бали по критеріях + середнє/сума по раундах.
+    Якщо запитувач є owner/admin — додатково повертає jury_breakdown
+    (оцінки кожного журі окремо).
+    """
+    permission_classes = [IsAuthenticated, IsTournamentParticipant]
+
+    def get(self, request, tournament_pk, participant_pk):
+        try:
+            tournament = Tournament.objects.get(pk=tournament_pk)
+        except Tournament.DoesNotExist:
+            return Response(
+                {'detail': 'Турнір не знайдено.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        membership = TournamentMember.objects.filter(
+            tournament=tournament,
+            user=request.user,
+        ).first()
+
+        if not membership:
+            return Response(
+                {'detail': 'Ви не є учасником цього турніру.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        role = membership.role
+        is_privileged = role in ('owner', 'admin')
+
+        if not is_privileged and not tournament.leaderboard_published:
+            return Response(
+                {'detail': 'Таблиця лідерів ще не опублікована.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        grades = (
+            Grade.objects
+            .filter(
+                submission__task__round__tournament=tournament,
+                submission__participant_id=participant_pk,
+            )
+            .select_related(
+                'juror',
+                'submission__task__round',
+                'submission__participant',
+            )
+        )
+
+        if not grades.exists():
+            return Response(
+                {'detail': 'Учасника не знайдено або він ще не має оцінок.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        first_grade = grades.first()
+        participant = first_grade.submission.participant
+        full_name = (
+            f"{participant.first_name} {participant.last_name}".strip()
+            or participant.username
+            or f"Учасник #{participant_pk}"
+        )
+
+        round_data = {}
+
+        for grade in grades:
+            rid    = grade.submission.task.round_id
+            rtitle = grade.submission.task.round.title
+
+            if rid not in round_data:
+                round_data[rid] = {'title': rtitle, 'grades': []}
+
+            juror = grade.juror
+            jname = (
+                f"{juror.first_name} {juror.last_name}".strip()
+                or juror.username
+            )
+
+            round_data[rid]['grades'].append({
+                'juror_id':   juror.id,
+                'juror_name': jname,
+                'total':      grade.total,
+                'scores':     grade.scores or {},
+            })
+
+        all_criteria_keys = [c['key'] for c in DEFAULT_CRITERIA]
+
+        def _avg_criteria(grade_list):
+            sums   = defaultdict(float)
+            counts = defaultdict(int)
+            for g in grade_list:
+                for key, val in g['scores'].items():
+                    try:
+                        sums[key]   += float(val)
+                        counts[key] += 1
+                    except (TypeError, ValueError):
+                        pass
+            return {
+                key: round(sums[key] / counts[key], 1)
+                for key in all_criteria_keys
+                if counts[key] > 0
+            }
+
+        rounds_out    = []
+        grand_total   = 0.0
+        global_sums   = defaultdict(float)
+        global_counts = defaultdict(int)
+
+        for rid, rinfo in sorted(round_data.items()):
+            grade_list = rinfo['grades']
+            totals     = [g['total'] for g in grade_list]
+            avg_total  = round(sum(totals) / len(totals), 1) if totals else 0
+
+            criteria_avg = _avg_criteria(grade_list)
+
+            grand_total += avg_total
+            for key, val in criteria_avg.items():
+                global_sums[key]   += val
+                global_counts[key] += 1
+
+            round_obj = {
+                'round_id':     rid,
+                'round_title':  rinfo['title'],
+                'avg_total':    avg_total,
+                'criteria_avg': criteria_avg,
+            }
+
+            if is_privileged:
+                round_obj['jury_breakdown'] = sorted(
+                    grade_list, key=lambda g: g['total'], reverse=True
+                )
+
+            rounds_out.append(round_obj)
+
+        grand_criteria_avg = {
+            key: round(global_sums[key] / global_counts[key], 1)
+            for key in all_criteria_keys
+            if global_counts[key] > 0
+        }
+
+        return Response({
+            'participant_id':   participant.id,
+            'participant_name': full_name,
+            'rounds':           rounds_out,
+            'grand_total':      round(grand_total, 1),
+            'criteria_avg':     grand_criteria_avg,
+            'criteria_meta':    DEFAULT_CRITERIA,
+        })

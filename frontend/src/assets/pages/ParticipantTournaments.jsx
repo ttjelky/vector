@@ -6,6 +6,7 @@ import NavBar from "../components/NavBar";
 import TournamentCard from "../components/TournamentCard";
 import JoinByCodeModal from "../components/JoinByCodeModal";
 import styles from "../components/styles/admindashboard.module.css";
+import { computeStatus } from "../components/tournamentHelpers";
 
 const ParticipantTournaments = () => {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ const ParticipantTournaments = () => {
                 imageMode={tournament.image_mode}
                 stockImage={tournament.stock_image}
                 customImage={tournament.custom_image ?? null}
+                status={computeStatus(tournament)}
               />
             </div>
           ))}

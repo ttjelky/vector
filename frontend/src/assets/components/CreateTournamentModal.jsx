@@ -5,6 +5,9 @@ import api from "../../api";
 import TournamentCard, { STOCK_IMAGES } from "./TournamentCard";
 import User from "./static/icons/Profile.svg?react";
 import Users from "./static/icons/Users.svg?react";
+import { RichTextArea } from "./RichTextArea";
+import heic2any from "heic2any";
+import { computeStatus } from "../components/tournamentHelpers";
 
 const ACCENT_COLORS = ["#82b3e4", "#4ad44c", "#ca7979", "#c76db0", "#8e5edf", "#eccb5c"];
 
@@ -23,376 +26,57 @@ const TOURNAMENT_TYPES = [
   },
 ];
 
-/* ─────────────────────────────────────────────────────────
-   Toolbar icon components (inline SVG — no extra deps)
-───────────────────────────────────────────────────────── */
-const IconBold = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/>
-  </svg>
-);
-const IconItalic = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/>
-  </svg>
-);
-const IconUnderline = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/>
-  </svg>
-);
-const IconStrike = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 4H9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><line x1="4" y1="12" x2="20" y2="12"/>
-  </svg>
-);
-const IconUL = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/>
-    <circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/>
-  </svg>
-);
-const IconOL = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/>
-    <path d="M4 6h1v4" stroke="currentColor" strokeWidth="1.8"/><path d="M4 10h2" stroke="currentColor" strokeWidth="1.8"/>
-    <path d="M6 14H4c0-1 2-2 2-3s-1-1.5-2-1" stroke="currentColor" strokeWidth="1.8"/>
-    <path d="M4 19v-1a1 1 0 0 1 1-1h0a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H4" stroke="currentColor" strokeWidth="1.8"/>
-  </svg>
-);
-const IconQuote = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
-    <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
-  </svg>
-);
-const IconLink = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-  </svg>
-);
-const IconH2 = () => (
-  <svg width="17" height="15" viewBox="0 0 28 18" fill="none">
-    <text x="0" y="14" fontFamily="'Google Sans', sans-serif" fontSize="15" fontWeight="700" fill="currentColor">H2</text>
-  </svg>
-);
-const IconH3 = () => (
-  <svg width="17" height="15" viewBox="0 0 28 18" fill="none">
-    <text x="0" y="14" fontFamily="'Google Sans', sans-serif" fontSize="15" fontWeight="700" fill="currentColor">H3</text>
-  </svg>
-);
-const IconCode = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-  </svg>
-);
-const IconClear = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-    <line x1="3" y1="21" x2="21" y2="3"/>
-  </svg>
-);
 
 /* ─────────────────────────────────────────────────────────
-   Link popup
+   ImagePicker
+   onCustomUpload(file, previewUrl) — колбек з уже готовим файлом
 ───────────────────────────────────────────────────────── */
-function LinkPopup({ onInsert, onClose }) {
-  const [url, setUrl] = useState("https://");
-  const [text, setText] = useState("");
-  const inputRef = useRef(null);
-  useEffect(() => { inputRef.current?.focus(); }, []);
-  return (
-    <div className={styles.linkPopup}>
-      <div className={styles.linkPopupRow}>
-        <input
-          ref={inputRef}
-          className={styles.linkInput}
-          placeholder="https://..."
-          value={url}
-          onChange={e => setUrl(e.target.value)}
-        />
-      </div>
-      <div className={styles.linkPopupRow}>
-        <input
-          className={styles.linkInput}
-          placeholder="Текст посилання (необов'язково)"
-          value={text}
-          onChange={e => setText(e.target.value)}
-        />
-      </div>
-      <div className={styles.linkPopupActions}>
-        <button type="button" className={styles.linkBtn} onClick={onClose}>Скасувати</button>
-        <button
-          type="button" className={`${styles.linkBtn} ${styles.linkBtnPrimary}`}
-          onClick={() => { onInsert(url, text); onClose(); }}
-          disabled={!url || url === "https://"}
-        >Вставити</button>
-      </div>
-    </div>
-  );
-}
+export function ImagePicker({ imageMode, setImageMode, stockImage, setStockImage, customImage, onCustomUpload, onConvertingChange }) {
+  const [converting, setConverting] = useState(false);
 
-/* ─────────────────────────────────────────────────────────
-   RichTextArea — повноцінний WYSIWYG редактор
-   Зберігає HTML у value, показує відформатований текст.
-───────────────────────────────────────────────────────── */
-export function RichTextArea({ id, rows = 4, placeholder, value, onChange }) {
-  const editorRef = useRef(null);
-  const isInternalChange = useRef(false);
-  const savedRange = useRef(null);
-  const [activeFormats, setActiveFormats] = useState({});
-  const [showLinkPopup, setShowLinkPopup] = useState(false);
-  const [charCount, setCharCount] = useState(0);
+  const setConv = (v) => { setConverting(v); onConvertingChange?.(v); };
 
-  /* Sync external value → DOM (only on mount or external reset) */
-  useEffect(() => {
-    if (!editorRef.current) return;
-    if (!isInternalChange.current && editorRef.current.innerHTML !== value) {
-      editorRef.current.innerHTML = value || "";
-      setCharCount(editorRef.current.innerText.replace(/\n/g, "").length);
+  const handleFileChange = async (e) => {
+    const original = e.target.files[0];
+    if (!original) return;
+
+    e.target.value = "";
+
+    // Крок 1: одразу показуємо прев'ю — Safari рендерить HEIC нативно
+    const immediatePreview = URL.createObjectURL(original);
+    onCustomUpload(original, immediatePreview);
+
+    // Крок 2: якщо HEIC — конвертуємо у фоні для відправки на бекенд
+    const fname = original.name.toLowerCase();
+    const isHeic =
+      fname.endsWith(".heic") ||
+      fname.endsWith(".heif") ||
+      original.type === "image/heic" ||
+      original.type === "image/heif" ||
+      (original.type === "" && (fname.endsWith(".heic") || fname.endsWith(".heif")));
+
+    if (!isHeic) return;
+
+    setConv(true);
+    try {
+      const converted = await heic2any({ blob: original, toType: "image/jpeg", quality: 0.85 });
+      const blob = Array.isArray(converted) ? converted[0] : converted;
+      const jpegFile = new File(
+        [blob],
+        original.name.replace(/\.[^/.]+$/, ".jpg"),
+        { type: "image/jpeg", lastModified: Date.now() }
+      );
+      URL.revokeObjectURL(immediatePreview);
+      const jpegPreview = URL.createObjectURL(jpegFile);
+      onCustomUpload(jpegFile, jpegPreview);
+    } catch (err) {
+      console.error("HEIC → JPEG conversion failed:", err);
+      onConvertingChange?.("error");
+    } finally {
+      setConv(false);
     }
-    isInternalChange.current = false;
-  }, [value]);
-
-  /* Detect active formats at cursor */
-  const updateActiveFormats = useCallback(() => {
-    const fmt = {
-      bold:          document.queryCommandState("bold"),
-      italic:        document.queryCommandState("italic"),
-      underline:     document.queryCommandState("underline"),
-      strikeThrough: document.queryCommandState("strikeThrough"),
-      insertUnorderedList: document.queryCommandState("insertUnorderedList"),
-      insertOrderedList:   document.queryCommandState("insertOrderedList"),
-    };
-    // detect blockquote / pre / heading
-    let node = window.getSelection()?.anchorNode;
-    while (node && node !== editorRef.current) {
-      const tag = node.nodeName;
-      if (tag === "BLOCKQUOTE") fmt.blockquote = true;
-      if (tag === "PRE")        fmt.pre = true;
-      if (tag === "H2")         fmt.h2 = true;
-      if (tag === "H3")         fmt.h3 = true;
-      node = node.parentNode;
-    }
-    setActiveFormats(fmt);
-  }, []);
-
-  /* Save selection before popup opens */
-  const saveSelection = () => {
-    const sel = window.getSelection();
-    if (sel?.rangeCount) savedRange.current = sel.getRangeAt(0).cloneRange();
   };
 
-  /* Restore selection after popup */
-  const restoreSelection = () => {
-    if (!savedRange.current) return;
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(savedRange.current);
-  };
-
-  /* Core exec command helper */
-  const exec = useCallback((cmd, val = null) => {
-    editorRef.current?.focus();
-    document.execCommand(cmd, false, val);
-    emitChange();
-    updateActiveFormats();
-  }, []);
-
-  /* Toggle block-level elements */
-  const toggleBlock = useCallback((tag) => {
-    editorRef.current?.focus();
-    const sel = window.getSelection();
-    if (!sel?.rangeCount) return;
-    let node = sel.anchorNode;
-    while (node && node !== editorRef.current) {
-      if (node.nodeName === tag) {
-        // Unwrap — replace with <p>
-        const p = document.createElement("p");
-        p.innerHTML = node.innerHTML;
-        node.parentNode.replaceChild(p, node);
-        emitChange();
-        updateActiveFormats();
-        return;
-      }
-      node = node.parentNode;
-    }
-    // Wrap selection in tag
-    document.execCommand("formatBlock", false, tag);
-    emitChange();
-    updateActiveFormats();
-  }, []);
-
-  /* Emit change to parent */
-  const emitChange = useCallback(() => {
-    if (!editorRef.current) return;
-    isInternalChange.current = true;
-    const html = editorRef.current.innerHTML;
-    const text = editorRef.current.innerText.replace(/\n/g, "");
-    setCharCount(text.length);
-    onChange({ target: { value: html } });
-  }, [onChange]);
-
-  /* Insert link */
-  const insertLink = useCallback((url, text) => {
-    restoreSelection();
-    editorRef.current?.focus();
-    const sel = window.getSelection();
-    const linkText = text || (sel?.toString()) || url;
-    document.execCommand("insertHTML", false,
-      `<a href="${url}" target="_blank" rel="noopener noreferrer">${linkText}</a>`
-    );
-    emitChange();
-  }, [emitChange]);
-
-  /* Keyboard shortcuts */
-  const handleKeyDown = useCallback((e) => {
-    const mod = e.ctrlKey || e.metaKey;
-    if (mod) {
-      if (e.key === "b") { e.preventDefault(); exec("bold"); }
-      else if (e.key === "i") { e.preventDefault(); exec("italic"); }
-      else if (e.key === "u") { e.preventDefault(); exec("underline"); }
-      else if (e.key === "k") { e.preventDefault(); saveSelection(); setShowLinkPopup(true); }
-    }
-    // Tab → indent inside lists
-    if (e.key === "Tab") {
-      e.preventDefault();
-      exec(e.shiftKey ? "outdent" : "indent");
-    }
-  }, [exec]);
-
-  /* Toolbar button config */
-  const TOOLBAR = [
-    {
-      group: "format",
-      items: [
-        { cmd: "bold",          icon: <IconBold />,       title: "Жирний (Ctrl+B)",      fmtKey: "bold" },
-        { cmd: "italic",        icon: <IconItalic />,     title: "Курсив (Ctrl+I)",       fmtKey: "italic" },
-        { cmd: "underline",     icon: <IconUnderline />,  title: "Підкреслений (Ctrl+U)", fmtKey: "underline" },
-        { cmd: "strikeThrough", icon: <IconStrike />,     title: "Закреслений",           fmtKey: "strikeThrough" },
-      ],
-    },
-    ...(id === "desc" ? [{
-      group: "headings",
-      items: [
-        { block: "H2", icon: <IconH2 />, title: "Заголовок 2", fmtKey: "h2" },
-        { block: "H3", icon: <IconH3 />, title: "Заголовок 3", fmtKey: "h3" },
-      ],
-    }] : []),
-    {
-      group: "lists",
-      items: [
-        { cmd: "insertUnorderedList", icon: <IconUL />, title: "Маркований список", fmtKey: "insertUnorderedList" },
-        { cmd: "insertOrderedList",   icon: <IconOL />, title: "Нумерований список", fmtKey: "insertOrderedList" },
-      ],
-    },
-    {
-      group: "blocks",
-      items: [
-        { block: "BLOCKQUOTE", icon: <IconQuote />, title: "Цитата",      fmtKey: "blockquote" },
-        { block: "PRE",        icon: <IconCode />,  title: "Код / Pre",   fmtKey: "pre" },
-      ],
-    },
-    {
-      group: "insert",
-      items: [
-        {
-          custom: "link",
-          icon: <IconLink />,
-          title: "Посилання (Ctrl+K)",
-          onClick: () => { saveSelection(); setShowLinkPopup(v => !v); },
-        },
-      ],
-    },
-    {
-      group: "clear",
-      items: [
-        { cmd: "removeFormat", icon: <IconClear />, title: "Очистити форматування" },
-      ],
-    },
-  ];
-
-  const isEmpty = !value || value === "<br>" || value === "<p><br></p>";
-
-  return (
-    <div className={styles.richEditor}>
-      {/* ── Toolbar ── */}
-      <div className={styles.toolbar} onMouseDown={e => e.preventDefault()}>
-        {TOOLBAR.map((group, gi) => (
-          <span key={gi} className={styles.tbGroup}>
-            {group.items.map((item, ii) => {
-              const isActive = item.fmtKey ? activeFormats[item.fmtKey] : false;
-              const handleClick = item.custom === "link"
-                ? item.onClick
-                : item.block
-                  ? () => toggleBlock(item.block)
-                  : () => exec(item.cmd);
-              return (
-                <button
-                  key={ii}
-                  type="button"
-                  className={`${styles.tbBtn} ${isActive ? styles.tbBtnActive : ""}`}
-                  title={item.title}
-                  onClick={handleClick}
-                >
-                  {item.icon}
-                </button>
-              );
-            })}
-            {gi < TOOLBAR.length - 1 && <span className={styles.tbDivider} />}
-          </span>
-        ))}
-      </div>
-
-      {/* ── Link popup ── */}
-      {showLinkPopup && (
-        <LinkPopup
-          onInsert={insertLink}
-          onClose={() => { setShowLinkPopup(false); editorRef.current?.focus(); }}
-        />
-      )}
-
-      {/* ── Editable area ── */}
-      <div className={styles.editorWrap}>
-        {isEmpty && (
-          <div className={styles.editorPlaceholder} aria-hidden="true">
-            {placeholder}
-          </div>
-        )}
-        <div
-          ref={editorRef}
-          id={id}
-          className={styles.editorContent}
-          contentEditable
-          suppressContentEditableWarning
-          style={{ minHeight: `${rows * 1.6}em` }}
-          onInput={emitChange}
-          onKeyDown={handleKeyDown}
-          onKeyUp={updateActiveFormats}
-          onMouseUp={updateActiveFormats}
-          onFocus={updateActiveFormats}
-          onPaste={(e) => {
-            // Paste as plain text to avoid style pollution
-            e.preventDefault();
-            const text = e.clipboardData.getData("text/plain");
-            document.execCommand("insertText", false, text);
-          }}
-        />
-      </div>
-
-      {/* ── Footer: char count ── */}
-      <div className={styles.editorFooter}>
-        <span className={styles.editorCharCount}>{charCount} символів</span>
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────
-   ImagePicker (unchanged logic)
-───────────────────────────────────────────────────────── */
-export function ImagePicker({ imageMode, setImageMode, stockImage, setStockImage, customImage, onCustomUpload }) {
   return (
     <div className={styles.sideSection}>
       <span className={styles.sideLabel}>Зображення</span>
@@ -418,15 +102,28 @@ export function ImagePicker({ imageMode, setImageMode, stockImage, setStockImage
         </div>
       )}
       {imageMode === "custom" && (
-        <label className={styles.uploadZone}>
-          {customImage
-            ? <img src={customImage} alt="preview" className={styles.uploadPreview} />
-            : <>
-                <span className={styles.uploadIcon}>↑</span>
-                <span className={styles.uploadPrompt}>Натисніть або перетягніть файл</span>
-              </>
-          }
-          <input type="file" accept="image/*" onChange={onCustomUpload} className={styles.fileInputHidden} />
+        <label className={styles.uploadZone} data-converting={converting || undefined}>
+          {converting ? (
+            <>
+              <span className={styles.uploadIcon}>⏳</span>
+              <span className={styles.uploadPrompt}>Конвертація HEIC…</span>
+            </>
+          ) : customImage ? (
+            <img src={customImage} alt="preview" className={styles.uploadPreview} />
+          ) : (
+            <>
+              <span className={styles.uploadIcon}>↑</span>
+              <span className={styles.uploadPrompt}>Натисніть або перетягніть файл</span>
+            </>
+          )}
+          <input
+            type="file"
+            // Явно дозволяємо HEIC/HEIF — деякі браузери не включають їх у image/*
+            accept="image/*,.heic,.heif"
+            onChange={handleFileChange}
+            className={styles.fileInputHidden}
+            disabled={converting}
+          />
         </label>
       )}
     </div>
@@ -464,9 +161,13 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
   const [description,    setDescription]    = useState("");
   const [rules,          setRules]          = useState("");
   const [startDate,      setStartDate]      = useState("");
+  const [endDate,        setEndDate]        = useState("");
   const [maxTeams,       setMaxTeams]       = useState("");
   const [regStart,       setRegStart]       = useState("");
   const [regEnd,         setRegEnd]         = useState("");
+
+  const [minTeamSize,    setMinTeamSize]    = useState("");
+  const [maxTeamSize,    setMaxTeamSize]    = useState("");
 
   const [imageMode,      setImageMode]      = useState("stock");
   const [stockImage,     setStockImage]     = useState(STOCK_IMAGES[0].id);
@@ -475,22 +176,36 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
   const [accentColor,    setAccentColor]    = useState(ACCENT_COLORS[0]);
   const [tournamentType, setTournamentType] = useState("");
   const [typeError,      setTypeError]      = useState(false);
+  const [nameError,      setNameError]      = useState(false);
+  const [endDateError,   setEndDateError]   = useState(false);
+  const [maxTeamSizeError, setMaxTeamSizeError] = useState(false);
+  const [imageConverting, setImageConverting] = useState(false);
+  const [convertError,    setConvertError]    = useState(false);
 
   const handleClose = () => {
     setClosing(true);
     setTimeout(() => onClose?.(), 340);
   };
 
-  const handleCustomUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleCustomUpload = (file, previewUrl) => {
+    if (customPreview) URL.revokeObjectURL(customPreview);
     setCustomFile(file);
-    setCustomPreview(URL.createObjectURL(file));
+    setCustomPreview(previewUrl);
+    setConvertError(false);
+  };
+
+  const handleConvertingChange = (v) => {
+    if (v === "error") { setConvertError(true); setImageConverting(false); }
+    else setImageConverting(Boolean(v));
   };
 
   const handleNext = () => {
+    if (step === 1 && !name.trim()) { setNameError(true); return; }
     if (step === 1 && !tournamentType) { setTypeError(true); return; }
+    if (step === 1 && !endDate) { setEndDateError(true); return; }
+    setNameError(false);
     setTypeError(false);
+    setEndDateError(false);
     setPrevStep(step);
     setStep(s => Math.min(s + 1, TOTAL_STEPS));
   };
@@ -500,24 +215,39 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
     setStep(s => Math.max(s - 1, 1));
   };
 
-  /* Strip HTML to plain text for description preview in card */
-  const descPlainText = description.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  // Блочні теги → новий рядок, решта тегів → видалити
+  const descPlainText = description
+    .replace(/<\/?(p|div|h[1-6]|li|blockquote|br)(\s[^>]*)?>\s*/gi, "\n")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .trim();
+  const descFirstLine = description.includes("<table")
+    ? "Таблиця"
+    : descPlainText.split("\n").map(l => l.trim()).find(l => l.length > 0) || "";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tournamentType) { setTypeError(true); return; }
+    if (tournamentType === "team" && !maxTeamSize) { setMaxTeamSizeError(true); return; }
+    if (imageConverting) return; // чекаємо завершення конвертації HEIC
     const body = new FormData();
     body.append("name",               name);
-    body.append("description",        description);       // HTML
-    body.append("rules",              rules);             // HTML
+    body.append("description",        description);
+    body.append("rules",              rules);
     body.append("accent_color",       accentColor);
     body.append("image_mode",         imageMode);
-    body.append("start_date",         startDate);
+    body.append("start_date",         startDate ? startDate + "T00:00:00" : "");
+    body.append("end_date",           endDate   ? endDate   + "T00:00:00" : "");
     body.append("max_teams",          maxTeams);
     body.append("tournament_type",    tournamentType);
     body.append("format",             tournamentType);
     body.append("registration_start", regStart);
     body.append("registration_end",   regEnd);
+    if (tournamentType === "team") {
+      body.append("min_team_size", minTeamSize || "3");
+      body.append("max_team_size", maxTeamSize);
+    }
     if (imageMode === "stock")                body.append("stock_image",  stockImage);
     if (imageMode === "custom" && customFile) body.append("custom_image", customFile);
     try {
@@ -556,9 +286,13 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
               <div className={`${styles.previewContainer} ${styles.panelItem1}`}>
                 <span className={styles.previewLabel}>Передогляд</span>
                 <TournamentCard
-                  name={name} info={descPlainText} date={startDate}
+                  name={name} info={descFirstLine} date={startDate}
                   accentColor={accentColor} imageMode={imageMode}
                   stockImage={stockImage} customImage={customPreview}
+                  status={computeStatus({
+                    start_date: startDate ? startDate + "T00:00:00" : null,
+                    end_date: endDate ? endDate + "T00:00:00" : null,
+                  })}
                 />
               </div>
 
@@ -567,6 +301,7 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                   imageMode={imageMode}       setImageMode={setImageMode}
                   stockImage={stockImage}     setStockImage={setStockImage}
                   customImage={customPreview} onCustomUpload={handleCustomUpload}
+                  onConvertingChange={handleConvertingChange}
                 />
               </div>
 
@@ -598,12 +333,13 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
               {step === 1 && (
                 <div key="step1" className={`${styles.stepContent} ${stepAnimClass}`}>
                   <div className={`${styles.field} ${styles.stagger1}`}>
-                    <label htmlFor="name" className={styles.label}>Назва турніру</label>
+                    <label htmlFor="name" className={styles.label}>Назва турніру <span className={styles.editRequired}>*</span></label>
                     <input
-                      id="name" type="text" className={styles.input}
+                      id="name" type="text" className={`${styles.input} ${nameError ? styles.inputError : ""}`}
                       placeholder="Наприклад: Літній кубок 2025"
-                      value={name} onChange={(e) => setName(e.target.value)} required
+                      value={name} onChange={(e) => { setName(e.target.value); setNameError(false); }} required
                     />
+                    {nameError && <p className={styles.fieldError}>Назва турніру обов'язкова</p>}
                   </div>
 
                   <div className={`${styles.twoCol} ${styles.stagger2}`}>
@@ -617,14 +353,16 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                       />
                     </div>
                     <div className={styles.field}>
-                      <label htmlFor="maxTeams" className={styles.label}>
-                        Макс. учасників <span className={styles.optional}>необов'язково</span>
+                      <label htmlFor="endDate" className={styles.label}>
+                        Дата кінця <span className={styles.editRequired}>*</span>
                       </label>
                       <input
-                        id="maxTeams" type="number" placeholder="Без обмежень"
-                        min={2} className={styles.input}
-                        value={maxTeams} onChange={(e) => setMaxTeams(e.target.value)}
+                        id="endDate" type="date" className={`${styles.input} ${endDateError ? styles.inputError : ""}`}
+                        value={endDate} onChange={(e) => { setEndDate(e.target.value); setEndDateError(false); }}
+                        min={startDate || undefined}
+                        required
                       />
+                      {endDateError && <p className={styles.fieldError}>Дата кінця турніру обов'язкова</p>}
                     </div>
                   </div>
 
@@ -655,6 +393,18 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                     </div>
                     {typeError && <p className={styles.fieldError}>Оберіть тип турніру</p>}
                   </div>
+
+                  <div className={`${styles.field} ${styles.stagger3}`}>
+                    <label htmlFor="maxTeams" className={styles.label}>
+                      {tournamentType === "team" ? "Макс. команд" : "Макс. учасників"}{" "}
+                      <span className={styles.optional}>необов'язково</span>
+                    </label>
+                    <input
+                      id="maxTeams" type="number" placeholder="Без обмежень"
+                      min={2} className={styles.input}
+                      value={maxTeams} onChange={(e) => setMaxTeams(e.target.value)}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -678,7 +428,9 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                     />
                   </div>
                   <div className={`${styles.sectionDivider} ${styles.stagger3}`}>
-                    <span className={styles.sectionTitle}>Реєстрація команд, учасників</span>
+                    <span className={styles.sectionTitle}>
+                      {tournamentType === "team" ? "Реєстрація команд" : "Реєстрація учасників"}
+                    </span>
                     <span className={styles.sectionLine} />
                   </div>
                   <div className={`${styles.regBlock} ${styles.stagger4}`}>
@@ -701,6 +453,44 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                       </div>
                     </div>
                   </div>
+
+                  {tournamentType === "team" && (
+                    <>
+                      <div className={`${styles.sectionDivider} ${styles.stagger4}`}>
+                        <span className={styles.sectionTitle}>Розмір команди</span>
+                        <span className={styles.sectionLine} />
+                      </div>
+                      <div className={`${styles.regBlock} ${styles.stagger4}`}>
+                        <div className={styles.twoCol}>
+                          <div className={styles.field}>
+                            <label htmlFor="minTeamSize" className={styles.label}>
+                              Мін. гравців <span className={styles.optional}>необов'язково</span>
+                            </label>
+                            <input
+                              id="minTeamSize" type="number" min={3}
+                              placeholder="За замовч.: 3"
+                              className={styles.input}
+                              value={minTeamSize} onChange={(e) => setMinTeamSize(e.target.value)}
+                            />
+                          </div>
+                          <div className={styles.field}>
+                            <label htmlFor="maxTeamSize" className={styles.label}>
+                              Макс. гравців <span className={styles.editRequired}>*</span>
+                            </label>
+                            <input
+                              id="maxTeamSize" type="number" min={minTeamSize || 3}
+                              placeholder="Вкажіть ліміт"
+                              className={`${styles.input} ${maxTeamSizeError ? styles.inputError : ""}`}
+                              value={maxTeamSize}
+                              onChange={(e) => { setMaxTeamSize(e.target.value); setMaxTeamSizeError(false); }}
+                              required
+                            />
+                            {maxTeamSizeError && <p className={styles.fieldError}>Вкажіть макс. кількість гравців</p>}
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -717,8 +507,26 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
               </button>
               {step < TOTAL_STEPS
                 ? <button type="button" className={styles.btnCreate} onClick={handleNext}>Далі →</button>
-                : <button type="submit" className={styles.btnCreate}>+ Створити турнір</button>
+                : (
+                  <button
+                    type="submit"
+                    className={styles.btnCreate}
+                    disabled={imageConverting || convertError}
+                    title={
+                      imageConverting ? "Зачекайте, конвертація зображення…" :
+                      convertError    ? "Не вдалось конвертувати HEIC. Оберіть інше зображення." :
+                      undefined
+                    }
+                  >
+                    {imageConverting ? "Конвертація…" : "+ Створити турнір"}
+                  </button>
+                )
               }
+              {convertError && (
+                <p style={{ color: "#d04d3e", fontSize: 12, marginTop: 6 }}>
+                  Не вдалось конвертувати HEIC. Будь ласка, оберіть інше зображення.
+                </p>
+              )}
             </div>
           </div>
         </form>

@@ -29,30 +29,34 @@ export const formatRoundDateRange = (start, end) => {
 
 // ─── Status helpers ───────────────────────────────────────────────────────────
 
+// Чотири статуси турніру залежно від дат:
+//   "upcoming"     — до start_date (або дати немає)        → Очікується
+//   "registration" — після start_date і до registration_end → Реєстрація команд
+//   "ongoing"      — після registration_end і до end_date   → Триває
+//   "finished"     — після end_date                         → Завершено
 export const computeStatus = (t) => {
-  const now      = new Date();
-  const regStart = t.registration_start ? new Date(t.registration_start) : null;
-  const regEnd   = t.registration_end   ? new Date(t.registration_end)   : null;
-  const start    = t.start_date         ? new Date(t.start_date)         : null;
-  if (start    && now > start)     return "Триває";
-  if (regEnd   && now > regEnd)    return "Реєстрація закрита";
-  if (regStart && now >= regStart) return "Реєстрація відкрита";
-  return "Очікується";
+  const now    = new Date();
+  const start  = t.start_date       ? new Date(t.start_date)       : null;
+  const regEnd = t.registration_end ? new Date(t.registration_end) : null;
+  const end    = t.end_date         ? new Date(t.end_date)         : null;
+
+  if (!start || now < start)   return "upcoming";
+  if (end && now > end)        return "finished";
+  if (regEnd && now <= regEnd) return "registration";
+  return "ongoing";
 };
 
 // Повертає inline-стилі для бейджу статусу турніру
 export const getStatusStyle = (status) => {
   switch (status) {
-    case "Триває":
+    case "ongoing":
       return { background: "#e6f4ed", color: "#2a7a4b", border: "1px solid #b7e0ca" };
-    case "Реєстрація відкрита":
-      return { background: "#e6f4ed", color: "#2a7a4b", border: "1px solid #b7e0ca" };
-    case "Реєстрація закрита":
-      return { background: "#fef9e6", color: "#92700a", border: "1px solid #f0dc9a" };
-    case "Завершено":
+    case "registration":
+      return { background: "#eff6ff", color: "#1d4ed8", border: "1px solid #bfdbfe" };
+    case "finished":
       return { background: "#f2f2f4", color: "#888", border: "1px solid #ddd" };
-    default: // "Очікується"
-      return { background: "#eef3ff", color: "#3a5cbf", border: "1px solid #c4d0f5" };
+    default: // "upcoming"
+      return { background: "#fffbeb", color: "#b45309", border: "1px solid #fde68a" };
   }
 };
 
@@ -81,12 +85,12 @@ export const roundStatus = (round) => {
 
 export const fileIcon = (filename) => {
   const ext = (filename || "").split(".").pop().toLowerCase();
-  if (["pdf"].includes(ext))                              return "📄";
+  if (["pdf"].includes(ext))                               return "📄";
   if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return "🖼️";
-  if (["zip", "rar", "7z", "tar", "gz"].includes(ext))   return "🗜️";
-  if (["doc", "docx"].includes(ext))                     return "📝";
-  if (["xls", "xlsx"].includes(ext))                     return "📊";
-  if (["mp4", "mov", "avi"].includes(ext))               return "🎬";
+  if (["zip", "rar", "7z", "tar", "gz"].includes(ext))    return "🗜️";
+  if (["doc", "docx"].includes(ext))                      return "📝";
+  if (["xls", "xlsx"].includes(ext))                      return "📊";
+  if (["mp4", "mov", "avi"].includes(ext))                return "🎬";
   return "📎";
 };
 

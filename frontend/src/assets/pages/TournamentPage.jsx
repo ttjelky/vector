@@ -14,6 +14,26 @@ import { useTabs } from "../../TabsContext";
 import useTournamentTabGuard from "../../useTournamentTabGuard";
 import LeaderboardTab from "../components/LeaderboardTab";
 
+// ─── Rich-text preview helper ─────────────────────────────────────────────────
+function getDescriptionPreview(html, maxLen = 80) {
+  if (!html) return "";
+  let result = html.replace(/<table[\s\S]*?<\/table>/gi, " Таблиця ");
+  result = result.replace(/<ul[\s\S]*?<\/ul>/gi, (match) => {
+    const firstLi = match.match(/<li[^>]*>([\s\S]*?)<\/li>/i);
+    if (!firstLi) return "";
+    const text = firstLi[1].replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    return " " + text + "… ";
+  });
+  result = result.replace(/<ol[\s\S]*?<\/ol>/gi, (match) => {
+    const firstLi = match.match(/<li[^>]*>([\s\S]*?)<\/li>/i);
+    if (!firstLi) return "";
+    const text = firstLi[1].replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    return " " + text + "… ";
+  });
+  const plain = result.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+  return plain.length > maxLen ? plain.slice(0, maxLen) + "…" : plain;
+}
+
 export default function TournamentPage() {
   const { id }   = useParams();
   const navigate = useNavigate();
@@ -32,7 +52,8 @@ export default function TournamentPage() {
   const [error,       setError]       = useState(null);
 
   const isOwner = myRole === "owner";
-  const isJury  = myRole === "jury";
+  const isJury      = myRole === "jury";
+  const isJuryPanel = myRole === "jury" || myRole === "admin" || myRole === "owner";
 
   useEffect(() => {
     API.get(`/tournaments/${id}/`)
@@ -108,12 +129,12 @@ export default function TournamentPage() {
   })();
 
   const tabs = [
-  { id: "overview",     label: "Основна сторінка" },
-  { id: "rounds",       label: "Раунди" },
-  { id: "participants", label: "Учасники" },
-  { id: "leaderboard",  label: "Таблиця лідерів" },
-  ...(isJury ? [{ id: "jury", label: "Панель журі" }] : []),
-];
+    { id: "overview",     label: "Основна сторінка" },
+    { id: "rounds",       label: "Раунди" },
+    { id: "participants", label: "Учасники" },
+    { id: "leaderboard",  label: "Таблиця лідерів" },
+    ...(isJuryPanel ? [{ id: "jury", label: "Панель журі" }] : []),
+  ];
 
   return (
     <NavBar>
@@ -130,15 +151,13 @@ export default function TournamentPage() {
               <h1 className={styles.title}>{tournament.name}</h1>
               {tournament.description && (
                 <p className={styles.subtitle}>
-                  {tournament.description.length > 80
-                    ? tournament.description.slice(0, 80) + "…"
-                    : tournament.description}
+                  {getDescriptionPreview(tournament.description, 80)}
                 </p>
               )}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <StatusBadge status={status} />
-              {isJury && (
+              {isJuryPanel && (
                 <span style={{
                   fontSize: 11.5,
                   fontWeight: 600,
@@ -199,6 +218,7 @@ export default function TournamentPage() {
               onRoundCreated={handleRoundCreated}
               readOnly={!isOwner}
               myRole={myRole}
+              tournamentStatus={status}
             />
           )}
 
@@ -208,14 +228,17 @@ export default function TournamentPage() {
               myRole={myRole}
               loading={false}
               tournamentType={tournament?.tournament_type}
+              maxParticipants={tournament.max_teams}
+              tournamentStatus={status}
             />
           )}
 
-          {activeTab === "jury" && isJury && (
+            {activeTab === "jury" && (myRole === "jury" || myRole === "admin" || myRole === "owner") && (
             <JuryTab
               tournamentId={id}
               rounds={rounds}
               loading={roundsLoading}
+              myRole={myRole}
             />
           )}
 

@@ -157,7 +157,7 @@ function GradeResultPanel({ submissionId, taskId, roundId, tournamentId }) {
 
 // ─── MySubmissionPanel ────────────────────────────────────────────────────────
 
-function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed }) {
+function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed, canSubmit = true }) {
   const [submission,  setSubmission]  = useState(undefined);
   const [loading,     setLoading]     = useState(true);
   const [showForm,    setShowForm]    = useState(false);
@@ -244,23 +244,32 @@ function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed }) {
               {new Date(submission.submitted_at).toLocaleString("uk-UA")}
             </span>
             <div className={styles.mySubmissionActions}>
-              {!deadlinePassed && (
+              {!deadlinePassed && canSubmit && (
                 <button className={styles.editSubmissionBtn} onClick={() => setShowForm(true)}>
                   Редагувати
                 </button>
               )}
-              <button
-                className={styles.deleteSubmissionBtn}
-                onClick={() => setShowConfirm(true)}
-                title="Видалити здачу"
-              >
-                <TrashIconSm />
-              </button>
+              {canSubmit && (
+                <button
+                  className={styles.deleteSubmissionBtn}
+                  onClick={() => setShowConfirm(true)}
+                  title="Видалити здачу"
+                >
+                  <TrashIconSm />
+                </button>
+              )}
+              {!canSubmit && (
+                <span style={{
+                  fontSize: 12, fontWeight: 500, color: "#991b1b",
+                  background: "#fff1f2", border: "1px solid #fecdd3",
+                  borderRadius: 100, padding: "3px 10px", whiteSpace: "nowrap"
+                }}>🔒 Раунд завершено</span>
+              )}
             </div>
           </div>
 
           {submission.text && (
-            <div className={styles.submissionText} dangerouslySetInnerHTML={{ __html: submission.text }} />
+            <div className={`${styles.submissionText} richContent`} dangerouslySetInnerHTML={{ __html: submission.text }} />
           )}
 
           {submission.links?.length > 0 && (
@@ -363,9 +372,7 @@ function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
 
           {expanded === sub.id && (
             <div className={styles.submissionCardBody}>
-              {sub.text && (
-                <div className={styles.submissionText} dangerouslySetInnerHTML={{ __html: sub.text }} />
-              )}
+              {sub.text && <div className={`${styles.submissionText} richContent`} dangerouslySetInnerHTML={{ __html: sub.text }} />}
 
               {sub.links?.length > 0 && (
                 <div className={styles.submissionExtras}>
@@ -402,21 +409,30 @@ function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
 
 // ─── Task Drawer ───────────────────────────────────────────────────────────────
 
-function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDate, onClose }) {
-  const [activeTab, setActiveTab] = useState("details");
+function TaskDrawer({ task: taskProp, roundId, tournamentId, readOnly, myRole, roundEndDate, canSubmit = true, onClose }) {
+  const [activeTab,   setActiveTab]   = useState("details");
+  const [task,        setTask]        = useState(taskProp);
+
+  // Підвантажуємо повні дані завдання при відкритті —
+  // список tasks у раунді може не містити нових полів (tech_requirements, must_have).
+  useEffect(() => {
+    API.get(`/tournaments/${tournamentId}/rounds/${roundId}/tasks/${taskProp.id}/`)
+      .then((r) => setTask(r.data))
+      .catch(() => { /* залишаємо дані з пропсу */ });
+  }, [taskProp.id, roundId, tournamentId]);
 
   const isOwnerOrAdmin = myRole === "owner" || myRole === "admin";
   const isJury         = myRole === "jury";
   const isParticipant  = readOnly && !isJury;
 
-  const hasDetails     = task.description || task.links?.length > 0 || task.attachments?.length > 0;
+  const hasDetails     = true; // завжди показуємо вкладку Деталі
   const deadlinePassed = isDeadlinePassed(roundEndDate ?? task.end_date);
   const deadlineLabel  = formatDeadline(roundEndDate ?? task.end_date);
 
   const tabs = [];
-  if (hasDetails)               tabs.push({ id: "details",  label: "Деталі" });
-  if (isParticipant)            tabs.push({ id: "submit",   label: "Моя здача" });
-  if (isOwnerOrAdmin || isJury) tabs.push({ id: "allSubs",  label: "Здачі учасників" });
+  tabs.push({ id: "details", label: "Деталі" });
+  if (isParticipant) tabs.push({ id: "submit",   label: "Моя здача" });
+  if (isOwnerOrAdmin || isJury) tabs.push({ id: "allSubs", label: "Здачі учасників" });
 
   const validTab = tabs.find((t) => t.id === activeTab) ? activeTab : (tabs[0]?.id ?? "details");
 
@@ -476,7 +492,35 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
               {task.description && (
                 <div className={styles.drawerSection}>
                   <span className={styles.drawerSectionLabel}>Опис</span>
-                  <div className={styles.drawerDesc} dangerouslySetInnerHTML={{ __html: task.description }} />
+                  <div className={`${styles.drawerDesc} richContent`} dangerouslySetInnerHTML={{ __html: task.description }} />
+                </div>
+              )}
+
+              {task.tech_requirements?.length > 0 && (
+                <div className={styles.drawerSection}>
+                  <span className={styles.drawerSectionLabel}>Вимоги до технологій</span>
+                  <div className={styles.techReqGrid}>
+                    {task.tech_requirements.map((req, i) => (
+                      <div key={i} className={styles.techReqCard}>
+                        <span className={styles.techReqCategory}>{req.category}</span>
+                        <span className={styles.techReqValue}>{req.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {task.must_have?.length > 0 && (
+                <div className={styles.drawerSection}>
+                  <span className={styles.drawerSectionLabel}>Must have</span>
+                  <ul className={styles.mustHaveViewList}>
+                    {task.must_have.map((item, i) => (
+                      <li key={i} className={styles.mustHaveViewItem}>
+                        <span className={styles.mustHaveCheck}>✓</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
 
@@ -506,7 +550,8 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
                 </div>
               )}
 
-              {!task.description && !task.links?.length && !task.attachments?.length && (
+              {!task.description && !task.links?.length && !task.attachments?.length
+               && !task.tech_requirements?.length && !task.must_have?.length && (
                 <p className={styles.empty}>Опис завдання відсутній.</p>
               )}
             </>
@@ -518,6 +563,7 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
               roundId={roundId}
               tournamentId={tournamentId}
               deadlinePassed={deadlinePassed}
+              canSubmit={canSubmit}
             />
           )}
 
@@ -534,6 +580,28 @@ function TaskDrawer({ task, roundId, tournamentId, readOnly, myRole, roundEndDat
   );
 }
 
+// ─── Rich-text preview helper ─────────────────────────────────────────────────
+// Замінює таблиці на "Таблиця", списки → перший елемент, решту тегів прибирає.
+
+function getDescriptionPreview(html, maxLen = 80) {
+  if (!html) return "";
+  let result = html.replace(/<table[\s\S]*?<\/table>/gi, " Таблиця ");
+  result = result.replace(/<ul[\s\S]*?<\/ul>/gi, (match) => {
+    const firstLi = match.match(/<li[^>]*>([\s\S]*?)<\/li>/i);
+    if (!firstLi) return "";
+    const text = firstLi[1].replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    return " " + text + "… ";
+  });
+  result = result.replace(/<ol[\s\S]*?<\/ol>/gi, (match) => {
+    const firstLi = match.match(/<li[^>]*>([\s\S]*?)<\/li>/i);
+    if (!firstLi) return "";
+    const text = firstLi[1].replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    return " " + text + "… ";
+  });
+  const plain = result.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+  return plain.length > maxLen ? plain.slice(0, maxLen) + "…" : plain;
+}
+
 // ─── TaskCard ─────────────────────────────────────────────────────────────────
 
 export function TaskCard({
@@ -544,6 +612,8 @@ export function TaskCard({
   readOnly = false,
   myRole,
   roundEndDate,
+  canSubmit = true,
+  // Legacy пропси (ігноруємо, залишаємо для сумісності)
   isOpen: _isOpen,
   onToggle: _onToggle,
 }) {
@@ -581,8 +651,7 @@ export function TaskCard({
           <span className={styles.taskTitle}>{task.title}</span>
           {task.description && (
             <p className={styles.taskDesc}>
-              {task.description.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 80) +
-                (task.description.replace(/<[^>]*>/g, "").length > 80 ? "…" : "")}
+              {getDescriptionPreview(task.description, 80)}
             </p>
           )}
         </div>
@@ -618,6 +687,7 @@ export function TaskCard({
           readOnly={readOnly}
           myRole={myRole}
           roundEndDate={endDate}
+          canSubmit={canSubmit}
           onClose={() => setDrawerOpen(false)}
         />
       )}
