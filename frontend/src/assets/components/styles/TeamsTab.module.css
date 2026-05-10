@@ -1,0 +1,222 @@
+/* ─── TeamsTab.module.css ───────────────────────────────────────────────────── */
+
+.wrap { padding: 28px 24px; max-width: 760px; }
+
+/* ── Stats bar ────────────────────────────────────────────────────────────── */
+.statsBar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  flex: 1;
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 16px;
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.statLabel {
+  font-size: 11px;
+  color: #ccc;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* ── List header ──────────────────────────────────────────────────────────── */
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.listCount { font-size: 13px; font-weight: 600; color: #bbb; }
+.headerActions { display: flex; align-items: center; gap: 8px; }
+
+/* ── Invite button ────────────────────────────────────────────────────────── */
+.inviteBtn {
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: #111;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.inviteBtn:hover:not(:disabled) { background: #2a2a2a; box-shadow: 0 4px 14px rgba(0,0,0,0.16); }
+.inviteBtn:active:not(:disabled) { transform: scale(0.98); }
+.inviteBtn:disabled { background: #e4e4e7; color: #bbb; cursor: not-allowed; }
+
+/* ── PIN section ──────────────────────────────────────────────────────────── */
+.pinSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  margin-bottom: 16px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 14px;
+  flex-wrap: wrap;
+}
+.pinInfo { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.pinText { font-size: 13px; color: #888; white-space: nowrap; }
+.pinCode {
+  font-size: 15px; font-weight: 700; letter-spacing: 0.14em;
+  color: #111; background: #fff;
+  border: 1px solid #ebebeb;
+  border-radius: 10px; padding: 4px 14px;
+  font-family: 'SF Mono', 'Menlo', 'Fira Code', monospace;
+}
+
+.regenBtn {
+  padding: 6px 14px;
+  font-size: 12px; font-weight: 600; color: #888;
+  background: #f4f4f5; border: 1px solid #ebebeb;
+  border-radius: 100px; cursor: pointer; white-space: nowrap; font-family: inherit;
+  transition: background 0.15s;
+}
+.regenBtn:hover:not(:disabled) { background: #ebebeb; }
+.regenBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.regenConfirm { color: #c0392b; background: rgba(192,57,43,0.06); border-color: rgba(192,57,43,0.16); }
+.regenConfirm:hover { background: rgba(192,57,43,0.1) !important; }
+
+.pinClose {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  background: none; border: none; cursor: pointer; color: #d4d4d8;
+  border-radius: 100px; flex-shrink: 0; transition: color 0.15s, background 0.15s;
+}
+.pinClose:hover { color: #555; background: #f0f0f0; }
+
+/* ── Search ───────────────────────────────────────────────────────────────── */
+.searchInput {
+  width: 100%; max-width: 340px;
+  padding: 9px 16px;
+  border: 1px solid #ebebeb; border-radius: 100px;
+  font-size: 13px; font-family: inherit; outline: none;
+  margin-bottom: 16px; background: #fff; color: #111;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.searchInput:focus { border-color: #111; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+.searchInput::placeholder { color: #d4d4d8; }
+
+/* ── Team list & empty ────────────────────────────────────────────────────── */
+.teamList { display: flex; flex-direction: column; gap: 6px; }
+.empty    { font-size: 14px; color: #ccc; font-style: italic; padding: 28px 0; }
+
+/* ── Team card ────────────────────────────────────────────────────────────── */
+.teamCard {
+  border: 1px solid #f0f0f0;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  background: #fff;
+}
+.teamCard:hover { border-color: #e0e0e0; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+.teamCardExpanded { border-color: #e0e0e0; box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+
+.teamCardHeader {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 15px 20px; cursor: pointer; user-select: none;
+}
+.teamCardLeft  { display: flex; align-items: center; gap: 10px; }
+.teamCardRight { display: flex; align-items: center; gap: 10px; }
+.teamCardChevron { font-size: 10px; color: #ccc; width: 12px; flex-shrink: 0; }
+.teamCardName  { font-size: 14px; font-weight: 650; color: #111; letter-spacing: -0.01em; }
+.teamCardCity  { font-size: 12px; color: #ccc; margin-left: 8px; }
+
+.memberCountBadge {
+  font-size: 12px; font-weight: 600; color: #aaa;
+  background: #f4f4f5; padding: 3px 11px; border-radius: 100px;
+}
+.lockIndicator { font-size: 14px; }
+
+/* ── Team card body ───────────────────────────────────────────────────────── */
+.teamCardBody {
+  padding: 16px 20px 20px;
+  border-top: 1px solid #f4f4f5;
+  background: #fafafa;
+}
+
+.captainRow {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.captainLabel {
+  font-weight: 700; font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase;
+  color: #999; background: #f4f4f5; border: 1px solid #ebebeb;
+  padding: 2px 8px; border-radius: 100px;
+}
+.captainName  { font-weight: 600; color: #111; }
+.captainEmail { color: #ccc; font-size: 12px; }
+
+.membersList { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.memberChip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 12px;
+  background: #fff; border: 1px solid #ebebeb; border-radius: 100px; font-size: 12px;
+}
+.memberChipAvatar {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #f0f0f0; color: #888;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 10px; flex-shrink: 0;
+}
+.memberChipName  { font-weight: 600; color: #333; }
+.memberChipEmail { color: #ccc; }
+
+/* ── Admin actions ────────────────────────────────────────────────────────── */
+.adminActions {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding-top: 14px; border-top: 1px solid #f0f0f0;
+}
+.adminBtn {
+  padding: 6px 14px; border-radius: 100px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s; border: 1px solid transparent; font-family: inherit;
+}
+.adminBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.lockBtn   { background: #f4f4f5; color: #555; border-color: #ebebeb; }
+.lockBtn:hover:not(:disabled) { background: #ebebeb; }
+.deleteBtn { background: none; color: #c0392b; border-color: rgba(192,57,43,0.22); }
+.deleteBtn:hover { background: rgba(192,57,43,0.05); }
+.confirmDeleteBtn { background: #c0392b; color: #fff; border-color: #c0392b; }
+.confirmDeleteBtn:hover { background: #a93226; }
+.cancelBtn { background: none; color: #888; border-color: #ebebeb; }
+.cancelBtn:hover { background: #fafafa; }
+.confirmRow {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: #777; flex-wrap: wrap;
+}
+
+/* ── Skeleton ─────────────────────────────────────────────────────────────── */
+.loadingWrap { padding: 28px 24px; }
+.skeleton {
+  background: linear-gradient(90deg, #f4f4f5 25%, #ebebeb 50%, #f4f4f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 12px;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }

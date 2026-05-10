@@ -19,6 +19,7 @@ import TournamentPage       from "./assets/pages/TournamentPage";
 import JoinTournamentPage   from "./assets/pages/JoinTournamentPage";
 import ProtectedRoute       from "./assets/components/ProtectedRoute";
 import News                 from "./assets/pages/News";
+import TeamInvitePage       from "./assets/pages/TeamInvitePage";
 
 const App = () => (
   <TabsProvider>
@@ -27,8 +28,12 @@ const App = () => (
 
         {/* ── Публічні ──────────────────────────────────────────── */}
         <Route path="/"               element={<Landing />} />
+        {/* /login — той самий лендінг, підтримує ?next= для редиректу після входу */}
+        <Route path="/login"          element={<Landing />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/join/:token"    element={<JoinTournamentPage />} />
+        <Route path="/join/:token"        element={<JoinTournamentPage />} />
+        <Route path="/team-invite/:token"  element={<TeamInvitePage />} />
+        <Route path="/team-invite/:token/" element={<TeamInvitePage />} />
 
         {/* ── Адмін ─────────────────────────────────────────────── */}
         <Route
@@ -87,7 +92,7 @@ const App = () => (
           }
         />
 
-         <Route
+        <Route
           path="/news"
           element={
             <ProtectedRoute allowedRoles={["participant"]}>
@@ -97,10 +102,6 @@ const App = () => (
         />
 
         {/* ── Спільні (будь-яка авторизована роль) ──────────────── */}
-        {/*
-          /tournaments — універсальний маршрут: Tournaments.jsx сам визначає
-          який компонент рендерити на основі ролі з localStorage.
-        */}
         <Route
           path="/tournaments"
           element={

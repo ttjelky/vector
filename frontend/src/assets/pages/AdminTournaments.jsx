@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTabs } from "../../TabsContext";
 import API from "../../api";
 import React from "react";
@@ -12,6 +12,7 @@ import { computeStatus } from "../components/tournamentHelpers";
 
 const AdminTournaments = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [tournaments, setTournaments] = useState([]);
     const { addTab } = useTabs();
 
@@ -31,6 +32,15 @@ const AdminTournaments = () => {
     useEffect(() => {
         fetchTournaments();
     }, []);
+
+    // Рефетч після виходу/видалення турніру
+    useEffect(() => {
+        if (location.state?.refetch) {
+            fetchTournaments();
+            // Очищаємо state щоб повторний рендер не тригерив ще раз
+            window.history.replaceState({}, "");
+        }
+    }, [location.state]);
 
     const [open, setOpen] = useState(false);
 

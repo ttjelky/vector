@@ -1,0 +1,417 @@
+/* ─── CreateTeamForm.module.css ─────────────────────────────────────────────── */
+
+.formWrap {
+  max-width: 580px;
+  padding: 36px 32px;
+}
+
+.formHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 36px;
+}
+
+.formTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 5px;
+  letter-spacing: -0.03em;
+}
+
+.formSubtitle { font-size: 13px; color: #bbb; margin: 0; }
+
+/* ── Fields ─────────────────────────────────────────────────────────────── */
+.stepContent { display: flex; flex-direction: column; gap: 22px; }
+.field       { display: flex; flex-direction: column; gap: 7px; }
+
+.label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.required { color: #e53e3e; }
+.optional { font-size: 11px; font-weight: 400; color: #ccc; text-transform: none; letter-spacing: 0; }
+
+.input {
+  padding: 11px 15px;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+  color: #111;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+.input:focus        { border-color: #111; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+.input::placeholder { color: #d4d4d8; }
+.inputError         { border-color: #e53e3e !important; }
+.fieldError         { font-size: 12px; color: #e53e3e; margin: 0; }
+
+.twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 520px) { .twoCol { grid-template-columns: 1fr; } }
+
+.sizeHint {
+  font-size: 12.5px;
+  color: #aaa;
+  margin: 0;
+  padding: 11px 15px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+}
+
+/* ── Section block ──────────────────────────────────────────────────────── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 16px;
+}
+
+.sectionLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inviteHint {
+  font-size: 11px;
+  font-weight: 400;
+  color: #d4d4d8;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ── Badge ──────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+}
+.badgeDraft      { color: #92520a; background: rgba(245,158,11,0.09); border-color: rgba(245,158,11,0.2); }
+.badgeRegistered { color: #1a7f4c; background: rgba(26,127,76,0.07); border-color: rgba(26,127,76,0.18); }
+
+/* ── Size progress ──────────────────────────────────────────────────────── */
+.sizeProgress { display: flex; align-items: center; gap: 14px; padding: 2px 0; }
+
+.sizeProgressBar {
+  flex: 1; height: 3px; background: #ebebeb; border-radius: 100px; overflow: hidden;
+}
+.sizeProgressFill {
+  height: 100%; background: #f59e0b; border-radius: 100px;
+  transition: width 0.4s cubic-bezier(.4,0,.2,1);
+}
+.sizeProgressReady { background: #22c55e; }
+
+.sizeProgressLabel { font-size: 12px; font-weight: 600; color: #bbb; white-space: nowrap; }
+.sizeReady         { color: #1a7f4c; }
+
+/* ── Member rows ────────────────────────────────────────────────────────── */
+.memberList { display: flex; flex-direction: column; gap: 5px; }
+
+.memberRow {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 13px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  background: #fff;
+  transition: background 0.1s;
+}
+.memberAccepted { border-color: rgba(26,127,76,0.14); background: rgba(26,127,76,0.03); }
+.memberPending  { border-color: rgba(245,158,11,0.14); background: rgba(245,158,11,0.03); }
+.captainRow     { background: #fff; border-color: #ebebeb; }
+
+.memberInfo { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.memberName {
+  font-size: 13px; font-weight: 600; color: #111;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.memberEmail { font-size: 12px; color: #ccc; }
+
+.captainBadge {
+  font-size: 10px; font-weight: 700; color: #999;
+  background: #f4f4f5; border: 1px solid #ebebeb;
+  padding: 1px 7px; border-radius: 100px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+.memberStatus {
+  font-size: 11.5px; font-weight: 600;
+  padding: 2px 9px; border-radius: 100px;
+  white-space: nowrap; border: 1px solid transparent;
+}
+.statusAccepted { color: #1a7f4c; background: rgba(26,127,76,0.07); border-color: rgba(26,127,76,0.18); }
+.statusPending  { color: #92520a; background: rgba(245,158,11,0.09); border-color: rgba(245,158,11,0.2); }
+
+.removeMemberBtn {
+  background: none; border: none; cursor: pointer; color: #d4d4d8;
+  font-size: 13px; padding: 4px 8px; border-radius: 8px; flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+.removeMemberBtn:hover { color: #e53e3e; background: rgba(229,62,62,0.07); }
+
+/* ── Invite link ────────────────────────────────────────────────────────── */
+.inviteLinkWrap {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.inviteLinkLabel { font-size: 12px; color: #ccc; }
+.copyLinkBtn {
+  font-size: 12px; font-weight: 600; color: #555;
+  background: #f4f4f5; border: 1px solid #ebebeb;
+  border-radius: 100px; padding: 5px 13px; cursor: pointer;
+  transition: background 0.15s; font-family: inherit;
+}
+.copyLinkBtn:hover { background: #ebebeb; }
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+.formFooter {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 36px; padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+  gap: 10px; flex-wrap: wrap;
+}
+
+.btnPrimary {
+  padding: 11px 26px;
+  background: #111; color: #fff;
+  border: none; border-radius: 100px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  transition: background 0.15s, box-shadow 0.15s;
+  letter-spacing: -0.01em;
+}
+.btnPrimary:hover:not(:disabled) { background: #2a2a2a; box-shadow: 0 4px 16px rgba(0,0,0,0.16); }
+.btnPrimary:disabled { background: #e4e4e7; color: #aaa; cursor: not-allowed; }
+
+.btnDisabledHint { background: #f4f4f5 !important; color: #bbb !important; box-shadow: none !important; }
+
+.btnSecondary {
+  padding: 11px 22px;
+  background: none; color: #999;
+  border: 1px solid #e8e8e8; border-radius: 100px;
+  font-size: 14px; cursor: pointer; font-family: inherit;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.btnSecondary:hover { background: #fafafa; border-color: #d4d4d8; color: #333; }
+
+/* ── Messages ───────────────────────────────────────────────────────────── */
+.successMsg {
+  font-size: 13px; font-weight: 600; color: #1a7f4c;
+  background: rgba(26,127,76,0.07);
+  border: 1px solid rgba(26,127,76,0.16);
+  border-radius: 100px; padding: 8px 18px;
+}
+
+.globalError {
+  background: rgba(229,62,62,0.05); color: #c0392b;
+  border: 1px solid rgba(229,62,62,0.15);
+  border-radius: 12px; padding: 10px 14px;
+  font-size: 13px; margin-bottom: 20px;
+}
+
+/*
+  Patch for CreateTeamForm.module.css
+  Merge these rules into your existing module (or override them after the original import).
+  Changes: thinner borders, centered layout, more rounded corners, refined spacing.
+*/
+
+/* ── Wrap: centered, max-width ─────────────────────────────────────── */
+.formWrap {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+.formHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+/* ── Section cards ───────────────────────────────────────────────────── */
+.section {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);   /* thinner, softer */
+  border-radius: 14px;                       /* more rounded */
+  padding: 20px;
+  margin-bottom: 12px;
+}
+
+/* ── Inputs ──────────────────────────────────────────────────────────── */
+.input {
+  border: 1px solid rgba(0, 0, 0, 0.14);    /* thinner border */
+  border-radius: 10px;                       /* more rounded */
+  padding: 9px 13px;
+  font-size: 14px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  border-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.inputError {
+  border-color: #e03e3e;
+  box-shadow: 0 0 0 3px rgba(224, 62, 62, 0.08);
+}
+
+/* ── Member rows ─────────────────────────────────────────────────────── */
+.memberRow {
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  padding: 10px 12px;
+  margin-bottom: 6px;
+}
+
+.memberAccepted {
+  background: rgba(26, 127, 76, 0.04);
+  border-color: rgba(26, 127, 76, 0.14);
+}
+
+.memberPending {
+  background: rgba(230, 140, 0, 0.04);
+  border-color: rgba(230, 140, 0, 0.14);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+.btnPrimary {
+  border-radius: 10px;
+  border: none;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.btnSecondary {
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 10px 20px;
+  font-size: 14px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnSecondary:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.copyLinkBtn {
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 9px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  background: transparent;
+}
+
+.copyLinkBtn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
+.formFooter {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+/* ── Badge variants ──────────────────────────────────────────────────── */
+.badge {
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.badgeDraft {
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.badgeRegistered {
+  background: rgba(26, 127, 76, 0.08);
+  color: #1a7f4c;
+  border: 1px solid rgba(26, 127, 76, 0.18);
+}
+
+/* ── Size progress bar ───────────────────────────────────────────────── */
+.sizeProgressBar {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.sizeProgressFill {
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.25);
+  transition: width 0.3s ease;
+}
+
+.sizeProgressReady {
+  background: #1a7f4c;
+}
+
+/* ── Success message ─────────────────────────────────────────────────── */
+.successMsg {
+  color: #1a7f4c;
+  font-weight: 600;
+  font-size: 15px;
+  text-align: center;
+  width: 100%;
+  padding: 8px 0;
+}
+
+/* ── Global error ────────────────────────────────────────────────────── */
+.globalError {
+  background: rgba(224, 62, 62, 0.07);
+  border: 1px solid rgba(224, 62, 62, 0.18);
+  border-radius: 10px;
+  color: #c0392b;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}

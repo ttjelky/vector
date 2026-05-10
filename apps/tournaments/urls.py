@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     DistributeSubmissionsView, TournamentCreateView, TournamentDetailView,
-    MyTournamentRoleView,
+    MyTournamentRoleView, LeaveTournamentView,
     TournamentInviteLinkView, RegeneratePinView,
     JoinByTokenView, TournamentPreviewByTokenView, VerifyInvitePinView,
     TournamentMemberListView, TournamentMemberDeleteView,
@@ -21,10 +21,12 @@ from .views import (
 )
 from .team_views import (
     TeamListCreateView, TeamDetailView,
-    TeamMemberView, TeamUploadPermissionView,
-    AdminAssignTeamView,
+    TeamInviteView, TeamMemberRemoveView,
+    TeamRegisterView, TeamRosterLockView,
+    MyTeamView,
+    TeamInviteInfoView, TeamInviteAcceptView, TeamInviteDeclineView,
 )
-from .jury_views import JuryPendingSubmissionsView  # ← нове
+from .jury_views import JuryPendingSubmissionsView
 
 urlpatterns = [
     # ── Tournaments ────────────────────────────────────────────────────────────
@@ -44,26 +46,36 @@ urlpatterns = [
     # ── Members ────────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/members/', TournamentMemberListView.as_view(), name='tournament-members'),
     path('<int:tournament_pk>/members/<int:pk>/', TournamentMemberDeleteView.as_view(), name='tournament-member-delete'),
+    path('<int:tournament_pk>/leave/', LeaveTournamentView.as_view(), name='tournament-leave'),
 
     # ── Teams ─────────────────────────────────────────────────────────────────
-    path('<int:tournament_pk>/teams/', TeamListCreateView.as_view(), name='team-list-create'),
-    path('<int:tournament_pk>/teams/<int:team_pk>/', TeamDetailView.as_view(), name='team-detail'),
+    path('<int:tournament_pk>/teams/',
+         TeamListCreateView.as_view(), name='team-list-create'),
+    path('<int:tournament_pk>/teams/<int:team_pk>/',
+         TeamDetailView.as_view(), name='team-detail'),
+    path('<int:tournament_pk>/teams/<int:team_pk>/invite/',
+         TeamInviteView.as_view(), name='team-invite-member'),
+    path('<int:tournament_pk>/teams/<int:team_pk>/members/<int:member_pk>/',
+         TeamMemberRemoveView.as_view(), name='team-member-remove'),
+    path('<int:tournament_pk>/teams/<int:team_pk>/register/',
+         TeamRegisterView.as_view(), name='team-register'),
+    path('<int:tournament_pk>/teams/<int:team_pk>/lock/',
+         TeamRosterLockView.as_view(), name='team-roster-lock'),
+    path('<int:tournament_pk>/my-team/',
+         MyTeamView.as_view(), name='my-team'),
 
-    # ── Team members ──────────────────────────────────────────────────────────
-    path('<int:tournament_pk>/teams/<int:team_pk>/members/', TeamMemberView.as_view(), name='team-member-add'),
-    path('<int:tournament_pk>/teams/<int:team_pk>/members/<int:user_pk>/', TeamMemberView.as_view(), name='team-member-remove'),
-
-    # ── Upload permissions ────────────────────────────────────────────────────
-    path('<int:tournament_pk>/teams/<int:team_pk>/upload-permission/', TeamUploadPermissionView.as_view(), name='team-upload-perm-add'),
-    path('<int:tournament_pk>/teams/<int:team_pk>/upload-permission/<int:user_pk>/', TeamUploadPermissionView.as_view(), name='team-upload-perm-remove'),
-
-    # ── Admin assign ──────────────────────────────────────────────────────────
-    path('<int:tournament_pk>/teams/<int:team_pk>/assign-member/', AdminAssignTeamView.as_view(), name='team-admin-assign'),
+    # ── Team invites (без tournament_pk) ──────────────────────────────────────
+    path('team-invite/<uuid:token>/',
+         TeamInviteInfoView.as_view(), name='team-invite-info'),
+    path('team-invite/<uuid:token>/accept/',
+         TeamInviteAcceptView.as_view(), name='team-invite-accept'),
+    path('team-invite/<uuid:token>/decline/',
+         TeamInviteDeclineView.as_view(), name='team-invite-decline'),
 
     # ── Jury panel ─────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/jury/submissions/', JurySubmissionsView.as_view(), name='jury-submissions'),
     path('<int:tournament_pk>/jury/submissions/<int:submission_pk>/grade/', JuryGradeView.as_view(), name='jury-grade'),
-    path('jury/pending-submissions/', JuryPendingSubmissionsView.as_view(), name='jury-pending-submissions'),  # ← нове
+    path('jury/pending-submissions/', JuryPendingSubmissionsView.as_view(), name='jury-pending-submissions'),
 
     # ── Leaderboard ────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/leaderboard/', LeaderboardView.as_view(), name='leaderboard'),
@@ -104,7 +116,7 @@ urlpatterns = [
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/links/', SubmissionLinkCreateView.as_view(), name='submission-link-create'),
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/links/<int:pk>/', SubmissionLinkDeleteView.as_view(), name='submission-link-delete'),
 
-    # ── Submission grade (for participant) ────────────────────────────────────
+    # ── Submission grade ──────────────────────────────────────────────────────
     path('<int:tournament_pk>/rounds/<int:round_pk>/tasks/<int:task_pk>/submissions/<int:submission_pk>/grade/', SubmissionGradeView.as_view(), name='submission-grade'),
 
     # ── Submission attachments ────────────────────────────────────────────────
