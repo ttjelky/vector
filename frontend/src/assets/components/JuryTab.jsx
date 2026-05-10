@@ -197,6 +197,7 @@ function DistributePanel({ tournamentId }) {
 export default function JuryTab({ tournamentId, rounds = [], loading, myRole }) {
   const [submissions,   setSubmissions]   = useState([]);
   const [criteria,      setCriteria]      = useState([]);
+  const [isTeam,        setIsTeam]        = useState(false);
   const [subsLoading,   setSubsLoading]   = useState(true);
   const [selectedRound, setSelectedRound] = useState("all");
   const [statusFilter,  setStatusFilter]  = useState(STATUS_ALL);
@@ -217,6 +218,7 @@ export default function JuryTab({ tournamentId, rounds = [], loading, myRole }) 
       .then(r => {
         setSubmissions(r.data.submissions ?? []);
         setCriteria(r.data.criteria ?? []);
+        setIsTeam(r.data.is_team ?? false);
       })
       .catch(err => console.error("Помилка завантаження подань:", err))
       .finally(() => setSubsLoading(false));
@@ -314,6 +316,7 @@ export default function JuryTab({ tournamentId, rounds = [], loading, myRole }) 
         saving={savingGrade}
         error={gradeError}
         success={gradeSuccess}
+        isTeam={isTeam}
       />
     );
   }
@@ -445,6 +448,7 @@ export default function JuryTab({ tournamentId, rounds = [], loading, myRole }) 
               submission={sub}
               index={idx + 1}
               maxTotal={maxTotal}
+              isTeam={isTeam}
               onClick={() => openSubmission(sub)}
             />
           ))}
@@ -470,9 +474,10 @@ function StatCard({ label, value, accent, icon }) {
 
 // ─── SubmissionCard ───────────────────────────────────────────────────────────
 
-function SubmissionCard({ submission: sub, index, maxTotal, onClick }) {
-  const isGraded = sub.my_grade != null;
-  const total    = isGraded ? (sub.my_grade.total ?? calcTotal(sub.my_grade.scores)) : null;
+function SubmissionCard({ submission: sub, index, maxTotal, isTeam, onClick }) {
+  const isGraded   = sub.my_grade != null;
+  const total      = isGraded ? (sub.my_grade.total ?? calcTotal(sub.my_grade.scores)) : null;
+  const authorName = isTeam ? (sub.team_name ?? sub.author_name) : sub.author_name;
 
   return (
     <button className={styles.subCard} onClick={onClick}>
@@ -480,13 +485,22 @@ function SubmissionCard({ submission: sub, index, maxTotal, onClick }) {
 
       <div className={styles.subInfo}>
         <span className={styles.subTask}>{sub.task_title || "Без назви"}</span>
-        {sub.author_name && (
+        {authorName && (
           <span className={styles.subAuthor}>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            {sub.author_name}
+            {isTeam ? (
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            ) : (
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            )}
+            {authorName}
           </span>
         )}
         <div className={styles.subMeta}>
@@ -513,12 +527,13 @@ function SubmissionCard({ submission: sub, index, maxTotal, onClick }) {
 
 // ─── SubmissionDetail ─────────────────────────────────────────────────────────
 
-function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, onSave, onClose, saving, error, success }) {
-  const isGraded = sub.my_grade != null;
-  const maxTotal = criteria.reduce((a, c) => a + c.max, 0);
-  const total    = gradeForm
+function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, onSave, onClose, saving, error, success, isTeam }) {
+  const isGraded   = sub.my_grade != null;
+  const maxTotal   = criteria.reduce((a, c) => a + c.max, 0);
+  const total      = gradeForm
     ? criteria.reduce((a, c) => a + (Number(gradeForm.scores[c.key]) || 0), 0)
     : null;
+  const authorName = isTeam ? (sub.team_name ?? sub.author_name) : sub.author_name;
 
   const links      = sub.content_links ?? [];
   const files      = sub.content_files ?? [];
@@ -556,16 +571,25 @@ function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, 
             <span className={styles.detailRound}>{sub.round_title}</span>
           </div>
 
-          {sub.author_name && (
+          {authorName && (
             <div className={styles.authorBadge}>
               <div className={styles.authorBadgeIcon}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
+                {isTeam ? (
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                ) : (
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                )}
               </div>
-              <span className={styles.authorBadgeLabel}>Автор:</span>
-              <span className={styles.authorBadgeName}>{sub.author_name}</span>
+              <span className={styles.authorBadgeLabel}>{isTeam ? "Команда:" : "Автор:"}</span>
+              <span className={styles.authorBadgeName}>{authorName}</span>
             </div>
           )}
 

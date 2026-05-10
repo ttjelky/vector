@@ -452,6 +452,26 @@ class TournamentMemberDeleteView(generics.DestroyAPIView):
         )
 
 
+class LeaveTournamentView(APIView):
+    """DELETE /tournaments/<tournament_pk>/leave/ — вихід з турніру для учасника або журі."""
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, tournament_pk):
+        membership = TournamentMember.objects.filter(
+            tournament_id=tournament_pk,
+            user=request.user,
+        ).first()
+
+        if not membership:
+            return Response({"detail": "Ви не є учасником цього турніру."}, status=404)
+
+        if membership.role == "owner":
+            return Response({"detail": "Власник не може покинути турнір."}, status=403)
+
+        membership.delete()
+        return Response(status=204)
+
+
 # ── Round views ───────────────────────────────────────────────────────────────
 
 class RoundListCreateView(generics.ListCreateAPIView):
@@ -608,22 +628,69 @@ class SubmissionListCreateView(generics.ListCreateAPIView):
         )
         if _is_owner_or_staff(self.request, self.kwargs['tournament_pk']):
             return base
+
+        # Для командного турніру — показуємо здачу команди всім її учасникам
+        task_obj = Task.objects.select_related('round__tournament').get(
+            pk=self.kwargs['task_pk']
+        )
+        if task_obj.round.tournament.tournament_type == 'team':
+            from .models import TeamMember
+            # Шукаємо команду юзера (капітан або учасник)
+            team = Team.objects.filter(
+                tournament=task_obj.round.tournament, captain=self.request.user
+            ).first()
+            if not team:
+                membership = TeamMember.objects.filter(
+                    team__tournament=task_obj.round.tournament,
+                    user=self.request.user,
+                    status=TeamMember.STATUS_ACCEPTED,
+                ).select_related('team').first()
+                team = membership.team if membership else None
+            if team:
+                return base.filter(team=team)
+            return base.none()
+
         return base.filter(participant=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        data = []
+        for item, obj in zip(serializer.data, queryset):
+            item = dict(item)
+            item['participant_username'] = obj.participant.get_full_name() or obj.participant.username
+            item['participant_email']    = obj.participant.email
+            if obj.team:
+                item['team_name'] = obj.team.name
+            data.append(item)
+        return Response(data)
 
     def perform_create(self, serializer):
         task = Task.objects.get(pk=self.kwargs['task_pk'])
         tournament = task.round.tournament
 
         if tournament.tournament_type == 'team':
+            from .models import TeamMember
+            # Спочатку шукаємо як капітан
             team = Team.objects.filter(
-                tournament=tournament, members=self.request.user
+                tournament=tournament, captain=self.request.user
             ).first()
+            # Якщо не капітан — шукаємо як прийнятий учасник
+            if not team:
+                membership = TeamMember.objects.filter(
+                    team__tournament=tournament,
+                    user=self.request.user,
+                    status=TeamMember.STATUS_ACCEPTED,
+                ).select_related('team').first()
+                team = membership.team if membership else None
+
             if not team:
                 raise ValidationError("Ви не є членом жодної команди в цьому турнірі.")
-            if not team.can_upload(self.request.user):
-                raise ValidationError(
-                    "Тільки капітан або учасник з дозволом може завантажувати роботу."
-                )
+
+            # Тільки капітан може здавати роботу
+            if team.captain_id != self.request.user.pk:
+                raise ValidationError("Тільки капітан команди може здавати роботу.")
+
             if Submission.objects.filter(task=task, team=team).exists():
                 raise ValidationError("Ваша команда вже здала роботу по цьому завданню.")
             serializer.save(task=task, participant=self.request.user, team=team)
@@ -645,11 +712,25 @@ class SubmissionDetailView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.method in ('PATCH', 'PUT', 'DELETE'):
             tournament = obj.task.round.tournament
             if tournament.tournament_type == 'team':
-                if obj.team and not obj.team.can_upload(self.request.user):
-                    raise PermissionDenied("Тільки капітан або учасник з дозволом може редагувати здачу.")
+                # Редагувати може тільки капітан
+                if not obj.team or obj.team.captain_id != self.request.user.pk:
+                    raise PermissionDenied("Тільки капітан команди може редагувати здачу.")
             else:
                 if obj.participant != self.request.user:
                     raise PermissionDenied("Ви можете редагувати лише свою здачу.")
+        elif self.request.method == 'GET':
+            # GET: перевіряємо що юзер є учасником цієї команди або капітаном
+            tournament = obj.task.round.tournament
+            if tournament.tournament_type == 'team' and obj.team:
+                from .models import TeamMember
+                is_captain = obj.team.captain_id == self.request.user.pk
+                is_member  = TeamMember.objects.filter(
+                    team=obj.team,
+                    user=self.request.user,
+                    status=TeamMember.STATUS_ACCEPTED,
+                ).exists()
+                if not is_captain and not is_member and not _is_owner_or_staff(self.request, tournament.pk):
+                    raise PermissionDenied("Ви не є учасником цієї команди.")
         return obj
 
 
@@ -728,18 +809,23 @@ class JurySubmissionsView(APIView):
         role = _get_membership_role(request, tournament_pk)
         is_privileged = role in ('owner', 'admin')
 
+        try:
+            tournament = Tournament.objects.get(pk=tournament_pk)
+        except Tournament.DoesNotExist:
+            return Response({'detail': 'Турнір не знайдено.'}, status=404)
+
+        is_team = tournament.tournament_type == 'team'
+
         base_qs = (
             Submission.objects
-            .select_related('task', 'task__round', 'participant')
+            .select_related('task', 'task__round', 'participant', 'team')
             .prefetch_related('links', 'attachments', 'grades', 'jury_assignments')
             .order_by('-submitted_at')
         )
 
         if is_privileged:
-            # Owner/admin бачить усі подання
             submissions = base_qs.filter(task__round__tournament_id=tournament_pk)
         else:
-            # Журі бачить тільки призначені роботи
             submissions = base_qs.filter(
                 jury_assignments__juror=request.user,
                 jury_assignments__tournament_id=tournament_pk,
@@ -753,11 +839,25 @@ class JurySubmissionsView(APIView):
             submissions, many=True, context={'request': request},
         )
 
+        # Для командного турніру — підміняємо author_name на назву команди
+        subs_data = list(serializer.data)
+        if is_team:
+            sub_map = {s.id: s for s in submissions}
+            subs_data = []
+            for item in serializer.data:
+                item = dict(item)
+                sub_obj = sub_map.get(item.get('id'))
+                if sub_obj and sub_obj.team:
+                    item['team_name']   = sub_obj.team.name
+                    item['author_name'] = sub_obj.team.name
+                subs_data.append(item)
+
         return Response({
-            'submissions':    serializer.data,
-            'criteria':       DEFAULT_CRITERIA,
-            'max_total':      MAX_TOTAL,
+            'submissions':     subs_data,
+            'criteria':        DEFAULT_CRITERIA,
+            'max_total':       MAX_TOTAL,
             'has_assignments': has_assignments,
+            'is_team':         is_team,
         })
 
 
@@ -1331,7 +1431,10 @@ class ParticipantGradesNewsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        grades = (
+        from .models import TeamMember
+
+        # 1. Оцінки за особисті здачі (одиночний формат)
+        personal_grades = (
             Grade.objects
             .filter(submission__participant=request.user)
             .select_related(
@@ -1339,12 +1442,49 @@ class ParticipantGradesNewsView(APIView):
                 'submission__task',
                 'submission__task__round',
                 'submission__task__round__tournament',
+                'submission__team',
             )
             .order_by('-updated_at')
         )
 
+        # 2. Знаходимо всі команди де юзер є капітаном або прийнятим учасником
+        captain_team_ids = list(
+            Team.objects.filter(tournament__tournament_type='team', captain=request.user)
+            .values_list('id', flat=True)
+        )
+        member_team_ids = list(
+            TeamMember.objects.filter(
+                user=request.user,
+                status=TeamMember.STATUS_ACCEPTED,
+                team__tournament__tournament_type='team',
+            ).values_list('team_id', flat=True)
+        )
+        all_team_ids = list(set(captain_team_ids + member_team_ids))
+
+        # 3. Оцінки за командні здачі (де юзер — будь-який учасник команди)
+        team_grades = (
+            Grade.objects
+            .filter(submission__team_id__in=all_team_ids)
+            .exclude(submission__participant=request.user)  # уникаємо дублів з personal
+            .select_related(
+                'juror',
+                'submission__task',
+                'submission__task__round',
+                'submission__task__round__tournament',
+                'submission__team',
+            )
+            .order_by('-updated_at')
+        )
+
+        # Об'єднуємо і сортуємо по даті
+        all_grades = sorted(
+            list(personal_grades) + list(team_grades),
+            key=lambda g: g.updated_at,
+            reverse=True,
+        )
+
         result = []
-        for grade in grades:
+        for grade in all_grades:
             sub        = grade.submission
             task       = sub.task
             round_     = task.round
@@ -1371,6 +1511,7 @@ class ParticipantGradesNewsView(APIView):
                 "comment":      grade.comment or "",
                 "graded_at":    grade.updated_at,
                 "read":         False,
+                "team_name":    sub.team.name if sub.team else None,
             })
 
         return Response(result, status=status.HTTP_200_OK)

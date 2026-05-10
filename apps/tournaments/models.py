@@ -2,6 +2,7 @@ import uuid
 import random
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 
 def generate_invite_pin():
@@ -32,10 +33,6 @@ class Tournament(models.Model):
         choices=TOURNAMENT_TYPE_CHOICES,
         default='solo',
         verbose_name="Тип турніру",
-    )
-    max_team_size = models.IntegerField(
-        null=True, blank=True,
-        verbose_name="Макс. учасників у команді",
     )
 
     # Дати
@@ -68,19 +65,12 @@ class Tournament(models.Model):
     )
 
     def registration_open(self):
-        """
-        True якщо зараз дозволена реєстрація учасників:
-          — або статус турніру 'registration'
-          — або активний тимчасовий виняток адміна
-        """
         from django.utils import timezone
         now = timezone.now()
-        # Звичайна реєстрація
         start = self.start_date
         reg_end = self.registration_end
         if start and now >= start and (not reg_end or now <= reg_end):
             return True
-        # Тимчасовий виняток
         if self.registration_exception_until and now < self.registration_exception_until:
             return True
         return False
@@ -140,30 +130,175 @@ class TournamentMember(models.Model):
 # ── Team ──────────────────────────────────────────────────────────────────────
 
 class Team(models.Model):
-    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='teams')
-    name       = models.CharField(max_length=255, verbose_name="Назва команди")
-    captain    = models.ForeignKey(
-        'users.User', on_delete=models.CASCADE,
-        related_name='captained_teams', verbose_name="Капітан",
+    STATUS_DRAFT      = 'draft'
+    STATUS_REGISTERED = 'registered'
+    STATUS_CHOICES = [
+        (STATUS_DRAFT,      'Чернетка'),
+        (STATUS_REGISTERED, 'Зареєстрована'),
+    ]
+
+    tournament = models.ForeignKey(
+        'Tournament', on_delete=models.CASCADE, related_name='teams'
     )
-    members    = models.ManyToManyField(
-        'users.User', related_name='teams', blank=True, verbose_name="Учасники",
+    # Капітан — завжди зареєстрований користувач
+    captain = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name='captained_teams',
+        verbose_name="Капітан",
     )
+
+    name    = models.CharField(max_length=200, verbose_name="Назва команди")
+    city    = models.CharField(max_length=100, blank=True, verbose_name="Місто")
+    contact = models.CharField(
+        max_length=200, blank=True,
+        verbose_name="Контактний Telegram / телефон"
+    )
+
+    # Статус: draft → registered
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_DRAFT,
+        verbose_name="Статус команди",
+    )
+
+    # Токен для запрошення учасників у команду
+    team_invite_token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        verbose_name="Токен запрошення в команду",
+    )
+
+    # Адмін може заблокувати склад вручну
+    roster_locked = models.BooleanField(
+        default=False,
+        verbose_name="Склад зафіксований",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        # Одна команда на турнір для кожного капітана
+        # Один капітан — одна команда у турнірі
         unique_together = ('tournament', 'captain')
         ordering = ['created_at']
+        verbose_name = 'Команда'
+        verbose_name_plural = 'Команди'
 
     def __str__(self):
         return f"{self.name} ({self.tournament.name})"
 
-    def can_upload(self, user):
-        """Перевіряє чи може user завантажувати роботу від імені команди."""
-        if self.captain == user:
-            return True
-        return TeamUploadPermission.objects.filter(team=self, user=user).exists()
+    # ── Helpers ──────────────────────────────────────────────────────────────
+
+    def is_roster_editable(self):
+        """
+        Склад можна редагувати якщо:
+          • статус — draft  (не зареєстрована)
+          • roster_locked == False
+          • реєстрація у турнірі ще відкрита
+        Адміни обходять цю перевірку у views.
+        """
+        if self.status == self.STATUS_REGISTERED:
+            return False
+        if self.roster_locked:
+            return False
+        t = self.tournament
+        now = timezone.now()
+        if t.registration_end and now > t.registration_end:
+            return False
+        return True
+
+    def accepted_member_count(self):
+        """Кількість учасників зі статусом 'accepted' (не рахуючи капітана)."""
+        return self.members.filter(status=TeamMember.STATUS_ACCEPTED).count()
+
+    def total_participant_count(self):
+        """Загальна кількість: капітан (1) + прийняті учасники."""
+        return 1 + self.accepted_member_count()
+
+    def can_register(self):
+        """
+        True якщо команда може перейти зі статусу draft → registered:
+          • мінімальна кількість учасників дотримана
+          • реєстрація у турнірі ще відкрита
+        """
+        t = self.tournament
+        min_size = t.min_team_size or 2
+        if self.total_participant_count() < min_size:
+            return False
+        if not t.registration_open():
+            return False
+        return True
+
+    def validate_max_size(self):
+        t = self.tournament
+        if t.max_team_size and self.accepted_member_count() + 1 >= t.max_team_size:
+            raise ValidationError(
+                f"Команда вже заповнена (максимум {t.max_team_size} учасників)."
+            )
+
+
+# ── TeamMember ────────────────────────────────────────────────────────────────
+
+class TeamMember(models.Model):
+    """
+    Учасник команди — завжди зареєстрований користувач.
+
+    Флоу:
+      1. Капітан запрошує → status='pending'
+      2. Юзер переходить за посиланням і приймає → status='accepted'
+      3. Юзер може відхилити → запис видаляється
+    """
+    STATUS_PENDING  = 'pending'
+    STATUS_ACCEPTED = 'accepted'
+    STATUS_CHOICES  = [
+        (STATUS_PENDING,  'Запрошений'),
+        (STATUS_ACCEPTED, 'У команді'),
+    ]
+
+    team   = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='members')
+    user   = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name='team_memberships',
+        verbose_name="Учасник",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+        verbose_name="Статус запрошення",
+    )
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('team', 'user')
+        ordering = ['added_at']
+        verbose_name = 'Учасник команди'
+        verbose_name_plural = 'Учасники команди'
+
+    def __str__(self):
+        return f"{self.user} → {self.team.name} [{self.status}]"
+
+    def clean(self):
+        if self.pk:
+            return
+        # Один юзер — одна команда у межах турніру
+        conflict = TeamMember.objects.filter(
+            team__tournament=self.team.tournament,
+            user=self.user,
+            status=self.STATUS_ACCEPTED,
+        ).exclude(team=self.team).exists()
+        if conflict:
+            raise ValidationError(
+                "Цей користувач вже є учасником іншої команди у цьому турнірі."
+            )
+        # Капітан не може бути учасником
+        if self.user == self.team.captain:
+            raise ValidationError(
+                "Капітан не може бути доданий як учасник власної команди."
+            )
 
 
 class TeamUploadPermission(models.Model):
@@ -276,7 +411,6 @@ class TaskAttachment(models.Model):
 class Submission(models.Model):
     task        = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="submissions")
     participant = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="submissions")
-    # Для командних турнірів — до якої команди належить ця здача
     team        = models.ForeignKey(
         Team, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="submissions",
@@ -287,7 +421,6 @@ class Submission(models.Model):
     updated_at   = models.DateTimeField(auto_now=True)
 
     class Meta:
-        # Для командних — унікальність по task+team, для solo — task+participant
         ordering = ['-submitted_at']
 
     def __str__(self):
@@ -324,29 +457,19 @@ class SubmissionAttachment(models.Model):
 # ── Grade ─────────────────────────────────────────────────────────────────────
 
 class Grade(models.Model):
-    """
-    Оцінка журі для конкретного подання.
-    Одне журі — одна оцінка на одне подання (unique_together).
-    Бали зберігаються як JSON-словник: { "backend_quality": 8, "database": 7, ... }
-    """
     submission = models.ForeignKey(
-        Submission,
-        on_delete=models.CASCADE,
-        related_name="grades",
-        verbose_name="Подання",
+        Submission, on_delete=models.CASCADE,
+        related_name="grades", verbose_name="Подання",
     )
     juror = models.ForeignKey(
-        'users.User',
-        on_delete=models.CASCADE,
-        related_name="grades_given",
-        verbose_name="Журі",
+        'users.User', on_delete=models.CASCADE,
+        related_name="grades_given", verbose_name="Журі",
     )
     scores  = models.JSONField(default=dict, verbose_name="Бали за критеріями")
     comment = models.TextField(blank=True, default="", verbose_name="Коментар")
     total   = models.FloatField(default=0, verbose_name="Загальний бал")
-
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата оцінювання")
-    updated_at = models.DateTimeField(auto_now=True,     verbose_name="Дата оновлення")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата оновлення")
 
     class Meta:
         unique_together = ('submission', 'juror')
@@ -363,34 +486,17 @@ class Grade(models.Model):
 # ── JuryAssignment ────────────────────────────────────────────────────────────
 
 class JuryAssignment(models.Model):
-    """
-    Призначення конкретного подання конкретному члену журі.
-
-    Формується автоматично через DistributeSubmissionsView або вручну
-    адміністратором/власником турніру.
-
-    Обмеження:
-      - одне журі не може отримати ту саму роботу двічі (unique_together)
-      - кількість призначень на журі і мінімальна кількість рецензентів
-        контролюються логікою розподілу у views.py
-    """
     tournament = models.ForeignKey(
-        Tournament,
-        on_delete=models.CASCADE,
-        related_name='jury_assignments',
-        verbose_name='Турнір',
+        Tournament, on_delete=models.CASCADE,
+        related_name='jury_assignments', verbose_name='Турнір',
     )
     juror = models.ForeignKey(
-        'users.User',
-        on_delete=models.CASCADE,
-        related_name='jury_assignments',
-        verbose_name='Журі',
+        'users.User', on_delete=models.CASCADE,
+        related_name='jury_assignments', verbose_name='Журі',
     )
     submission = models.ForeignKey(
-        Submission,
-        on_delete=models.CASCADE,
-        related_name='jury_assignments',
-        verbose_name='Подання',
+        Submission, on_delete=models.CASCADE,
+        related_name='jury_assignments', verbose_name='Подання',
     )
     assigned_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата призначення')
 

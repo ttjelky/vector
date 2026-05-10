@@ -100,6 +100,11 @@ function GradeCard({ item, defaultOpen = false, onRead }) {
               {item.tournament ? `${item.tournament} · ` : ""}{item.round_title}
             </p>
           )}
+          {item.team_name && (
+            <p className={styles.cardTeam}>
+              🏆 {item.team_name}
+            </p>
+          )}
           <p className={styles.cardJury}>
             Оцінено: {item.jury_name || "Журі"}
           </p>

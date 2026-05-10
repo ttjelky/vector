@@ -44,7 +44,7 @@ function RichContent({ html, emptyText = "Відсутній.", className }) {
 
 // ─── Компонент ────────────────────────────────────────────────────────────────
 
-export default function OverviewTab({ tournament, status, onSave, readOnly = false }) {
+export default function OverviewTab({ tournament, status, onSave, readOnly = false, myRole, tournamentId, isRegistered, onLeft }) {
   const [editing, setEditing] = useState(false);
   const [saving,  setSaving]  = useState(false);
   const [error,   setError]   = useState("");
@@ -56,6 +56,13 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
   const [customPreview, setCustomPreview] = useState(
     tournament.image_mode === "custom" ? tournament.custom_image : null
   );
+
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [leaving,          setLeaving]          = useState(false);
+  const [leaveError,       setLeaveError]       = useState(null);
+
+  const tournamentEnded = tournament.end_date && new Date() > new Date(tournament.end_date);
+  const canLeave = isRegistered && tournamentEnded && (myRole === "participant" || myRole === "jury");
 
   useEffect(() => {
     setForm(buildForm(tournament));
@@ -101,6 +108,20 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
       setError("Помилка збереження. Спробуйте ще раз.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleLeave = async () => {
+    setLeaving(true);
+    setLeaveError(null);
+    try {
+      await API.delete(`/tournaments/${tournamentId}/leave/`);
+      onLeft?.();
+    } catch (err) {
+      setLeaveError(err?.response?.data?.detail || "Не вдалося покинути турнір.");
+      setShowLeaveConfirm(false);
+    } finally {
+      setLeaving(false);
     }
   };
 
@@ -277,6 +298,31 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
             />
           </div>
         </section>
+      )}
+
+      {canLeave && (
+        <div className={styles.leaveSection}>
+          {!showLeaveConfirm ? (
+            <button className={styles.leaveBtn} onClick={() => setShowLeaveConfirm(true)}>
+              Покинути турнір
+            </button>
+          ) : (
+            <div className={styles.leaveConfirm}>
+              <p className={styles.leaveConfirmText}>
+                Ви впевнені? Ви більше не матимете доступу до цього турніру.
+              </p>
+              <div className={styles.leaveConfirmActions}>
+                <button className={styles.leaveBtn} onClick={handleLeave} disabled={leaving}>
+                  {leaving ? "Виходжу…" : "Так, покинути"}
+                </button>
+                <button className={styles.leaveCancelBtn} onClick={() => setShowLeaveConfirm(false)}>
+                  Скасувати
+                </button>
+              </div>
+              {leaveError && <p className={styles.formError} style={{ marginTop: 8 }}>{leaveError}</p>}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

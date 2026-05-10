@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTabs } from "../../TabsContext";
 import API from "../../api";
 import NavBar from "../components/NavBar";
@@ -10,15 +10,28 @@ import { computeStatus } from "../components/tournamentHelpers";
 
 const ParticipantTournaments = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { addTab } = useTabs();
   const [tournaments, setTournaments] = useState([]);
   const [showJoin, setShowJoin] = useState(false);
 
-  useEffect(() => {
+  const fetchTournaments = () => {
     API.get("/tournaments/")
       .then((res) => setTournaments(res.data))
       .catch((err) => console.error("Помилка завантаження турнірів:", err));
+  };
+
+  useEffect(() => {
+    fetchTournaments();
   }, []);
+
+  // Рефетч після виходу з турніру
+  useEffect(() => {
+    if (location.state?.refetch) {
+      fetchTournaments();
+      window.history.replaceState({}, "");
+    }
+  }, [location.state]);
 
   return (
     <NavBar>

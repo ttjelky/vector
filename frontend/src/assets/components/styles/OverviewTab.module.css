@@ -415,3 +415,71 @@
 .detailGrid[data-team] .dc:nth-child(5) {
   grid-column: span 2;
 }
+/* ─── Leave section ───────────────────────────────────────────────────────── */
+
+.leaveSection {
+  margin-top: 8px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f2;
+}
+
+.leaveBtn {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #999;
+  background: transparent;
+  border: 1px solid #e8e8ec;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.leaveBtn:hover:not(:disabled) {
+  color: #e05c5c;
+  border-color: #f5c0c0;
+  background: #fff8f8;
+}
+
+.leaveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.leaveConfirm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.leaveConfirmText {
+  font-size: 13.5px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.leaveConfirmActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.leaveCancelBtn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #888;
+  background: transparent;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s, background 0.15s;
+}
+
+.leaveCancelBtn:hover {
+  color: #333;
+  background: #f4f4f6;
+}

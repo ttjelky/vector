@@ -3,6 +3,7 @@
 .page {
   min-height: 100%;
   background: #fff;
+  position: relative;
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
 }
 
@@ -191,3 +192,118 @@
 
 .deleteBtn:hover  { background: #fee2e2; border-color: #f89595; }
 .deleteBtn:active { transform: scale(0.97); }
+
+/* ─── Unregistered team participant glass badge ───────────────────────────── */
+
+.unregisteredBadge {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px 13px 20px;
+  max-width: 480px;
+  width: calc(100% - 48px);
+  background: rgba(255, 255, 255, 0.52);
+  backdrop-filter: blur(10px) saturate(1.4);
+  -webkit-backdrop-filter: blur(10px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 18px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.07),
+    0 1px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255,255,255,0.75);
+  animation: badgeSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes badgeSlideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.unregisteredBadgeIcon {
+  font-size: 18px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.unregisteredBadgeText {
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+  line-height: 1.45;
+  flex: 1;
+}
+
+.unregisteredBadgeLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.unregisteredBadgeLink:hover {
+  color: #555;
+}
+
+.unregisteredBadgeClose {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: rgba(0, 0, 0, 0.06);
+  border: none;
+  border-radius: 50%;
+  font-size: 11px;
+  color: #666;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1;
+}
+
+.unregisteredBadgeClose:hover {
+  background: rgba(0, 0, 0, 0.12);
+  color: #111;
+}
+
+/* ─── Inline leave confirm ────────────────────────────────────────────────── */
+
+.confirmInline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.confirmInlineText {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e76b6b;
+}
+
+.cancelInlineBtn {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #888;
+  background: none;
+  border: 1px solid #e8e8e8;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cancelInlineBtn:hover { background: #f5f5f5; color: #444; }

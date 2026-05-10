@@ -55,6 +55,9 @@ export default function RoundsTab({
   readOnly = false,
   myRole,
   tournamentStatus,
+  isTeamTournament = false,
+  isTeamCaptain = true,
+  teamName = null,
 }) {
   const [rounds,         setRounds]         = useState(initialRounds);
   const [activeRoundId,  setActiveRoundId]  = useState(null);
@@ -559,6 +562,8 @@ export default function RoundsTab({
                         myRole={myRole}
                         roundEndDate={activeRound.end_date}
                         canSubmit={canSubmit}
+                        isTeamCaptain={isTeamCaptain}
+                        teamName={isTeamTournament ? teamName : null}
                         onDeleted={(taskId) => handleTaskDeleted(activeRound.id, taskId)}
                       />
                     ))}
