@@ -97,7 +97,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
         tech_requirements: filteredTechReqs.length > 0 ? filteredTechReqs : null,
         must_have:         filteredMustHave.length > 0 ? filteredMustHave : null,
       };
-      await API.patch(`/tournaments/${tournamentId}/rounds/${round.id}/`, payload);
+      const patchRes = await API.patch(`/tournaments/${tournamentId}/rounds/${round.id}/`, payload);
 
       for (const link of links.filter((l) => l._new)) {
         await API.post(
@@ -111,8 +111,19 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
         await API.post(`/tournaments/${tournamentId}/rounds/${round.id}/attachments/`, fd);
       }
 
-      const fresh = await API.get(`/tournaments/${tournamentId}/rounds/`);
-      const freshRound = fresh.data.find((r) => r.id === round.id) || { ...round, ...payload };
+      // Якщо є нові посилання або файли — підвантажуємо свіжі дані конкретного раунду,
+      // інакше використовуємо відповідь PATCH напряму (не GET /rounds/, бо він не містить tasks)
+      let freshRound;
+      if (links.some((l) => l._new) || newFiles.length > 0) {
+        try {
+          const fresh = await API.get(`/tournaments/${tournamentId}/rounds/${round.id}/`);
+          freshRound = fresh.data;
+        } catch {
+          freshRound = patchRes.data ?? { ...round, ...payload };
+        }
+      } else {
+        freshRound = patchRes.data ?? { ...round, ...payload };
+      }
       onSaved(freshRound);
     } catch (err) {
       console.error(err);
@@ -129,7 +140,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
           Назва <span className={styles.editRequired}>*</span>
           <input className={styles.editInput} name="title" value={form.title} onChange={handleChange} />
         </label>
-        <label className={styles.editLabel}>
+        <div className={styles.editLabel}>
           Опис
           <RichTextArea
             id="round-description"
@@ -138,7 +149,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
             value={form.description}
             onChange={(e) => { setForm((f) => ({ ...f, description: e.target.value })); setError(""); }}
           />
-        </label>
+        </div>
         <div className={styles.editRow}>
           <label className={styles.editLabel}>
             Початок

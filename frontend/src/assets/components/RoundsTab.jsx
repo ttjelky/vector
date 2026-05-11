@@ -58,6 +58,7 @@ export default function RoundsTab({
   isTeamTournament = false,
   isTeamCaptain = true,
   teamName = null,
+  openRegistration = false,
 }) {
   const [rounds,         setRounds]         = useState(initialRounds);
   const [activeRoundId,  setActiveRoundId]  = useState(null);
@@ -84,11 +85,14 @@ export default function RoundsTab({
   const activeRound = rounds.find((r) => r.id === activeRoundId) ?? null;
 
   // ── Права доступу ─────────────────────────────────────────────────────────
-  // Власник, адмін, журі — завжди бачать усе
+  // Власник і адмін отримують readOnly=false з TournamentPage → можуть редагувати
+  // Журі і учасники отримують readOnly=true → тільки перегляд
   const isPrivileged = !readOnly || myRole === "jury" || myRole === "admin";
 
-  // Учасники бачать раунди лише коли турнір "ongoing" або "finished"
+  // Учасники бачать раунди лише коли турнір "ongoing" або "finished",
+  // або якщо увімкнена вільна реєстрація (openRegistration=true)
   const canSeeRounds = isPrivileged
+    || openRegistration
     || tournamentStatus === "ongoing"
     || tournamentStatus === "finished";
 
@@ -150,7 +154,12 @@ export default function RoundsTab({
   // ── Збереження / видалення раунду ─────────────────────────────────────────
 
   const handleRoundSaved = (updatedRound) => {
-    setRounds((prev) => prev.map((r) => r.id === updatedRound.id ? updatedRound : r));
+    setRounds((prev) => prev.map((r) => {
+      if (r.id !== updatedRound.id) return r;
+      // GET /rounds/ не повертає tasks — зберігаємо їх з поточного стану,
+      // щоб завдання не зникали після редагування раунду
+      return { ...updatedRound, tasks: updatedRound.tasks ?? r.tasks ?? [] };
+    }));
     setEditingRound(null);
   };
 
@@ -386,7 +395,7 @@ export default function RoundsTab({
                         </span>
                       );
                     })()}
-                    {/* Кнопки дій (тільки адміну) */}
+                    {/* Кнопки дій (тільки власнику) */}
                     {!readOnly && (
                       <div className={styles.roundInfoActions}>
                         <button

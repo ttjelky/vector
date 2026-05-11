@@ -15,6 +15,7 @@ from .models import (
     Submission, SubmissionLink, SubmissionAttachment,
     Grade, Team, TeamUploadPermission, JuryAssignment,
     generate_invite_pin,
+    Announcement, AnnouncementComment, AnnouncementReaction,
 )
 from .serializers import (
     TournamentSerializer, TournamentMemberSerializer, JoinByTokenSerializer,
@@ -23,6 +24,7 @@ from .serializers import (
     SubmissionSerializer, SubmissionLinkSerializer, SubmissionAttachmentSerializer,
     GradeSerializer, GradeWriteSerializer, JurySubmissionSerializer,
     JuryAssignmentSerializer,
+    AnnouncementSerializer, AnnouncementCommentSerializer,
 )
 from .permissions import IsTournamentOwner, IsTournamentMemberOrOwner, IsTournamentParticipant, IsTournamentJury
 
@@ -1669,3 +1671,187 @@ class LeaderboardDetailView(APIView):
             'criteria_avg':     grand_criteria_avg,
             'criteria_meta':    DEFAULT_CRITERIA,
         })
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Announcements
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _can_manage_ann(role):
+    return role in ('owner', 'admin')
+
+
+def _reaction_summary(reactions_qs, user_id):
+    counts = {}
+    my_reaction = None
+    for r in reactions_qs:
+        counts[r.emoji] = counts.get(r.emoji, 0) + 1
+        if r.user_id == user_id:
+            my_reaction = r.emoji
+    return {'reactions': counts, 'my_reaction': my_reaction}
+
+
+class AnnouncementListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, tournament_pk):
+        role = _get_membership_role(request, tournament_pk)
+        if role is None:
+            return Response({'detail': 'Доступ заборонено.'}, status=status.HTTP_403_FORBIDDEN)
+
+        qs = (
+            Announcement.objects
+            .filter(tournament_id=tournament_pk)
+            .select_related('author')
+            .prefetch_related(
+                'reactions',
+                'comments__author',
+                'comments__reactions',
+                'comments__replies__author',
+                'comments__replies__reactions',
+            )
+        )
+
+        # Адмін/власник бачать усі; решта — тільки своє + "all"
+        if not _can_manage_ann(role):
+            qs = [a for a in qs if a.target_role in ('all', role)]
+
+        serializer = AnnouncementSerializer(qs, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def post(self, request, tournament_pk):
+        role = _get_membership_role(request, tournament_pk)
+        if not _can_manage_ann(role):
+            return Response({'detail': 'Недостатньо прав.'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = AnnouncementSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            ann = serializer.save(tournament_id=tournament_pk, author=request.user)
+            ann.refresh_from_db()
+            return Response(
+                AnnouncementSerializer(ann, context={'request': request}).data,
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AnnouncementDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, tournament_pk, ann_pk):
+        role = _get_membership_role(request, tournament_pk)
+        if not _can_manage_ann(role):
+            return Response({'detail': 'Недостатньо прав.'}, status=status.HTTP_403_FORBIDDEN)
+        ann = generics.get_object_or_404(Announcement, pk=ann_pk, tournament_id=tournament_pk)
+        ann.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AnnouncementReactView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, tournament_pk, ann_pk):
+        role = _get_membership_role(request, tournament_pk)
+        if role is None:
+            return Response({'detail': 'Доступ заборонено.'}, status=status.HTTP_403_FORBIDDEN)
+
+        ann   = generics.get_object_or_404(Announcement, pk=ann_pk, tournament_id=tournament_pk)
+        emoji = request.data.get('emoji', '')
+
+        existing = AnnouncementReaction.objects.filter(
+            user=request.user, announcement=ann
+        ).first()
+
+        if existing:
+            if existing.emoji == emoji:
+                existing.delete()
+            else:
+                existing.emoji = emoji
+                existing.save(update_fields=['emoji'])
+        else:
+            AnnouncementReaction.objects.create(
+                user=request.user, announcement=ann, emoji=emoji
+            )
+
+        return Response(_reaction_summary(ann.reactions.all(), request.user.id))
+
+
+class AnnouncementCommentListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, tournament_pk, ann_pk):
+        role = _get_membership_role(request, tournament_pk)
+        if role is None:
+            return Response({'detail': 'Доступ заборонено.'}, status=status.HTTP_403_FORBIDDEN)
+
+        ann  = generics.get_object_or_404(Announcement, pk=ann_pk, tournament_id=tournament_pk)
+        text = request.data.get('text', '').strip()
+
+        if not text:
+            return Response({'text': ["Це поле обов'язкове."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        parent = None
+        parent_id = request.data.get('parent')
+        if parent_id:
+            parent = generics.get_object_or_404(
+                AnnouncementComment, pk=parent_id, announcement=ann
+            )
+
+        comment = AnnouncementComment.objects.create(
+            announcement=ann, author=request.user, text=text, parent=parent,
+        )
+        return Response(
+            AnnouncementCommentSerializer(comment, context={'request': request}).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class AnnouncementCommentDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, tournament_pk, ann_pk, comment_pk):
+        role    = _get_membership_role(request, tournament_pk)
+        comment = generics.get_object_or_404(
+            AnnouncementComment,
+            pk=comment_pk,
+            announcement_id=ann_pk,
+            announcement__tournament_id=tournament_pk,
+        )
+        if not (_can_manage_ann(role) or comment.author_id == request.user.id):
+            return Response({'detail': 'Недостатньо прав.'}, status=status.HTTP_403_FORBIDDEN)
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AnnouncementCommentReactView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, tournament_pk, ann_pk, comment_pk):
+        role = _get_membership_role(request, tournament_pk)
+        if role is None:
+            return Response({'detail': 'Доступ заборонено.'}, status=status.HTTP_403_FORBIDDEN)
+
+        comment = generics.get_object_or_404(
+            AnnouncementComment,
+            pk=comment_pk,
+            announcement_id=ann_pk,
+            announcement__tournament_id=tournament_pk,
+        )
+        emoji = request.data.get('emoji', '')
+
+        existing = AnnouncementReaction.objects.filter(
+            user=request.user, comment=comment
+        ).first()
+
+        if existing:
+            if existing.emoji == emoji:
+                existing.delete()
+            else:
+                existing.emoji = emoji
+                existing.save(update_fields=['emoji'])
+        else:
+            AnnouncementReaction.objects.create(
+                user=request.user, comment=comment, emoji=emoji
+            )
+
+        return Response(_reaction_summary(comment.reactions.all(), request.user.id))

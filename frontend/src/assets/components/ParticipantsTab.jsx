@@ -3,6 +3,7 @@ import styles from "./styles/ParticipantsTab.module.css";
 import API from "../../api";
 import { X, Shield, Users, Crown, Upload, UserPlus } from "lucide-react";
 import { ConfirmDeleteModal } from "./TournamentShared";
+import { usePolling } from "../../usePolling";
 
 // ─── Константи ────────────────────────────────────────────────────────────────
 
@@ -33,6 +34,13 @@ const REGISTRATION_STATUS_BANNERS = {
     border: "#fde68a",
     text: "Реєстрація ще не відкрита. Команди зможуть приєднатися після початку турніру.",
   },
+  upcoming_open: {
+    icon: "✅",
+    color: "#15803d",
+    bg: "#f0fdf4",
+    border: "#bbf7d0",
+    text: "Вільна реєстрація — команди можуть приєднуватися будь-коли до завершення турніру.",
+  },
   registration: {
     icon: "✅",
     color: "#15803d",
@@ -46,6 +54,13 @@ const REGISTRATION_STATUS_BANNERS = {
     bg: "#eff6ff",
     border: "#bfdbfe",
     text: "Турнір вже розпочався. Реєстрація нових команд закрита.",
+  },
+  ongoing_open: {
+    icon: "✅",
+    color: "#15803d",
+    bg: "#f0fdf4",
+    border: "#bbf7d0",
+    text: "Вільна реєстрація — команди можуть приєднуватися будь-коли до завершення турніру.",
   },
   finished: {
     icon: "🏁",
@@ -91,6 +106,7 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
   const [asCaptain,     setAsCaptain]     = useState(false);
 
   const isCaptain    = team.captain_id === myUserId;
+  // Власник і адмін можуть керувати командами
   const isPrivileged = myRole === "owner" || myRole === "admin";
 
   const nonCaptainMembers = (team.members || []).filter(m => m.id !== team.captain_id);
@@ -424,10 +440,12 @@ function TeamsSubTab({ tournamentId, myRole, members, myUserId }) {
 
 // ─── Головний компонент ───────────────────────────────────────────────────────
 
-export default function ParticipantsTab({ tournamentId, myRole, loading, tournamentType, tournamentStatus, maxParticipants }) {
+export default function ParticipantsTab({ tournamentId, myRole, loading, tournamentType, tournamentStatus, maxParticipants, openRegistration = false }) {
+  const isTeamTourn = tournamentType === "team";
+
   const [members,        setMembers]        = useState([]);
   const [membersLoading, setMembersLoading] = useState(true);
-  const [activeTab,      setActiveTab]      = useState("participant");
+  const [activeTab,      setActiveTab]      = useState(isTeamTourn ? "jury" : "participant");
   const [myUserId,       setMyUserId]       = useState(null);
 
   const [invites,      setInvites]      = useState({ participant: {}, jury: {}, admin: {} });
@@ -444,9 +462,12 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
   const [exceptionMinutes, setExceptionMinutes]    = useState(30);
   const [showException,    setShowException]       = useState(false);
 
-  const isOwner     = myRole === "owner";
-  const isTeamTourn = tournamentType === "team";
+  const isOwner        = myRole === "owner";
+  const isPrivilegedUser = myRole === "owner" || myRole === "admin"; // може запрошувати і видаляти
   const canRegister = tournamentStatus === "registration";
+
+  // При вільній реєстрації реєстрація відкрита завжди (крім finished)
+  const isOpenAndActive = openRegistration && tournamentStatus !== "finished";
 
   // ── Завантаження стану винятку реєстрації ────────────────────────────────
   useEffect(() => {
@@ -457,7 +478,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
   }, [tournamentId, isOwner]);
 
   const exceptionActive = exceptionUntil && new Date() < new Date(exceptionUntil);
-  const canRegisterNow  = canRegister || exceptionActive;
+  const canRegisterNow  = canRegister || exceptionActive || isOpenAndActive;
 
   // Автоматично очищаємо виняток після закінчення часу
   useEffect(() => {
@@ -496,6 +517,14 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
   };
 
   // ── Завантаження учасників ────────────────────────────────────────────────
+  const fetchMembers = useCallback(() => {
+    if (!tournamentId) return;
+    API.get(`/tournaments/${tournamentId}/members/`)
+      .then(r => setMembers(r.data))
+      .catch(err => console.error(err));
+  }, [tournamentId]);
+
+  // Початкове завантаження зі спінером
   useEffect(() => {
     if (!tournamentId) return;
     setMembersLoading(true);
@@ -505,9 +534,12 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
       .finally(() => setMembersLoading(false));
   }, [tournamentId]);
 
+  // Автооновлення кожні 5 секунд (без спінера)
+  usePolling(fetchMembers, 5000, !!tournamentId);
+
   // ── Завантаження посилань-запрошень ───────────────────────────────────────
   useEffect(() => {
-    if (!tournamentId || !isOwner) return;
+    if (!tournamentId || !isPrivilegedUser) return;
     ["participant", "jury", "admin"].forEach(role => {
       API.get(`/tournaments/${tournamentId}/invite-link/?role=${role}`)
         .then(r => setInvites(prev => ({
@@ -516,7 +548,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
         })))
         .catch(() => {});
     });
-  }, [tournamentId, isOwner]);
+  }, [tournamentId, isPrivilegedUser]);
 
   const handleInvite = useCallback((role) => {
     const url = invites[role]?.url;
@@ -588,16 +620,21 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
   const isCopied   = copied  === activeTab;
   const isRegen    = regenRole === activeTab;
 
-  const subTabs = [
-    ...TABS,
-    ...(isTeamTourn ? [{ key: "teams", label: "Команди" }] : []),
-  ];
+  const subTabs = isTeamTourn
+    ? TABS.filter(t => t.key === "jury" || t.key === "admin")
+    : TABS;
 
-  const statusBanner = isOwner && activeTab === "participant"
-    ? REGISTRATION_STATUS_BANNERS[tournamentStatus]
+  const statusBanner = isPrivilegedUser && activeTab === "participant"
+    ? (() => {
+        if (openRegistration && tournamentStatus !== "finished") {
+          return REGISTRATION_STATUS_BANNERS[`${tournamentStatus}_open`]
+            ?? REGISTRATION_STATUS_BANNERS.upcoming_open;
+        }
+        return REGISTRATION_STATUS_BANNERS[tournamentStatus] ?? null;
+      })()
     : null;
 
-  const showInviteBtn = isOwner && (activeTab !== "participant" || canRegisterNow);
+  const showInviteBtn = isPrivilegedUser && (activeTab !== "participant" || canRegisterNow);
 
   // ── Рендер ────────────────────────────────────────────────────────────────
 
@@ -710,7 +747,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
               )}
 
               {/* Заблокована кнопка запрошення */}
-              {isOwner && activeTab === "participant" && !canRegisterNow && (
+              {isPrivilegedUser && activeTab === "participant" && !canRegisterNow && (
                 <button
                   className={styles.inviteBtn}
                   disabled
@@ -763,7 +800,7 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
           )}
 
           {/* PIN-секція */}
-          {isOwner && pinVisible && invite?.pin && (
+          {isPrivilegedUser && pinVisible && invite?.pin && (
             <div className={styles.pinSection}>
               <div className={styles.pinInfo}>
                 <span className={styles.pinText}>Надайте <strong>PIN-код:</strong></span>
@@ -792,12 +829,19 @@ export default function ParticipantsTab({ tournamentId, myRole, loading, tournam
                   <MemberAvatar member={member} />
                   <div className={styles.teamInfo}>
                     <span className={styles.teamName}>{getDisplayName(member)}</span>
+                    {(() => {
+                      const email = member.email || member.fullusername;
+                      const displayName = getDisplayName(member);
+                      return email && email !== displayName ? (
+                        <span className={styles.teamEmail}>{email}</span>
+                      ) : null;
+                    })()}
                     <span className={styles.teamMeta}>
                       {ROLE_LABELS[member.role] ?? member.role}
                       {member.user_role && ` · ${member.user_role}`}
                     </span>
                   </div>
-                  {isOwner && member.role !== "owner" && (
+                  {isPrivilegedUser && member.role !== "owner" && (
                     <button className={styles.removeBtn} onClick={() => setMemberToDelete(member)}>✕</button>
                   )}
                   {member.joined_at && (

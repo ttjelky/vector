@@ -15,6 +15,7 @@ import useTournamentTabGuard from "../../useTournamentTabGuard";
 import LeaderboardTab from "../components/LeaderboardTab";
 import MyTeamTab from "../components/MyTeamTab";
 import TeamsTab from "../components/TeamsTab";
+import AnnouncementsTab from "../components/AnnouncementsTab";
 
 // ─── Rich-text preview helper ─────────────────────────────────────────────────
 function getDescriptionPreview(html, maxLen = 80) {
@@ -55,7 +56,9 @@ export default function TournamentPage() {
   const [error,       setError]       = useState(null);
   const [myTeam,      setMyTeam]      = useState(null);
 
-  const isOwner = myRole === "owner";
+  const isOwner   = myRole === "owner";
+  const isAdmin   = myRole === "admin";
+  const canManage = isOwner || isAdmin; // може редагувати турнір
   const isJury      = myRole === "jury";
   const isJuryPanel = myRole === "jury" || myRole === "admin" || myRole === "owner";
 
@@ -149,18 +152,19 @@ export default function TournamentPage() {
   })();
 
 const tabs = [
-  { id: "overview",     label: "Основна сторінка" },
+  { id: "overview",      label: "Основна сторінка" },
+  { id: "announcements", label: "Оголошення" },
   ...(!isTeamParticipantUnregistered ? [{ id: "rounds", label: "Раунди" }] : []),
   ...(isTeamTournament
     ? [
         ...(!isJuryPanel ? [{ id: "my_team", label: "Моя команда" }] : []),
         ...(isJuryPanel ? [{ id: "teams", label: "Команди" }] : []),
+        { id: "participants", label: isTeamTournament ? "Адміністрація" : "Учасники" },
       ]
     : [
-        { id: "participants", label: "Учасники" },
+        { id: "participants", label: isTeamTournament ? "Адміністрація" : "Учасники" },
       ]
   ),
- 
   ...(!isTeamParticipantUnregistered ? [{ id: "leaderboard", label: "Таблиця лідерів" }] : []),
   ...(isJuryPanel ? [{ id: "jury", label: "Панель журі" }] : []),
 ];
@@ -190,13 +194,13 @@ const tabs = [
                 <span style={{
                   fontSize: 11.5,
                   fontWeight: 600,
-                  color: "#5566aa",
-                  background: "#f0f2ff",
-                  border: "1px solid #dde4f5",
+                  color: myRole === "admin" ? "#7c3aed" : "#5566aa",
+                  background: myRole === "admin" ? "#f5f3ff" : "#f0f2ff",
+                  border: `1px solid ${myRole === "admin" ? "#ddd6fe" : "#dde4f5"}`,
                   borderRadius: 100,
                   padding: "3px 10px",
                 }}>
-                  ⚖️ Журі
+                  {myRole === "admin" ? "Адміністратор" : "Права журі"}
                 </span>
               )}
             </div>
@@ -222,7 +226,7 @@ const tabs = [
                 tournament={tournament}
                 status={status}
                 onSave={handleSave}
-                readOnly={!isOwner}
+                readOnly={!canManage}
                 myRole={myRole}
                 tournamentId={id}
                 isRegistered={isRegistered}
@@ -241,6 +245,13 @@ const tabs = [
               )}
             </>
           )}
+
+          {activeTab === "announcements" && (
+            <AnnouncementsTab
+              tournamentId={id}
+              myRole={myRole}
+            />
+          )}
         
           {activeTab === "rounds" && (
             <RoundsTab
@@ -248,7 +259,7 @@ const tabs = [
               loading={roundsLoading}
               tournamentId={id}
               onRoundCreated={handleRoundCreated}
-              readOnly={!isOwner}
+              readOnly={!canManage}
               myRole={myRole}
               tournamentStatus={status}
               isTeamTournament={isTeamTournament}
@@ -276,7 +287,7 @@ const tabs = [
             />
           )}
         
-          {activeTab === "participants" && !isTeamTournament && (
+          {activeTab === "participants" && (
             <ParticipantsTab
               tournamentId={id}
               myRole={myRole}
@@ -299,8 +310,9 @@ const tabs = [
           {activeTab === "leaderboard" && (
             <LeaderboardTab
               tournamentId={id}
+              tournamentType={tournament?.tournament_type}
               rounds={rounds}
-              loading={roundsLoading}
+              roundsLoading={roundsLoading}
               isOwner={isOwner}
               myRole={myRole}
             />

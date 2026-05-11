@@ -15,12 +15,8 @@ export function SubmissionForm({ taskId, roundId, tournamentId, existingSubmissi
   const [saving,       setSaving]       = useState(false);
   const [error,        setError]        = useState("");
   const [fileInputKey, setFileInputKey] = useState(0);
-  const [showExtras,   setShowExtras]   = useState(
-    !!(links.length > 0 || files.length > 0 || existingSubmission?.attachments?.length > 0)
-  );
 
   const isEdit = !!existingSubmission;
-  const extrasCount = links.length + files.length + (existingSubmission?.attachments?.length || 0);
 
   const addLink = () => {
     if (!linkForm.url.trim()) return;
@@ -99,68 +95,60 @@ export function SubmissionForm({ taskId, roundId, tournamentId, existingSubmissi
         onChange={(e) => { setText(e.target.value); setError(""); }}
       />
 
-      <div>
-        <button type="button" className={styles.extrasToggle} onClick={() => setShowExtras((v) => !v)}>
-          {showExtras ? "▲" : "▼"} Посилання та файли{extrasCount > 0 ? ` (${extrasCount})` : ""}
-        </button>
-
-        {showExtras && (
-          <div className={styles.extrasPanel} style={{ marginTop: 8 }}>
-            {/* Посилання */}
-            <div className={styles.attachSection}>
-              <span className={styles.attachSectionLabel}>🔗 Посилання</span>
-              {links.map((link) => (
-                <div key={link.id} className={styles.attachItem}>
-                  <span className={styles.attachItemIcon}>🔗</span>
-                  <span className={styles.attachItemName}>{link.label || link.url}</span>
-                  <span className={styles.attachItemMeta}>{link.url}</span>
-                  <button className={styles.attachRemove} onClick={() => removeLink(link)}>✕</button>
-                </div>
-              ))}
-              <div className={styles.linkInputRow}>
-                <input
-                  className={styles.editInput}
-                  placeholder="URL посилання"
-                  value={linkForm.url}
-                  onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
-                  onKeyDown={(e) => e.key === "Enter" && addLink()}
-                />
-                <input
-                  className={styles.editInput}
-                  placeholder="Підпис (необов'язково)"
-                  value={linkForm.label}
-                  onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
-                  onKeyDown={(e) => e.key === "Enter" && addLink()}
-                />
-                <button className={styles.addLinkBtn} onClick={addLink}>Додати</button>
-              </div>
+      <div className={styles.extrasPanel}>
+        {/* Посилання */}
+        <div className={styles.attachSection}>
+          <span className={styles.attachSectionLabel}>🔗 Посилання</span>
+          {links.map((link) => (
+            <div key={link.id} className={styles.attachItem}>
+              <span className={styles.attachItemIcon}>🔗</span>
+              <span className={styles.attachItemName}>{link.label || link.url}</span>
+              <span className={styles.attachItemMeta}>{link.url}</span>
+              <button className={styles.attachRemove} onClick={() => removeLink(link)}>✕</button>
             </div>
-
-            {/* Файли */}
-            <div className={styles.attachSection}>
-              <span className={styles.attachSectionLabel}>📎 Файли</span>
-              {isEdit && existingSubmission?.attachments?.map((att) => (
-                <div key={att.id} className={styles.attachItem}>
-                  <span className={styles.attachItemIcon}>{fileIcon(att.name)}</span>
-                  <span className={styles.attachItemName}>{att.name}</span>
-                  <span className={styles.attachItemMeta}>збережено</span>
-                </div>
-              ))}
-              {files.map((f, i) => (
-                <div key={i} className={styles.attachItem}>
-                  <span className={styles.attachItemIcon}>{fileIcon(f.name)}</span>
-                  <span className={styles.attachItemName}>{f.name}</span>
-                  <span className={styles.attachItemMeta}>{(f.size / 1024).toFixed(0)} KB</span>
-                  <button className={styles.attachRemove} onClick={() => removeNewFile(i)}>✕</button>
-                </div>
-              ))}
-              <label className={styles.filePickBtn}>
-                + Прикріпити файл
-                <input key={fileInputKey} type="file" multiple hidden accept="*/*" onChange={handleFiles} />
-              </label>
-            </div>
+          ))}
+          <div className={styles.linkInputRow}>
+            <input
+              className={styles.editInput}
+              placeholder="URL посилання"
+              value={linkForm.url}
+              onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && addLink()}
+            />
+            <input
+              className={styles.editInput}
+              placeholder="Підпис (необов'язково)"
+              value={linkForm.label}
+              onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
+              onKeyDown={(e) => e.key === "Enter" && addLink()}
+            />
+            <button className={styles.addLinkBtn} onClick={addLink}>Додати</button>
           </div>
-        )}
+        </div>
+
+        {/* Файли */}
+        <div className={styles.attachSection}>
+          <span className={styles.attachSectionLabel}>📎 Файли</span>
+          {isEdit && existingSubmission?.attachments?.map((att) => (
+            <div key={att.id} className={styles.attachItem}>
+              <span className={styles.attachItemIcon}>{fileIcon(att.name)}</span>
+              <span className={styles.attachItemName}>{att.name}</span>
+              <span className={styles.attachItemMeta}>збережено</span>
+            </div>
+          ))}
+          {files.map((f, i) => (
+            <div key={i} className={styles.attachItem}>
+              <span className={styles.attachItemIcon}>{fileIcon(f.name)}</span>
+              <span className={styles.attachItemName}>{f.name}</span>
+              <span className={styles.attachItemMeta}>{(f.size / 1024).toFixed(0)} KB</span>
+              <button className={styles.attachRemove} onClick={() => removeNewFile(i)}>✕</button>
+            </div>
+          ))}
+          <label className={styles.filePickBtn}>
+            + Прикріпити файл
+            <input key={fileInputKey} type="file" multiple hidden accept="*/*" onChange={handleFiles} />
+          </label>
+        </div>
       </div>
 
       {error && <p className={styles.formError}>{error}</p>}

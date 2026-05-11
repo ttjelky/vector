@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { usePolling } from "../../usePolling";
 import styles from "./styles/JuryTab.module.css";
 import API from "../../api";
 
@@ -209,20 +210,32 @@ export default function JuryTab({ tournamentId, rounds = [], loading, myRole }) 
   const [gradeError,    setGradeError]    = useState("");
   const [gradeSuccess,  setGradeSuccess]  = useState(false);
 
+  const [isDistributed, setIsDistributed] = useState(null); // null = невідомо, true/false після завантаження
+
   const isPrivileged = myRole === "owner" || myRole === "admin";
+
+  const fetchSubmissions = useCallback(async (initial = false) => {
+    if (initial) setSubsLoading(true);
+    try {
+      const r = await API.get(`/tournaments/${tournamentId}/jury/submissions/`);
+      setSubmissions(r.data.submissions ?? []);
+      setCriteria(r.data.criteria ?? []);
+      setIsTeam(r.data.is_team ?? false);
+      setIsDistributed(r.data.is_distributed ?? false);
+    } catch (err) {
+      console.error("Помилка завантаження подань:", err);
+    } finally {
+      if (initial) setSubsLoading(false);
+    }
+  }, [tournamentId]);
 
   useEffect(() => {
     if (!tournamentId) return;
-    setSubsLoading(true);
-    API.get(`/tournaments/${tournamentId}/jury/submissions/`)
-      .then(r => {
-        setSubmissions(r.data.submissions ?? []);
-        setCriteria(r.data.criteria ?? []);
-        setIsTeam(r.data.is_team ?? false);
-      })
-      .catch(err => console.error("Помилка завантаження подань:", err))
-      .finally(() => setSubsLoading(false));
-  }, [tournamentId]);
+    fetchSubmissions(true);
+  }, [tournamentId, fetchSubmissions]);
+
+  // Polling — оновлюємо список без перезавантаження сторінки
+  usePolling(fetchSubmissions, 15_000, !subsLoading && !!tournamentId);
 
   const filtered = useMemo(() => {
     let list = [...submissions];
@@ -334,6 +347,29 @@ export default function JuryTab({ tournamentId, rounds = [], loading, myRole }) 
       {/* ── Admin: розподіл робіт ── */}
       {isPrivileged && (
         <DistributePanel tournamentId={tournamentId} />
+      )}
+
+      {/* Distribution badge */}
+      {!isPrivileged && isDistributed !== null && (
+        <div className={isDistributed ? styles.distBadgeOk : styles.distBadgeWarn}>
+          {isDistributed ? (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Роботи розподілені адміністратором між членами журі
+            </>
+          ) : (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              Зверніть увагу — роботи ще не розподілені. Ви бачите всі здачі.
+            </>
+          )}
+        </div>
       )}
 
       {/* Stats */}
