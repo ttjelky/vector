@@ -269,21 +269,34 @@ export default function OverviewTab({ tournament, status, onSave, readOnly = fal
             <span className={styles.dcValue}>{formatDate(tournament.end_date) || "—"}</span>
           </div>
 
-          <div className={`${styles.dc} ${styles.dcOrange}`}>
-            <span className={styles.dcIcon}>
-              <svg viewBox="0 0 16 16" fill="none"><path d="M10.5 2H12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="5.5" y="1" width="5" height="3" rx="1" stroke="currentColor" strokeWidth="1.5"/><path d="M5 9l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </span>
-            <span className={styles.dcLabel}>Початок реєстрації</span>
-            <span className={styles.dcValue}>{formatDate(tournament.registration_start) || "—"}</span>
-          </div>
+          {tournament.open_registration ? (
+            <div className={`${styles.dc} ${styles.dcOpenReg}`}>
+              <span className={styles.dcIcon}>
+                <svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.515 1.5 3.5 3.515 3.5 6v1H2.5A1.5 1.5 0 0 0 1 8.5v5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-5A1.5 1.5 0 0 0 13.5 7H12.5V6c0-2.485-2.015-4.5-4.5-4.5Z" stroke="currentColor" strokeWidth="1.5"/><circle cx="8" cy="11" r="1.25" fill="currentColor"/><path d="M5.5 7h5V6a2.5 2.5 0 0 0-5 0v1Z" fill="currentColor" opacity=".18"/></svg>
+              </span>
+              <span className={styles.dcLabel}>Реєстрація</span>
+              <span className={styles.dcValue}>Вільна</span>
+              <span className={styles.dcOpenRegHint}>Будь-коли до кінця турніру</span>
+            </div>
+          ) : (
+            <>
+              <div className={`${styles.dc} ${styles.dcOrange}`}>
+                <span className={styles.dcIcon}>
+                  <svg viewBox="0 0 16 16" fill="none"><path d="M10.5 2H12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="5.5" y="1" width="5" height="3" rx="1" stroke="currentColor" strokeWidth="1.5"/><path d="M5 9l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </span>
+                <span className={styles.dcLabel}>Початок реєстрації</span>
+                <span className={styles.dcValue}>{formatDate(tournament.registration_start) || "—"}</span>
+              </div>
 
-          <div className={`${styles.dc} ${styles.dcOrange}`}>
-            <span className={styles.dcIcon}>
-              <svg viewBox="0 0 16 16" fill="none"><path d="M10.5 2H12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="5.5" y="1" width="5" height="3" rx="1" stroke="currentColor" strokeWidth="1.5"/><path d="M8 8v4M6 10h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-            </span>
-            <span className={styles.dcLabel}>Кінець реєстрації</span>
-            <span className={styles.dcValue}>{formatDate(tournament.registration_end) || "—"}</span>
-          </div>
+              <div className={`${styles.dc} ${styles.dcOrange}`}>
+                <span className={styles.dcIcon}>
+                  <svg viewBox="0 0 16 16" fill="none"><path d="M10.5 2H12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h1.5" stroke="currentColor" strokeWidth="1.5"/><rect x="5.5" y="1" width="5" height="3" rx="1" stroke="currentColor" strokeWidth="1.5"/><path d="M8 8v4M6 10h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                </span>
+                <span className={styles.dcLabel}>Кінець реєстрації</span>
+                <span className={styles.dcValue}>{formatDate(tournament.registration_end) || "—"}</span>
+              </div>
+            </>
+          )}
 
         </div>
       </section>

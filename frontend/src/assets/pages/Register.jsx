@@ -79,11 +79,69 @@ const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
       navigate(ROLE_HOME[returnedRole] ?? ROLE_HOME.participant);  // був хардкод '/admindashboard' — БАГ
 
     } catch (error) {
-      if (error.response?.data) {
-        setErrors(error.response.data);
-        if (error.response.data.email || error.response.data.first_name) setStep(1);
+      const serverErrors = error.response?.data;
+
+      if (serverErrors) {
+        const emailTranslations = {
+          "user with this email already exists": "Акаунт з такою поштою вже існує. Спробуйте увійти.",
+          "Enter a valid email address.": "Введіть коректну адресу електронної пошти.",
+        };
+
+        const passwordTranslations = {
+          "This password is too short. It must contain at least 8 characters.": "Пароль занадто короткий. Мінімум 8 символів.",
+          "This password is too common.": "Пароль занадто простий. Оберіть надійніший.",
+          "This password is entirely numeric.": "Пароль не може складатися лише з цифр.",
+        };
+
+        // Якщо прийшов об'єкт з полями (стандартний DRF)
+        if (typeof serverErrors === "object" && !Array.isArray(serverErrors)) {
+          const translatedErrors = { ...serverErrors };
+
+          if (serverErrors.email) {
+            translatedErrors.email = serverErrors.email.map(
+              (msg) => emailTranslations[msg] || msg
+            );
+          }
+          if (serverErrors.password) {
+            translatedErrors.password = serverErrors.password.map(
+              (msg) => passwordTranslations[msg] || msg
+            );
+          }
+
+          setErrors(translatedErrors);
+
+          if (serverErrors.email || serverErrors.first_name || serverErrors.last_name || serverErrors.password) {
+            setStep(1);
+          }
+          return;
+        }
+
+        // Якщо прийшов рядок або { detail: "..." } — перевіряємо на дублікат email/username
+        const rawMessage =
+          typeof serverErrors === "string"
+            ? serverErrors
+            : serverErrors.detail || "";
+
+        const isDuplicate =
+          rawMessage.toLowerCase().includes("unique") ||
+          rawMessage.toLowerCase().includes("already exists") ||
+          rawMessage.toLowerCase().includes("username") ||
+          rawMessage.toLowerCase().includes("constraint");
+
+        if (isDuplicate) {
+          setErrors({
+            email: ["Акаунт з такою поштою вже існує. Спробуйте увійти."],
+          });
+          setStep(1);
+          return;
+        }
+
+        // Загальна помилка
+        setErrors({ detail: "Сталася помилка. Спробуйте ще раз." });
+
       } else {
-        alert("Щось пішло не так. Перевірте з'єднання.");
+        setErrors({ detail: "Помилка з'єднання з сервером." });
+        setStep(1);
       }
     } finally {
       setIsLoading(false);
@@ -146,7 +204,22 @@ const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
                 <label className={styles.fieldLabel}>Email</label>
                 <input type="email" name="email" value={formData.email}
                   onChange={handleChange} className={styles.input} placeholder="ivan@example.com" required />
-                {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
+                {errors.email && (
+                  <span className={styles.errorText}>
+                    {errors.email[0]}
+                    {errors.email[0]?.includes("вже існує") && (
+                      <>
+                        {" "}
+                        <span
+                          onClick={onSwitchToLogin}
+                          style={{ cursor: "pointer", textDecoration: "underline", color: "inherit" }}
+                        >
+                          Увійти
+                        </span>
+                      </>
+                    )}
+                  </span>
+                )}
               </div>
 
               <div className={styles.field}>

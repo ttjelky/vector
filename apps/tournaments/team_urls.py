@@ -15,6 +15,7 @@ from .team_views import (
     TeamInviteAcceptView,
     TeamInviteDeclineView,
 )
+from .team_leaderboard_view import TeamLeaderboardDetailView
 
 urlpatterns = [
     # ── В межах турніру ──────────────────────────────────────────────────────
@@ -69,5 +70,10 @@ urlpatterns = [
         'team-invite/<uuid:token>/decline/',
         TeamInviteDeclineView.as_view(),
         name='team-invite-decline',
+    ),
+    path(
+        'tournaments/<int:tournament_pk>/leaderboard/team/<int:team_pk>/',
+        TeamLeaderboardDetailView.as_view(),
+        name='team-leaderboard-detail',
     ),
 ]

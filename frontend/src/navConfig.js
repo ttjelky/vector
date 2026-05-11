@@ -15,7 +15,6 @@ export const ROLE_TABS = {
   admin: [
     { key: "home",        label: "Головна",    path: "/admindashboard" },
     { key: "tournaments", label: "Турніри",    path: "/tournaments"    },
-    { key: "stats",       label: "Статистика", path: "/stats"          },
   ],
 
   jury: [

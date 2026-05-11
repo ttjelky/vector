@@ -66,10 +66,16 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
     } catch (error) {
       const serverMessage = error.response?.data?.detail;
       const translations = {
-        "No active account found with the given credentials": "Невірна пошта або пароль",
-        "User is inactive": "Акаунт не активовано",
+        "No active account found with the given credentials": "Акаунт з такою поштою не знайдено. Спробуйте зареєструватися.",
+        "User is inactive": "Акаунт не активовано. Перевірте пошту для підтвердження.",
       };
-      setErrors({ detail: translations[serverMessage] || "Помилка підключення до сервера" });
+
+      const isNotFound = serverMessage === "No active account found with the given credentials";
+
+      setErrors({
+        detail: translations[serverMessage] || "Помилка підключення до сервера",
+        notFound: isNotFound,
+      });
     }
   };
 
@@ -120,7 +126,20 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
           </div>
 
           {errors.detail && (
-            <p className={styles.errorText} style={{ marginTop: "8px" }}>{errors.detail}</p>
+            <p className={styles.errorText} style={{ marginTop: "8px" }}>
+              {errors.detail}
+              {errors.notFound && (
+                <>
+                  {" "}
+                  <span
+                    onClick={onSwitchToRegister}
+                    style={{ cursor: "pointer", textDecoration: "underline", color: "inherit" }}
+                  >
+                    Зареєструватися
+                  </span>
+                </>
+              )}
+            </p>
           )}
 
           <div className={styles.rememberme} style={{ marginTop: "16px" }}>

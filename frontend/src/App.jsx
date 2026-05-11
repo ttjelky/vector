@@ -13,7 +13,6 @@ import Profile              from "./assets/pages/Profile";
 import Settings             from "./assets/pages/Settings";
 import Works                from "./assets/pages/Works";
 import Tournaments          from "./assets/pages/Tournaments";
-import Stats                from "./assets/pages/Stats";
 import ResetPassword        from "./assets/pages/ResetPassword";
 import TournamentPage       from "./assets/pages/TournamentPage";
 import JoinTournamentPage   from "./assets/pages/JoinTournamentPage";
@@ -50,15 +49,6 @@ const App = () => (
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminTournaments />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/stats"
-          element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <Stats />
             </ProtectedRoute>
           }
         />

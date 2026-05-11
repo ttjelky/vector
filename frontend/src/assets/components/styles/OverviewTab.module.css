@@ -320,46 +320,65 @@
 .richContent strike { text-decoration: line-through; }
 
 /* ══════════════════════════════════════════════════
-   DETAIL GRID CARDS
+   DETAIL GRID CARDS — macOS Liquid Glass
    ══════════════════════════════════════════════════ */
 
 .detailGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 10px;
 }
 
-/* Базова картка */
+/* Базова картка — liquid glass */
 .dc {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 14px 15px 15px;
-  background: #fafafa;
-  border: 1px solid #ebebed;
-  border-radius: 14px;
+  gap: 3px;
+  padding: 14px 15px 16px;
+  border-radius: 18px;
   overflow: hidden;
-  transition: box-shadow 0.15s, transform 0.1s;
+  transition: box-shadow 0.22s ease, transform 0.18s ease, background 0.2s ease;
+
+  /* Glass base */
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.10),
+    0 1px 4px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .dc:hover {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.13),
+    0 3px 8px rgba(0, 0, 0, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.78);
 }
 
-/* Кольорова смужка зверху — вказує групу */
+/* Верхній shine-блік */
 .dc::before {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 3px;
-  border-radius: 14px 14px 0 0;
+  height: 44%;
+  border-radius: 18px 18px 60% 60% / 18px 18px 30px 30px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.0) 100%
+  );
+  pointer-events: none;
 }
 
-.dcBlue::before   { background: #a8c8f0; }
-.dcGreen::before  { background: #85d4b0; }
-.dcOrange::before { background: #f0c080; }
+/* Кольорова мікросмужка знизу — прибрана */
+.dc::after {
+  display: none;
+}
 
 /* Іконка */
 .dcIcon {
@@ -368,13 +387,20 @@
   height: 28px;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  margin-bottom: 6px;
+  border-radius: 9px;
+  margin-bottom: 7px;
+  flex-shrink: 0;
+
+  /* Glass icon bg */
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
 }
 
-.dcBlue   .dcIcon { background: #eef5fc; color: #4a90d9; }
-.dcGreen  .dcIcon { background: #edf9f3; color: #2ea876; }
-.dcOrange .dcIcon { background: #fef6ea; color: #d4880a; }
+.dcBlue   .dcIcon { color: #2563eb; }
+.dcGreen  .dcIcon { color: #059669; }
+.dcOrange .dcIcon { color: #d97706; }
+.dcOpenReg .dcIcon { color: #0891b2; }
 
 .dcIcon svg {
   width: 14px;
@@ -384,11 +410,11 @@
 
 /* Підпис */
 .dcLabel {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #bbb;
+  color: rgba(0, 0, 0, 0.38);
   line-height: 1;
 }
 
@@ -396,9 +422,17 @@
 .dcValue {
   font-size: 14.5px;
   font-weight: 700;
-  color: #111;
+  color: rgba(0, 0, 0, 0.82);
   line-height: 1.3;
+  margin-top: 2px;
+}
+
+/* Підказка під значенням (лише dcOpenReg) */
+.dcOpenRegHint {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.38);
   margin-top: 1px;
+  line-height: 1.3;
 }
 
 /* ─── Detail grid: last-row cards fill empty space ───────────────────────── */
@@ -409,9 +443,7 @@
   grid-column: span 2;
 }
 
-/* Team (7 cards): last 3 cards each span ~1.33 — not cleanly divisible.
-   Better: last row has 3 cards → first gets span 2, rest span 1 each = 4.
-   Achieved by: 5th spans 2, 6th spans 1, 7th spans 1 */
+/* Team (7 cards): 5th spans 2, 6th and 7th span 1 each */
 .detailGrid[data-team] .dc:nth-child(5) {
   grid-column: span 2;
 }
