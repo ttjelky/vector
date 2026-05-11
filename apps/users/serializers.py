@@ -42,13 +42,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
     Accept { email, password } instead of { username, password }.
-    We look up the user by email, then let the parent handle
-    password validation and token generation normally.
+    Works correctly even if username != email (legacy accounts).
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Swap out the 'username' field for 'email'
         self.fields.pop('username', None)
         self.fields['email'] = serializers.EmailField(required=True)
 
@@ -61,19 +59,33 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             user = User.objects.get(email__iexact=email)
         except User.DoesNotExist:
             raise serializers.ValidationError(
-                {'email': 'No account found with this email.'}
+                "No active account found with the given credentials"
             )
 
-        # Re-inject as 'username' so the parent validator can authenticate
+        # Ensure username == email (fix legacy accounts on the fly)
+        if user.username != user.email:
+            user.username = user.email
+            user.save(update_fields=['username'])
+
+        # Authenticate directly to avoid issues with mismatched USERNAME_FIELD
+        authed = authenticate(
+            request=self.context.get('request'),
+            username=user.username,
+            password=password,
+        )
+        if authed is None:
+            raise serializers.ValidationError(
+                "No active account found with the given credentials"
+            )
+
+        # Generate tokens via parent using the correct username
         attrs['username'] = user.username
-        # Remove our custom field so parent doesn't choke on unknown keys
         attrs.pop('email', None)
 
         data = super().validate(attrs)
 
-        # Enrich the token response
         data['email']      = self.user.email
-        data['username']   = self.user.email   # expose email as username to frontend
+        data['username']   = self.user.email
         data['first_name'] = self.user.first_name
         data['last_name']  = self.user.last_name
 

@@ -54,7 +54,7 @@ const passwordTranslations = {
   "This password is entirely numeric.": "Пароль не може складатися лише з цифр.",
 };
 
-const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
+const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [role, setRole] = useState("");
@@ -118,7 +118,11 @@ const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
       );
 
       onClose();
-      navigate(ROLE_HOME[returnedRole] ?? ROLE_HOME.participant);
+      if (onRegisterSuccess) {
+        onRegisterSuccess();
+      } else {
+        navigate(ROLE_HOME[returnedRole] ?? ROLE_HOME.participant);
+      }
 
     } catch {
       // Реєстрація пройшла успішно, але автологін не вдався

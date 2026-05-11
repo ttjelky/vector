@@ -333,16 +333,15 @@ class VerifyInvitePinView(APIView):
                         tournament=tournament, user=request.user
                     ).exists()
                 )
-                if not already and not tournament.registration_open():
-                    return Response(
-                        {'detail': 'Реєстрація учасників зараз закрита.'},
-                        status=status.HTTP_403_FORBIDDEN,
-                    )
+                registration_closed = not already and not tournament.registration_open()
+            else:
+                registration_closed = False
 
             return Response({
-                'valid':           True,
-                'tournament_name': tournament.name,
-                'role':            role,
+                'valid':                True,
+                'tournament_name':      tournament.name,
+                'role':                 role,
+                'registration_closed':  registration_closed,
             })
 
         return Response(
