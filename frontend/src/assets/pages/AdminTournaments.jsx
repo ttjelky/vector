@@ -126,7 +126,7 @@ const AdminTournaments = () => {
               className={`${styles.segmentTab} ${tab === "archive" ? styles.segmentTabActive : ""}`}
               onClick={() => setTab("archive")}
             >
-              🗄 Архів
+              Архів
               <span className={styles.segmentTabBadge}>{archive.length}</span>
             </button>
           </div>

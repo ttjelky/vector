@@ -7,7 +7,7 @@ import { usePolling } from "../../usePolling";
 const REACTIONS = ["👍", "❤️", "🔥", "😂", "😮", "👏"];
 
 const ROLE_OPTIONS = [
-  { value: "all",         label: "Усі учасники",    short: "Усі" },
+  { value: "all",         label: "Усі",    short: "Усі" },
   { value: "participant", label: "Учасники",         short: "Учасники" },
   { value: "jury",        label: "Журі",             short: "Журі" },
   { value: "admin",       label: "Адміністратори",   short: "Адміни" },
