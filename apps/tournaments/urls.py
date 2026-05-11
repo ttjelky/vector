@@ -14,7 +14,6 @@ from .views import (
     SubmissionListCreateView, SubmissionDetailView,
     SubmissionLinkCreateView, SubmissionLinkDeleteView,
     SubmissionAttachmentCreateView, SubmissionAttachmentDeleteView,
-    JurySubmissionsView, JuryGradeView,
     SubmissionGradeView, ParticipantGradesNewsView,
     LeaderboardView, LeaderboardDetailView,
     RegistrationExceptionView,
@@ -28,7 +27,11 @@ from .team_views import (
     MyTeamView,
     TeamInviteInfoView, TeamInviteAcceptView, TeamInviteDeclineView,
 )
-from .jury_views import JuryPendingSubmissionsView
+from .jury_views import JuryPendingSubmissionsView, JurySubmissionsView, JuryGradeView
+from .criteria_views import (
+      TournamentCriteriaView,
+      TournamentCriterionDetailView,
+  )
 from .team_leaderboard_view import TeamLeaderboardDetailView
 
 urlpatterns = [
@@ -144,4 +147,8 @@ urlpatterns = [
          AnnouncementCommentDetailView.as_view(),     name='announcement-comment-detail'),
     path('<int:tournament_pk>/announcements/<int:ann_pk>/comments/<int:comment_pk>/react/',
          AnnouncementCommentReactView.as_view(),      name='announcement-comment-react'),
+     
+    # ── Criteria ───────────────────────────────────────────────────────────────
+    path('<int:pk>/criteria/',           TournamentCriteriaView.as_view(),        name='tournament-criteria'),
+    path('<int:pk>/criteria/<int:cid>/', TournamentCriterionDetailView.as_view(), name='tournament-criterion-detail'),
 ]

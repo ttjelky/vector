@@ -31,7 +31,7 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
 
     try {
       const response = await loginUser({
-        username: loginData.email,
+        email: loginData.email,
         password: loginData.password,
       });
 

@@ -295,6 +295,10 @@ const tabs = [
               tournamentType={tournament?.tournament_type}
               maxParticipants={tournament.max_teams}
               tournamentStatus={status}
+              openRegistration={
+                tournament?.open_registration ||
+                (!tournament?.registration_start && !tournament?.registration_end)
+              }
             />
           )}
         

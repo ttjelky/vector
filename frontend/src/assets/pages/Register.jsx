@@ -43,6 +43,17 @@ const ROLES = [
   },
 ];
 
+const emailTranslations = {
+  "user with this email already exists": "Акаунт з такою поштою вже існує. Спробуйте увійти.",
+  "Enter a valid email address.": "Введіть коректну адресу електронної пошти.",
+};
+
+const passwordTranslations = {
+  "This password is too short. It must contain at least 8 characters.": "Пароль занадто короткий. Мінімум 8 символів.",
+  "This password is too common.": "Пароль занадто простий. Оберіть надійніший.",
+  "This password is entirely numeric.": "Пароль не може складатися лише з цифр.",
+};
+
 const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -59,90 +70,61 @@ const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
+
+    // ── Крок 1: реєстрація ────────────────────────────────────────
     try {
       await registerUser({ ...formData, role });
+    } catch (error) {
+      const serverErrors = error.response?.data;
 
-      const response = await loginUser({ username: formData.email, password: formData.password });
+      if (serverErrors && typeof serverErrors === "object" && !Array.isArray(serverErrors)) {
+        const translatedErrors = { ...serverErrors };
+
+        if (serverErrors.email) {
+          translatedErrors.email = serverErrors.email.map(
+            (msg) => emailTranslations[msg] || msg
+          );
+        }
+        if (serverErrors.password) {
+          translatedErrors.password = serverErrors.password.map(
+            (msg) => passwordTranslations[msg] || msg
+          );
+        }
+
+        setErrors(translatedErrors);
+        // Якщо помилка у полях форми — повертаємось на крок 1
+        if (serverErrors.email || serverErrors.first_name || serverErrors.last_name || serverErrors.password) {
+          setStep(1);
+        }
+      } else {
+        setErrors({ detail: "Сталася помилка. Спробуйте ще раз." });
+        setStep(1);
+      }
+
+      setIsLoading(false);
+      return; // зупиняємось — не йдемо до логіну
+    }
+
+    // ── Крок 2: автологін після успішної реєстрації ───────────────
+    try {
+      const response = await loginUser({ email: formData.email, password: formData.password });
       const { access, first_name, last_name, role: returnedRole = "participant" } = response.data;
 
-      // ── Зберігаємо так само як Login.jsx ──────────────────────
       localStorage.setItem("accessToken", access);
-      localStorage.setItem("userRole", returnedRole);               // був 'role' — БАГ
+      localStorage.setItem("userRole", returnedRole);
       localStorage.setItem(
         "fullUserName",
         `${first_name || formData.first_name} ${last_name || formData.last_name}`.trim()
       );
 
       onClose();
+      navigate(ROLE_HOME[returnedRole] ?? ROLE_HOME.participant);
 
-      // ── Редірект на основі ролі, як у Login.jsx ───────────────
-      navigate(ROLE_HOME[returnedRole] ?? ROLE_HOME.participant);  // був хардкод '/admindashboard' — БАГ
-
-    } catch (error) {
-      const serverErrors = error.response?.data;
-
-      if (serverErrors) {
-        const emailTranslations = {
-          "user with this email already exists": "Акаунт з такою поштою вже існує. Спробуйте увійти.",
-          "Enter a valid email address.": "Введіть коректну адресу електронної пошти.",
-        };
-
-        const passwordTranslations = {
-          "This password is too short. It must contain at least 8 characters.": "Пароль занадто короткий. Мінімум 8 символів.",
-          "This password is too common.": "Пароль занадто простий. Оберіть надійніший.",
-          "This password is entirely numeric.": "Пароль не може складатися лише з цифр.",
-        };
-
-        // Якщо прийшов об'єкт з полями (стандартний DRF)
-        if (typeof serverErrors === "object" && !Array.isArray(serverErrors)) {
-          const translatedErrors = { ...serverErrors };
-
-          if (serverErrors.email) {
-            translatedErrors.email = serverErrors.email.map(
-              (msg) => emailTranslations[msg] || msg
-            );
-          }
-          if (serverErrors.password) {
-            translatedErrors.password = serverErrors.password.map(
-              (msg) => passwordTranslations[msg] || msg
-            );
-          }
-
-          setErrors(translatedErrors);
-
-          if (serverErrors.email || serverErrors.first_name || serverErrors.last_name || serverErrors.password) {
-            setStep(1);
-          }
-          return;
-        }
-
-        // Якщо прийшов рядок або { detail: "..." } — перевіряємо на дублікат email/username
-        const rawMessage =
-          typeof serverErrors === "string"
-            ? serverErrors
-            : serverErrors.detail || "";
-
-        const isDuplicate =
-          rawMessage.toLowerCase().includes("unique") ||
-          rawMessage.toLowerCase().includes("already exists") ||
-          rawMessage.toLowerCase().includes("username") ||
-          rawMessage.toLowerCase().includes("constraint");
-
-        if (isDuplicate) {
-          setErrors({
-            email: ["Акаунт з такою поштою вже існує. Спробуйте увійти."],
-          });
-          setStep(1);
-          return;
-        }
-
-        // Загальна помилка
-        setErrors({ detail: "Сталася помилка. Спробуйте ще раз." });
-
-      } else {
-        setErrors({ detail: "Помилка з'єднання з сервером." });
-        setStep(1);
-      }
+    } catch {
+      // Реєстрація пройшла успішно, але автологін не вдався
+      // (наприклад, сервер тимчасово недоступний)
+      setErrors({ detail: "Акаунт створено! Тепер увійдіть вручну." });
+      // Не повертаємось на крок 1 — показуємо повідомлення на кроці 2
     } finally {
       setIsLoading(false);
     }

@@ -8,6 +8,7 @@ import Users from "./static/icons/Users.svg?react";
 import { RichTextArea } from "./RichTextArea";
 import heic2any from "heic2any";
 import { computeStatus } from "../components/tournamentHelpers";
+import CriteriaEditor, { DEFAULT_CRITERIA } from "./CriteriaEditor";
 
 const ACCENT_COLORS = ["#82b3e4", "#4ad44c", "#ca7979", "#c76db0", "#8e5edf", "#eccb5c"];
 
@@ -165,6 +166,7 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
   const [maxTeams,       setMaxTeams]       = useState("");
   const [regStart,       setRegStart]       = useState("");
   const [regEnd,         setRegEnd]         = useState("");
+  const [criteria,       setCriteria]       = useState(DEFAULT_CRITERIA);
 
   // ── Відкрита реєстрація ──────────────────────────────────────────────────
   const [openRegistration, setOpenRegistration] = useState(false);
@@ -361,7 +363,13 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
     if (imageMode === "custom" && customFile) body.append("custom_image", customFile);
     try {
       const { status, data } = await api.post("/tournaments/", body);
-      if (status === 201) { onCreate(data); handleClose(); }
+      if (status === 201) {
+        if (criteria.length > 0) {
+          await api.put(`/tournaments/${data.id}/criteria/`, criteria);
+        }
+        onCreate(data);
+        handleClose();
+      }
     } catch (err) {
       console.error(err.response?.data);
     }
@@ -549,13 +557,19 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                     />
                   </div>
                   <div className={`${styles.field} ${styles.stagger2}`}>
-                    <label htmlFor="desc" className={styles.label}>Опис</label>
+                    <label htmlFor="desc" className={styles.label}>Опис *</label>
                     <RichTextArea
                       id="desc" rows={4}
                       placeholder="Призи, партнери, формат проведення..."
                       value={description} onChange={(e) => setDescription(e.target.value)}
                     />
                   </div>
+
+                  <div className={`${styles.sectionDivider} ${styles.stagger4}`}>
+                    <span className={styles.sectionTitle}>Критерії оцінювання журі</span>
+                    <span className={styles.sectionLine} />
+                  </div>
+                  <CriteriaEditor criteria={criteria} onChange={setCriteria} styles={styles} />
 
                   {/* ── Реєстрація ── */}
                   <div className={`${styles.sectionDivider} ${styles.stagger3}`}>
