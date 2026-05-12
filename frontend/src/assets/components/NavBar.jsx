@@ -18,10 +18,10 @@ import cross           from "./static/icons/cross.svg";
 import NewsIcon        from "./static/icons/News.svg?react";
 
 import { ComposeModal, NotificationDropdown } from './Notifications';
-import { mediaUrl } from '../../api';
+import { mediaUrl, getAccessToken, getUserRole, clearAccessToken, logoutUser } from '../../api';
 
-const API_BASE = 'http://127.0.0.1:8000/api';
-const getToken = () => localStorage.getItem('accessToken');
+const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:8000/api';
+const getToken = () => getAccessToken();
 
 const ICON_MAP = {
   home:        HomeIcon,
@@ -105,7 +105,9 @@ const useTournamentRemovalPolling = (openTabs, removeTabById) => {
     const check = async () => {
       for (const tab of openTabs) {
         try {
-          const res = await API.get(`/tournaments/${tab.id}/my-role/`);
+          const res = await fetch(`${API_BASE}/tournaments/${tab.id}/my-role/`, {
+            headers: { Authorization: `Bearer ${getToken()}` },
+          });
           if (res.status === 403 || res.status === 404) removeTabById(tab.id);
         } catch (err) {
           if (err.response?.status === 403 || err.response?.status === 404) {
@@ -234,7 +236,7 @@ const NavBar = ({ children }) => {
   const fetchNotifs = async () => {
     setNotifsLoading(true);
     try {
-      const res = await fetch(`${API.defaults.baseURL}/notifications/`, { headers: { Authorization: `Bearer ${getAccessToken()}` } });
+      const res = await fetch(`${API_BASE}/notifications/`, { headers: { Authorization: `Bearer ${getToken()}` } });
       if (res.ok) setNotifs(await res.json());
     } catch {} finally { setNotifsLoading(false); }
   };
@@ -249,12 +251,12 @@ const NavBar = ({ children }) => {
   }, [bellOpen]);
 
   const markAllRead = async () => {
-    await fetch(`${API.defaults.baseURL}/notifications/mark-read/`, { method: 'POST', headers: { Authorization: `Bearer ${getAccessToken()}` } });
+    await fetch(`${API_BASE}/notifications/mark-read/`, { method: 'POST', headers: { Authorization: `Bearer ${getToken()}` } });
     setNotifs(n => n.map(x => ({ ...x, is_read: true })));
   };
 
   const markOneRead = async (id) => {
-    await fetch(`${API.defaults.baseURL}/notifications/mark-read/${id}/`, { method: 'POST', headers: { Authorization: `Bearer ${getAccessToken()}` } });
+    await fetch(`${API_BASE}/notifications/mark-read/${id}/`, { method: 'POST', headers: { Authorization: `Bearer ${getToken()}` } });
     setNotifs(n => n.map(x => x.id === id ? { ...x, is_read: true } : x));
   };
 

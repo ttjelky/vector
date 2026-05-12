@@ -1,18 +1,4 @@
-/**
- * api.js
- *
- * Схема:
- *  • Access token — зберігається ТІЛЬКИ у змінній пам'яті (_accessToken).
- *  • User role    — зберігається ТІЛЬКИ у змінній пам'яті (_userRole).
- *    Ніякого localStorage для чутливих даних. Не доступні скриптам після перезавантаження.
- *  • Refresh token — httpOnly cookie, JS його не бачить взагалі.
- *
- *  • При кожному запиті — додаємо Authorization: Bearer <_accessToken>.
- *  • При 401 — автоматично викликаємо /token/refresh/, отримуємо новий access,
- *    зберігаємо в пам'яті і повторюємо оригінальний запит.
- *  • При перезавантаженні сторінки — restoreSession() відновлює access token
- *    через refresh cookie (якщо вона ще жива).
- */
+import axios from "axios";
 
 export const MEDIA_URL = import.meta.env.VITE_MEDIA_URL ?? 'http://127.0.0.1:8000';
 
