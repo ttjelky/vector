@@ -1,15 +1,24 @@
+
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
-from .views import RegisterView, MyTokenObtainPairView
-from .views import dashboard_data
-from .views import profile, jury_submissions
-from . import views
+from .views import (
+    MyTokenObtainPairView,
+    CookieTokenRefreshView,
+    LogoutView,
+    RegisterView,
+    profile,
+    jury_submissions,
+    dashboard_data,
+)
 
 urlpatterns = [
-    path('register/', RegisterView.as_view(), name='api_register'),
-    path('login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('profile/', views.profile),
-    path('profile/jury-submissions/', views.jury_submissions),
-    path('chart/', dashboard_data),
+    # ── Auth ──────────────────────────────────────────────────────────────────
+    path("login/",         MyTokenObtainPairView.as_view(),  name="token-obtain"),
+    path("token/refresh/", CookieTokenRefreshView.as_view(), name="token-refresh"),
+    path("logout/",        LogoutView.as_view(),             name="logout"),
+    path("register/",      RegisterView.as_view(),           name="register"),
+
+    # ── Profile & misc ────────────────────────────────────────────────────────
+    path("profile/",           profile,          name="profile"),
+    path("jury-submissions/",  jury_submissions,  name="jury-submissions"),
+    path("dashboard/",         dashboard_data,    name="dashboard"),
 ]

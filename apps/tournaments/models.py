@@ -585,3 +585,141 @@ class Certificate(models.Model):
 
     def __str__(self):
         return f"{self.recipient.username} — {self.cert_type} — {self.tournament.name}"
+
+# ── Announcements ─────────────────────────────────────────────────────────────
+
+ANNOUNCEMENT_TARGET_CHOICES = [
+    ('all',         'Усі учасники'),
+    ('participant', 'Учасники'),
+    ('jury',        'Журі'),
+    ('admin',       'Адміністратори'),
+    ('owner',       'Власник'),
+]
+
+
+class Announcement(models.Model):
+    tournament  = models.ForeignKey(
+        Tournament, on_delete=models.CASCADE, related_name='announcements'
+    )
+    author      = models.ForeignKey(
+        'users.User', on_delete=models.SET_NULL,
+        null=True, related_name='announcements'
+    )
+    title       = models.CharField(max_length=200, verbose_name='Заголовок')
+    body        = models.TextField(blank=True, verbose_name='Текст')
+    target_role = models.CharField(
+        max_length=20, choices=ANNOUNCEMENT_TARGET_CHOICES,
+        default='all', verbose_name='Аудиторія'
+    )
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Оголошення'
+        verbose_name_plural = 'Оголошення'
+
+    def __str__(self):
+        return f'[{self.tournament}] {self.title}'
+
+
+class AnnouncementComment(models.Model):
+    announcement = models.ForeignKey(
+        Announcement, on_delete=models.CASCADE, related_name='comments'
+    )
+    author     = models.ForeignKey(
+        'users.User', on_delete=models.SET_NULL,
+        null=True, related_name='announcement_comments'
+    )
+    text       = models.TextField(verbose_name='Текст')
+    parent     = models.ForeignKey(
+        'self', on_delete=models.CASCADE,
+        null=True, blank=True, related_name='replies'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = 'Коментар'
+        verbose_name_plural = 'Коментарі'
+
+    def __str__(self):
+        return f'{self.author} → [{self.announcement}]'
+
+
+class AnnouncementReaction(models.Model):
+    """
+    Реакція на Оголошення АБО Коментар (nullable FK).
+    Toggle: той самий emoji — знімаємо; інший — замінюємо.
+    """
+    user         = models.ForeignKey('users.User', on_delete=models.CASCADE)
+    announcement = models.ForeignKey(
+        Announcement, on_delete=models.CASCADE,
+        null=True, blank=True, related_name='reactions'
+    )
+    comment      = models.ForeignKey(
+        AnnouncementComment, on_delete=models.CASCADE,
+        null=True, blank=True, related_name='reactions'
+    )
+    emoji      = models.CharField(max_length=10)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'announcement'],
+                condition=models.Q(announcement__isnull=False),
+                name='unique_ann_reaction_per_user',
+            ),
+            models.UniqueConstraint(
+                fields=['user', 'comment'],
+                condition=models.Q(comment__isnull=False),
+                name='unique_comment_reaction_per_user',
+            ),
+        ]
+        verbose_name = 'Реакція'
+        verbose_name_plural = 'Реакції'
+
+class JuryGradingCriterion(models.Model):
+    tournament = models.ForeignKey(
+        Tournament,
+        on_delete=models.CASCADE,
+        related_name="grading_criteria",
+        verbose_name="Турнір",
+    )
+    key = models.SlugField(
+        max_length=80,
+        verbose_name="Ключ (slug)",
+        help_text="Унікальний slug у межах турніру. Використовується як ключ у Grade.scores",
+    )
+    label = models.CharField(max_length=200, verbose_name="Назва критерію")
+    max_score = models.PositiveSmallIntegerField(
+        default=10,
+        verbose_name="Максимальний бал",
+    )
+    group = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        verbose_name="Група",
+        help_text="Необов'язкова назва групи критеріїв (напр. 'Технічна частина')",
+    )
+    hint = models.CharField(
+        max_length=300,
+        blank=True,
+        default="",
+        verbose_name="Підказка",
+        help_text="Коротка підказка для журі, що саме оцінювати",
+    )
+    order = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name="Порядок відображення",
+    )
+
+    class Meta:
+        ordering = ["order", "id"]
+        unique_together = ("tournament", "key")
+        verbose_name = "Критерій оцінювання"
+        verbose_name_plural = "Критерії оцінювання"
+
+    def __str__(self):
+        return f"[{self.tournament.name}] {self.label} (макс. {self.max_score})"

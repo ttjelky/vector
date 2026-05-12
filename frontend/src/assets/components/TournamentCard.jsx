@@ -69,11 +69,20 @@ export default function TournamentCard({
   imageMode = "none", stockImage, customImage,
 }) {
   const renderImage = () => {
-    if (imageMode === "custom" && customImage) {
+    if (imageMode === "custom") {
+      if (customImage) {
+        return (
+          <div className={styles.previewImage}>
+            <img src={customImage} alt={name} className={styles.cardImg} />
+          </div>
+        );
+      }
+      // Зображення ще не завантажено — сірий placeholder
       return (
-        <div className={styles.previewImage}>
-          <img src={customImage} alt={name} className={styles.cardImg} />
-        </div>
+        <div
+          className={styles.previewImage}
+          style={{ background: "linear-gradient(135deg, #e0e0e4 0%, #f0f0f3 100%)" }}
+        />
       );
     }
     if (imageMode === "stock") {

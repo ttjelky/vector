@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import styles from "../components/styles/registerPage.module.css";
 import cross from "../components/static/icons/cross.svg";
-import { registerUser, loginUser } from '../../api';
-import { useNavigate } from 'react-router-dom';
-import { ROLE_HOME } from '../../navConfig';
+import { registerUser, setAccessToken, setUserRole } from "../../api";
+import { useNavigate } from "react-router-dom";
+import { ROLE_HOME } from "../../navConfig";
 
 const ROLES = [
   {
     value: "admin",
     label: "Адміністратор",
-    desc: "Створюю та керую турнірами",
+    desc:  "Створюю та керую турнірами",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -19,7 +19,7 @@ const ROLES = [
   {
     value: "participant",
     label: "Учасник",
-    desc: "Беру участь у турнірах та змагаюся",
+    desc:  "Беру участь у турнірах та змагаюся",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -32,7 +32,7 @@ const ROLES = [
   {
     value: "jury",
     label: "Журі",
-    desc: "Оцінюю роботи та виставляю бали",
+    desc:  "Оцінюю роботи та виставляю бали",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="3" width="20" height="14" rx="2"/>
@@ -43,47 +43,73 @@ const ROLES = [
   },
 ];
 
-const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
-  const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [role, setRole] = useState("");
-  const [formData, setFormData] = useState({ first_name: '', last_name: '', email: '', password: '' });
-  const [errors, setErrors] = useState({});
+const emailTranslations = {
+  "user with this email already exists":  "Акаунт з такою поштою вже існує. Спробуйте увійти.",
+  "Enter a valid email address.":          "Введіть коректну адресу електронної пошти.",
+};
+const passwordTranslations = {
+  "This password is too short. It must contain at least 8 characters.": "Пароль занадто короткий. Мінімум 8 символів.",
+  "This password is too common.":           "Пароль занадто простий. Оберіть надійніший.",
+  "This password is entirely numeric.":     "Пароль не може складатися лише з цифр.",
+};
+
+const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
+  const navigate  = useNavigate();
+  const [step,     setStep]     = useState(1);
+  const [role,     setRole]     = useState("");
+  const [formData, setFormData] = useState({ first_name: "", last_name: "", email: "", password: "" });
+  const [errors,   setErrors]   = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
-    try {
-      await registerUser({ ...formData, role });
 
-      const response = await loginUser({ username: formData.email, password: formData.password });
+    try {
+      const response = await registerUser({ ...formData, role });
       const { access, first_name, last_name, role: returnedRole = "participant" } = response.data;
 
-      // ── Зберігаємо так само як Login.jsx ──────────────────────
-      localStorage.setItem("accessToken", access);
-      localStorage.setItem("userRole", returnedRole);               // був 'role' — БАГ
-      localStorage.setItem(
-        "fullUserName",
-        `${first_name || formData.first_name} ${last_name || formData.last_name}`.trim()
-      );
+      // ── Access token і роль — тільки в пам'яті (захищено) ─────────────────
+      if (access) setAccessToken(access);
+      setUserRole(returnedRole);
 
+      // ── Не-чутливі UI-дані — можна в localStorage ─────────────────────────
+      localStorage.setItem("userRole",     returnedRole);
+      localStorage.setItem("fullUserName", `${first_name || formData.first_name} ${last_name || formData.last_name}`.trim());
+
+      // Refresh token вже записаний бекендом у httpOnly cookie
+
+      window.dispatchEvent(new Event("auth-changed"));
       onClose();
 
-      // ── Редірект на основі ролі, як у Login.jsx ───────────────
-      navigate(ROLE_HOME[returnedRole] ?? ROLE_HOME.participant);  // був хардкод '/admindashboard' — БАГ
+      if (onRegisterSuccess) {
+        onRegisterSuccess();
+      } else {
+        navigate(ROLE_HOME[returnedRole] ?? ROLE_HOME.participant);
+      }
 
     } catch (error) {
-      if (error.response?.data) {
-        setErrors(error.response.data);
-        if (error.response.data.email || error.response.data.first_name) setStep(1);
+      const serverErrors = error.response?.data;
+
+      if (serverErrors && typeof serverErrors === "object" && !Array.isArray(serverErrors)) {
+        const translated = { ...serverErrors };
+        if (serverErrors.email) {
+          translated.email = serverErrors.email.map((m) => emailTranslations[m] || m);
+        }
+        if (serverErrors.password) {
+          translated.password = serverErrors.password.map((m) => passwordTranslations[m] || m);
+        }
+        setErrors(translated);
+        if (serverErrors.email || serverErrors.first_name || serverErrors.last_name || serverErrors.password) {
+          setStep(1);
+        }
       } else {
-        alert("Щось пішло не так. Перевірте з'єднання.");
+        setErrors({ detail: "Сталася помилка. Спробуйте ще раз." });
+        setStep(1);
       }
     } finally {
       setIsLoading(false);
@@ -93,7 +119,7 @@ const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
   const handleClose = () => {
     setStep(1);
     setRole("");
-    setFormData({ first_name: '', last_name: '', email: '', password: '' });
+    setFormData({ first_name: "", last_name: "", email: "", password: "" });
     setErrors({});
     onClose();
   };
@@ -106,12 +132,11 @@ const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
     <div className={styles.overlay} onClick={handleClose}>
       <div className={styles.register} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
 
-        {/* Floating header */}
         <div className={styles.header}>
           <div className={styles.stepIndicator}>
-            <div className={`${styles.stepDot} ${step >= 1 ? styles.stepDotActive : ''}`} />
-            <div className={`${styles.stepLine} ${step >= 2 ? styles.stepLineActive : ''}`} />
-            <div className={`${styles.stepDot} ${step >= 2 ? styles.stepDotActive : ''}`} />
+            <div className={`${styles.stepDot} ${step >= 1 ? styles.stepDotActive : ""}`} />
+            <div className={`${styles.stepLine} ${step >= 2 ? styles.stepLineActive : ""}`} />
+            <div className={`${styles.stepDot} ${step >= 2 ? styles.stepDotActive : ""}`} />
           </div>
           <img src={cross} alt="Закрити" className={styles.cross} onClick={handleClose} />
         </div>
@@ -146,7 +171,20 @@ const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
                 <label className={styles.fieldLabel}>Email</label>
                 <input type="email" name="email" value={formData.email}
                   onChange={handleChange} className={styles.input} placeholder="ivan@example.com" required />
-                {errors.email && <span className={styles.errorText}>{errors.email[0]}</span>}
+                {errors.email && (
+                  <span className={styles.errorText}>
+                    {errors.email[0]}
+                    {errors.email[0]?.includes("вже існує") && (
+                      <>
+                        {" "}
+                        <span onClick={onSwitchToLogin}
+                          style={{ cursor: "pointer", textDecoration: "underline", color: "inherit" }}>
+                          Увійти
+                        </span>
+                      </>
+                    )}
+                  </span>
+                )}
               </div>
 
               <div className={styles.field}>
@@ -157,7 +195,6 @@ const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
               </div>
 
               <hr className={styles.divider} />
-
               <div className={styles.underform}>
                 <div onClick={onSwitchToLogin} style={{ cursor: "pointer" }}>
                   <span>Вже маєте акаунт? </span>
@@ -179,12 +216,11 @@ const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
               <div className={styles.roleGrid}>
                 {ROLES.map(({ value, label, desc, icon }) => (
                   <button
-                    key={value}
-                    type="button"
-                    className={`${styles.roleCard} ${role === value ? styles.roleCardActive : ''}`}
+                    key={value} type="button"
+                    className={`${styles.roleCard} ${role === value ? styles.roleCardActive : ""}`}
                     onClick={() => setRole(value)}
                   >
-                    <div className={`${styles.roleIcon} ${role === value ? styles.roleIconActive : ''}`}>
+                    <div className={`${styles.roleIcon} ${role === value ? styles.roleIconActive : ""}`}>
                       {icon}
                     </div>
                     <span className={styles.roleLabel}>{label}</span>
@@ -204,15 +240,12 @@ const Register = ({ isOpen, onClose, onSwitchToLogin }) => {
             </div>
           )}
 
-          {/* Floating footer */}
           <div className={styles.footer}>
             {step === 1 ? (
               <>
                 <button type="button" className={styles.btnCancel} onClick={handleClose}>Скасувати</button>
                 <button type="button" className={styles.btnSubmit} disabled={!step1Valid}
-                  onClick={() => setStep(2)}>
-                  Далі →
-                </button>
+                  onClick={() => setStep(2)}>Далі →</button>
               </>
             ) : (
               <>

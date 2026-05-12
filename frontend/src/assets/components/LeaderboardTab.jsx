@@ -164,6 +164,243 @@ function ScoreBar({ value, max = 10, color = "#6366f1" }) {
   );
 }
 
+// ── RoundSection (shared between ParticipantDetail and TeamDetail) ────────────
+
+function RoundSection({ round, criteria_meta, criteriaColors, isPrivileged, showJuryBreak, submissions, members }) {
+  return (
+    <div className={detailStyles.roundSection}>
+      <div className={detailStyles.roundSectionHeader}>
+        <h3 className={detailStyles.roundTitle}>{round.round_title}</h3>
+        <span className={detailStyles.roundAvg}>
+          Середній бал: <strong>{round.avg_total}</strong>
+        </span>
+      </div>
+
+      {criteria_meta.length > 0 && round.criteria_avg && (
+        <div className={detailStyles.criteriaGrid}>
+          {criteria_meta.map(c => {
+            const val = round.criteria_avg?.[c.key] ?? null;
+            if (val === null) return null;
+            return (
+              <div key={c.key} className={detailStyles.criteriaRow}>
+                <div className={detailStyles.criteriaLabelRow}>
+                  <span className={detailStyles.criteriaLabel}>{c.label}</span>
+                  <span className={detailStyles.criteriaValue} style={{ color: criteriaColors[c.key] }}>
+                    {val} <span className={detailStyles.criteriaMax}>/ {c.max}</span>
+                  </span>
+                </div>
+                <ScoreBar value={val} max={c.max} color={criteriaColors[c.key]} />
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {submissions && submissions.length > 0 && (
+        <div className={detailStyles.submissionsTable}>
+          <div className={detailStyles.submissionsHead}>
+            <span className={detailStyles.subThName}>Учасник</span>
+            <span className={detailStyles.subThTask}>Завдання</span>
+            {criteria_meta.map(c => (
+              <span key={c.key} className={detailStyles.subThCrit} title={c.label}>
+                {c.label.split(" ")[0]}
+              </span>
+            ))}
+            <span className={detailStyles.subThTotal}>Бал</span>
+          </div>
+          {submissions.map((s, idx) => {
+            const member = members?.find(m => m.participant_id === s.participant_id);
+            return (
+              <div key={s.submission_id ?? idx} className={detailStyles.submissionsRow}>
+                <span className={detailStyles.subCellName}>
+                  <span className={detailStyles.subAvatar} style={{ background: getAvatarColor(s.participant_name ?? member?.name ?? "") }}>
+                    {getInitials(s.participant_name ?? member?.name ?? "?")}
+                  </span>
+                  <span>{s.participant_name ?? member?.name ?? "—"}</span>
+                  {member?.is_captain && <span style={{ fontSize: 11 }}>👑</span>}
+                </span>
+                <span className={detailStyles.subCellTask}>{s.task_title ?? `Завдання ${s.task_id}`}</span>
+                {criteria_meta.map(c => (
+                  <span key={c.key} className={detailStyles.subCellCrit}>
+                    {s.scores?.[c.key] != null
+                      ? <span style={{ color: criteriaColors[c.key], fontWeight: 600 }}>{s.scores[c.key]}</span>
+                      : <span className={detailStyles.noScore}>—</span>}
+                  </span>
+                ))}
+                <span className={detailStyles.subCellTotal}>{s.total ?? "—"}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {isPrivileged && showJuryBreak && round.jury_breakdown?.length > 0 && (
+        <div className={detailStyles.jurySection}>
+          <p className={detailStyles.jurySectionTitle}><JuryIcon /> Оцінки журі</p>
+          <div className={detailStyles.juryTable}>
+            <div className={detailStyles.juryTableHead}>
+              <span className={detailStyles.juryTableThName}>Журі</span>
+              {criteria_meta.map(c => (
+                <span key={c.key} className={detailStyles.juryTableTh} title={c.label}>
+                  {c.label.split(" ")[0]}
+                </span>
+              ))}
+              <span className={detailStyles.juryTableThTotal}>Разом</span>
+            </div>
+            {round.jury_breakdown.map(j => (
+              <div key={j.juror_id} className={detailStyles.juryTableRow}>
+                <span className={detailStyles.juryTableName}>{j.juror_name}</span>
+                {criteria_meta.map(c => (
+                  <span key={c.key} className={detailStyles.juryTableCell}>
+                    {j.scores?.[c.key] ?? <span className={detailStyles.noScore}>—</span>}
+                  </span>
+                ))}
+                <span className={detailStyles.juryTableTotal}>{j.total}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── TeamDetail ────────────────────────────────────────────────────────────────
+
+function TeamDetail({ tournamentId, teamId, isPrivileged, onClose }) {
+  const [data,          setData]          = useState(null);
+  const [loading,       setLoading]       = useState(true);
+  const [error,         setError]         = useState(null);
+  const [activeRound,   setActiveRound]   = useState(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    API.get(`/tournaments/${tournamentId}/leaderboard/team/${teamId}/`)
+      .then(r => {
+        setData(r.data);
+        if (r.data.rounds?.length === 1) setActiveRound(r.data.rounds[0].round_id);
+      })
+      .catch(() => setError("Не вдалося завантажити деталізацію команди."))
+      .finally(() => setLoading(false));
+  }, [tournamentId, teamId]);
+
+  const criteriaColors = useMemo(() => {
+    const palette = ["#6366f1","#0ea5e9","#10b981","#f59e0b","#ec4899","#8b5cf6","#14b8a6"];
+    if (!data?.criteria_meta) return {};
+    return Object.fromEntries(data.criteria_meta.map((c, i) => [c.key, palette[i % palette.length]]));
+  }, [data]);
+
+  if (loading) return (
+    <div className={detailStyles.panel}>
+      <div className={detailStyles.panelHeader}>
+        <button className={detailStyles.backBtn} onClick={onClose}><BackIcon /> Назад</button>
+      </div>
+      <div className={detailStyles.stateBox}>
+        <div className={detailStyles.spinner} /><span>Завантаження…</span>
+      </div>
+    </div>
+  );
+
+  if (error) return (
+    <div className={detailStyles.panel}>
+      <div className={detailStyles.panelHeader}>
+        <button className={detailStyles.backBtn} onClick={onClose}><BackIcon /> Назад</button>
+      </div>
+      <div className={detailStyles.stateBox}>
+        <span className={detailStyles.errorText}>{error}</span>
+      </div>
+    </div>
+  );
+
+  const { team_name: _tn, participant_name: _pn, grand_total, members = [], rounds = [], criteria_avg = {}, criteria_meta = [] } = data;
+  const team_name = _tn ?? _pn ?? "Команда";
+
+  const visibleRounds = activeRound ? rounds.filter(r => r.round_id === activeRound) : rounds;
+  const hasJury = rounds.some(r => r.jury_breakdown?.length > 0);
+
+  return (
+    <div className={detailStyles.panel}>
+      <div className={detailStyles.panelHeader}>
+        <button className={detailStyles.backBtn} onClick={onClose}>
+          <BackIcon /> Назад до таблиці
+        </button>
+        <div className={detailStyles.headerRight} />
+      </div>
+
+      {/* Team hero */}
+      <div className={detailStyles.hero}>
+        <div className={detailStyles.heroAvatar} style={{ background: getAvatarColor(team_name) }}>
+          {getInitials(team_name)}
+        </div>
+        <div className={detailStyles.heroInfo}>
+          <h2 className={detailStyles.heroName}>{team_name}</h2>
+          <span className={detailStyles.heroTotal}>
+            Загальний бал команди: <strong>{grand_total}</strong>
+          </span>
+          {members.length > 0 && (
+            <span className={detailStyles.heroSub}>👥 {members.length} учасників</span>
+          )}
+        </div>
+      </div>
+
+
+
+      {/* Round filter pills */}
+      {rounds.length > 1 && (
+        <div className={detailStyles.roundPills}>
+          <button
+            className={`${detailStyles.roundPill} ${activeRound === null ? detailStyles.roundPillActive : ""}`}
+            onClick={() => setActiveRound(null)}
+          >Всі раунди</button>
+          {rounds.map(r => (
+            <button
+              key={r.round_id}
+              className={`${detailStyles.roundPill} ${activeRound === r.round_id ? detailStyles.roundPillActive : ""}`}
+              onClick={() => setActiveRound(r.round_id)}
+            >{r.round_title}</button>
+          ))}
+        </div>
+      )}
+
+      {activeRound === null && criteria_meta.length > 0 && (
+        <div className={detailStyles.section}>
+          <h3 className={detailStyles.sectionTitle}>Середнє по критеріях (всі раунди)</h3>
+          <div className={detailStyles.criteriaGrid}>
+            {criteria_meta.map(c => {
+              const val = criteria_avg[c.key] ?? 0;
+              return (
+                <div key={c.key} className={detailStyles.criteriaRow}>
+                  <div className={detailStyles.criteriaLabelRow}>
+                    <span className={detailStyles.criteriaLabel}>{c.label}</span>
+                    <span className={detailStyles.criteriaValue} style={{ color: criteriaColors[c.key] }}>
+                      {val} <span className={detailStyles.criteriaMax}>/ {c.max}</span>
+                    </span>
+                  </div>
+                  <ScoreBar value={val} max={c.max} color={criteriaColors[c.key]} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {visibleRounds.map(round => (
+        <RoundSection
+          key={round.round_id}
+          round={round}
+          criteria_meta={criteria_meta}
+          criteriaColors={criteriaColors}
+          isPrivileged={isPrivileged}
+          showJuryBreak={true}
+          submissions={round.submissions ?? []}
+          members={members}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ── ParticipantDetail ─────────────────────────────────────────────────────────
 
 function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose }) {
@@ -231,12 +468,10 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
 
   return (
     <div className={detailStyles.panel}>
-      {/* Header */}
       <div className={detailStyles.panelHeader}>
         <button className={detailStyles.backBtn} onClick={onClose}>
           <BackIcon /> Назад до таблиці
         </button>
-
         <div className={detailStyles.headerRight}>
           {isPrivileged && rounds.some(r => r.jury_breakdown?.length > 0) && (
             <button
@@ -250,7 +485,6 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
         </div>
       </div>
 
-      {/* Participant hero */}
       <div className={detailStyles.hero}>
         <AvatarWithFallback
           name={participant_name}
@@ -260,34 +494,26 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
         />
         <div className={detailStyles.heroInfo}>
           <h2 className={detailStyles.heroName}>{participant_name}</h2>
-          <span className={detailStyles.heroTotal}>
-            Загальний бал: <strong>{grand_total}</strong>
-          </span>
+          <span className={detailStyles.heroTotal}>Загальний бал: <strong>{grand_total}</strong></span>
         </div>
       </div>
 
-      {/* Round filter pills */}
       {rounds.length > 1 && (
         <div className={detailStyles.roundPills}>
           <button
             className={`${detailStyles.roundPill} ${activeRound === null ? detailStyles.roundPillActive : ""}`}
             onClick={() => setActiveRound(null)}
-          >
-            Всі раунди
-          </button>
+          >Всі раунди</button>
           {rounds.map(r => (
             <button
               key={r.round_id}
               className={`${detailStyles.roundPill} ${activeRound === r.round_id ? detailStyles.roundPillActive : ""}`}
               onClick={() => setActiveRound(r.round_id)}
-            >
-              {r.round_title}
-            </button>
+            >{r.round_title}</button>
           ))}
         </div>
       )}
 
-      {/* Overall criteria bar chart */}
       {activeRound === null && criteria_meta.length > 0 && (
         <div className={detailStyles.section}>
           <h3 className={detailStyles.sectionTitle}>Середнє по критеріях (всі раунди)</h3>
@@ -310,7 +536,6 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
         </div>
       )}
 
-      {/* Per-round sections */}
       {visibleRounds.map(round => (
         <div key={round.round_id} className={detailStyles.roundSection}>
           <div className={detailStyles.roundSectionHeader}>
@@ -431,6 +656,9 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
   const isTeam = tournamentType === "team";
   const getRowName = (p) => isTeam ? (p.team_name ?? p.participant_name) : p.participant_name;
 
+  // selected: { type: "team"|"participant", id } | null
+  const [selected, setSelected] = useState(null);
+
   const fetchLeaderboard = useCallback((silent = false) => {
     if (silent) setRefreshing(true);
     else { setLoading(true); setError(null); }
@@ -517,15 +745,25 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
     }
   };
 
-  // ── Деталізація учасника ───────────────────────────────────────────────────
+  // ── Якщо обрано рядок — показуємо деталізацію ────────────────────────────
 
-  if (selectedPid !== null) {
+  if (selected !== null) {
+    if (selected.type === "team") {
+      return (
+        <TeamDetail
+          tournamentId={tournamentId}
+          teamId={selected.id}
+          isPrivileged={canAlwaysSee}
+          onClose={() => setSelected(null)}
+        />
+      );
+    }
     return (
       <ParticipantDetail
         tournamentId={tournamentId}
-        participantId={selectedPid}
+        participantId={selected.id}
         isPrivileged={canAlwaysSee}
-        onClose={() => setSelectedPid(null)}
+        onClose={() => setSelected(null)}
       />
     );
   }
@@ -655,9 +893,16 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
                 </tr>
               </thead>
               <tbody>
-                {ranked.map((p, idx) => (
+                {ranked.map((p, idx) => {
+                  const rowKey = isTeam
+                    ? (p.team_id ?? p.participant_id ?? p.team_name ?? idx)
+                    : (p.participant_id ?? p.participant_name ?? idx);
+                  const detailId = isTeam
+                    ? (p.team_id ?? p.participant_id ?? p.team_name)
+                    : (p.participant_id ?? p.participant_name);
+                  return (
                   <tr
-                    key={p.participant_id ?? p.participant_name}
+                    key={String(rowKey)}
                     className={[
                       styles.row,
                       styles.rowClickable,
@@ -665,7 +910,7 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
                       idx === 1 ? styles.rowSilver : "",
                       idx === 2 ? styles.rowBronze : "",
                     ].join(" ")}
-                    onClick={() => setSelectedPid(p.participant_id ?? p.participant_name)}
+                    onClick={() => setSelected({ type: isTeam ? "team" : "participant", id: detailId })}
                     title="Переглянути деталізацію"
                   >
                     <td className={styles.tdRank}>
@@ -702,7 +947,8 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
                       <span className={styles.detailArrow}>›</span>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

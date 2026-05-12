@@ -5,6 +5,7 @@ from .models import (
     Task, TaskLink, TaskAttachment,
     Submission, SubmissionLink, SubmissionAttachment,
     Grade, JuryAssignment,
+    Announcement, AnnouncementComment, AnnouncementReaction,
 )
 
 
@@ -306,3 +307,118 @@ class JurySubmissionSerializer(serializers.ModelSerializer):
     def get_assignment_count(self, obj):
         """Скільки журі призначено на цю роботу."""
         return obj.jury_assignments.count()
+
+
+# ── Announcement serializers ──────────────────────────────────────────────────
+
+def _get_display_name(user):
+    if not user:
+        return 'Видалений користувач'
+    full = f"{user.first_name} {user.last_name}".strip()
+    return full or user.username
+
+
+def _reaction_counts(reactions_qs, user_id):
+    counts = {}
+    my_reaction = None
+    for r in reactions_qs:
+        counts[r.emoji] = counts.get(r.emoji, 0) + 1
+        if r.user_id == user_id:
+            my_reaction = r.emoji
+    return counts, my_reaction
+
+
+class AnnouncementCommentSerializer(serializers.ModelSerializer):
+    author_name = serializers.SerializerMethodField()
+    is_mine     = serializers.SerializerMethodField()
+    replies     = serializers.SerializerMethodField()
+    reactions   = serializers.SerializerMethodField()
+    my_reaction = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = AnnouncementComment
+        fields = [
+            'id', 'text', 'author_name', 'is_mine',
+            'created_at', 'replies', 'reactions', 'my_reaction',
+        ]
+        read_only_fields = [
+            'id', 'author_name', 'is_mine', 'created_at',
+            'replies', 'reactions', 'my_reaction',
+        ]
+
+    def get_author_name(self, obj):
+        return _get_display_name(obj.author)
+
+    def get_is_mine(self, obj):
+        request = self.context.get('request')
+        return bool(request and obj.author_id == request.user.id)
+
+    def get_replies(self, obj):
+        if obj.parent_id is not None:
+            return []
+        qs = (
+            obj.replies
+            .select_related('author')
+            .prefetch_related('reactions')
+        )
+        return AnnouncementCommentSerializer(qs, many=True, context=self.context).data
+
+    def get_reactions(self, obj):
+        counts, _ = _reaction_counts(obj.reactions.all(), self.context['request'].user.id)
+        return counts
+
+    def get_my_reaction(self, obj):
+        _, my = _reaction_counts(obj.reactions.all(), self.context['request'].user.id)
+        return my
+
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+    author_name = serializers.SerializerMethodField()
+    author_role = serializers.SerializerMethodField()
+    comments    = serializers.SerializerMethodField()
+    reactions   = serializers.SerializerMethodField()
+    my_reaction = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = Announcement
+        fields = [
+            'id', 'title', 'body', 'target_role',
+            'author_name', 'author_role', 'created_at',
+            'comments', 'reactions', 'my_reaction',
+        ]
+        read_only_fields = [
+            'id', 'author_name', 'author_role',
+            'created_at', 'comments', 'reactions', 'my_reaction',
+        ]
+
+    def get_author_name(self, obj):
+        return _get_display_name(obj.author)
+
+    def get_author_role(self, obj):
+        if not obj.author:
+            return None
+        m = TournamentMember.objects.filter(
+            tournament=obj.tournament, user=obj.author
+        ).first()
+        return m.role if m else None
+
+    def get_comments(self, obj):
+        qs = (
+            obj.comments
+            .filter(parent__isnull=True)
+            .select_related('author')
+            .prefetch_related(
+                'reactions',
+                'replies__author',
+                'replies__reactions',
+            )
+        )
+        return AnnouncementCommentSerializer(qs, many=True, context=self.context).data
+
+    def get_reactions(self, obj):
+        counts, _ = _reaction_counts(obj.reactions.all(), self.context['request'].user.id)
+        return counts
+
+    def get_my_reaction(self, obj):
+        _, my = _reaction_counts(obj.reactions.all(), self.context['request'].user.id)
+        return my

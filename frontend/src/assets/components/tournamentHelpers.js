@@ -32,6 +32,7 @@ export const formatRoundDateRange = (start, end) => {
 // Чотири статуси турніру залежно від дат:
 //   "upcoming"     — до start_date (або дати немає)        → Очікується
 //   "registration" — після start_date і до registration_end → Реєстрація команд
+//                  — або якщо open_registration=true (завжди відкрита реєстрація)
 //   "ongoing"      — після registration_end і до end_date   → Триває
 //   "finished"     — після end_date                         → Завершено
 export const computeStatus = (t) => {
@@ -42,6 +43,8 @@ export const computeStatus = (t) => {
 
   if (!start || now < start)   return "upcoming";
   if (end && now > end)        return "finished";
+  // Якщо відкрита реєстрація — показуємо "registration" поки турнір не завершився
+  if (t.open_registration)     return "registration";
   if (regEnd && now <= regEnd) return "registration";
   return "ongoing";
 };

@@ -16,6 +16,7 @@ import LeaderboardTab from "../components/LeaderboardTab";
 import MyTeamTab from "../components/MyTeamTab";
 import TeamsTab from "../components/TeamsTab";
 import CertificatesPage from "./CertificatesPage";
+import AnnouncementsTab from "../components/AnnouncementsTab";
 
 // ─── Rich-text preview helper ─────────────────────────────────────────────────
 function getDescriptionPreview(html, maxLen = 80) {
@@ -56,7 +57,9 @@ export default function TournamentPage() {
   const [error,       setError]       = useState(null);
   const [myTeam,      setMyTeam]      = useState(null);
 
-  const isOwner     = myRole === "owner";
+  const isOwner   = myRole === "owner";
+  const isAdmin   = myRole === "admin";
+  const canManage = isOwner || isAdmin; // може редагувати турнір
   const isJury      = myRole === "jury";
   const isJuryPanel = myRole === "jury" || myRole === "admin" || myRole === "owner";
   const isAdminOrOwner = myRole === "admin" || myRole === "owner";
@@ -149,21 +152,23 @@ export default function TournamentPage() {
   })();
 
   const tabs = [
-    { id: "overview",     label: "Основна сторінка" },
-    ...(!isTeamParticipantUnregistered ? [{ id: "rounds", label: "Раунди" }] : []),
-    ...(isTeamTournament
-      ? [
-          ...(!isJuryPanel ? [{ id: "my_team", label: "Моя команда" }] : []),
-          ...(isJuryPanel  ? [{ id: "teams",   label: "Команди" }]     : []),
-        ]
-      : [
-          { id: "participants", label: "Учасники" },
-        ]
-    ),
-    ...(!isTeamParticipantUnregistered ? [{ id: "leaderboard", label: "Таблиця лідерів" }] : []),
-    ...(isJuryPanel      ? [{ id: "jury",         label: "Панель журі" }]  : []),
-    ...(myRole ? [{ id: "certificates", label: "Сертифікати" }] : []),
-  ];
+  { id: "overview",       label: "Основна сторінка" },
+  { id: "announcements",  label: "Оголошення" },          // з main
+  ...(!isTeamParticipantUnregistered ? [{ id: "rounds", label: "Раунди" }] : []),
+  ...(isTeamTournament
+    ? [
+        ...(!isJuryPanel ? [{ id: "my_team", label: "Моя команда" }] : []),
+        ...(isJuryPanel  ? [{ id: "teams",   label: "Команди" }]    : []),
+        { id: "participants", label: isTeamTournament ? "Адміністрація" : "Учасники" }, // з main
+      ]
+    : [
+        { id: "participants", label: isTeamTournament ? "Адміністрація" : "Учасники" }, // з main
+      ]
+  ),
+  ...(!isTeamParticipantUnregistered ? [{ id: "leaderboard", label: "Таблиця лідерів" }] : []),
+  ...(isJuryPanel ? [{ id: "jury", label: "Панель журі" }] : []),
+  ...(myRole ? [{ id: "certificates", label: "Сертифікати" }] : []),  // з TrrippleBranch
+];
 
   return (
     <NavBar>
@@ -190,13 +195,13 @@ export default function TournamentPage() {
                 <span style={{
                   fontSize: 11.5,
                   fontWeight: 600,
-                  color: "#5566aa",
-                  background: "#f0f2ff",
-                  border: "1px solid #dde4f5",
+                  color: myRole === "admin" ? "#7c3aed" : "#5566aa",
+                  background: myRole === "admin" ? "#f5f3ff" : "#f0f2ff",
+                  border: `1px solid ${myRole === "admin" ? "#ddd6fe" : "#dde4f5"}`,
                   borderRadius: 100,
                   padding: "3px 10px",
                 }}>
-                  ⚖️ Журі
+                  {myRole === "admin" ? "Адміністратор" : "Права журі"}
                 </span>
               )}
             </div>
@@ -222,7 +227,7 @@ export default function TournamentPage() {
                 tournament={tournament}
                 status={status}
                 onSave={handleSave}
-                readOnly={!isOwner}
+                readOnly={!canManage}
                 myRole={myRole}
                 tournamentId={id}
                 isRegistered={isRegistered}
@@ -242,13 +247,20 @@ export default function TournamentPage() {
             </>
           )}
 
+          {activeTab === "announcements" && (
+            <AnnouncementsTab
+              tournamentId={id}
+              myRole={myRole}
+            />
+          )}
+        
           {activeTab === "rounds" && (
             <RoundsTab
               rounds={rounds}
               loading={roundsLoading}
               tournamentId={id}
               onRoundCreated={handleRoundCreated}
-              readOnly={!isOwner}
+              readOnly={!canManage}
               myRole={myRole}
               tournamentStatus={status}
               isTeamTournament={isTeamTournament}
@@ -275,8 +287,8 @@ export default function TournamentPage() {
               tournamentStatus={status}
             />
           )}
-
-          {activeTab === "participants" && !isTeamTournament && (
+        
+          {activeTab === "participants" && (
             <ParticipantsTab
               tournamentId={id}
               myRole={myRole}
@@ -284,6 +296,10 @@ export default function TournamentPage() {
               tournamentType={tournament?.tournament_type}
               maxParticipants={tournament.max_teams}
               tournamentStatus={status}
+              openRegistration={
+                tournament?.open_registration ||
+                (!tournament?.registration_start && !tournament?.registration_end)
+              }
             />
           )}
 
@@ -299,8 +315,9 @@ export default function TournamentPage() {
           {activeTab === "leaderboard" && (
             <LeaderboardTab
               tournamentId={id}
+              tournamentType={tournament?.tournament_type}
               rounds={rounds}
-              loading={roundsLoading}
+              roundsLoading={roundsLoading}
               isOwner={isOwner}
               myRole={myRole}
             />

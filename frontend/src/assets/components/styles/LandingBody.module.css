@@ -69,19 +69,20 @@ html, body {
     display: flex;
     justify-content: center;
     width: 100%;
-    border-bottom: 5px solid rgb(238, 238, 238);
 }
 
 .img1 {
-    width: 900px;
-    margin-top: 20px;
+    width: 1200px;
+    margin-top: 40px;
+    border-radius: 24px;
+    border: 3px solid lightgray;
 }
 
 .title2 {
     font-family: "Google Sans", sans-serif;
     font-size: 50px;
     padding: 20px;
-    margin: 330px 50px 10px 50px;
+    margin: 420px 50px 10px 50px;
     -webkit-font-smoothing: antialiased;
     border: 5px solid black;
     border-radius: 20px;
@@ -120,6 +121,13 @@ html, body {
     display: flex;
     justify-content: center;
     margin-top: 60px;
+}
+
+.img2 {
+    max-width: 100%;
+    width: 1200px;
+    border-radius: 24px;
+    border: 3px solid lightgray;
 }
 
 .howToStart {
@@ -169,8 +177,10 @@ html, body {
 }
 
 .img3 {
-    padding: 10px;
     margin-top: 60px;
+    width: 1200px;
+    border-radius: 24px;
+    border: 3px solid lightgray;
 }
 
 .img3wrapper {
@@ -223,6 +233,8 @@ html, body {
     width: 17%;
     transform: rotate(-10deg);
 }
+
+
 
 @media (max-width: 1030px) {
     .LandingBodyTitle {
@@ -510,4 +522,27 @@ html, body {
     .contactUsTitle {
         font-size: 26px;
     }
+}
+/* ── Scroll reveal базовий стан ── */
+.reveal,
+.revealUp,
+.revealLeft,
+.revealRight,
+.revealScale {
+    opacity: 0;
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+}
+
+.reveal      { transform: translateY(40px); }
+.revealUp    { transform: translateY(60px); }
+.revealLeft  { transform: translateX(-50px); }
+.revealRight { transform: translateX(50px); }
+.revealScale { transform: scale(0.94) translateY(30px); }
+
+/* Активний стан — елемент у viewport */
+.revealVisible {
+    opacity: 1 !important;
+    transform: none !important;
 }

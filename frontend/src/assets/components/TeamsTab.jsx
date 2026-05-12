@@ -198,9 +198,17 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
 
   const mutatingTeamIds = useRef(new Set());
 
+  const [exceptionUntil,   setExceptionUntilState] = useState(null);
+  const [exceptionLoading, setExceptionLoading]    = useState(false);
+  const [exceptionMinutes, setExceptionMinutes]    = useState(30);
+  const [showException,    setShowException]       = useState(false);
+
   const isOwner      = myRole === "owner";
   const isPrivileged = myRole === "owner" || myRole === "admin";
-  const canInvite    = isOwner && tournamentStatus === "registration";
+
+  const exceptionActive = exceptionUntil && new Date() < new Date(exceptionUntil);
+  const canRegisterNow  = tournamentStatus === "registration" || exceptionActive;
+  const canInvite    = isOwner && canRegisterNow;
 
   const mergeTeams = useCallback((fresh) => {
     setTeams(prev => {
@@ -240,6 +248,53 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
   }, [tournamentId, mergeTeams]);
 
   usePolling(pollTeams, POLL_INTERVAL, !loading);
+
+  // ── Exception state fetch ────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!isOwner) return;
+    API.get(`/tournaments/${tournamentId}/registration-exception/`)
+      .then(r => { if (r.data.is_active) setExceptionUntilState(r.data.until); })
+      .catch(() => {});
+  }, [tournamentId, isOwner]);
+
+  // Автоматично очищаємо виняток після закінчення часу
+  useEffect(() => {
+    if (!exceptionUntil) return;
+    const ms = new Date(exceptionUntil) - new Date();
+    if (ms <= 0) { setExceptionUntilState(null); return; }
+    const t = setTimeout(() => setExceptionUntilState(null), ms);
+    return () => clearTimeout(t);
+  }, [exceptionUntil]);
+
+  const handleActivateException = async () => {
+    setExceptionLoading(true);
+    try {
+      const r = await API.post(`/tournaments/${tournamentId}/registration-exception/`, {
+        minutes: exceptionMinutes,
+      });
+      setExceptionUntilState(r.data.until);
+      setShowException(false);
+    } catch (err) {
+      console.error("Exception:", err);
+    } finally {
+      setExceptionLoading(false);
+    }
+  };
+
+  const handleCancelException = async () => {
+    setExceptionLoading(true);
+    try {
+      await API.post(`/tournaments/${tournamentId}/registration-exception/`, { minutes: 0 });
+      setExceptionUntilState(null);
+    } catch (err) {
+      console.error("Cancel exception:", err);
+    } finally {
+      setExceptionLoading(false);
+    }
+  };
+
+  // ── Invite link ───────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (!isOwner) return;
@@ -346,6 +401,29 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
           {registered.length}{tournament?.max_teams ? ` / ${tournament.max_teams}` : ""} команд
         </span>
         <div className={styles.headerActions}>
+          {/* Кнопка винятку — тільки ongoing/finished */}
+          {isOwner && (tournamentStatus === "ongoing" || tournamentStatus === "finished") && (
+            exceptionActive ? (
+              <button
+                className={styles.exceptionActiveBtn}
+                onClick={handleCancelException}
+                disabled={exceptionLoading}
+                title="Натисніть щоб скасувати"
+              >
+                <span className={styles.exceptionDot} />
+                До {new Date(exceptionUntil).toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}
+              </button>
+            ) : (
+              <button
+                className={styles.exceptionBtn}
+                onClick={() => setShowException(v => !v)}
+                disabled={exceptionLoading}
+              >
+                Зробити виняток
+              </button>
+            )
+          )}
+
           {isOwner && (
             <button
               className={styles.inviteBtn}
@@ -361,6 +439,41 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
         </div>
       </div>
 
+      {/* Exception panel */}
+      {showException && isOwner && (
+        <div className={styles.exceptionPanel}>
+          <span className={styles.exceptionPanelTitle}>Тимчасово відкрити реєстрацію команд</span>
+          <div className={styles.exceptionPanelRow}>
+            <span className={styles.exceptionPanelLabel}>Тривалість:</span>
+            {[15, 30, 60].map(m => (
+              <button
+                key={m}
+                className={`${styles.exceptionPill} ${exceptionMinutes === m ? styles.exceptionPillActive : ""}`}
+                onClick={() => setExceptionMinutes(m)}
+              >
+                {m} хв
+              </button>
+            ))}
+          </div>
+          <div className={styles.exceptionPanelActions}>
+            <button
+              className={styles.exceptionConfirmBtn}
+              onClick={handleActivateException}
+              disabled={exceptionLoading}
+            >
+              {exceptionLoading ? "Збереження…" : "Активувати"}
+            </button>
+            <button className={styles.exceptionCancelBtn} onClick={() => setShowException(false)}>
+              Скасувати
+            </button>
+          </div>
+          <span className={styles.exceptionPanelHint}>
+            Реєстрація відкриється на {exceptionMinutes} хв для всіх адмінів і закриється автоматично
+          </span>
+        </div>
+      )}
+
+      {/* PIN */}
       {isOwner && showPin && invite.pin && (
         <div className={styles.pinSection}>
           <div className={styles.pinInfo}>

@@ -8,6 +8,7 @@ import Users from "./static/icons/Users.svg?react";
 import { RichTextArea } from "./RichTextArea";
 import heic2any from "heic2any";
 import { computeStatus } from "../components/tournamentHelpers";
+import CriteriaEditor, { DEFAULT_CRITERIA } from "./CriteriaEditor";
 
 const ACCENT_COLORS = ["#82b3e4", "#4ad44c", "#ca7979", "#c76db0", "#8e5edf", "#eccb5c"];
 
@@ -165,6 +166,10 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
   const [maxTeams,       setMaxTeams]       = useState("");
   const [regStart,       setRegStart]       = useState("");
   const [regEnd,         setRegEnd]         = useState("");
+  const [criteria,       setCriteria]       = useState(DEFAULT_CRITERIA);
+
+  // ── Відкрита реєстрація ──────────────────────────────────────────────────
+  const [openRegistration, setOpenRegistration] = useState(false);
 
   const [minTeamSize,    setMinTeamSize]    = useState("");
   const [maxTeamSize,    setMaxTeamSize]    = useState("");
@@ -179,8 +184,75 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
   const [nameError,      setNameError]      = useState(false);
   const [endDateError,   setEndDateError]   = useState(false);
   const [maxTeamSizeError, setMaxTeamSizeError] = useState(false);
+  const [regDateError,    setRegDateError]    = useState(false);
+  const [pastDateError,   setPastDateError]   = useState("");
   const [imageConverting, setImageConverting] = useState(false);
   const [convertError,    setConvertError]    = useState(false);
+
+  // ── Серверний час (захист від підробки системного годинника) ──────────────
+  // Зберігаємо різницю: serverNowMs - Date.now() на момент отримання відповіді.
+  // Далі реальний час = Date.now() + serverDriftMs.
+  const [serverDriftMs,  setServerDriftMs]  = useState(0);
+  const [serverTimeReady, setServerTimeReady] = useState(false);
+  const [serverTimeError, setServerTimeError] = useState(false);
+
+  useEffect(() => {
+    const fetchServerTime = async () => {
+      // Список джерел — пробуємо по черзі
+      // Пріоритет: власний бекенд (без CORS) → timeapi.io → локальний годинник
+      const sources = [
+        // 1. Власний бекенд — найнадійніший, без CORS
+        async () => {
+          const res = await api.get("/server-time/");
+          const ms = new Date(res.data.utc).getTime();
+          if (!isFinite(ms)) throw new Error("Invalid date from backend");
+          return ms;
+        },
+        // 2. timeapi.io — CORS-friendly публічний API
+        async () => {
+          const res = await fetch(
+            "https://timeapi.io/api/time/current/zone?timeZone=UTC",
+            { cache: "no-store", signal: AbortSignal.timeout(4000) }
+          );
+          const d = await res.json();
+          const ms = new Date(`${d.date}T${d.time}Z`).getTime();
+          if (!isFinite(ms)) throw new Error("Invalid date from timeapi.io");
+          return ms;
+        },
+      ];
+      const localBefore = Date.now();
+      for (const source of sources) {
+        try {
+          const serverMs = await source();
+          const localAfter = Date.now();
+          const rtt = localAfter - localBefore;
+          const drift = serverMs + rtt / 2 - localAfter;
+          setServerDriftMs(drift);
+          setServerTimeReady(true);
+          return;
+        } catch { /* спробуємо наступне джерело */ }
+      }
+      // Усі джерела недоступні — тихе попередження в консоль, не блокуємо UI
+      console.warn("[ServerTime] Не вдалося синхронізувати час з жодного джерела. Валідація дат відключена.");
+      setServerTimeError(true);
+      setServerTimeReady(true);
+    };
+    fetchServerTime();
+  }, []);
+
+  // Повертає реальний поточний час (мс) з поправкою на дрейф серверного годинника
+  const getServerNow = () => {
+    const ms = Date.now() + (isFinite(serverDriftMs) ? serverDriftMs : 0);
+    return isFinite(ms) ? ms : Date.now();
+  };
+
+  // Безпечне перетворення серверного часу в рядок для атрибута min= полів дати
+  const serverMinDate  = serverTimeReady && !serverTimeError
+    ? (() => { try { return new Date(getServerNow()).toISOString().slice(0, 10); } catch { return undefined; } })()
+    : undefined;
+  const serverMinDt    = serverTimeReady && !serverTimeError
+    ? (() => { try { return new Date(getServerNow()).toISOString().slice(0, 16); } catch { return undefined; } })()
+    : undefined;
 
   const handleClose = () => {
     setClosing(true);
@@ -203,9 +275,24 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
     if (step === 1 && !name.trim()) { setNameError(true); return; }
     if (step === 1 && !tournamentType) { setTypeError(true); return; }
     if (step === 1 && !endDate) { setEndDateError(true); return; }
+
+    // Перевірка дат відносно серверного часу
+    if (step === 1 && serverTimeReady && !serverTimeError) {
+      const now = getServerNow();
+      if (startDate && new Date(startDate + "T00:00:00").getTime() < now) {
+        setPastDateError("Дата старту не може бути в минулому (за серверним часом).");
+        return;
+      }
+      if (endDate && new Date(endDate + "T00:00:00").getTime() < now) {
+        setPastDateError("Дата кінця не може бути в минулому (за серверним часом).");
+        return;
+      }
+    }
+
     setNameError(false);
     setTypeError(false);
     setEndDateError(false);
+    setPastDateError("");
     setPrevStep(step);
     setStep(s => Math.min(s + 1, TOTAL_STEPS));
   };
@@ -229,8 +316,25 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tournamentType) { setTypeError(true); return; }
+    if (!openRegistration && (!regStart || !regEnd)) { setRegDateError(true); return; }
     if (tournamentType === "team" && !maxTeamSize) { setMaxTeamSizeError(true); return; }
     if (imageConverting) return; // чекаємо завершення конвертації HEIC
+
+    // Перевірка дат реєстрації відносно серверного часу
+    if (serverTimeReady && !serverTimeError && !openRegistration) {
+      const now = getServerNow();
+      if (regStart && new Date(regStart).getTime() < now) {
+        setRegDateError(true);
+        setPastDateError("Початок реєстрації не може бути в минулому (за серверним часом).");
+        return;
+      }
+      if (regEnd && new Date(regEnd).getTime() < now) {
+        setRegDateError(true);
+        setPastDateError("Кінець реєстрації не може бути в минулому (за серверним часом).");
+        return;
+      }
+    }
+
     const body = new FormData();
     body.append("name",               name);
     body.append("description",        description);
@@ -242,8 +346,15 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
     body.append("max_teams",          maxTeams);
     body.append("tournament_type",    tournamentType);
     body.append("format",             tournamentType);
-    body.append("registration_start", regStart);
-    body.append("registration_end",   regEnd);
+    body.append("open_registration",  openRegistration);
+    // Серверний часовий штамп — бекенд може порівняти з власним now()
+    body.append("client_utc_ms",    String(getServerNow()));
+    body.append("server_drift_ms",  String(Math.round(serverDriftMs)));
+    // Дати реєстрації надсилаємо тільки якщо реєстрація НЕ відкрита
+    if (!openRegistration) {
+      body.append("registration_start", regStart);
+      body.append("registration_end",   regEnd);
+    }
     if (tournamentType === "team") {
       body.append("min_team_size", minTeamSize || "3");
       body.append("max_team_size", maxTeamSize);
@@ -252,7 +363,13 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
     if (imageMode === "custom" && customFile) body.append("custom_image", customFile);
     try {
       const { status, data } = await api.post("/tournaments/", body);
-      if (status === 201) { onCreate(data); handleClose(); }
+      if (status === 201) {
+        if (criteria.length > 0) {
+          await api.put(`/tournaments/${data.id}/criteria/`, criteria);
+        }
+        onCreate(data);
+        handleClose();
+      }
     } catch (err) {
       console.error(err.response?.data);
     }
@@ -260,7 +377,7 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
 
   const STEP_META = [
     { num: "КРОК 1 З 2", title: "Основне", sub: "Заповніть назву, дату та тип турніру" },
-    { num: "КРОК 2 З 2", title: "Деталі",  sub: "Додайте правила, опис та дати реєстрації" },
+    { num: "КРОК 2 З 2", title: "Деталі",  sub: "Додайте правила, опис та умови реєстрації" },
   ];
 
   const goingForward = prevStep === null || step > prevStep;
@@ -292,6 +409,7 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                   status={computeStatus({
                     start_date: startDate ? startDate + "T00:00:00" : null,
                     end_date: endDate ? endDate + "T00:00:00" : null,
+                    open_registration: openRegistration,
                   })}
                 />
               </div>
@@ -349,7 +467,8 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                       </label>
                       <input
                         id="startDate" type="date" className={styles.input}
-                        value={startDate} onChange={(e) => setStartDate(e.target.value)}
+                        value={startDate} onChange={(e) => { setStartDate(e.target.value); setPastDateError(""); }}
+                        min={serverMinDate}
                       />
                     </div>
                     <div className={styles.field}>
@@ -358,13 +477,31 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                       </label>
                       <input
                         id="endDate" type="date" className={`${styles.input} ${endDateError ? styles.inputError : ""}`}
-                        value={endDate} onChange={(e) => { setEndDate(e.target.value); setEndDateError(false); }}
-                        min={startDate || undefined}
+                        value={endDate} onChange={(e) => { setEndDate(e.target.value); setEndDateError(false); setPastDateError(""); }}
+                        min={startDate || serverMinDate}
                         required
                       />
                       {endDateError && <p className={styles.fieldError}>Дата кінця турніру обов'язкова</p>}
                     </div>
                   </div>
+
+                  {/* Індикатор серверного часу — тільки успіх або тихе очікування */}
+                  {serverTimeReady && !serverTimeError && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: -6 }}>
+                      <span style={{ fontSize: 11.5, color: "#059669" }}>
+                        🔒 Час синхронізовано з сервером
+                        {Math.abs(serverDriftMs) > 30000 && (
+                          <span style={{ color: "#d97706", marginLeft: 4 }}>
+                            (відхилення {Math.round(serverDriftMs / 1000)}с)
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  )}
+
+                  {pastDateError && (
+                    <p className={styles.fieldError}>{pastDateError}</p>
+                  )}
 
                   <div className={`${styles.sideSection} ${styles.stagger3}`}>
                     <span className={styles.label}>Тип турніру</span>
@@ -420,39 +557,77 @@ export default function CreateTournamentModal({ onClose, onCreate }) {
                     />
                   </div>
                   <div className={`${styles.field} ${styles.stagger2}`}>
-                    <label htmlFor="desc" className={styles.label}>Опис</label>
+                    <label htmlFor="desc" className={styles.label}>Опис *</label>
                     <RichTextArea
                       id="desc" rows={4}
                       placeholder="Призи, партнери, формат проведення..."
                       value={description} onChange={(e) => setDescription(e.target.value)}
                     />
                   </div>
+
+                  <div className={`${styles.sectionDivider} ${styles.stagger4}`}>
+                    <span className={styles.sectionTitle}>Критерії оцінювання журі</span>
+                    <span className={styles.sectionLine} />
+                  </div>
+                  <CriteriaEditor criteria={criteria} onChange={setCriteria} styles={styles} />
+
+                  {/* ── Реєстрація ── */}
                   <div className={`${styles.sectionDivider} ${styles.stagger3}`}>
                     <span className={styles.sectionTitle}>
                       {tournamentType === "team" ? "Реєстрація команд" : "Реєстрація учасників"}
                     </span>
                     <span className={styles.sectionLine} />
                   </div>
-                  <div className={`${styles.regBlock} ${styles.stagger4}`}>
-                    <div className={styles.twoCol}>
-                      <div className={styles.field}>
-                        <label htmlFor="registrationStart" className={styles.label}>Початок</label>
-                        <input
-                          id="registrationStart" type="datetime-local"
-                          className={styles.input} required
-                          value={regStart} onChange={(e) => setRegStart(e.target.value)}
-                        />
+
+                  {/* Тогл відкритої реєстрації */}
+                  <div className={`${styles.stagger3}`}>
+                    <label className={styles.toggleRow}>
+                      <div
+                        className={`${styles.toggleTrack} ${openRegistration ? styles.toggleTrackOn : ""}`}
+                        onClick={() => { setOpenRegistration(v => !v); setRegDateError(false); }}
+                        role="switch"
+                        aria-checked={openRegistration}
+                      >
+                        <span className={styles.toggleThumb} />
                       </div>
-                      <div className={styles.field}>
-                        <label htmlFor="registrationEnd" className={styles.label}>Кінець</label>
-                        <input
-                          id="registrationEnd" type="datetime-local"
-                          className={styles.input} required
-                          value={regEnd} onChange={(e) => setRegEnd(e.target.value)}
-                        />
+                      <div className={styles.toggleText}>
+                        <span className={styles.toggleLabel}>Відкрита реєстрація</span>
+                        <span className={styles.toggleHint}>
+                          {openRegistration
+                            ? "Учасники можуть приєднатись будь-коли до завершення турніру"
+                            : "Реєстрація обмежена часовими рамками нижче"}
+                        </span>
                       </div>
-                    </div>
+                    </label>
                   </div>
+
+                  {/* Поля дат — тільки якщо реєстрація НЕ відкрита */}
+                  {!openRegistration && (
+                    <div className={`${styles.regBlock} ${styles.stagger4}`}>
+                      <div className={styles.twoCol}>
+                        <div className={styles.field}>
+                          <label htmlFor="registrationStart" className={styles.label}>Початок</label>
+                          <input
+                            id="registrationStart" type="datetime-local"
+                            className={`${styles.input} ${regDateError && !regStart ? styles.inputError : ""}`}
+                            value={regStart} onChange={(e) => { setRegStart(e.target.value); setRegDateError(false); setPastDateError(""); }}
+                            min={serverMinDt}
+                          />
+                        </div>
+                        <div className={styles.field}>
+                          <label htmlFor="registrationEnd" className={styles.label}>Кінець</label>
+                          <input
+                            id="registrationEnd" type="datetime-local"
+                            className={`${styles.input} ${regDateError && !regEnd ? styles.inputError : ""}`}
+                            value={regEnd} onChange={(e) => { setRegEnd(e.target.value); setRegDateError(false); setPastDateError(""); }}
+                            min={regStart || serverMinDt}
+                          />
+                        </div>
+                      </div>
+                      {regDateError && <p className={styles.fieldError}>Вкажіть дати початку і кінця реєстрації</p>}
+                      {pastDateError && <p className={styles.fieldError}>{pastDateError}</p>}
+                    </div>
+                  )}
 
                   {tournamentType === "team" && (
                     <>

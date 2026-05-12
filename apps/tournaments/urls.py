@@ -14,10 +14,11 @@ from .views import (
     SubmissionListCreateView, SubmissionDetailView,
     SubmissionLinkCreateView, SubmissionLinkDeleteView,
     SubmissionAttachmentCreateView, SubmissionAttachmentDeleteView,
-    JurySubmissionsView, JuryGradeView,
     SubmissionGradeView, ParticipantGradesNewsView,
     LeaderboardView, LeaderboardDetailView,
     RegistrationExceptionView,
+    AnnouncementListCreateView, AnnouncementDetailView, AnnouncementReactView,
+    AnnouncementCommentListCreateView, AnnouncementCommentDetailView, AnnouncementCommentReactView,
 )
 from .team_views import (
     TeamListCreateView, TeamDetailView,
@@ -26,7 +27,12 @@ from .team_views import (
     MyTeamView,
     TeamInviteInfoView, TeamInviteAcceptView, TeamInviteDeclineView,
 )
-from .jury_views import JuryPendingSubmissionsView
+from .jury_views import JuryPendingSubmissionsView, JurySubmissionsView, JuryGradeView
+from .criteria_views import (
+      TournamentCriteriaView,
+      TournamentCriterionDetailView,
+  )
+from .team_leaderboard_view import TeamLeaderboardDetailView
 
 from .certificate_views import (
     CertificateTemplateListView,
@@ -91,6 +97,7 @@ urlpatterns = [
     # ── Leaderboard ────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/leaderboard/', LeaderboardView.as_view(), name='leaderboard'),
     path('<int:tournament_pk>/leaderboard/<int:participant_pk>/', LeaderboardDetailView.as_view(), name='leaderboard-detail'),
+    path('<int:tournament_pk>/leaderboard/team/<int:team_pk>/', TeamLeaderboardDetailView.as_view(), name='team-leaderboard-detail'),
 
     # ── Registration exception ─────────────────────────────────────────────────
     path('<int:tournament_pk>/registration-exception/', RegistrationExceptionView.as_view(), name='registration-exception'),
@@ -159,4 +166,21 @@ urlpatterns = [
          StockTemplateListView.as_view(), name='stock-template-list'),
     path('<int:tournament_pk>/certificates/stock-generate/',
          StockTemplateGenerateView.as_view(), name='stock-template-generate'),
+    # ── Announcements ──────────────────────────────────────────────────────────
+    path('<int:tournament_pk>/announcements/',
+         AnnouncementListCreateView.as_view(),       name='announcement-list-create'),
+    path('<int:tournament_pk>/announcements/<int:ann_pk>/',
+         AnnouncementDetailView.as_view(),            name='announcement-detail'),
+    path('<int:tournament_pk>/announcements/<int:ann_pk>/react/',
+         AnnouncementReactView.as_view(),             name='announcement-react'),
+    path('<int:tournament_pk>/announcements/<int:ann_pk>/comments/',
+         AnnouncementCommentListCreateView.as_view(), name='announcement-comments'),
+    path('<int:tournament_pk>/announcements/<int:ann_pk>/comments/<int:comment_pk>/',
+         AnnouncementCommentDetailView.as_view(),     name='announcement-comment-detail'),
+    path('<int:tournament_pk>/announcements/<int:ann_pk>/comments/<int:comment_pk>/react/',
+         AnnouncementCommentReactView.as_view(),      name='announcement-comment-react'),
+     
+    # ── Criteria ───────────────────────────────────────────────────────────────
+    path('<int:pk>/criteria/',           TournamentCriteriaView.as_view(),        name='tournament-criteria'),
+    path('<int:pk>/criteria/<int:cid>/', TournamentCriterionDetailView.as_view(), name='tournament-criterion-detail'),
 ]

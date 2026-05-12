@@ -698,3 +698,371 @@
   font-size: 10px; font-weight: 700; color: #fff;
   background: #34c759; border-radius: 50%; margin-top: 1px;
 }
+
+/* ─── Edit button on task card (pencil icon) ─────────────────────────────────── */
+.taskEditBtn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #aeaeb2;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.taskEditBtn:hover {
+  background: rgba(0,0,0,0.07);
+  color: #1d1d1f;
+}
+
+/* ─── Score badge on task card (participant view) ────────────────────────────── */
+.taskScoreBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 100px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.taskScoreBadgeHigh {
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+.taskScoreBadgeMid {
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+.taskScoreBadgeLow {
+  color: #dc2626;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+}
+
+/* Submitted but not yet graded */
+.taskSubmittedDot {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #6e6e73;
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.09);
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.taskSubmittedDot::before {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34c759;
+  flex-shrink: 0;
+}
+
+/* ─── Drawer header actions group ────────────────────────────────────────────── */
+.drawerHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Edit button inside drawer header */
+.drawerEditBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1d1d1f;
+  background: rgba(0,0,0,0.05);
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.drawerEditBtn:hover { background: rgba(0,0,0,0.09); }
+
+/* Edit mode label */
+.drawerEditingLabel {
+  font-size: 12px;
+  color: #aeaeb2;
+  font-style: italic;
+}
+
+/* ─── Task edit form ─────────────────────────────────────────────────────────── */
+.editFormBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.1) transparent;
+}
+
+.editFormActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 14px 24px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+
+.editLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.editRequired { color: #ff3b30; }
+
+.editInput {
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #1d1d1f;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.editInput:focus {
+  border-color: #1d1d1f;
+  box-shadow: 0 0 0 3px rgba(29,29,31,0.07);
+}
+.editInput::placeholder { color: #d1d1d6; }
+
+.editTextarea {
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #1d1d1f;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.7;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 90px;
+}
+.editTextarea:focus {
+  border-color: #1d1d1f;
+  box-shadow: 0 0 0 3px rgba(29,29,31,0.07);
+}
+.editTextarea::placeholder { color: #d1d1d6; }
+
+/* Section header within edit form */
+.editSectionLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 6px;
+}
+
+/* Two-column row (tech req inputs) */
+.editRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.editRowFlex1  { flex: 1; min-width: 0; }
+.editRowFlex15 { flex: 1.5; min-width: 0; }
+
+/* Small × remove button */
+.editRemoveBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.04);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #aeaeb2;
+  padding: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.editRemoveBtn:hover:not(:disabled) { background: #fecdd3; color: #dc2626; }
+.editRemoveBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Dashed "add row" button */
+.editAddBtn {
+  align-self: flex-start;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #6e6e73;
+  background: rgba(0,0,0,0.04);
+  border: 1.5px dashed rgba(0,0,0,0.13);
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  margin-top: 4px;
+}
+.editAddBtn:hover {
+  background: rgba(0,0,0,0.07);
+  color: #1d1d1f;
+  border-color: rgba(0,0,0,0.25);
+}
+
+/* Attachment / link chip in edit form */
+.editAttachItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.03);
+  border-radius: 10px;
+}
+.editAttachItemNew { background: rgba(52,199,89,0.06); }
+.editAttachItemIcon { font-size: 15px; flex-shrink: 0; }
+.editAttachItemName {
+  flex: 1;
+  font-size: 13px;
+  color: #1d1d1f;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.editAttachItemMeta { font-size: 11.5px; color: #aeaeb2; flex-shrink: 0; }
+
+/* Must-have index badge */
+.editMustHaveIdx {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #86868b;
+  background: rgba(0,0,0,0.06);
+  border-radius: 50%;
+}
+
+/* Link input row */
+.editLinkRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.editLinkRow .editInput { flex: 1; min-width: 120px; }
+
+/* "Додати" link button */
+.editLinkAddBtn {
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  background: #1d1d1f;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.editLinkAddBtn:hover { background: #2d2d2f; }
+
+/* File picker label */
+.editFilePickBtn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6e6e73;
+  background: rgba(0,0,0,0.04);
+  border: 1.5px dashed rgba(0,0,0,0.15);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  margin-top: 4px;
+}
+.editFilePickBtn:hover {
+  background: rgba(0,0,0,0.07);
+  border-color: rgba(0,0,0,0.28);
+  color: #1d1d1f;
+}
+
+/* Error message */
+.editFormError {
+  font-size: 13px;
+  color: #dc2626;
+  margin: 0;
+  padding: 10px 14px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 12px;
+}
+
+/* Cancel / Save buttons — mirror .cancelBtn / .saveBtn from RoundCard */
+.editCancelBtn {
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #1d1d1f;
+  background: rgba(0,0,0,0.05);
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.editCancelBtn:hover:not(:disabled) { background: rgba(0,0,0,0.09); }
+.editCancelBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.editSaveBtn {
+  padding: 9px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff;
+  background: #1d1d1f;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, transform 0.1s;
+}
+.editSaveBtn:hover:not(:disabled) { background: #2d2d2f; }
+.editSaveBtn:active { transform: scale(0.97); }
+.editSaveBtn:disabled { opacity: 0.5; cursor: not-allowed; }

@@ -1,14 +1,30 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate } from "react-router-dom";
+import { getAccessToken, getUserRole } from "../../api";
 
-const ProtectedRoute = ({ children }) => {
-    const token = localStorage.getItem('accessToken');
+/**
+ * @param {string[]} allowedRoles — масив дозволених ролей.
+ *   Якщо не передано — дозволено будь-якій авторизованій ролі.
+ *
+ * Роль читається з пам'яті (getUserRole), а не з localStorage —
+ * це унеможливлює підміну ролі через DevTools.
+ *
+ * ВАЖЛИВО: цей компонент рендериться лише після того як App.jsx
+ * завершив restoreSession() (authReady === true), тому гонки немає.
+ * Якщо токен відсутній після відновлення — редіректимо на лендінг.
+ */
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const isAuthenticated = Boolean(getAccessToken());
+  const role            = getUserRole() ?? localStorage.getItem("userRole") ?? "";
 
-    if (!token) {
-        return <Navigate to="/" replace />;
-    }
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
-    return children;
+  if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(role)) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
 
 export default ProtectedRoute;

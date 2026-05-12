@@ -1,21 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, NavLink } from 'react-router-dom';
-import { useTabs } from '../../TabsContext';
-import { getTabsForRole, COMMON_TABS } from '../../navConfig';
-import styles from './styles/NavBar.module.css';
-import nStyles from './styles/Notifications.module.css'
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, NavLink } from "react-router-dom";
+import { useTabs } from "../../TabsContext";
+import { getTabsForRole, COMMON_TABS } from "../../navConfig";
+import styles from "./styles/NavBar.module.css";
+import nStyles from "./styles/Notifications.module.css";
 
-import HomeIcon        from './static/icons/Home.svg?react';
-import TournamentsIcon from './static/icons/Tournaments.svg?react';
-import WorksIcon       from './static/icons/Works.svg?react';
-import StatsIcon       from './static/icons/Stats.svg?react';
-import SettingsIcon    from './static/icons/Settings.svg?react';
-import ProfileIcon     from './static/icons/Profile.svg?react';
-import InfoIcon        from './static/icons/Info.svg?react';
-import LogoutIcon      from './static/icons/Logout.svg?react';
-import BellIcon        from './static/icons/Bell.svg?react';
-import Logo            from './static/VectorLogo.svg';
-import cross           from './static/icons/cross.svg';
+import HomeIcon        from "./static/icons/Home.svg?react";
+import TournamentsIcon from "./static/icons/Tournaments.svg?react";
+import WorksIcon       from "./static/icons/Works.svg?react";
+import SettingsIcon    from "./static/icons/Settings.svg?react";
+import ProfileIcon     from "./static/icons/Profile.svg?react";
+import InfoIcon        from "./static/icons/Info.svg?react";
+import LogoutIcon      from "./static/icons/Logout.svg?react";
+import BellIcon        from "./static/icons/Bell.svg?react";
+import Logo            from "./static/VectorLogo.svg";
+import cross           from "./static/icons/cross.svg";
 import NewsIcon        from "./static/icons/News.svg?react";
 
 import { ComposeModal, NotificationDropdown } from './Notifications';
@@ -28,74 +27,70 @@ const ICON_MAP = {
   home:        HomeIcon,
   tournaments: TournamentsIcon,
   works:       WorksIcon,
-  stats:       StatsIcon,
   settings:    SettingsIcon,
   profile:     ProfileIcon,
   help:        InfoIcon,
   news:        NewsIcon,
 };
 
-const renderIcon = (key) => {
+const renderIcon = (key, isMobile = false) => {
   const Icon = ICON_MAP[key] ?? HomeIcon;
-  return <Icon className={styles.sidebarIcon} />;
+  return <Icon className={isMobile ? styles.mobileNavIcon : styles.sidebarIcon} />;
 };
 
-/* ─── Один пункт меню ─── */
-const NavItem = ({ tabKey, label, path, children }) => (
-  <li className={styles.sidebarEl}>
+/* ─── Nav item ─── */
+const NavItem = ({ tabKey, label, path, children, onNavClick, mobile }) => (
+  <li style={mobile ? { marginBottom: 4, listStyle: 'none' } : undefined}>
     <NavLink
       to={path}
-      className={({ isActive }) => isActive ? styles.activeLink : styles.inactiveLink}
+      className={({ isActive }) => isActive
+        ? (mobile ? styles.mobileActiveLink : styles.activeLink)
+        : (mobile ? styles.mobileInactiveLink : styles.inactiveLink)
+      }
+      onClick={onNavClick}
     >
-      {renderIcon(tabKey)}
-      <span className={styles.sidebarText}>{label}</span>
+      {renderIcon(tabKey, mobile)}
+      <span className={mobile ? styles.mobileSidebarText : styles.sidebarText}>{label}</span>
     </NavLink>
     {children}
   </li>
 );
 
-/* ─── Вкладка турніру з анімацією ─── */
-const TournamentTab = ({ tab, onClose, animate }) => {
+/* ─── Tournament tab ─── */
+const TournamentTab = ({ tab, onClose, animate, onNavClick }) => {
   const [phase, setPhase] = useState(animate ? 'hidden' : 'open');
 
   useEffect(() => {
     if (!animate) return;
-    const raf = requestAnimationFrame(() => {
-      setPhase('opening');
-    });
+    const raf = requestAnimationFrame(() => setPhase('opening'));
     return () => cancelAnimationFrame(raf);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line
 
   const handleClose = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setPhase('closing');
+    setPhase("closing");
     setTimeout(() => onClose(tab.id), 250);
   };
 
   const cls = [
     styles.nestedTournament,
-    phase === 'hidden'  ? styles.tabHidden  : '',
-    phase === 'opening' ? styles.tabOpening : '',
-    phase === 'closing' ? styles.tabClosing : '',
-  ].filter(Boolean).join(' ');
+    phase === "hidden"  ? styles.tabHidden  : "",
+    phase === "opening" ? styles.tabOpening : "",
+    phase === "closing" ? styles.tabClosing : "",
+  ].filter(Boolean).join(" ");
 
   return (
     <div className={cls}>
       <NavLink
         to={`/tournament/${tab.id}`}
-        className={({ isActive }) =>
-          isActive ? styles.activeNestedLink : styles.nestedLink
-        }
+        className={({ isActive }) => isActive ? styles.activeNestedLink : styles.nestedLink}
         title={tab.name}
+        onClick={onNavClick}
       >
         <span className={styles.tabName}>└ {tab.name}</span>
-        <button
-          className={styles.closeIconWrapper}
-          onClick={handleClose}
-          aria-label={`Закрити ${tab.name}`}
-          type="button"
-        >
+        <button className={styles.closeIconWrapper} onClick={handleClose}
+          aria-label={`Закрити ${tab.name}`} type="button">
           <img src={cross} className={styles.closeIcon} alt="" />
         </button>
       </NavLink>
@@ -103,51 +98,57 @@ const TournamentTab = ({ tab, onClose, animate }) => {
   );
 };
 
-/* ─── Хук: polling для авто-закриття вкладок турніру ─── */
+/* ─── Polling hook ─── */
 const useTournamentRemovalPolling = (openTabs, removeTabById) => {
   useEffect(() => {
     if (!openTabs.length) return;
-
     const check = async () => {
-      const token = getToken();
-      if (!token) return;
-
       for (const tab of openTabs) {
         try {
-          const res = await fetch(`${API_BASE}/tournaments/${tab.id}/my-role/`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.status === 403 || res.status === 404) {
+          const res = await API.get(`/tournaments/${tab.id}/my-role/`);
+          if (res.status === 403 || res.status === 404) removeTabById(tab.id);
+        } catch (err) {
+          if (err.response?.status === 403 || err.response?.status === 404) {
             removeTabById(tab.id);
           }
-        } catch {
-          // ігноруємо помилки мережі
         }
       }
     };
-
     const interval = setInterval(check, 15000);
     return () => clearInterval(interval);
   }, [openTabs, removeTabById]);
 };
 
-/* ─── Головний компонент ─── */
+/* ─── Burger button ─── */
+const BurgerButton = ({ isOpen, onClick }) => (
+  <button
+    className={`${styles.burgerBtn} ${isOpen ? styles.burgerBtnOpen : ''}`}
+    onClick={onClick}
+    aria-label={isOpen ? 'Закрити меню' : 'Відкрити меню'}
+    type="button"
+  >
+    <span className={styles.burgerLine} />
+    <span className={styles.burgerLine} />
+    <span className={styles.burgerLine} />
+  </button>
+);
+
+/* ─── Main NavBar ─── */
 const NavBar = ({ children }) => {
   const { openTabs, closeTab, removeTabById } = useTabs();
   const navigate = useNavigate();
   const [fullUserName, setFullUserName] = useState('');
+  const [avatar, setAvatar]             = useState(null);
 
-  const [avatar, setAvatar]               = useState(null);
   const [bellOpen, setBellOpen]           = useState(false);
   const [compose, setCompose]             = useState(false);
   const [notifs, setNotifs]               = useState([]);
   const [notifsLoading, setNotifsLoading] = useState(false);
 
-  const [sidebarOpen, setSidebarOpen]       = useState(false);
-  const [sidebarClosing, setSidebarClosing] = useState(false);
+  const [mobileOpen, setMobileOpen]       = useState(false);
+  const [mobileClosing, setMobileClosing] = useState(false);
 
-  const bellRef    = useRef();
-  const sidebarRef = useRef();
+  const bellRef = useRef();
 
   const [showLogout, setShowLogout] = useState(
     () => JSON.parse(localStorage.getItem("setting_logout") ?? "true")
@@ -155,25 +156,35 @@ const NavBar = ({ children }) => {
 
   useTournamentRemovalPolling(openTabs, removeTabById);
 
+  // Settings sync
   useEffect(() => {
-    const syncLogout = () =>
-      setShowLogout(JSON.parse(localStorage.getItem("setting_logout") ?? "true"));
-    window.addEventListener("settings-updated", syncLogout);
-    window.addEventListener("storage", syncLogout);
-    return () => {
-      window.removeEventListener("settings-updated", syncLogout);
-      window.removeEventListener("storage", syncLogout);
-    };
+    const sync = () => setShowLogout(JSON.parse(localStorage.getItem("setting_logout") ?? "true"));
+    window.addEventListener("settings-updated", sync);
+    window.addEventListener("storage", sync);
+    return () => { window.removeEventListener("settings-updated", sync); window.removeEventListener("storage", sync); };
   }, []);
 
-  const role = localStorage.getItem('userRole') ?? 'participant';
+  // Warm filter
+  useEffect(() => {
+    const applyWarm = () => {
+      const warm = JSON.parse(localStorage.getItem("setting_warm") ?? "false");
+      document.documentElement.style.filter = warm ? "sepia(0.25) saturate(1.1) brightness(0.98)" : "";
+    };
+    applyWarm();
+    window.addEventListener("settings-updated", applyWarm);
+    window.addEventListener("storage", applyWarm);
+    return () => { window.removeEventListener("settings-updated", applyWarm); window.removeEventListener("storage", applyWarm); };
+  }, []);
+
+  // Роль — спочатку з пам'яті (безпечно), fallback на localStorage для UI
+  const role     = getUserRole() ?? localStorage.getItem("userRole") ?? "participant";
   const roleTabs = getTabsForRole(role);
 
-  const initialTabIds = useRef(new Set(openTabs.map(t => String(t.id))));
+  const initialTabIds = useRef(new Set(openTabs.map((t) => String(t.id))));
 
   // ── Початкове завантаження профілю ───────────────────────────────────────
   useEffect(() => {
-    const storedName = localStorage.getItem('fullUserName');
+    const storedName = localStorage.getItem("fullUserName");
     if (storedName) setFullUserName(storedName.trim());
 
     const token = getToken();
@@ -189,118 +200,189 @@ const NavBar = ({ children }) => {
     }
   }, []);
 
-  // ── Реалтайм-оновлення після збереження профілю ───────────────────────────
   useEffect(() => {
     const handler = (e) => {
       if (e.detail?.fullUserName) setFullUserName(e.detail.fullUserName);
       // avatar вже абсолютний URL (підготовлений у Profile.jsx через mediaUrl)
       if (e.detail?.avatar !== undefined) setAvatar(e.detail.avatar);
     };
-    window.addEventListener('profile-updated', handler);
-    return () => window.removeEventListener('profile-updated', handler);
+    window.addEventListener("profile-updated", handler);
+    return () => window.removeEventListener("profile-updated", handler);
   }, []);
 
+  // Mobile sidebar scroll lock
   useEffect(() => {
-    const applyWarm = () => {
-      const warm = JSON.parse(localStorage.getItem("setting_warm") ?? "false");
-      document.documentElement.style.filter = warm
-        ? "sepia(0.25) saturate(1.1) brightness(0.98)"
-        : "";
-    };
-    applyWarm();
-    window.addEventListener("settings-updated", applyWarm);
-    window.addEventListener("storage", applyWarm);
-    return () => {
-      window.removeEventListener("settings-updated", applyWarm);
-      window.removeEventListener("storage", applyWarm);
-    };
-  }, []);
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
 
   useEffect(() => {
-    if (!sidebarOpen) return;
-    const handler = (e) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
-        closeSidebar();
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    document.addEventListener('touchstart', handler);
-    return () => {
-      document.removeEventListener('mousedown', handler);
-      document.removeEventListener('touchstart', handler);
-    };
-  }, [sidebarOpen]);
+    if (!mobileOpen) return;
+    const handleEsc = (e) => { if (e.key === 'Escape') closeMobile(); };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [mobileOpen]);
 
-  const closeSidebar = () => {
-    setSidebarClosing(true);
-    setTimeout(() => {
-      setSidebarOpen(false);
-      setSidebarClosing(false);
-    }, 320);
+  const openMobile  = () => { setMobileClosing(false); setMobileOpen(true); };
+  const closeMobile = () => {
+    setMobileClosing(true);
+    setTimeout(() => { setMobileOpen(false); setMobileClosing(false); }, 320);
   };
+  const handleNavClick = () => { if (mobileOpen) closeMobile(); };
 
+  // Bell
   const fetchNotifs = async () => {
     setNotifsLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/notifications/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await fetch(`${API.defaults.baseURL}/notifications/`, { headers: { Authorization: `Bearer ${getAccessToken()}` } });
       if (res.ok) setNotifs(await res.json());
-    } catch {}
-    finally { setNotifsLoading(false); }
+    } catch {} finally { setNotifsLoading(false); }
   };
 
-  const handleBellClick = () => {
-    const next = !bellOpen;
-    setBellOpen(next);
-    if (next) fetchNotifs();
-  };
+  const handleBellClick = () => { const next = !bellOpen; setBellOpen(next); if (next) fetchNotifs(); };
 
   useEffect(() => {
     if (!bellOpen) return;
-    const handler = (e) => {
-      if (bellRef.current && !bellRef.current.contains(e.target)) setBellOpen(false);
-    };
+    const handler = (e) => { if (bellRef.current && !bellRef.current.contains(e.target)) setBellOpen(false); };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [bellOpen]);
 
   const markAllRead = async () => {
-    await fetch(`${API_BASE}/notifications/mark-read/`, {
-      method: 'POST', headers: { Authorization: `Bearer ${getToken()}` },
-    });
+    await fetch(`${API.defaults.baseURL}/notifications/mark-read/`, { method: 'POST', headers: { Authorization: `Bearer ${getAccessToken()}` } });
     setNotifs(n => n.map(x => ({ ...x, is_read: true })));
   };
 
   const markOneRead = async (id) => {
-    await fetch(`${API_BASE}/notifications/mark-read/${id}/`, {
-      method: 'POST', headers: { Authorization: `Bearer ${getToken()}` },
-    });
+    await fetch(`${API.defaults.baseURL}/notifications/mark-read/${id}/`, { method: 'POST', headers: { Authorization: `Bearer ${getAccessToken()}` } });
     setNotifs(n => n.map(x => x.id === id ? { ...x, is_read: true } : x));
   };
 
-  const handleLogout = (e) => {
+  const handleLogout = async (e) => {
     e.preventDefault();
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('fullUserName');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userId');
-    window.dispatchEvent(new Event('auth-changed'));
-    navigate('/');
+    try {
+      // Інвалідуємо refresh token на бекенді і видаляємо httpOnly cookie
+      await logoutUser();
+    } catch {}
+
+    // ── Повне очищення стану ──────────────────────────────────────────────
+    clearAccessToken();                          // access token + роль з пам'яті
+
+    // Актуальні ключі
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("fullUserName");
+    // Legacy-ключі старого коду
+    localStorage.removeItem("role");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userId");
+
+    // Скидаємо локальний UI-стан навбару
+    setFullUserName("");
+    setAvatar(null);
+    setNotifs([]);
+    setBellOpen(false);
+
+    window.dispatchEvent(new Event("auth-changed"));
+    navigate("/");
   };
 
-  const hasUnread = notifs.some(n => !n.is_read);
+  const hasUnread = notifs.some((n) => !n.is_read);
+
+  // ── Desktop nav content ────────────────────────────────────────────────────
+  const desktopNavContent = () => (
+    <>
+      <nav className={styles.primaryNav}>
+        <h3 className={styles.sidebarSectionTitle}>Меню</h3>
+        <ul>
+          {roleTabs.map(({ key, label, path }) => (
+            <NavItem key={key} tabKey={key} label={label} path={path}>
+              {key === 'tournaments' && openTabs.length > 0 && (
+                <div className={styles.openedList}>
+                  {openTabs.map((tab) => (
+                    <TournamentTab
+                      key={tab.id}
+                      tab={tab}
+                      onClose={closeTab}
+                      animate={!initialTabIds.current.has(String(tab.id))}
+                    />
+                  ))}
+                </div>
+              )}
+            </NavItem>
+          ))}
+        </ul>
+      </nav>
+      <nav className={styles.secondaryNav}>
+        <h3 className={styles.sidebarSectionTitle}>Інше</h3>
+        <ul>
+          {COMMON_TABS.map(({ key, label, path }) => (
+            <NavItem key={key} tabKey={key} label={label} path={path} />
+          ))}
+        </ul>
+      </nav>
+    </>
+  );
+
+  // ── Mobile nav content — uses inline styles to bypass CSS Modules scoping ──
+  const mobileNavContent = () => (
+    <>
+      {/* МЕНЮ */}
+      <div style={{ marginBottom: 20 }}>
+        <p style={{
+          fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
+          textTransform: 'uppercase', color: '#aab0bc',
+          margin: '0 0 8px 12px',
+        }}>Меню</p>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          {roleTabs.map(({ key, label, path }) => (
+            <NavItem key={key} tabKey={key} label={label} path={path} onNavClick={handleNavClick} mobile>
+              {key === 'tournaments' && openTabs.length > 0 && (
+                <div className={styles.openedList}>
+                  {openTabs.map((tab) => (
+                    <TournamentTab
+                      key={tab.id}
+                      tab={tab}
+                      onClose={closeTab}
+                      animate={!initialTabIds.current.has(String(tab.id))}
+                      onNavClick={handleNavClick}
+                    />
+                  ))}
+                </div>
+              )}
+            </NavItem>
+          ))}
+        </ul>
+      </div>
+
+      {/* ІНШЕ */}
+      <div>
+        <p style={{
+          fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
+          textTransform: 'uppercase', color: '#aab0bc',
+          margin: '0 0 8px 12px',
+        }}>Інше</p>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          {COMMON_TABS.map(({ key, label, path }) => (
+            <NavItem key={key} tabKey={key} label={label} path={path} onNavClick={handleNavClick} mobile />
+          ))}
+        </ul>
+      </div>
+    </>
+  );
 
   return (
     <div className={styles.vectorApp}>
 
+      {/* ── Topbar ── */}
       <header className={styles.topNavbar}>
+        <BurgerButton isOpen={mobileOpen} onClick={mobileOpen ? closeMobile : openMobile} />
+
         <div className={styles.navbarLogo}>
           <img src={Logo} alt="Vector" className={styles.logo} />
         </div>
 
         <div className={styles.search}>
-          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" style={{opacity:0.4,flexShrink:0}}>
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" style={{ opacity: 0.4, flexShrink: 0 }}>
             <circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/>
           </svg>
           <input type="search" placeholder="Пошук..." className={styles.searchInput} />
@@ -312,7 +394,7 @@ const NavBar = ({ children }) => {
             ? <img src={avatar} alt="avatar" className={styles.navbarAvatar} />
             : (
               <div className={styles.navbarAvatarPlaceholder}>
-                {fullUserName?.[0]?.toUpperCase() || '?'}
+                {fullUserName?.[0]?.toUpperCase() || "?"}
               </div>
             )
           }
@@ -323,12 +405,10 @@ const NavBar = ({ children }) => {
             </button>
             {bellOpen && (
               <NotificationDropdown
-                notifs={notifs}
-                loading={notifsLoading}
+                notifs={notifs} loading={notifsLoading}
                 onClose={() => setBellOpen(false)}
                 onCompose={() => { setBellOpen(false); setCompose(true); }}
-                onMarkAllRead={markAllRead}
-                onMarkOne={markOneRead}
+                onMarkAllRead={markAllRead} onMarkOne={markOneRead}
               />
             )}
           </div>
@@ -336,58 +416,65 @@ const NavBar = ({ children }) => {
       </header>
 
       <div className={styles.mainWrapper}>
-        <aside className={styles.leftSidebar}>
-
-          <nav className={styles.primaryNav}>
-            <h3 className={styles.sidebarSectionTitle}>Меню</h3>
-            <ul>
-              {roleTabs.map(({ key, label, path }) => (
-                <NavItem key={key} tabKey={key} label={label} path={path}>
-                  {key === 'tournaments' && openTabs.length > 0 && (
-                    <div className={styles.openedList}>
-                      {openTabs.map((tab) => (
-                        <TournamentTab
-                          key={tab.id}
-                          tab={tab}
-                          onClose={closeTab}
-                          animate={!initialTabIds.current.has(String(tab.id))}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </NavItem>
-              ))}
-            </ul>
-          </nav>
-
-          <nav className={styles.secondaryNav}>
-            <h3 className={styles.sidebarSectionTitle}>Інше</h3>
-            <ul>
-              {COMMON_TABS.map(({ key, label, path }) => (
-                <NavItem key={key} tabKey={key} label={label} path={path} />
-              ))}
-            </ul>
-          </nav>
-
+        {/* ── Desktop sidebar ── */}
+        <aside className={`${styles.leftSidebar} ${styles.desktopSidebar}`}>
+          {desktopNavContent()}
           <div className={styles.logoutSection}>
             {showLogout && (
               <button onClick={handleLogout} className={styles.logoutBtn} type="button">
-                <LogoutIcon className={styles.logoutIcon} style={{ color: 'rgb(215,125,126)', fill: 'rgb(215,125,126)' }} />
+                <LogoutIcon className={styles.logoutIcon} style={{ color: "rgb(215,125,126)", fill: "rgb(215,125,126)" }} />
                 <span className={styles.logoutText}>Вийти</span>
               </button>
             )}
           </div>
-
         </aside>
 
+        {/* ── Mobile overlay ── */}
+        {mobileOpen && (
+          <div
+            className={`${styles.mobileOverlay} ${mobileClosing ? styles.mobileOverlayClosing : styles.mobileOverlayOpen}`}
+            onClick={closeMobile}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* ── Mobile sidebar drawer ── */}
+        {mobileOpen && (
+          <aside className={`${styles.mobileSidebar} ${mobileClosing ? styles.mobileSidebarClosing : styles.mobileSidebarOpen}`}>
+
+            {/* Logo header */}
+            <div className={styles.mobileSidebarHeader}>
+              <img src={Logo} alt="Vector" className={styles.mobileSidebarLogo} />
+            </div>
+
+            {/* Nav body — inline styles bypass CSS Modules scoping */}
+            <div className={styles.mobileSidebarBody}>
+              {mobileNavContent()}
+            </div>
+
+            {/* Logout footer */}
+            <div className={styles.mobileSidebarFooter}>
+              {showLogout && (
+                <div className={styles.logoutSection}>
+                  <button onClick={handleLogout} className={styles.logoutBtn} type="button">
+                    <LogoutIcon className={styles.logoutIcon} style={{ color: 'rgb(215,125,126)', fill: 'rgb(215,125,126)' }} />
+                    <span className={styles.logoutText}>Вийти</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+          </aside>
+        )}
+
+        {/* ── Main content ── */}
         <main className={styles.contentArea}>
           {children}
         </main>
+
       </div>
 
-      {compose && (
-        <ComposeModal onClose={() => setCompose(false)} onSent={fetchNotifs} />
-      )}
+      {compose && <ComposeModal onClose={() => setCompose(false)} onSent={fetchNotifs} />}
     </div>
   );
 };
