@@ -16,7 +16,7 @@
 
 import axios from "axios";
 
-const BASE = "http://127.0.0.1:8000/api";
+const BASE = "/api";  // проксюється через Vite → 127.0.0.1:8000, cookie same-site
 
 // ── In-memory стан ────────────────────────────────────────────────────────────
 let _accessToken = null;
@@ -107,8 +107,13 @@ export async function restoreSession() {
     setAccessToken(data.access);
     if (data.role) setUserRole(data.role);
     return data;
-  } catch {
-    return null;
+  } catch (err) {
+    // 401/403 — refresh cookie немає або протухла, сесію не відновити
+    const status = err.response?.status;
+    if (status === 401 || status === 403) return null;
+    // Мережева помилка або бекенд недоступний — повертаємо спеціальний маркер
+    // щоб App.jsx не видаляв локальні дані і не кидав юзера на лендінг
+    return { networkError: true };
   }
 }
 

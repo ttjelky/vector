@@ -7,10 +7,14 @@ import { getAccessToken, getUserRole } from "../../api";
  *
  * Роль читається з пам'яті (getUserRole), а не з localStorage —
  * це унеможливлює підміну ролі через DevTools.
+ *
+ * ВАЖЛИВО: цей компонент рендериться лише після того як App.jsx
+ * завершив restoreSession() (authReady === true), тому гонки немає.
+ * Якщо токен відсутній після відновлення — редіректимо на лендінг.
  */
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const isAuthenticated = Boolean(getAccessToken());
-  const role            = getUserRole() ?? "";
+  const role            = getUserRole() ?? localStorage.getItem("userRole") ?? "";
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;

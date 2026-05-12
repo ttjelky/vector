@@ -224,7 +224,7 @@ const NavBar = ({ children }) => {
   const fetchNotifs = async () => {
     setNotifsLoading(true);
     try {
-      const res = await fetch(`${API}/notifications/`, { headers: { Authorization: `Bearer ${getToken()}` } });
+      const res = await fetch(`${API.defaults.baseURL}/notifications/`, { headers: { Authorization: `Bearer ${getAccessToken()}` } });
       if (res.ok) setNotifs(await res.json());
     } catch {} finally { setNotifsLoading(false); }
   };
@@ -239,12 +239,12 @@ const NavBar = ({ children }) => {
   }, [bellOpen]);
 
   const markAllRead = async () => {
-    await fetch(`${API}/notifications/mark-read/`, { method: 'POST', headers: { Authorization: `Bearer ${getToken()}` } });
+    await fetch(`${API.defaults.baseURL}/notifications/mark-read/`, { method: 'POST', headers: { Authorization: `Bearer ${getAccessToken()}` } });
     setNotifs(n => n.map(x => ({ ...x, is_read: true })));
   };
 
   const markOneRead = async (id) => {
-    await fetch(`${API}/notifications/mark-read/${id}/`, { method: 'POST', headers: { Authorization: `Bearer ${getToken()}` } });
+    await fetch(`${API.defaults.baseURL}/notifications/mark-read/${id}/`, { method: 'POST', headers: { Authorization: `Bearer ${getAccessToken()}` } });
     setNotifs(n => n.map(x => x.id === id ? { ...x, is_read: true } : x));
   };
 
@@ -406,34 +406,6 @@ const NavBar = ({ children }) => {
       </header>
 
       <div className={styles.mainWrapper}>
-        <aside className={styles.leftSidebar}>
-          <nav className={styles.primaryNav}>
-            <h3 className={styles.sidebarSectionTitle}>Меню</h3>
-            <ul>
-              {roleTabs.map(({ key, label, path }) => (
-                <NavItem key={key} tabKey={key} label={label} path={path}>
-                  {key === "tournaments" && openTabs.length > 0 && (
-                    <div className={styles.openedList}>
-                      {openTabs.map((tab) => (
-                        <TournamentTab key={tab.id} tab={tab} onClose={closeTab}
-                          animate={!initialTabIds.current.has(String(tab.id))} />
-                      ))}
-                    </div>
-                  )}
-                </NavItem>
-              ))}
-            </ul>
-          </nav>
-
-          <nav className={styles.secondaryNav}>
-            <h3 className={styles.sidebarSectionTitle}>Інше</h3>
-            <ul>
-              {COMMON_TABS.map(({ key, label, path }) => (
-                <NavItem key={key} tabKey={key} label={label} path={path} />
-              ))}
-            </ul>
-          </nav>
-
         {/* ── Desktop sidebar ── */}
         <aside className={`${styles.leftSidebar} ${styles.desktopSidebar}`}>
           {desktopNavContent()}

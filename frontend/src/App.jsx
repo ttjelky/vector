@@ -109,7 +109,7 @@ const App = () => {
     localStorage.removeItem("userId");
 
     restoreSession().then((data) => {
-      if (data) {
+      if (data && !data.networkError) {
         // Роль — в пам'яті (захищено)
         if (data.role) setUserRole(data.role);
 
@@ -121,11 +121,12 @@ const App = () => {
             `${data.first_name} ${data.last_name || ""}`.trim()
           );
         }
-      } else {
+      } else if (!data || (!data.networkError)) {
         // Refresh cookie немає або протухла — чистимо все
         localStorage.removeItem("userRole");
         localStorage.removeItem("fullUserName");
       }
+      // data.networkError — нічого не чіпаємо, лишаємо юзера де він є
       setAuthReady(true);
     });
   }, []);
@@ -133,11 +134,11 @@ const App = () => {
   if (!authReady) return null;
 
   return (
-    <TabsProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <TabsProvider>
         <AppRoutes />
-      </BrowserRouter>
-    </TabsProvider>
+      </TabsProvider>
+    </BrowserRouter>
   );
 };
 

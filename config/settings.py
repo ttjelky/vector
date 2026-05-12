@@ -180,13 +180,15 @@ AUTH_COOKIE                  = "refresh_token"
 AUTH_COOKIE_MAX_AGE          = 60 * 60 * 24 * 30
 AUTH_COOKIE_SECURE           = False
 AUTH_COOKIE_HTTP_ONLY        = True
-AUTH_COOKIE_PATH             = "/api/users/"
+AUTH_COOKIE_PATH             = "/"           # була "/api/users/" — Safari не надсилав cookie на інші шляхи
 AUTH_COOKIE_SAMESITE         = "Lax"
- 
+
 # ── CORS — дозволяємо credentials (cookie) ───────────────────────────────────
 CORS_ALLOW_ALL_ORIGINS       = False
 CORS_ALLOWED_ORIGINS         = [
     "http://localhost:3000",
     "http://localhost:5173",
+    "http://127.0.0.1:5173",  # Safari іноді резолвить localhost як 127.0.0.1
+    "http://127.0.0.1:3000",
 ]
 CORS_ALLOW_CREDENTIALS       = True
