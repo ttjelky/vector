@@ -18,7 +18,6 @@ import TeamsTab from "../components/TeamsTab";
 import CertificatesPage from "./CertificatesPage";
 import AnnouncementsTab from "../components/AnnouncementsTab";
 
-// ─── Rich-text preview helper ─────────────────────────────────────────────────
 function getDescriptionPreview(html, maxLen = 80) {
   if (!html) return "";
   let result = html.replace(/<table[\s\S]*?<\/table>/gi, " Таблиця ");
@@ -57,11 +56,11 @@ export default function TournamentPage() {
   const [error,       setError]       = useState(null);
   const [myTeam,      setMyTeam]      = useState(null);
 
-  const isOwner   = myRole === "owner";
-  const isAdmin   = myRole === "admin";
-  const canManage = isOwner || isAdmin; // може редагувати турнір
-  const isJury      = myRole === "jury";
-  const isJuryPanel = myRole === "jury" || myRole === "admin" || myRole === "owner";
+  const isOwner        = myRole === "owner";
+  const isAdmin        = myRole === "admin";
+  const canManage      = isOwner || isAdmin;
+  const isJury         = myRole === "jury";
+  const isJuryPanel    = myRole === "jury" || myRole === "admin" || myRole === "owner";
   const isAdminOrOwner = myRole === "admin" || myRole === "owner";
 
   useEffect(() => {
@@ -133,6 +132,7 @@ export default function TournamentPage() {
       </div>
     </NavBar>
   );
+
   if (!tournament) return (
     <NavBar>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#888', fontSize: 14 }}>
@@ -152,23 +152,23 @@ export default function TournamentPage() {
   })();
 
   const tabs = [
-  { id: "overview",       label: "Основна сторінка" },
-  { id: "announcements",  label: "Оголошення" },          // з main
-  ...(!isTeamParticipantUnregistered ? [{ id: "rounds", label: "Раунди" }] : []),
-  ...(isTeamTournament
-    ? [
-        ...(!isJuryPanel ? [{ id: "my_team", label: "Моя команда" }] : []),
-        ...(isJuryPanel  ? [{ id: "teams",   label: "Команди" }]    : []),
-        { id: "participants", label: isTeamTournament ? "Адміністрація" : "Учасники" }, // з main
-      ]
-    : [
-        { id: "participants", label: isTeamTournament ? "Адміністрація" : "Учасники" }, // з main
-      ]
-  ),
-  ...(!isTeamParticipantUnregistered ? [{ id: "leaderboard", label: "Таблиця лідерів" }] : []),
-  ...(isJuryPanel ? [{ id: "jury", label: "Панель журі" }] : []),
-  ...(myRole ? [{ id: "certificates", label: "Сертифікати" }] : []),  // з TrrippleBranch
-];
+    { id: "overview",      label: "Основна сторінка" },
+    { id: "announcements", label: "Оголошення" },
+    ...(!isTeamParticipantUnregistered ? [{ id: "rounds", label: "Раунди" }] : []),
+    ...(isTeamTournament
+      ? [
+          ...(!isJuryPanel ? [{ id: "my_team", label: "Моя команда" }] : []),
+          ...(isJuryPanel  ? [{ id: "teams",   label: "Команди" }]    : []),
+          { id: "participants", label: isTeamTournament ? "Адміністрація" : "Учасники" },
+        ]
+      : [
+          { id: "participants", label: isTeamTournament ? "Адміністрація" : "Учасники" },
+        ]
+    ),
+    ...(!isTeamParticipantUnregistered ? [{ id: "leaderboard", label: "Таблиця лідерів" }] : []),
+    ...(isJuryPanel ? [{ id: "jury", label: "Панель журі" }] : []),
+    ...(myRole ? [{ id: "certificates", label: "Сертифікати" }] : []),
+  ];
 
   return (
     <NavBar>
@@ -189,7 +189,9 @@ export default function TournamentPage() {
                 </p>
               )}
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+
+            {/* Бейджики — на мобілці колонка, на десктопі рядок */}
+            <div className={styles.headerBadges}>
               <StatusBadge status={status} />
               {isJuryPanel && (
                 <span style={{
@@ -200,6 +202,7 @@ export default function TournamentPage() {
                   border: `1px solid ${myRole === "admin" ? "#ddd6fe" : "#dde4f5"}`,
                   borderRadius: 100,
                   padding: "3px 10px",
+                  whiteSpace: "nowrap",
                 }}>
                   {myRole === "admin" ? "Адміністратор" : "Права журі"}
                 </span>
@@ -248,12 +251,9 @@ export default function TournamentPage() {
           )}
 
           {activeTab === "announcements" && (
-            <AnnouncementsTab
-              tournamentId={id}
-              myRole={myRole}
-            />
+            <AnnouncementsTab tournamentId={id} myRole={myRole} />
           )}
-        
+
           {activeTab === "rounds" && (
             <RoundsTab
               rounds={rounds}
@@ -287,7 +287,7 @@ export default function TournamentPage() {
               tournamentStatus={status}
             />
           )}
-        
+
           {activeTab === "participants" && (
             <ParticipantsTab
               tournamentId={id}
