@@ -1,5 +1,4 @@
-/* admindashboard.module.css
-   Стилі ТІЛЬКИ для AdminDashboard — не містять tournamentGrid/tournamentCard/createBtn */
+/* admindashboard.module.css */
 
 :global(body) {
   background-color: #fbfbfb;
@@ -59,6 +58,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 
 .sectionTitle {
@@ -69,6 +70,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 /* ── Carousel ─────────────────────────────────────────────────────────────── */
@@ -81,9 +84,14 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  width: 100%;
 }
 
-.carouselSlide { width: 100%; }
+.carouselSlide {
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
 
 .slideEnter {
   opacity: 1;
@@ -109,6 +117,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .arrowBtn {
@@ -117,6 +126,7 @@
   border-radius: 8px;
   width: 30px;
   height: 30px;
+  min-width: 30px;
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
@@ -126,6 +136,7 @@
   justify-content: center;
   transition: background 0.18s, border-color 0.18s;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .arrowBtn:hover { background: #f4f4f4; border-color: #c8c8c8; }
@@ -160,6 +171,7 @@
   padding: 2px 8px;
   min-width: 22px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .markAllBtn {
@@ -173,6 +185,7 @@
   transition: color 0.15s;
   white-space: nowrap;
   margin-left: auto;
+  flex-shrink: 0;
 }
 .markAllBtn:hover { color: #1a1a1a; }
 
@@ -181,13 +194,17 @@
   flex-direction: column;
   gap: 0.55rem;
   overflow-y: auto;
+  overflow-x: hidden;
   max-height: 340px;
   padding-right: 2px;
+  min-width: 0;
+  width: 100%;
 }
 
 .notifGrid::-webkit-scrollbar { width: 4px; }
 .notifGrid::-webkit-scrollbar-thumb { background: #e1e1e1; border-radius: 4px; }
 
+/* ── Notification tile ── */
 .notifTile {
   display: flex;
   align-items: flex-start;
@@ -198,18 +215,16 @@
   position: relative;
   cursor: pointer;
   transition: opacity 0.15s;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
 }
 .notifTile:hover { opacity: 0.85; }
 
-.notif_unread {
-  background: #f0f4ff;
-  border-color: #6366f1;
-}
-
-.notif_read {
-  background: #fafafa;
-  border-color: #e5e7eb;
-}
+.notif_unread { background: #f0f4ff; border-color: #6366f1; }
+.notif_read   { background: #fafafa; border-color: #e5e7eb; }
 
 .notifDot {
   position: absolute;
@@ -222,18 +237,23 @@
   flex-shrink: 0;
 }
 
+/* Content column */
 .notifContent {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 3px;
   min-width: 0;
+  overflow: hidden;
 }
 
 .notifTitle {
   font-size: 0.82rem;
   font-weight: 600;
   color: #111;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .notifMsg {
@@ -242,6 +262,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .notifTournamentTag {
@@ -253,7 +274,11 @@
   padding: 2px 8px;
   border-radius: 999px;
   width: fit-content;
+  max-width: 100%;
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .notifLinkList {
@@ -261,6 +286,9 @@
   flex-direction: column;
   gap: 2px;
   margin-top: 2px;
+  min-width: 0;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .notifLink {
@@ -270,21 +298,29 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
 }
 .notifLink:hover { text-decoration: underline; }
 
+/* Meta column */
 .notifMeta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 3px;
   flex-shrink: 0;
+  min-width: 0;
+  max-width: 90px;
 }
 
 .notifSender {
   font-size: 0.72rem;
   color: #999;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .notifTime {
@@ -321,6 +357,8 @@
   border: 1px solid #ebebeb;
   background: #fff;
   width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
 }
 
 .skeletonImg {
@@ -352,9 +390,11 @@
   display: flex;
   flex-direction: column;
   gap: 7px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-/* ── Legacy stats (збережено для сумісності) ──────────────────────────────── */
+/* ── Legacy stats ─────────────────────────────────────────────────────────── */
 .statscontainer {
   display: flex;
   gap: 20px;
@@ -388,9 +428,7 @@
   font-weight: bold;
 }
 
-
-/* ── Tournament grid (ParticipantTournaments) ─────────────────────────────── */
-
+/* ── Tournament grid ──────────────────────────────────────────────────────── */
 .tournamentGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -402,6 +440,7 @@
   cursor: pointer;
   border-radius: 16px;
   transition: transform 0.12s, box-shadow 0.12s;
+  max-width: 400px;
 }
 .tournamentCard:hover {
   transform: translateY(-2px);
@@ -410,7 +449,6 @@
 .tournamentCard:active { transform: translateY(0); }
 
 /* ── Join button ──────────────────────────────────────────────────────────── */
-
 .createBtnContainer {
   display: flex;
   justify-content: center;
@@ -433,3 +471,228 @@
 }
 .createBtn:hover  { background: #2a2a2a; box-shadow: 0 4px 16px rgba(0,0,0,0.16); }
 .createBtn:active { transform: scale(0.97); box-shadow: none; }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE OVERRIDES
+   ══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 992px) {
+
+  .contentArea {
+    padding: 20px 16px;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .pageHeader
+  { margin-bottom: 1.25rem; }
+  .pageSubtitle
+  { margin-left: 55px;
+  margin-right: 50px;}
+  .pageTitle 
+  { font-size: 1.25rem; 
+  margin-left: 55px;
+  margin-right: 50px; }
+
+  /* Single column */
+  .mainGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Section — не пропускає контент назовні */
+  .section {
+    min-height: auto;
+    overflow: hidden;
+  }
+
+  /* Carousel — строго в контейнер */
+  .carouselWrapper {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .carouselSlide {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Нотіфікейшн grid — без горизонтального overflow */
+  .notifGrid {
+    max-height: none;
+    overflow-y: visible;
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Нотіфікейшн тайл — строго в контейнер */
+  .notifTile {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .notifContent {
+    min-width: 0;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  /* Довгі посилання обрізати */
+  .notifLink {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: block;
+  }
+
+  .notifTournamentTag {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .notifLinkList {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* Meta — не виштовхує контент */
+  .notifMeta {
+    max-width: 80px;
+    flex-shrink: 0;
+  }
+
+  /* Скелетони */
+  .tournamentCard,
+  .skeletonCard,
+  .skeletonTile {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .tournamentGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .contentArea {
+    padding: 16px 12px;
+  }
+
+  .pageTitle    { font-size: 1.1rem; }
+  .pageSubtitle { font-size: 0.82rem; }
+
+  .section {
+    padding: 1rem;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  /* Нотіфікейшн тайл — meta йде на окремий рядок */
+  .notifTile {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    overflow: hidden;
+  }
+
+  /* Текст повідомлення може переноситись */
+  .notifMsg {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .notifMeta {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    max-width: 100%;
+    width: 100%;
+    flex-basis: 100%;
+    gap: 6px;
+  }
+
+  /* Stats stack */
+  .statscontainer {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    margin-top: 20px;
+  }
+
+  .infocard { min-width: auto; padding: 20px; }
+}
+
+@media (max-width: 576px) {
+  .contentArea {
+    padding: 12px 8px;
+  }
+
+  .pageHeader { margin-bottom: 1rem; }
+  .pageTitle  { font-size: 1rem; }
+
+  .section {
+    padding: 0.875rem;
+    gap: 0.75rem;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .sectionTitle { font-size: 0.9rem; }
+
+  /* Carousel controls */
+  .carouselControls { flex-shrink: 0; }
+  .arrowBtn { width: 28px; height: 28px; min-width: 28px; font-size: 1rem; }
+  .carouselWrapper { min-height: 180px; }
+
+  /* Notification: all text wraps */
+  .notifMsg {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .notifTitle {
+    font-size: 0.80rem;
+  }
+
+  /* Dot зміщуємо щоб не перекривав текст на малих екранах */
+  .notifDot {
+    top: 8px;
+    right: 8px;
+  }
+
+  .createBtn { padding: 10px 22px; font-size: 13px; }
+}
+
+@media (max-width: 420px) {
+  .contentArea { padding: 10px 6px; }
+  .section {
+    padding: 0.75rem;
+    overflow: hidden;
+  }
+  .notifTitle { font-size: 0.78rem; }
+  .notifMsg   { font-size: 0.74rem; }
+  .carouselWrapper { min-height: 160px; }
+}
+
+@media (max-width: 375px) {
+  .contentArea { padding: 8px 4px; }
+  .pageTitle   { font-size: 0.95rem; }
+  .section {
+    padding: 0.625rem;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .mainGrid { gap: 0.75rem; }
+}

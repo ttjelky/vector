@@ -6,7 +6,7 @@
   gap: 32px;
 }
 
-/* ─── Section — без окремих карток, просто чіткі групи ───────────────────── */
+/* ─── Section ─────────────────────────────────────────────────────────────── */
 
 .section {
   display: flex;
@@ -145,13 +145,12 @@
   border-radius: 9px;
 }
 
-/* ─── Info grid — єдина "картка" на сторінці, бо це таблиця з рядками ────── */
+/* ─── Info grid ───────────────────────────────────────────────────────────── */
 
 .infoGrid {
   border: 1px solid #ebebed;
   border-radius: 14px;
   overflow: hidden;
-  /* Один легкий підйом щоб виділити таблицю серед тексту */
   box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
 }
 
@@ -219,9 +218,7 @@
 .deleteBtn:hover  { background: #fee2e2; border-color: #f89595; }
 .deleteBtn:active { transform: scale(0.97); }
 
-/* ═══════════════════════════════════════════════════
-   RICH CONTENT DISPLAY — додати до OverviewTab.module.css
-   ═══════════════════════════════════════════════════ */
+/* ─── Empty / Rich content ────────────────────────────────────────────────── */
 
 .emptyText {
   color: #aaaaaa;
@@ -230,7 +227,6 @@
   margin: 0;
 }
 
-/* Базовий контейнер для відформатованого HTML */
 .richContent {
   font-size: 14px;
   line-height: 1.7;
@@ -238,13 +234,8 @@
   word-break: break-word;
 }
 
-.richContent p {
-  margin: 0 0 8px;
-}
-
-.richContent p:last-child {
-  margin-bottom: 0;
-}
+.richContent p          { margin: 0 0 8px; }
+.richContent p:last-child { margin-bottom: 0; }
 
 .richContent h2 {
   font-size: 17px;
@@ -267,13 +258,9 @@
   padding-left: 20px;
 }
 
-.richContent li {
-  margin-bottom: 4px;
-  line-height: 1.6;
-}
-
-.richContent ul li { list-style-type: disc; }
-.richContent ol li { list-style-type: decimal; }
+.richContent li          { margin-bottom: 4px; line-height: 1.6; }
+.richContent ul li       { list-style-type: disc; }
+.richContent ol li       { list-style-type: decimal; }
 
 .richContent blockquote {
   border-left: 3px solid #111111;
@@ -302,22 +289,14 @@
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
 }
-
-.richContent a:hover { color: #444444; }
-
+.richContent a:hover      { color: #444444; }
 .richContent b,
-.richContent strong { font-weight: 700; }
-
+.richContent strong       { font-weight: 700; }
 .richContent i,
-.richContent em { font-style: italic; }
-
-.richContent u {
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
+.richContent em           { font-style: italic; }
+.richContent u            { text-decoration: underline; text-underline-offset: 2px; }
 .richContent s,
-.richContent strike { text-decoration: line-through; }
+.richContent strike       { text-decoration: line-through; }
 
 /* ══════════════════════════════════════════════════
    DETAIL GRID CARDS — macOS Liquid Glass
@@ -329,7 +308,6 @@
   gap: 10px;
 }
 
-/* Базова картка — liquid glass */
 .dc {
   position: relative;
   display: flex;
@@ -340,7 +318,6 @@
   overflow: hidden;
   transition: box-shadow 0.22s ease, transform 0.18s ease, background 0.2s ease;
 
-  /* Glass base */
   background: rgba(255, 255, 255, 0.62);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -360,7 +337,6 @@
   background: rgba(255, 255, 255, 0.78);
 }
 
-/* Верхній shine-блік */
 .dc::before {
   content: "";
   position: absolute;
@@ -375,12 +351,8 @@
   pointer-events: none;
 }
 
-/* Кольорова мікросмужка знизу — прибрана */
-.dc::after {
-  display: none;
-}
+.dc::after { display: none; }
 
-/* Іконка */
 .dcIcon {
   display: flex;
   width: 28px;
@@ -390,16 +362,14 @@
   border-radius: 9px;
   margin-bottom: 7px;
   flex-shrink: 0;
-
-  /* Glass icon bg */
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.9);
   box-shadow: 0 1px 3px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
 }
 
-.dcBlue   .dcIcon { color: #2563eb; }
-.dcGreen  .dcIcon { color: #059669; }
-.dcOrange .dcIcon { color: #d97706; }
+.dcBlue    .dcIcon { color: #2563eb; }
+.dcGreen   .dcIcon { color: #059669; }
+.dcOrange  .dcIcon { color: #d97706; }
 .dcOpenReg .dcIcon { color: #0891b2; }
 
 .dcIcon svg {
@@ -408,7 +378,6 @@
   flex-shrink: 0;
 }
 
-/* Підпис */
 .dcLabel {
   font-size: 10px;
   font-weight: 700;
@@ -418,7 +387,6 @@
   line-height: 1;
 }
 
-/* Значення */
 .dcValue {
   font-size: 14.5px;
   font-weight: 700;
@@ -427,7 +395,6 @@
   margin-top: 2px;
 }
 
-/* Підказка під значенням (лише dcOpenReg) */
 .dcOpenRegHint {
   font-size: 11px;
   color: rgba(0, 0, 0, 0.38);
@@ -435,18 +402,17 @@
   line-height: 1.3;
 }
 
-/* ─── Detail grid: last-row cards fill empty space ───────────────────────── */
+/* ─── Last-row span rules (desktop only) ─────────────────────────────────── */
 
-/* Solo (6 cards): last 2 cards each span 2 of 4 columns */
 .detailGrid:not([data-team]) .dc:nth-child(5),
 .detailGrid:not([data-team]) .dc:nth-child(6) {
   grid-column: span 2;
 }
 
-/* Team (7 cards): 5th spans 2, 6th and 7th span 1 each */
 .detailGrid[data-team] .dc:nth-child(5) {
   grid-column: span 2;
 }
+
 /* ─── Leave section ───────────────────────────────────────────────────────── */
 
 .leaveSection {
@@ -514,4 +480,95 @@
 .leaveCancelBtn:hover {
   color: #333;
   background: #f4f4f6;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE — тільки адаптація карток, ПК не чіпаємо
+══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+
+  /* ── Загальні відступи ──────────────────────────────────────── */
+  .tabContent { gap: 24px; }
+  .section    { gap: 10px; }
+
+  /* ── Detail grid: 2 колонки ─────────────────────────────────── */
+  .detailGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* Скидаємо всі desktop span-правила */
+  .detailGrid .dc,
+  .detailGrid:not([data-team]) .dc:nth-child(5),
+  .detailGrid:not([data-team]) .dc:nth-child(6),
+  .detailGrid[data-team] .dc:nth-child(5) {
+    grid-column: span 1 !important;
+  }
+
+  /* Картки реєстрації (останні 2) — повна ширина,
+     бо підписи "ПОЧАТОК / КІНЕЦЬ РЕЄСТРАЦІЇ" довгі */
+  .detailGrid .dc:nth-last-child(-n+2) {
+    grid-column: span 2 !important;
+  }
+
+  /* ── Картка ─────────────────────────────────────────────────── */
+  .dc {
+    padding: 11px 12px 13px;
+    border-radius: 14px;
+  }
+
+  .dcIcon {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    margin-bottom: 5px;
+  }
+
+  .dcIcon svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Label — дозволяємо перенос щоб не обрізалось */
+  .dcLabel {
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  /* Value — нормальний перенос */
+  .dcValue {
+    font-size: 13px;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .dcOpenRegHint { font-size: 10px; }
+
+  /* ── Danger zone — вертикально ──────────────────────────────── */
+  .dangerZone {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-top: 32px;
+  }
+
+  .deleteBtn { align-self: flex-start; }
+}
+
+/* ── Дуже вузький (≤360px, старі iPhone SE) ─────────────────── */
+@media (max-width: 360px) {
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .detailGrid .dc,
+  .detailGrid .dc:nth-last-child(-n+2) {
+    grid-column: span 1 !important;
+  }
+
+  .dcValue { font-size: 14px; }
 }

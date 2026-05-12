@@ -108,7 +108,10 @@
   justify-content: center;
 }
 
-.carouselSlide { width: 100%; }
+.carouselSlide {
+  width: 100%;
+  max-width: 400px;
+}
 
 .slideEnter {
   opacity: 1;
@@ -384,6 +387,7 @@
   position: relative;
   cursor: pointer;
   transition: opacity 0.15s;
+  max-width: 1000px;
 }
 .notifTile:hover { opacity: 0.8; }
 
@@ -485,6 +489,7 @@
   border: 1px solid #ebebeb;
   background: #fff;
   width: 100%;
+  max-width: 400px;
 }
 
 .skeletonImg {
@@ -536,4 +541,5 @@
   display: flex;
   flex-direction: column;
   gap: 7px;
+  max-width: 400px;
 }

@@ -35,13 +35,13 @@
 }
 
 /* ═══════════════════════════════════════════
-   DROPDOWN — не чіпаємо
+   DROPDOWN — десктоп
 ═══════════════════════════════════════════ */
 .dropdown {
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  width: 290px;
+  width: 300px;
   min-height: 240px;
   background: #ffffff;
   border: none;
@@ -50,6 +50,7 @@
   z-index: 500;
   overflow: hidden;
   animation: dropIn 0.2s cubic-bezier(.22,.68,0,1.2) both;
+  max-width: calc(100vw - 16px);
 }
 
 @keyframes dropIn {
@@ -62,6 +63,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px 12px;
+  gap: 8px;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 
 .dropTitle {
@@ -70,9 +74,9 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #aab0bc;
-  margin-bottom: 8px;
-  margin-left: 12px;
-  margin-top: 0;
+  margin: 0 0 0 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .composeBtn {
@@ -85,9 +89,11 @@
   background: #1a1a1a;
   border: none;
   border-radius: 100px;
-  padding: 8px 14px;
+  padding: 7px 12px;
   cursor: pointer;
   transition: background 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .composeBtn:hover { background: #333; }
 
@@ -101,10 +107,16 @@
   padding: 6px 10px;
   cursor: pointer;
   transition: background 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .markReadBtn:hover { background: #e8e8e8; }
 
-.dropBody { max-height: 420px; overflow-y: auto; }
+.dropBody {
+  max-height: 420px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 
 .empty {
   display: flex;
@@ -118,8 +130,9 @@
 }
 .empty p { margin: 0; }
 
+/* ── Notification item ── */
 .notifItem {
-  padding: 11px 16px;
+  padding: 11px 14px;
   transition: background 0.15s;
   cursor: pointer;
   display: flex;
@@ -127,22 +140,87 @@
   gap: 3px;
   border-radius: 10px;
   margin: 2px 6px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
-.notifItem:hover  { background: #f0f0f0; }
-.unread           { background: #f0fdf4; }
-.unread:hover     { background: #e6faf0; }
+.notifItem:hover { background: #f0f0f0; }
+.unread          { background: #f0fdf4; }
+.unread:hover    { background: #e6faf0; }
 
-.notifSender     { font-size: 11px; color: #bbb; font-weight: 500; }
-.notifSubject    { font-size: 13px; font-weight: 600; color: #1a1a1a; margin: 0; }
-.notifText       { font-size: 12px; color: #666; margin: 0; line-height: 1.4; }
-.notifTournament { font-size: 11px; color: #aaa; }
-.notifLinks      { display: flex; flex-direction: column; gap: 3px; margin-top: 2px; }
-.notifLink       { font-size: 12px; color: #3b82f6; text-decoration: none; }
+.notifSender {
+  font-size: 11px;
+  color: #bbb;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.notifSubject {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.notifText {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.notifTournament {
+  font-size: 11px;
+  color: #aaa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
+}
+
+.notifLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 2px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.notifLink {
+  font-size: 12px;
+  color: #3b82f6;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
+}
 .notifLink:hover { text-decoration: underline; }
-.notifTime       { font-size: 11px; color: #ccc; margin-top: 2px; }
+
+.notifTime {
+  font-size: 11px;
+  color: #ccc;
+  margin-top: 2px;
+  white-space: nowrap;
+}
 
 /* ═══════════════════════════════════════════
-   COMPOSE OVERLAY — як у CreateTournamentModal
+   COMPOSE OVERLAY
 ═══════════════════════════════════════════ */
 .composeOverlay {
   position: fixed;
@@ -188,7 +266,6 @@
   to   { opacity: 0; transform: scale(0.94) translateY(12px); filter: blur(1px); }
 }
 
-/* ── Floating header (як у CreateTournamentModal) ── */
 .composeHeader {
   display: flex;
   align-items: center;
@@ -244,7 +321,6 @@
 .composeClose:hover  { background: #ececec; transform: scale(1.08); }
 .composeClose:active { transform: scale(0.94); }
 
-/* ── Body ── */
 .composeBody {
   flex: 1;
   padding: 72px 28px 88px;
@@ -257,7 +333,6 @@
 }
 .composeBody::-webkit-scrollbar { display: none; }
 
-/* ── Fields — як .field у CreateTournamentModal ── */
 .composeField { display: flex; flex-direction: column; gap: 6px; }
 
 .composeField label {
@@ -303,7 +378,6 @@
   border-color: #378ADD;
 }
 
-/* ── Recipient autocomplete ── */
 .recipientWrap {
   position: relative;
   display: flex;
@@ -368,7 +442,6 @@
 .acName { font-size: 14px; font-weight: 600; color: #1a1a1a; }
 .acSub  { font-size: 12px; color: #aaa; }
 
-/* ── Link row ── */
 .linkRow { display: flex; gap: 8px; align-items: center; }
 .linkRow input { flex: 1; }
 
@@ -391,7 +464,6 @@
 .addBtn:hover  { background: #222; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.22); }
 .addBtn:active { transform: translateY(0) scale(0.97); }
 
-/* ── Chips ── */
 .chipList { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 .chip {
   display: flex; align-items: center; gap: 5px;
@@ -403,7 +475,6 @@
   background: none; border: none; cursor: pointer; color: #aaa; padding: 0;
 }
 
-/* ── Attach ── */
 .attachFileBtn {
   align-self: flex-start;
   padding: 8px 16px;
@@ -427,7 +498,6 @@
   gap: 5px;
 }
 
-/* ── Floating footer (як у CreateTournamentModal) ── */
 .composeFooter {
   display: flex;
   align-items: center;
@@ -492,7 +562,7 @@
 .sendBtn:disabled              { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 /* ═══════════════════════════════════════════
-   MOBILE
+   MOBILE ≤ 768px
 ═══════════════════════════════════════════ */
 @media (max-width: 768px) {
   .composeOverlay { padding: 0; align-items: flex-end; }
@@ -504,17 +574,55 @@
   }
   .linkRow { flex-direction: column; }
   .addBtn  { width: 100%; }
+
+  /*
+   * ГОЛОВНИЙ ФІКС:
+   * position:absolute right:0 від bellWrap не працює на мобілі —
+   * bellWrap не в правому куті екрану.
+   * Переводимо на position:fixed знизу.
+   */
   .dropdown {
-    position: fixed;
-    top: auto; bottom: 0; left: 0; right: 0;
-    width: 100%;
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
     border-radius: 20px 20px 0 0;
     max-height: 70vh;
     overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.10);
+  }
+
+  .dropBody {
+    overflow-x: hidden;
+    max-height: none;
+  }
+
+  .notifItem {
+    overflow: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .notifText {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .notifSubject,
+  .notifTournament,
+  .notifLink {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
 @media (max-width: 390px) {
-  .composeBody    { padding: 68px 16px 84px; }
-  .composeHeader  { padding: 16px; }
+  .composeBody   { padding: 68px 16px 84px; }
+  .composeHeader { padding: 16px; }
 }

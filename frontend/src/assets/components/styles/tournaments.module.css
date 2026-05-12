@@ -42,7 +42,7 @@
   flex-wrap: wrap;
 }
 
-/* ─── Segment tabs — macOS style ─────────────────────────────────────────────── */
+/* ─── Segment tabs ───────────────────────────────────────────────────────────── */
 
 .segmentTabs {
   display: flex;
@@ -69,9 +69,7 @@
   letter-spacing: -0.1px;
 }
 
-.segmentTab:hover {
-  color: #1d1d1f;
-}
+.segmentTab:hover { color: #1d1d1f; }
 
 .segmentTabActive {
   background: #fff;
@@ -171,10 +169,13 @@
   gap: 16px;
 }
 
+/* ─── Tournament card ────────────────────────────────────────────────────────── */
+
 .tournamentCard {
   cursor: pointer;
   border-radius: 18px;
-  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease;
+  overflow: hidden;                    /* ← назва не вилазить за межі */
+  transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s ease;
 }
 
 .tournamentCard:hover {
@@ -217,11 +218,12 @@
   line-height: 1.5;
 }
 
-/* ─── Archive cards (dimmed) ─────────────────────────────────────────────────── */
+/* ─── Archive cards ──────────────────────────────────────────────────────────── */
 
 .archiveCard {
   cursor: pointer;
   border-radius: 18px;
+  overflow: hidden;                    /* ← теж */
   opacity: 0.65;
   filter: grayscale(20%);
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
@@ -288,32 +290,81 @@
   100% { background-position: -200% 0; }
 }
 
-/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   MOBILE — ПК не чіпаємо
+══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 680px) {
+
+  /* Відступи */
   .pageHeader,
   .toolbar,
-  .gridWrapper {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
+  .gridWrapper,
   .skeletonGrid {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
-  .tournamentGrid,
-  .skeletonGrid {
-    grid-template-columns: 1fr;
+  .pageHeader { padding-top: 20px; }
+  .toolbar    { padding-top: 14px; }
+  .gridWrapper { padding-top: 16px; padding-bottom: 32px; }
+
+  /* Заголовок сторінки */
+  .pageTitle { font-size: 20px; }
+
+  /* pageHeader — назва + кнопка в рядок, кнопка не стискає назву */
+  .pageHeader { flex-wrap: nowrap; align-items: center; }
+  .pageHeader > :first-child { flex: 1; min-width: 0; }
+  .pageActions { flex-shrink: 0; }
+
+  /* Кнопка — менша на мобільному */
+  .createBtn {
+    padding: 8px 14px;
+    font-size: 13px;
+    border-radius: 10px;
+    white-space: nowrap;
   }
 
+  /* Toolbar — вертикально */
   .toolbar {
     flex-direction: column;
     align-items: flex-start;
+    gap: 10px;
   }
 
-  .pageTitle {
-    font-size: 20px;
+  /* Segment tabs — займають всю ширину рівномірно */
+  .segmentTabs {
+    width: 100%;
   }
+
+  .segmentTab {
+    flex: 1;
+    justify-content: center;
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  /* Sort row — повна ширина */
+  .sortRow { width: 100%; }
+
+  .sortSelect {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Grid — одна колонка */
+  .tournamentGrid,
+  .skeletonGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Skeleton менший */
+  .skeletonCard { height: 140px; }
+}
+
+@media (max-width: 360px) {
+  .pageTitle   { font-size: 17px; }
+  .createBtn   { padding: 7px 12px; font-size: 12.5px; }
+  .segmentTab  { font-size: 12px; padding: 6px 8px; }
 }
