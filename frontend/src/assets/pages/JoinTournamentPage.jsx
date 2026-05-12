@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../../api";
 import Login from "./Login";
+import Register from "./Register";
+import Forgot from "./Forgot";
 import styles from "../components/styles/JoinTournamentPage.module.css";
 import Logo from "../components/static/LogoOnly.png";
 
@@ -22,7 +24,9 @@ export default function JoinTournamentPage() {
   const [pinLoading, setPinLoading] = useState(false);
 
   // Login modal
-  const [showLogin, setShowLogin] = useState(false);
+  const [showLogin,    setShowLogin]    = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [showForgot,   setShowForgot]   = useState(false);
 
   const isLoggedIn = () => !!localStorage.getItem("accessToken");
 
@@ -78,6 +82,11 @@ export default function JoinTournamentPage() {
 
   const handleLoginSuccess = async () => {
     setShowLogin(false);
+    await joinTournament();
+  };
+
+  const handleRegisterSuccess = async () => {
+    setShowRegister(false);
     await joinTournament();
   };
 
@@ -189,8 +198,25 @@ export default function JoinTournamentPage() {
           isOpen={showLogin}
           onClose={() => setShowLogin(false)}
           onLoginSuccess={handleLoginSuccess}
-          onSwitchToRegister={() => {}}
-          onSwitchToForgot={() => {}}
+          onSwitchToRegister={() => { setShowLogin(false); setShowRegister(true); }}
+          onSwitchToForgot={()   => { setShowLogin(false); setShowForgot(true);   }}
+        />
+      )}
+
+      {showRegister && (
+        <Register
+          isOpen={showRegister}
+          onClose={() => setShowRegister(false)}
+          onRegisterSuccess={handleRegisterSuccess}
+          onSwitchToLogin={() => { setShowRegister(false); setShowLogin(true); }}
+        />
+      )}
+
+      {showForgot && (
+        <Forgot
+          isOpen={showForgot}
+          onClose={() => setShowForgot(false)}
+          onBackToLogin={() => { setShowForgot(false); setShowLogin(true); }}
         />
       )}
     </>
