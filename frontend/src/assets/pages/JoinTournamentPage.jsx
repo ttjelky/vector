@@ -6,6 +6,7 @@ import Register from "./Register";
 import Forgot from "./Forgot";
 import styles from "../components/styles/JoinTournamentPage.module.css";
 import Logo from "../components/static/LogoOnly.png";
+import { getDescriptionPreview } from "../components/TournamentCard";
 
 export default function JoinTournamentPage() {
   const { token } = useParams();
@@ -141,9 +142,7 @@ export default function JoinTournamentPage() {
           <h2 className={styles.title}>{preview?.name}</h2>
           {preview?.description && (
             <p className={styles.description}>
-              {preview.description.length > 120
-                ? preview.description.slice(0, 120) + "…"
-                : preview.description}
+              {getDescriptionPreview(preview.description, 120)}
             </p>
           )}
           <p className={styles.hint}>Вас запрошено як учасника цього турніру.</p>

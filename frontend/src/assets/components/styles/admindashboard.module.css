@@ -51,6 +51,8 @@
   flex-direction: column;
   gap: 1rem;
   min-height: 360px;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .sectionHeader {
@@ -199,6 +201,8 @@
   padding-right: 2px;
   min-width: 0;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .notifGrid::-webkit-scrollbar { width: 4px; }
@@ -221,10 +225,8 @@
   max-width: 100%;
   overflow: hidden;
 }
-.notifTile:hover { opacity: 0.85; }
 
-.notif_unread { background: #f0f4ff; border-color: #6366f1; }
-.notif_read   { background: #fafafa; border-color: #e5e7eb; }
+.notifTile:hover { opacity: 0.85; }
 
 .notifDot {
   position: absolute;
@@ -254,15 +256,17 @@
   word-break: break-word;
   overflow-wrap: anywhere;
   white-space: normal;
+  overflow: hidden;
 }
 
 .notifMsg {
   font-size: 0.78rem;
   color: #555;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
   max-width: 100%;
+  overflow: hidden;
 }
 
 .notifTournamentTag {
