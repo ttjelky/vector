@@ -1,7 +1,4 @@
 # tournaments/team_serializers.py
-# ─────────────────────────────────────────────────────────────────────────────
-# Serializers для нового флоу: чернетка → запрошення учасників → реєстрація.
-# ─────────────────────────────────────────────────────────────────────────────
 
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
@@ -15,13 +12,26 @@ User = get_user_model()
 
 class UserCompactSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
+    avatar    = serializers.SerializerMethodField()
 
     class Meta:
         model  = User
-        fields = ['id', 'email', 'username', 'full_name']
+        fields = ['id', 'email', 'username', 'full_name', 'avatar']
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}".strip() or obj.username
+
+    def get_avatar(self, obj):
+        try:
+            profile = obj.profile
+            if profile.avatar:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(profile.avatar.url)
+                return profile.avatar.url
+        except Exception:
+            pass
+        return None
 
 
 # ── TeamMember (read) ─────────────────────────────────────────────────────────
@@ -83,61 +93,44 @@ class TeamSerializer(serializers.ModelSerializer):
         return 'open'
 
 
-# ── Team (create — крок 1: чернетка) ─────────────────────────────────────────
+# ── Team (create) ─────────────────────────────────────────────────────────────
 
 class TeamCreateSerializer(serializers.Serializer):
-    """
-    Капітан заповнює тільки назву, місто (опц.) і контакт (опц.).
-    Команда одразу отримує статус 'draft'.
-    """
     name    = serializers.CharField(max_length=200)
     city    = serializers.CharField(max_length=100, required=False, allow_blank=True)
     contact = serializers.CharField(max_length=200, required=False, allow_blank=True)
 
     def validate(self, data):
-        tournament: Tournament = self.context['tournament']
-        captain: User          = self.context['captain']
+        tournament = self.context['tournament']
+        captain    = self.context['captain']
 
-        # Турнір командний
         if tournament.tournament_type != 'team':
             raise serializers.ValidationError("Це не командний турнір.")
 
-        # Реєстрація відкрита
         if not tournament.registration_open():
-            raise serializers.ValidationError(
-                "Реєстрація команд наразі закрита."
-            )
+            raise serializers.ValidationError("Реєстрація команд наразі закрита.")
 
-        # Капітан вже в якійсь команді цього турніру
         if Team.objects.filter(tournament=tournament, captain=captain).exists():
-            raise serializers.ValidationError(
-                "Ви вже є капітаном команди у цьому турнірі."
-            )
+            raise serializers.ValidationError("Ви вже є капітаном команди у цьому турнірі.")
 
-        # Капітан вже прийнятий як учасник іншої команди
         if TeamMember.objects.filter(
             team__tournament=tournament,
             user=captain,
             status=TeamMember.STATUS_ACCEPTED,
         ).exists():
-            raise serializers.ValidationError(
-                "Ви вже є учасником іншої команди у цьому турнірі."
-            )
+            raise serializers.ValidationError("Ви вже є учасником іншої команди у цьому турнірі.")
 
-        # Ліміт команд
         if tournament.max_teams:
             if Team.objects.filter(
                 tournament=tournament, status=Team.STATUS_REGISTERED
             ).count() >= tournament.max_teams:
-                raise serializers.ValidationError(
-                    "Досягнуто максимальну кількість команд у турнірі."
-                )
+                raise serializers.ValidationError("Досягнуто максимальну кількість команд у турнірі.")
 
         return data
 
     def create(self, validated_data):
-        tournament: Tournament = self.context['tournament']
-        captain: User          = self.context['captain']
+        tournament = self.context['tournament']
+        captain    = self.context['captain']
         return Team.objects.create(
             tournament=tournament,
             captain=captain,
@@ -154,11 +147,9 @@ class TeamUpdateSerializer(serializers.Serializer):
     contact = serializers.CharField(max_length=200, required=False, allow_blank=True)
 
     def validate(self, data):
-        team: Team = self.context['team']
+        team = self.context['team']
         if not team.is_roster_editable():
-            raise serializers.ValidationError(
-                "Команда вже зареєстрована або склад зафіксований."
-            )
+            raise serializers.ValidationError("Команда вже зареєстрована або склад зафіксований.")
         return data
 
     def update(self, instance: Team, validated_data):
@@ -171,64 +162,44 @@ class TeamUpdateSerializer(serializers.Serializer):
 # ── Invite member ─────────────────────────────────────────────────────────────
 
 class TeamInviteMemberSerializer(serializers.Serializer):
-    """
-    Капітан запрошує учасника за email.
-    Шукаємо зареєстрованого юзера — не email-рядок.
-    """
     email = serializers.EmailField()
 
     def validate_email(self, value):
         return value.lower().strip()
 
     def validate(self, data):
-        team: Team    = self.context['team']
-        captain: User = self.context['captain']
-        email         = data['email']
+        team    = self.context['team']
+        captain = self.context['captain']
+        email   = data['email']
 
         if not team.is_roster_editable():
-            raise serializers.ValidationError(
-                "Команда вже зареєстрована або склад зафіксований."
-            )
+            raise serializers.ValidationError("Команда вже зареєстрована або склад зафіксований.")
 
-        # Знаходимо юзера
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             raise serializers.ValidationError(
-                "Користувача з таким email не знайдено. "
-                "Учасник має бути зареєстрований на сайті."
+                "Користувача з таким email не знайдено. Учасник має бути зареєстрований на сайті."
             )
 
-        # Капітан не може запросити себе
         if user == captain:
-            raise serializers.ValidationError(
-                "Капітан не може запросити себе як учасника."
-            )
+            raise serializers.ValidationError("Капітан не може запросити себе як учасника.")
 
-        # Вже є у цій команді
         if TeamMember.objects.filter(team=team, user=user).exists():
-            raise serializers.ValidationError(
-                "Цей користувач вже запрошений або є учасником команди."
-            )
+            raise serializers.ValidationError("Цей користувач вже запрошений або є учасником команди.")
 
-        # Вже прийнятий учасник іншої команди у цьому турнірі
         if TeamMember.objects.filter(
             team__tournament=team.tournament,
             user=user,
             status=TeamMember.STATUS_ACCEPTED,
         ).exists():
-            raise serializers.ValidationError(
-                "Цей користувач вже є учасником іншої команди у цьому турнірі."
-            )
+            raise serializers.ValidationError("Цей користувач вже є учасником іншої команди у цьому турнірі.")
 
-        # Перевірка максимального розміру (рахуємо accepted + pending, щоб не спамити)
         t = team.tournament
         if t.max_team_size:
-            current = team.members.count() + 1  # +1 captain
+            current = team.members.count() + 1
             if current >= t.max_team_size:
-                raise serializers.ValidationError(
-                    f"Команда вже заповнена (макс. {t.max_team_size} учасників)."
-                )
+                raise serializers.ValidationError(f"Команда вже заповнена (макс. {t.max_team_size} учасників).")
 
         data['user'] = user
         return data
@@ -246,10 +217,10 @@ class TeamInviteMemberSerializer(serializers.Serializer):
 # ── Admin serializer ──────────────────────────────────────────────────────────
 
 class TeamAdminSerializer(serializers.ModelSerializer):
-    captain      = UserCompactSerializer(read_only=True)
-    members      = serializers.SerializerMethodField()
-    member_count = serializers.SerializerMethodField()
-    is_editable  = serializers.SerializerMethodField()
+    captain       = UserCompactSerializer(read_only=True)
+    members       = serializers.SerializerMethodField()
+    member_count  = serializers.SerializerMethodField()
+    is_editable   = serializers.SerializerMethodField()
     captain_name  = serializers.SerializerMethodField()
     captain_email = serializers.SerializerMethodField()
 
@@ -276,12 +247,20 @@ class TeamAdminSerializer(serializers.ModelSerializer):
         return obj.captain.email
 
     def get_members(self, obj):
-        return [
-            {
+        request = self.context.get('request')
+        result = []
+        for m in obj.members.select_related('user__profile').all():
+            avatar = None
+            try:
+                if m.user.profile.avatar:
+                    avatar = request.build_absolute_uri(m.user.profile.avatar.url) if request else m.user.profile.avatar.url
+            except Exception:
+                pass
+            result.append({
                 'id':        m.id,
                 'full_name': f"{m.user.first_name} {m.user.last_name}".strip() or m.user.username,
                 'email':     m.user.email,
                 'status':    m.status,
-            }
-            for m in obj.members.all()
-        ]
+                'avatar':    avatar,
+            })
+        return result

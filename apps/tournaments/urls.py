@@ -28,6 +28,17 @@ from .team_views import (
 )
 from .jury_views import JuryPendingSubmissionsView
 
+from .certificate_views import (
+    CertificateTemplateListView,
+    CertificateTemplateDetailView,
+    CertificateListView,
+    CertificateGenerateView,
+    CertificateDetailView,
+    MyCertificatesView,
+    StockTemplateListView,
+    StockTemplateGenerateView,
+)
+
 urlpatterns = [
     # ── Tournaments ────────────────────────────────────────────────────────────
     path('', TournamentCreateView.as_view(), name='tournament-list-create'),
@@ -126,4 +137,26 @@ urlpatterns = [
     # ── My grades ─────────────────────────────────────────────────────────────
     path('my-grades/', ParticipantGradesNewsView.as_view(), name='participant-grades-news'),
     path('<int:tournament_pk>/jury/distribute/', DistributeSubmissionsView.as_view()),
+
+    # ── Certificates ───────────────────────────────────────────────────────────
+    path('<int:tournament_pk>/certificates/templates/',
+         CertificateTemplateListView.as_view(), name='certificate-template-list'),
+    path('<int:tournament_pk>/certificates/templates/<int:tmpl_id>/',
+         CertificateTemplateDetailView.as_view(), name='certificate-template-detail'),
+    path('<int:tournament_pk>/certificates/',
+         CertificateListView.as_view(), name='certificate-list'),
+    path('<int:tournament_pk>/certificates/generate/',
+         CertificateGenerateView.as_view(), name='certificate-generate'),
+    path('<int:tournament_pk>/certificates/<int:cert_id>/',
+         CertificateDetailView.as_view(), name='certificate-detail'),
+    path('<int:tournament_pk>/certificates/<int:cert_id>/download/',
+         CertificateDetailView.as_view(), name='certificate-download'),
+    path('my-certificates/',
+         MyCertificatesView.as_view(), name='my-certificates'),
+
+    # ── Stock templates ───────────────────────────────────────────────────────
+    path('<int:tournament_pk>/certificates/stock-templates/',
+         StockTemplateListView.as_view(), name='stock-template-list'),
+    path('<int:tournament_pk>/certificates/stock-generate/',
+         StockTemplateGenerateView.as_view(), name='stock-template-generate'),
 ]

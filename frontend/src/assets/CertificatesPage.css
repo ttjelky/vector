@@ -1,0 +1,286 @@
+/* frontend/src/assets/certificates.css */
+
+.certificates-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #111;
+}
+
+/* ── Alert ─────────────────────────────────────────────────────────────────── */
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  font-size: 0.875rem;
+}
+.alert--success { background: #f5f5f5; color: #222; border: 1px solid #d0d0d0; }
+.alert--error   { background: #f0f0f0; color: #111; border: 1px solid #aaa; }
+
+/* ── Tabs ───────────────────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 1.75rem;
+}
+.tab {
+  padding: 0.55rem 1.25rem;
+  font-size: 0.9rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #999;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: color 0.15s;
+  font-weight: 400;
+}
+.tab:hover { color: #333; }
+.tab--active {
+  color: #111;
+  border-bottom-color: #111;
+  font-weight: 500;
+}
+.badge {
+  background: #111;
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+/* ── Templates grid ─────────────────────────────────────────────────────────── */
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 1.25rem;
+}
+
+/* ── Template card ──────────────────────────────────────────────────────────── */
+.template-card {
+  border: 1px solid #e4e4e4;
+  border-radius: 12px;
+  padding: 1.25rem;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.template-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.template-card__header h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+  color: #111;
+}
+.template-card__preview {
+  border: 1px dashed #d0d0d0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fafafa;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.template-card__img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+}
+.template-card__empty {
+  font-size: 0.82rem;
+  color: #bbb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.template-card__empty-icon { font-size: 1.75rem; color: #ddd; }
+.template-card__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────────── */
+.btn {
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
+  line-height: 1.4;
+}
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn--primary { background: #111; color: #fff; border-color: #111; }
+.btn--primary:hover:not(:disabled) { background: #333; border-color: #333; }
+
+.btn--secondary { background: #fff; color: #333; border-color: #ddd; }
+.btn--secondary:hover:not(:disabled) { background: #f5f5f5; }
+
+.btn--success { background: #fff; color: #111; border-color: #ccc; }
+.btn--success:hover:not(:disabled) { background: #111; color: #fff; border-color: #111; }
+
+.btn--small { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 6px;
+  line-height: 1;
+  color: #ccc;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-icon:hover { color: #111; background: #f0f0f0; }
+
+/* ── Settings panel ──────────────────────────────────────────────────────────── */
+.settings-panel {
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.settings-panel__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #bbb;
+  margin: 0;
+}
+.settings-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.settings-group__label { font-size: 0.8rem; font-weight: 500; color: #555; }
+.settings-group__fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.field-label { display: flex; flex-direction: column; gap: 3px; font-size: 0.76rem; color: #777; }
+.field-input {
+  padding: 4px 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  width: 100%;
+  background: #fff;
+  color: #111;
+  transition: border-color 0.15s;
+}
+.field-input:focus { outline: none; border-color: #999; }
+.field-color {
+  height: 32px;
+  padding: 2px 4px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  width: 100%;
+  cursor: pointer;
+  background: #fff;
+}
+
+/* ── Certificate table ───────────────────────────────────────────────────────── */
+.cert-table-wrap { overflow-x: auto; }
+.search-input {
+  width: 100%;
+  max-width: 360px;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  display: block;
+  background: #fff;
+  color: #111;
+  transition: border-color 0.15s;
+}
+.search-input:focus { outline: none; border-color: #999; }
+.cert-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.cert-table th {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  background: #f7f7f7;
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: #999;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+.cert-table td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #f3f3f3; color: #222; }
+.cert-table tr:last-child td { border-bottom: none; }
+.cert-table__empty { text-align: center; color: #bbb; padding: 2.5rem !important; font-size: 0.875rem; }
+
+.type-badge {
+  background: #f0f0f0;
+  color: #333;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.text-muted { color: #bbb; font-size: 0.82rem; }
+
+/* ── My certificates ─────────────────────────────────────────────────────────── */
+.my-certificates { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+.cert-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.cert-card {
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.15s;
+}
+.cert-card:hover { border-color: #bbb; }
+.cert-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+.cert-card__type { display: flex; align-items: center; }
+.cert-card__date { font-size: 0.82rem; color: #aaa; margin: 0; }
+
+/* ── Empty state ─────────────────────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  gap: 0.75rem;
+}
+.empty-state__icon { font-size: 2.5rem; color: #ddd; }
+.empty-state__text { font-size: 0.9rem; color: #aaa; }
+
+/* ── Loading / error ─────────────────────────────────────────────────────────── */
+.page-loading { padding: 2rem; text-align: center; font-size: 0.9rem; color: #aaa; }
+.page-error   { padding: 2rem; text-align: center; font-size: 0.9rem; color: #555; }

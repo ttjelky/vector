@@ -1,12 +1,48 @@
-// src/tournament/components/TeamsTab.jsx
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import API from "../../api";
 import styles from "./styles/TeamsTab.module.css";
 import { X } from "lucide-react";
 import { usePolling } from "../../usePolling";
 
-const POLL_INTERVAL = 5000; // мс
+const POLL_INTERVAL = 5000;
+
+// ── Avatar helper ──────────────────────────────────────────────────────────
+function Avatar({ name, avatar, size = 28 }) {
+  const [imgError, setImgError] = useState(false);
+  const initials = (name ?? "?").charAt(0).toUpperCase();
+
+  const baseStyle = {
+    width:          size,
+    height:         size,
+    borderRadius:   "50%",
+    flexShrink:     0,
+    display:        "flex",
+    alignItems:     "center",
+    justifyContent: "center",
+    fontSize:       size * 0.42,
+    fontWeight:     600,
+    overflow:       "hidden",
+  };
+
+  if (avatar && !imgError) {
+    return (
+      <div style={baseStyle}>
+        <img
+          src={avatar}
+          alt={name}
+          onError={() => setImgError(true)}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ ...baseStyle, background: "#f0f0f0", color: "#555" }}>
+      {initials}
+    </div>
+  );
+}
 
 // ── Team card ──────────────────────────────────────────────────────────────
 
@@ -74,23 +110,40 @@ function TeamCard({ team, tournamentId, isPrivileged, onLockToggled, onDeleted }
 
       {expanded && (
         <div className={styles.teamCardBody}>
+          {/* Капітан */}
           <div className={styles.captainRow}>
             <span className={styles.captainLabel}>Капітан</span>
-            <span className={styles.captainName}>{team.captain_name}</span>
-            {team.captain_email && (
-              <span className={styles.captainEmail}>{team.captain_email}</span>
+            <Avatar
+              name={team.captain?.full_name ?? team.captain_name}
+              avatar={team.captain?.avatar}
+              size={24}
+            />
+            <span className={styles.captainName}>
+              {team.captain?.full_name ?? team.captain_name}
+            </span>
+            {(team.captain?.email ?? team.captain_email) && (
+              <span className={styles.captainEmail}>
+                {team.captain?.email ?? team.captain_email}
+              </span>
             )}
           </div>
 
+          {/* Учасники */}
           {acceptedMembers.length > 0 && (
             <div className={styles.membersList}>
-              {acceptedMembers.map(m => (
-                <div key={m.id} className={styles.memberChip}>
-                  <span className={styles.memberChipAvatar}>{(m.full_name || "?").charAt(0)}</span>
-                  <span className={styles.memberChipName}>{m.full_name}</span>
-                  {m.email && <span className={styles.memberChipEmail}>{m.email}</span>}
-                </div>
-              ))}
+              {acceptedMembers.map(m => {
+                // TeamAdminSerializer повертає flat-об'єкт, TeamSerializer — m.user
+                const name   = m.full_name ?? m.user?.full_name ?? "?";
+                const email  = m.email     ?? m.user?.email;
+                const avatar = m.avatar    ?? m.user?.avatar;
+                return (
+                  <div key={m.id} className={styles.memberChip}>
+                    <Avatar name={name} avatar={avatar} size={26} />
+                    <span className={styles.memberChipName}>{name}</span>
+                    {email && <span className={styles.memberChipEmail}>{email}</span>}
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -143,40 +196,24 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
   const [regenConfirm,  setRegenConfirm]  = useState(false);
   const [regenLoading,  setRegenLoading]  = useState(false);
 
-  // Зберігаємо id команд, що зараз редагуються — не перезаписуємо їх під час polling
   const mutatingTeamIds = useRef(new Set());
 
   const isOwner      = myRole === "owner";
   const isPrivileged = myRole === "owner" || myRole === "admin";
   const canInvite    = isOwner && tournamentStatus === "registration";
 
-  // ── Merge свіжих даних з сервера з локальним станом ──────────────────────
-  //
-  // Правила злиття:
-  //  • Нові команди (яких ще нема локально) — додаємо.
-  //  • Видалені на сервері команди — прибираємо (якщо не у mutatingTeamIds).
-  //  • Існуючі команди — оновлюємо поля, але:
-  //      – якщо команда зараз мутується (lock / delete) — пропускаємо,
-  //        щоб не скидати оптимістичний UI.
-
   const mergeTeams = useCallback((fresh) => {
     setTeams(prev => {
-      const prevMap = new Map(prev.map(t => [t.id, t]));
+      const prevMap  = new Map(prev.map(t => [t.id, t]));
       const freshMap = new Map(fresh.map(t => [t.id, t]));
 
-      // Оновлення + нові
       const merged = fresh.map(freshTeam => {
         if (mutatingTeamIds.current.has(freshTeam.id)) {
-          // Не перезаписуємо команду, яку зараз змінює користувач
           return prevMap.get(freshTeam.id) ?? freshTeam;
         }
         return freshTeam;
       });
 
-      // Команди, що є локально але відсутні на сервері — видалені
-      // (і не в процесі мутації)
-      // merged вже не містить видалених — це правильно.
-      // Але якщо команда мутується (наприклад, видаляється) — лишаємо її тимчасово
       prev.forEach(t => {
         if (!freshMap.has(t.id) && mutatingTeamIds.current.has(t.id)) {
           merged.push(t);
@@ -187,15 +224,11 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
     });
   }, []);
 
-  // ── Початкове завантаження ────────────────────────────────────────────────
-
   useEffect(() => {
     API.get(`/tournaments/${tournamentId}/teams/`)
       .then(r => { setTeams(r.data); setLoading(false); })
       .catch(err => { console.error("Fetch teams:", err); setLoading(false); });
   }, [tournamentId]);
-
-  // ── Polling ───────────────────────────────────────────────────────────────
 
   const pollTeams = useCallback(async () => {
     try {
@@ -206,10 +239,7 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
     }
   }, [tournamentId, mergeTeams]);
 
-  // Polling активний тільки після першого завантаження
   usePolling(pollTeams, POLL_INTERVAL, !loading);
-
-  // ── Invite link ───────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (!isOwner) return;
@@ -248,12 +278,9 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
     }
   }, [regenConfirm, tournamentId]);
 
-  // ── Callbacks з захистом від polling-перезапису ───────────────────────────
-
   const handleLockToggled = useCallback((teamId, locked) => {
     mutatingTeamIds.current.add(teamId);
     setTeams(prev => prev.map(t => t.id === teamId ? { ...t, roster_locked: locked } : t));
-    // Через 2 секунди дозволяємо polling знову оновлювати цю команду
     setTimeout(() => mutatingTeamIds.current.delete(teamId), 2000);
   }, []);
 
@@ -262,8 +289,6 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
     setTeams(prev => prev.filter(t => t.id !== teamId));
     setTimeout(() => mutatingTeamIds.current.delete(teamId), 3000);
   }, []);
-
-  // ── Filtering ─────────────────────────────────────────────────────────────
 
   const registered = teams.filter(t => t.status === "registered");
   const drafts     = teams.filter(t => t.status === "draft");
@@ -293,8 +318,6 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
 
   return (
     <div className={styles.wrap}>
-
-      {/* Stats */}
       <div className={styles.statsBar}>
         <div className={styles.stat}>
           <span className={styles.statValue}>{registered.length}</span>
@@ -318,7 +341,6 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
         )}
       </div>
 
-      {/* Header */}
       <div className={styles.listHeader}>
         <span className={styles.listCount}>
           {registered.length}{tournament?.max_teams ? ` / ${tournament.max_teams}` : ""} команд
@@ -339,7 +361,6 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
         </div>
       </div>
 
-      {/* PIN */}
       {isOwner && showPin && invite.pin && (
         <div className={styles.pinSection}>
           <div className={styles.pinInfo}>
@@ -359,7 +380,6 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
         </div>
       )}
 
-      {/* Search */}
       {teams.length > 4 && (
         <input
           className={styles.searchInput}
@@ -369,7 +389,6 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
         />
       )}
 
-      {/* Registered */}
       {filteredRegistered.length === 0 ? (
         <div className={styles.empty}>
           {registered.length === 0
@@ -385,7 +404,6 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
         </div>
       )}
 
-      {/* Drafts */}
       {isPrivileged && filteredDrafts.length > 0 && (
         <div style={{ marginTop: 32 }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: "#ccc", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>

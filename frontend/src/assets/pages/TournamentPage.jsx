@@ -15,6 +15,7 @@ import useTournamentTabGuard from "../../useTournamentTabGuard";
 import LeaderboardTab from "../components/LeaderboardTab";
 import MyTeamTab from "../components/MyTeamTab";
 import TeamsTab from "../components/TeamsTab";
+import CertificatesPage from "./CertificatesPage";
 
 // ─── Rich-text preview helper ─────────────────────────────────────────────────
 function getDescriptionPreview(html, maxLen = 80) {
@@ -55,9 +56,10 @@ export default function TournamentPage() {
   const [error,       setError]       = useState(null);
   const [myTeam,      setMyTeam]      = useState(null);
 
-  const isOwner = myRole === "owner";
+  const isOwner     = myRole === "owner";
   const isJury      = myRole === "jury";
   const isJuryPanel = myRole === "jury" || myRole === "admin" || myRole === "owner";
+  const isAdminOrOwner = myRole === "admin" || myRole === "owner";
 
   useEffect(() => {
     API.get(`/tournaments/${id}/`)
@@ -112,13 +114,11 @@ export default function TournamentPage() {
   const handleRoundCreated = (newRound) => setRounds((prev) => [...prev, newRound]);
   const isTeamTournament = tournament?.tournament_type === "team";
 
-  // Учасник командного турніру без зареєстрованої команди (чернетка або взагалі немає команди)
   const isTeamParticipantUnregistered =
     isTeamTournament &&
     !isJuryPanel &&
     (!myTeam || myTeam.status !== "registered");
 
-  // Чи вважається користувач "зареєстрованим" для кнопки "Покинути"
   const isRegistered = isTeamTournament
     ? myTeam?.status === "registered"
     : myRole === "participant" || myRole === "jury";
@@ -148,22 +148,22 @@ export default function TournamentPage() {
     return { background: "#e8e8e8" };
   })();
 
-const tabs = [
-  { id: "overview",     label: "Основна сторінка" },
-  ...(!isTeamParticipantUnregistered ? [{ id: "rounds", label: "Раунди" }] : []),
-  ...(isTeamTournament
-    ? [
-        ...(!isJuryPanel ? [{ id: "my_team", label: "Моя команда" }] : []),
-        ...(isJuryPanel ? [{ id: "teams", label: "Команди" }] : []),
-      ]
-    : [
-        { id: "participants", label: "Учасники" },
-      ]
-  ),
- 
-  ...(!isTeamParticipantUnregistered ? [{ id: "leaderboard", label: "Таблиця лідерів" }] : []),
-  ...(isJuryPanel ? [{ id: "jury", label: "Панель журі" }] : []),
-];
+  const tabs = [
+    { id: "overview",     label: "Основна сторінка" },
+    ...(!isTeamParticipantUnregistered ? [{ id: "rounds", label: "Раунди" }] : []),
+    ...(isTeamTournament
+      ? [
+          ...(!isJuryPanel ? [{ id: "my_team", label: "Моя команда" }] : []),
+          ...(isJuryPanel  ? [{ id: "teams",   label: "Команди" }]     : []),
+        ]
+      : [
+          { id: "participants", label: "Учасники" },
+        ]
+    ),
+    ...(!isTeamParticipantUnregistered ? [{ id: "leaderboard", label: "Таблиця лідерів" }] : []),
+    ...(isJuryPanel      ? [{ id: "jury",         label: "Панель журі" }]  : []),
+    ...(myRole ? [{ id: "certificates", label: "Сертифікати" }] : []),
+  ];
 
   return (
     <NavBar>
@@ -241,7 +241,7 @@ const tabs = [
               )}
             </>
           )}
-        
+
           {activeTab === "rounds" && (
             <RoundsTab
               rounds={rounds}
@@ -256,7 +256,7 @@ const tabs = [
               teamName={isTeamTournament ? (myTeam?.name ?? null) : null}
             />
           )}
-        
+
           {activeTab === "my_team" && isTeamTournament && !isJuryPanel && (
             <MyTeamTab
               tournamentId={id}
@@ -266,7 +266,7 @@ const tabs = [
               onTeamUpdated={setMyTeam}
             />
           )}
-        
+
           {activeTab === "teams" && isTeamTournament && isJuryPanel && (
             <TeamsTab
               tournamentId={id}
@@ -275,7 +275,7 @@ const tabs = [
               tournamentStatus={status}
             />
           )}
-        
+
           {activeTab === "participants" && !isTeamTournament && (
             <ParticipantsTab
               tournamentId={id}
@@ -286,7 +286,7 @@ const tabs = [
               tournamentStatus={status}
             />
           )}
-        
+
           {activeTab === "jury" && isJuryPanel && (
             <JuryTab
               tournamentId={id}
@@ -295,7 +295,7 @@ const tabs = [
               myRole={myRole}
             />
           )}
-        
+
           {activeTab === "leaderboard" && (
             <LeaderboardTab
               tournamentId={id}
@@ -305,9 +305,17 @@ const tabs = [
               myRole={myRole}
             />
           )}
+
+          {activeTab === "certificates" && (
+            <CertificatesPage
+              tournamentId={id}
+              isAdmin={isAdminOrOwner}
+              isTeamTournament={isTeamTournament}
+              myRole={myRole}
+            />
+          )}
         </div>
 
-        {/* Glass badge — тільки для незареєстрованих учасників командного турніру */}
         {isTeamParticipantUnregistered && !badgeDismissed && (
           <div className={styles.unregisteredBadge}>
             <span className={styles.unregisteredBadgeIcon}>⚠️</span>

@@ -25,6 +25,7 @@ from .serializers import (
     JuryAssignmentSerializer,
 )
 from .permissions import IsTournamentOwner, IsTournamentMemberOrOwner, IsTournamentParticipant, IsTournamentJury
+from apps.users.models import Profile as UserProfile
 
 BASE_URL = "http://localhost:5173"
 
@@ -1371,19 +1372,11 @@ class LeaderboardView(APIView):
                     'total':        round(total, 1),
                 })
         else:
-            data  = {}
-            names = {}
-            for grade in grades:
-                sub         = grade.submission
-                participant = sub.participant
-                pid         = participant.id
-                rid         = sub.task.round_id
-                if pid not in data:
-                    full_name = f"{participant.first_name} {participant.last_name}".strip()
-                    names[pid] = full_name or participant.username or f"Учасник #{pid}"
-                    data[pid]  = {}
-                data[pid].setdefault(rid, []).append(grade.total)
-
+            profile_map = {
+                p.user_id: p.avatar.url if p.avatar else None
+                for p in UserProfile.objects.filter(user_id__in=data.keys()).select_related()
+            }
+ 
             participants = []
             for pid, round_data in data.items():
                 round_scores = {}
@@ -1395,6 +1388,7 @@ class LeaderboardView(APIView):
                 participants.append({
                     'participant_id':   pid,
                     'participant_name': names[pid],
+                    'avatar':           profile_map.get(pid),
                     'round_scores':     round_scores,
                     'total':            round(total, 1),
                 })
@@ -1583,6 +1577,13 @@ class LeaderboardDetailView(APIView):
             or participant.username
             or f"Учасник #{participant_pk}"
         )
+ 
+        # Аватарка учасника
+        try:
+            participant_profile = UserProfile.objects.get(user=participant)
+            participant_avatar = participant_profile.avatar.url if participant_profile.avatar else None
+        except UserProfile.DoesNotExist:
+            participant_avatar = None
 
         round_data = {}
 
@@ -1599,11 +1600,19 @@ class LeaderboardDetailView(APIView):
                 or juror.username
             )
 
+            # Аватарка журі (кешуємо)
+            try:
+                juror_profile = UserProfile.objects.get(user=juror)
+                juror_avatar = juror_profile.avatar.url if juror_profile.avatar else None
+            except UserProfile.DoesNotExist:
+                juror_avatar = None
+ 
             round_data[rid]['grades'].append({
-                'juror_id':   juror.id,
-                'juror_name': jname,
-                'total':      grade.total,
-                'scores':     grade.scores or {},
+                'juror_id':     juror.id,
+                'juror_name':   jname,
+                'juror_avatar': juror_avatar,   # ← НОВЕ
+                'total':        grade.total,
+                'scores':       grade.scores or {},
             })
 
         all_criteria_keys = [c['key'] for c in DEFAULT_CRITERIA]
@@ -1664,6 +1673,7 @@ class LeaderboardDetailView(APIView):
         return Response({
             'participant_id':   participant.id,
             'participant_name': full_name,
+            'avatar':           participant_avatar,
             'rounds':           rounds_out,
             'grand_total':      round(grand_total, 1),
             'criteria_avg':     grand_criteria_avg,

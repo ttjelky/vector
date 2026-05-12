@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import styles from "./styles/LeaderboardTab.module.css";
 import detailStyles from "./styles/LeaderboardDetail.module.css";
-import API from "../../api";
+import API, { mediaUrl } from "../../api";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -18,13 +18,62 @@ function getAvatarColor(str = "") {
 
 const MEDAL = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
+// ─── AvatarWithFallback ───────────────────────────────────────────────────────
+
+function AvatarWithFallback({ name, avatarPath, size = 32, className, style: extraStyle }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const url = mediaUrl(avatarPath);
+
+  const baseStyle = {
+    width: size,
+    height: size,
+    borderRadius: "50%",
+    flexShrink: 0,
+    overflow: "hidden",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    ...extraStyle,
+  };
+
+  if (url && !imgFailed) {
+    return (
+      <div className={className} style={{ ...baseStyle, background: "transparent" }}>
+        <img
+          src={url}
+          alt={name}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          onError={() => setImgFailed(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={className}
+      style={{
+        ...baseStyle,
+        background: getAvatarColor(name),
+        fontSize: size * 0.36,
+        fontWeight: 600,
+        color: "#374151",
+      }}
+    >
+      {getInitials(name)}
+    </div>
+  );
+}
+
+// ─── aggregateFromSubmissions ─────────────────────────────────────────────────
+
 function aggregateFromSubmissions(submissions) {
   const byParticipant = {};
   submissions.forEach(sub => {
     const name = sub.author_name || "Невідомий";
     const pid  = sub.participant_id || name;
     if (!byParticipant[pid]) {
-      byParticipant[pid] = { participant_id: pid, participant_name: name, round_scores: {}, total: 0 };
+      byParticipant[pid] = { participant_id: pid, participant_name: name, avatar: null, round_scores: {}, total: 0 };
     }
     const grade = sub.my_grade;
     if (!grade) return;
@@ -39,6 +88,8 @@ function aggregateFromSubmissions(submissions) {
   });
   return Object.values(byParticipant);
 }
+
+// ─── exportToExcel ────────────────────────────────────────────────────────────
 
 async function exportToExcel({ ranked, roundIds, roundMap, tournamentId, isTeam }) {
   const XLSX = await import("xlsx");
@@ -120,7 +171,7 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
   const [loading,       setLoading]       = useState(true);
   const [error,         setError]         = useState(null);
   const [showJuryBreak, setShowJuryBreak] = useState(false);
-  const [activeRound,   setActiveRound]   = useState(null); // null = всі раунди
+  const [activeRound,   setActiveRound]   = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -128,14 +179,12 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
     API.get(`/tournaments/${tournamentId}/leaderboard/${participantId}/`)
       .then(r => {
         setData(r.data);
-        // Якщо тільки один раунд — одразу його показуємо
         if (r.data.rounds?.length === 1) setActiveRound(r.data.rounds[0].round_id);
       })
       .catch(() => setError("Не вдалося завантажити деталізацію."))
       .finally(() => setLoading(false));
   }, [tournamentId, participantId]);
 
-  // Колір для кожного критерію (стабільний)
   const criteriaColors = useMemo(() => {
     const palette = [
       "#6366f1", "#0ea5e9", "#10b981", "#f59e0b",
@@ -174,7 +223,7 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
     </div>
   );
 
-  const { participant_name, rounds = [], grand_total, criteria_avg = {}, criteria_meta = [] } = data;
+  const { participant_name, avatar, rounds = [], grand_total, criteria_avg = {}, criteria_meta = [] } = data;
 
   const visibleRounds = activeRound
     ? rounds.filter(r => r.round_id === activeRound)
@@ -189,7 +238,6 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
         </button>
 
         <div className={detailStyles.headerRight}>
-          {/* Перемикач журі — тільки для owner/admin */}
           {isPrivileged && rounds.some(r => r.jury_breakdown?.length > 0) && (
             <button
               className={`${detailStyles.juryToggle} ${showJuryBreak ? detailStyles.juryToggleOn : ""}`}
@@ -204,12 +252,12 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
 
       {/* Participant hero */}
       <div className={detailStyles.hero}>
-        <div
+        <AvatarWithFallback
+          name={participant_name}
+          avatarPath={avatar}
+          size={64}
           className={detailStyles.heroAvatar}
-          style={{ background: getAvatarColor(participant_name) }}
-        >
-          {getInitials(participant_name)}
-        </div>
+        />
         <div className={detailStyles.heroInfo}>
           <h2 className={detailStyles.heroName}>{participant_name}</h2>
           <span className={detailStyles.heroTotal}>
@@ -239,7 +287,7 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
         </div>
       )}
 
-      {/* Overall criteria bar chart — показується коли всі раунди */}
+      {/* Overall criteria bar chart */}
       {activeRound === null && criteria_meta.length > 0 && (
         <div className={detailStyles.section}>
           <h3 className={detailStyles.sectionTitle}>Середнє по критеріях (всі раунди)</h3>
@@ -272,7 +320,6 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
             </span>
           </div>
 
-          {/* Criteria breakdown */}
           {criteria_meta.length > 0 && (
             <div className={detailStyles.criteriaGrid}>
               {criteria_meta.map(c => {
@@ -293,7 +340,6 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
             </div>
           )}
 
-          {/* Jury breakdown — тільки для owner/admin і коли увімкнено */}
           {isPrivileged && showJuryBreak && round.jury_breakdown?.length > 0 && (
             <div className={detailStyles.jurySection}>
               <p className={detailStyles.jurySectionTitle}>
@@ -311,7 +357,15 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
                 </div>
                 {round.jury_breakdown.map(j => (
                   <div key={j.juror_id} className={detailStyles.juryTableRow}>
-                    <span className={detailStyles.juryTableName}>{j.juror_name}</span>
+                    <span className={detailStyles.juryTableName}>
+                      <AvatarWithFallback
+                        name={j.juror_name}
+                        avatarPath={j.juror_avatar}
+                        size={24}
+                        style={{ marginRight: 6 }}
+                      />
+                      {j.juror_name}
+                    </span>
                     {criteria_meta.map(c => (
                       <span key={c.key} className={detailStyles.juryTableCell}>
                         {j.scores?.[c.key] ?? <span className={detailStyles.noScore}>—</span>}
@@ -371,8 +425,7 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
   const [exporting,     setExporting]     = useState(false);
   const [lastUpdated,   setLastUpdated]   = useState(null);
   const [refreshing,    setRefreshing]    = useState(false);
-  // Деталізація
-  const [selectedPid,   setSelectedPid]   = useState(null); // participant_id або null
+  const [selectedPid,   setSelectedPid]   = useState(null);
 
   const canAlwaysSee = isOwner || myRole === "admin";
   const isTeam = tournamentType === "team";
@@ -432,7 +485,6 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
     }
   };
 
-  // Обчислення roundIds / roundMap (тільки раунди що є в leaderboard)
   const { roundIds, roundMap } = useMemo(() => {
     const ids = new Set();
     leaderboard.forEach(p => Object.keys(p.round_scores ?? {}).forEach(id => ids.add(id)));
@@ -465,7 +517,7 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
     }
   };
 
-  // ── Якщо обрано учасника — показуємо деталізацію ──────────────────────────
+  // ── Деталізація учасника ───────────────────────────────────────────────────
 
   if (selectedPid !== null) {
     return (
@@ -504,7 +556,6 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
 
   return (
     <div className={styles.wrap}>
-      {/* Тип турніру — бейдж */}
       {isTeam && (
         <div className={styles.teamBadge}>👥 Командний турнір — результати по командах</div>
       )}
@@ -622,9 +673,12 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
                     </td>
                     <td className={styles.tdName}>
                       <div className={styles.participant}>
-                        <div className={styles.avatar} style={{ background: getAvatarColor(getRowName(p)) }}>
-                          {getInitials(getRowName(p))}
-                        </div>
+                        <AvatarWithFallback
+                          name={getRowName(p)}
+                          avatarPath={p.avatar}
+                          size={32}
+                          className={styles.avatar}
+                        />
                         <div className={styles.participantInfo}>
                           <span className={styles.participantName}>{getRowName(p)}</span>
                           {isTeam && p.members_count && (

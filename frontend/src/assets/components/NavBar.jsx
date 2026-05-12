@@ -19,8 +19,9 @@ import cross           from './static/icons/cross.svg';
 import NewsIcon        from "./static/icons/News.svg?react";
 
 import { ComposeModal, NotificationDropdown } from './Notifications';
+import { mediaUrl } from '../../api';
 
-const API = 'http://127.0.0.1:8000/api';
+const API_BASE = 'http://127.0.0.1:8000/api';
 const getToken = () => localStorage.getItem('accessToken');
 
 const ICON_MAP = {
@@ -102,10 +103,7 @@ const TournamentTab = ({ tab, onClose, animate }) => {
   );
 };
 
-/* ─── Хук: polling для авто-закриття вкладок турніру ────────────────────────
- * Замість WebSocket використовує polling кожні 15 секунд.
- * Перевіряє чи є турніри у вкладках доступні для поточного юзера.
- */
+/* ─── Хук: polling для авто-закриття вкладок турніру ─── */
 const useTournamentRemovalPolling = (openTabs, removeTabById) => {
   useEffect(() => {
     if (!openTabs.length) return;
@@ -116,7 +114,7 @@ const useTournamentRemovalPolling = (openTabs, removeTabById) => {
 
       for (const tab of openTabs) {
         try {
-          const res = await fetch(`${API}/tournaments/${tab.id}/my-role/`, {
+          const res = await fetch(`${API_BASE}/tournaments/${tab.id}/my-role/`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (res.status === 403 || res.status === 404) {
@@ -155,7 +153,6 @@ const NavBar = ({ children }) => {
     () => JSON.parse(localStorage.getItem("setting_logout") ?? "true")
   );
 
-  // ── Polling замість WebSocket ─────────────────────────────────────────────
   useTournamentRemovalPolling(openTabs, removeTabById);
 
   useEffect(() => {
@@ -174,15 +171,19 @@ const NavBar = ({ children }) => {
 
   const initialTabIds = useRef(new Set(openTabs.map(t => String(t.id))));
 
+  // ── Початкове завантаження профілю ───────────────────────────────────────
   useEffect(() => {
     const storedName = localStorage.getItem('fullUserName');
     if (storedName) setFullUserName(storedName.trim());
+
     const token = getToken();
     if (token) {
-      fetch(`${API}/users/profile/`, { headers: { Authorization: `Bearer ${token}` } })
+      fetch(`${API_BASE}/users/profile/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
         .then(r => r.ok ? r.json() : null)
         .then(d => {
-          if (d?.avatar) setAvatar(`http://127.0.0.1:8000${d.avatar}`);
+          if (d?.avatar) setAvatar(mediaUrl(d.avatar));
         })
         .catch(() => {});
     }
@@ -192,6 +193,7 @@ const NavBar = ({ children }) => {
   useEffect(() => {
     const handler = (e) => {
       if (e.detail?.fullUserName) setFullUserName(e.detail.fullUserName);
+      // avatar вже абсолютний URL (підготовлений у Profile.jsx через mediaUrl)
       if (e.detail?.avatar !== undefined) setAvatar(e.detail.avatar);
     };
     window.addEventListener('profile-updated', handler);
@@ -240,7 +242,7 @@ const NavBar = ({ children }) => {
   const fetchNotifs = async () => {
     setNotifsLoading(true);
     try {
-      const res = await fetch(`${API}/notifications/`, {
+      const res = await fetch(`${API_BASE}/notifications/`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (res.ok) setNotifs(await res.json());
@@ -264,14 +266,14 @@ const NavBar = ({ children }) => {
   }, [bellOpen]);
 
   const markAllRead = async () => {
-    await fetch(`${API}/notifications/mark-read/`, {
+    await fetch(`${API_BASE}/notifications/mark-read/`, {
       method: 'POST', headers: { Authorization: `Bearer ${getToken()}` },
     });
     setNotifs(n => n.map(x => ({ ...x, is_read: true })));
   };
 
   const markOneRead = async (id) => {
-    await fetch(`${API}/notifications/mark-read/${id}/`, {
+    await fetch(`${API_BASE}/notifications/mark-read/${id}/`, {
       method: 'POST', headers: { Authorization: `Bearer ${getToken()}` },
     });
     setNotifs(n => n.map(x => x.id === id ? { ...x, is_read: true } : x));

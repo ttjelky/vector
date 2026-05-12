@@ -1,5 +1,3 @@
-// src/tournament/components/MyTeamTab.jsx
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import API from "../../api";
 import CreateTeamForm from "./CreateTeamForm";
@@ -27,10 +25,26 @@ function pluralMembers(n) {
 
 // ── Base UI ────────────────────────────────────────────────────────────────
 
-function Avatar({ name, size = "md" }) {
+function Avatar({ name, avatar, size = "md" }) {
+  const [imgError, setImgError] = useState(false);
+  const initials = (name ?? "?").charAt(0).toUpperCase();
+
+  if (avatar && !imgError) {
+    return (
+      <div className={`${styles.avatar} ${styles[`avatar_${size}`]}`} style={{ padding: 0, overflow: "hidden" }}>
+        <img
+          src={avatar}
+          alt={name}
+          onError={() => setImgError(true)}
+          style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`${styles.avatar} ${styles[`avatar_${size}`]}`}>
-      {(name ?? "?").charAt(0).toUpperCase()}
+      {initials}
     </div>
   );
 }
@@ -88,7 +102,7 @@ function MemberRow({ member, canRemove, onRemove, isRemoving }) {
 
   return (
     <div className={`${styles.memberRow} ${isPending ? styles.memberRowPending : ""}`}>
-      <Avatar name={full_name} size="sm" />
+      <Avatar name={full_name} avatar={member.user?.avatar} size="sm" />
       <div className={styles.memberInfo}>
         <span className={styles.memberName}>{full_name}</span>
         <span className={styles.memberEmail}>{email}</span>
@@ -324,7 +338,7 @@ function TeamDashboard({ team, tournamentId, myRole, onUpdated, onDeleted }) {
       <Card>
         <SectionLabel>Капітан</SectionLabel>
         <div className={styles.captainRow}>
-          <Avatar name={team.captain?.full_name} size="md" />
+          <Avatar name={team.captain?.full_name} avatar={team.captain?.avatar} size="md" />
           <div className={styles.memberInfo}>
             <span className={styles.memberName}>
               {team.captain?.full_name}
