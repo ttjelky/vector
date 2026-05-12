@@ -1,26 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, NavLink } from 'react-router-dom';
-import { useTabs } from '../../TabsContext';
-import { getTabsForRole, COMMON_TABS } from '../../navConfig';
-import styles from './styles/NavBar.module.css';
-import nStyles from './styles/Notifications.module.css'
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, NavLink } from "react-router-dom";
+import { useTabs } from "../../TabsContext";
+import { getTabsForRole, COMMON_TABS } from "../../navConfig";
+import styles from "./styles/NavBar.module.css";
+import nStyles from "./styles/Notifications.module.css";
 
-import HomeIcon        from './static/icons/Home.svg?react';
-import TournamentsIcon from './static/icons/Tournaments.svg?react';
-import WorksIcon       from './static/icons/Works.svg?react';
-import SettingsIcon    from './static/icons/Settings.svg?react';
-import ProfileIcon     from './static/icons/Profile.svg?react';
-import InfoIcon        from './static/icons/Info.svg?react';
-import LogoutIcon      from './static/icons/Logout.svg?react';
-import BellIcon        from './static/icons/Bell.svg?react';
-import Logo            from './static/VectorLogo.svg';
-import cross           from './static/icons/cross.svg';
+import HomeIcon        from "./static/icons/Home.svg?react";
+import TournamentsIcon from "./static/icons/Tournaments.svg?react";
+import WorksIcon       from "./static/icons/Works.svg?react";
+import SettingsIcon    from "./static/icons/Settings.svg?react";
+import ProfileIcon     from "./static/icons/Profile.svg?react";
+import InfoIcon        from "./static/icons/Info.svg?react";
+import LogoutIcon      from "./static/icons/Logout.svg?react";
+import BellIcon        from "./static/icons/Bell.svg?react";
+import Logo            from "./static/VectorLogo.svg";
+import cross           from "./static/icons/cross.svg";
 import NewsIcon        from "./static/icons/News.svg?react";
 
-import { ComposeModal, NotificationDropdown } from './Notifications';
+import { ComposeModal, NotificationDropdown } from "./Notifications";
 
-const API = 'http://127.0.0.1:8000/api';
-const getToken = () => localStorage.getItem('accessToken');
+import API, { logoutUser, getAccessToken, clearAccessToken, getUserRole } from "../../api";
 
 const ICON_MAP = {
   home:        HomeIcon,
@@ -37,7 +36,6 @@ const renderIcon = (key) => {
   return <Icon className={styles.sidebarIcon} />;
 };
 
-/* ─── Один пункт меню ─── */
 const NavItem = ({ tabKey, label, path, children }) => (
   <li className={styles.sidebarEl}>
     <NavLink
@@ -51,48 +49,39 @@ const NavItem = ({ tabKey, label, path, children }) => (
   </li>
 );
 
-/* ─── Вкладка турніру з анімацією ─── */
 const TournamentTab = ({ tab, onClose, animate }) => {
-  const [phase, setPhase] = useState(animate ? 'hidden' : 'open');
+  const [phase, setPhase] = useState(animate ? "hidden" : "open");
 
   useEffect(() => {
     if (!animate) return;
-    const raf = requestAnimationFrame(() => {
-      setPhase('opening');
-    });
+    const raf = requestAnimationFrame(() => setPhase("opening"));
     return () => cancelAnimationFrame(raf);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line
 
   const handleClose = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setPhase('closing');
+    setPhase("closing");
     setTimeout(() => onClose(tab.id), 250);
   };
 
   const cls = [
     styles.nestedTournament,
-    phase === 'hidden'  ? styles.tabHidden  : '',
-    phase === 'opening' ? styles.tabOpening : '',
-    phase === 'closing' ? styles.tabClosing : '',
-  ].filter(Boolean).join(' ');
+    phase === "hidden"  ? styles.tabHidden  : "",
+    phase === "opening" ? styles.tabOpening : "",
+    phase === "closing" ? styles.tabClosing : "",
+  ].filter(Boolean).join(" ");
 
   return (
     <div className={cls}>
       <NavLink
         to={`/tournament/${tab.id}`}
-        className={({ isActive }) =>
-          isActive ? styles.activeNestedLink : styles.nestedLink
-        }
+        className={({ isActive }) => isActive ? styles.activeNestedLink : styles.nestedLink}
         title={tab.name}
       >
         <span className={styles.tabName}>└ {tab.name}</span>
-        <button
-          className={styles.closeIconWrapper}
-          onClick={handleClose}
-          aria-label={`Закрити ${tab.name}`}
-          type="button"
-        >
+        <button className={styles.closeIconWrapper} onClick={handleClose}
+          aria-label={`Закрити ${tab.name}`} type="button">
           <img src={cross} className={styles.closeIcon} alt="" />
         </button>
       </NavLink>
@@ -100,50 +89,37 @@ const TournamentTab = ({ tab, onClose, animate }) => {
   );
 };
 
-/* ─── Хук: polling для авто-закриття вкладок турніру ────────────────────────
- * Замість WebSocket використовує polling кожні 15 секунд.
- * Перевіряє чи є турніри у вкладках доступні для поточного юзера.
- */
 const useTournamentRemovalPolling = (openTabs, removeTabById) => {
   useEffect(() => {
     if (!openTabs.length) return;
-
     const check = async () => {
-      const token = getToken();
-      if (!token) return;
-
       for (const tab of openTabs) {
         try {
-          const res = await fetch(`${API}/tournaments/${tab.id}/my-role/`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.status === 403 || res.status === 404) {
+          const res = await API.get(`/tournaments/${tab.id}/my-role/`);
+          if (res.status === 403 || res.status === 404) removeTabById(tab.id);
+        } catch (err) {
+          if (err.response?.status === 403 || err.response?.status === 404) {
             removeTabById(tab.id);
           }
-        } catch {
-          // ігноруємо помилки мережі
         }
       }
     };
-
     const interval = setInterval(check, 15000);
     return () => clearInterval(interval);
   }, [openTabs, removeTabById]);
 };
 
-/* ─── Головний компонент ─── */
 const NavBar = ({ children }) => {
   const { openTabs, closeTab, removeTabById } = useTabs();
   const navigate = useNavigate();
-  const [fullUserName, setFullUserName] = useState('');
 
-  const [avatar, setAvatar]               = useState(null);
-  const [bellOpen, setBellOpen]           = useState(false);
-  const [compose, setCompose]             = useState(false);
-  const [notifs, setNotifs]               = useState([]);
+  const [fullUserName, setFullUserName] = useState("");
+  const [avatar,       setAvatar]       = useState(null);
+  const [bellOpen,     setBellOpen]     = useState(false);
+  const [compose,      setCompose]      = useState(false);
+  const [notifs,       setNotifs]       = useState([]);
   const [notifsLoading, setNotifsLoading] = useState(false);
-
-  const [sidebarOpen, setSidebarOpen]       = useState(false);
+  const [sidebarOpen,   setSidebarOpen]   = useState(false);
   const [sidebarClosing, setSidebarClosing] = useState(false);
 
   const bellRef    = useRef();
@@ -153,7 +129,6 @@ const NavBar = ({ children }) => {
     () => JSON.parse(localStorage.getItem("setting_logout") ?? "true")
   );
 
-  // ── Polling замість WebSocket ─────────────────────────────────────────────
   useTournamentRemovalPolling(openTabs, removeTabById);
 
   useEffect(() => {
@@ -167,41 +142,37 @@ const NavBar = ({ children }) => {
     };
   }, []);
 
-  const role = localStorage.getItem('userRole') ?? 'participant';
+  // Роль — спочатку з пам'яті (безпечно), fallback на localStorage для UI
+  const role     = getUserRole() ?? localStorage.getItem("userRole") ?? "participant";
   const roleTabs = getTabsForRole(role);
 
-  const initialTabIds = useRef(new Set(openTabs.map(t => String(t.id))));
+  const initialTabIds = useRef(new Set(openTabs.map((t) => String(t.id))));
 
   useEffect(() => {
-    const storedName = localStorage.getItem('fullUserName');
+    const storedName = localStorage.getItem("fullUserName");
     if (storedName) setFullUserName(storedName.trim());
-    const token = getToken();
-    if (token) {
-      fetch(`${API}/users/profile/`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.ok ? r.json() : null)
-        .then(d => {
-          if (d?.avatar) setAvatar(`http://127.0.0.1:8000${d.avatar}`);
-        })
+
+    if (getAccessToken()) {
+      API.get("/users/profile/")
+        .then((r) => { if (r.data?.avatar) setAvatar(`http://127.0.0.1:8000${r.data.avatar}`); })
         .catch(() => {});
     }
   }, []);
 
-  // ── Реалтайм-оновлення після збереження профілю ───────────────────────────
   useEffect(() => {
     const handler = (e) => {
       if (e.detail?.fullUserName) setFullUserName(e.detail.fullUserName);
       if (e.detail?.avatar !== undefined) setAvatar(e.detail.avatar);
     };
-    window.addEventListener('profile-updated', handler);
-    return () => window.removeEventListener('profile-updated', handler);
+    window.addEventListener("profile-updated", handler);
+    return () => window.removeEventListener("profile-updated", handler);
   }, []);
 
   useEffect(() => {
     const applyWarm = () => {
       const warm = JSON.parse(localStorage.getItem("setting_warm") ?? "false");
       document.documentElement.style.filter = warm
-        ? "sepia(0.25) saturate(1.1) brightness(0.98)"
-        : "";
+        ? "sepia(0.25) saturate(1.1) brightness(0.98)" : "";
     };
     applyWarm();
     window.addEventListener("settings-updated", applyWarm);
@@ -215,33 +186,26 @@ const NavBar = ({ children }) => {
   useEffect(() => {
     if (!sidebarOpen) return;
     const handler = (e) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
-        closeSidebar();
-      }
+      if (sidebarRef.current && !sidebarRef.current.contains(e.target)) closeSidebar();
     };
-    document.addEventListener('mousedown', handler);
-    document.addEventListener('touchstart', handler);
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
     return () => {
-      document.removeEventListener('mousedown', handler);
-      document.removeEventListener('touchstart', handler);
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
     };
   }, [sidebarOpen]);
 
   const closeSidebar = () => {
     setSidebarClosing(true);
-    setTimeout(() => {
-      setSidebarOpen(false);
-      setSidebarClosing(false);
-    }, 320);
+    setTimeout(() => { setSidebarOpen(false); setSidebarClosing(false); }, 320);
   };
 
   const fetchNotifs = async () => {
     setNotifsLoading(true);
     try {
-      const res = await fetch(`${API}/notifications/`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (res.ok) setNotifs(await res.json());
+      const res = await API.get("/notifications/");
+      if (res.data) setNotifs(res.data);
     } catch {}
     finally { setNotifsLoading(false); }
   };
@@ -257,35 +221,49 @@ const NavBar = ({ children }) => {
     const handler = (e) => {
       if (bellRef.current && !bellRef.current.contains(e.target)) setBellOpen(false);
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, [bellOpen]);
 
   const markAllRead = async () => {
-    await fetch(`${API}/notifications/mark-read/`, {
-      method: 'POST', headers: { Authorization: `Bearer ${getToken()}` },
-    });
-    setNotifs(n => n.map(x => ({ ...x, is_read: true })));
+    await API.post("/notifications/mark-read/");
+    setNotifs((n) => n.map((x) => ({ ...x, is_read: true })));
   };
 
   const markOneRead = async (id) => {
-    await fetch(`${API}/notifications/mark-read/${id}/`, {
-      method: 'POST', headers: { Authorization: `Bearer ${getToken()}` },
-    });
-    setNotifs(n => n.map(x => x.id === id ? { ...x, is_read: true } : x));
+    await API.post(`/notifications/mark-read/${id}/`);
+    setNotifs((n) => n.map((x) => (x.id === id ? { ...x, is_read: true } : x)));
   };
 
-  const handleLogout = (e) => {
+  const handleLogout = async (e) => {
     e.preventDefault();
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('fullUserName');
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userId');
-    window.dispatchEvent(new Event('auth-changed'));
-    navigate('/');
+    try {
+      // Інвалідуємо refresh token на бекенді і видаляємо httpOnly cookie
+      await logoutUser();
+    } catch {}
+
+    // ── Повне очищення стану ──────────────────────────────────────────────
+    clearAccessToken();                          // access token + роль з пам'яті
+
+    // Актуальні ключі
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("fullUserName");
+    // Legacy-ключі старого коду
+    localStorage.removeItem("role");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userId");
+
+    // Скидаємо локальний UI-стан навбару
+    setFullUserName("");
+    setAvatar(null);
+    setNotifs([]);
+    setBellOpen(false);
+
+    window.dispatchEvent(new Event("auth-changed"));
+    navigate("/");
   };
 
-  const hasUnread = notifs.some(n => !n.is_read);
+  const hasUnread = notifs.some((n) => !n.is_read);
 
   return (
     <div className={styles.vectorApp}>
@@ -296,7 +274,7 @@ const NavBar = ({ children }) => {
         </div>
 
         <div className={styles.search}>
-          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" style={{opacity:0.4,flexShrink:0}}>
+          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" style={{ opacity: 0.4, flexShrink: 0 }}>
             <circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/>
           </svg>
           <input type="search" placeholder="Пошук..." className={styles.searchInput} />
@@ -308,7 +286,7 @@ const NavBar = ({ children }) => {
             ? <img src={avatar} alt="avatar" className={styles.navbarAvatar} />
             : (
               <div className={styles.navbarAvatarPlaceholder}>
-                {fullUserName?.[0]?.toUpperCase() || '?'}
+                {fullUserName?.[0]?.toUpperCase() || "?"}
               </div>
             )
           }
@@ -319,12 +297,10 @@ const NavBar = ({ children }) => {
             </button>
             {bellOpen && (
               <NotificationDropdown
-                notifs={notifs}
-                loading={notifsLoading}
+                notifs={notifs} loading={notifsLoading}
                 onClose={() => setBellOpen(false)}
                 onCompose={() => { setBellOpen(false); setCompose(true); }}
-                onMarkAllRead={markAllRead}
-                onMarkOne={markOneRead}
+                onMarkAllRead={markAllRead} onMarkOne={markOneRead}
               />
             )}
           </div>
@@ -333,21 +309,16 @@ const NavBar = ({ children }) => {
 
       <div className={styles.mainWrapper}>
         <aside className={styles.leftSidebar}>
-
           <nav className={styles.primaryNav}>
             <h3 className={styles.sidebarSectionTitle}>Меню</h3>
             <ul>
               {roleTabs.map(({ key, label, path }) => (
                 <NavItem key={key} tabKey={key} label={label} path={path}>
-                  {key === 'tournaments' && openTabs.length > 0 && (
+                  {key === "tournaments" && openTabs.length > 0 && (
                     <div className={styles.openedList}>
                       {openTabs.map((tab) => (
-                        <TournamentTab
-                          key={tab.id}
-                          tab={tab}
-                          onClose={closeTab}
-                          animate={!initialTabIds.current.has(String(tab.id))}
-                        />
+                        <TournamentTab key={tab.id} tab={tab} onClose={closeTab}
+                          animate={!initialTabIds.current.has(String(tab.id))} />
                       ))}
                     </div>
                   )}
@@ -368,12 +339,11 @@ const NavBar = ({ children }) => {
           <div className={styles.logoutSection}>
             {showLogout && (
               <button onClick={handleLogout} className={styles.logoutBtn} type="button">
-                <LogoutIcon className={styles.logoutIcon} style={{ color: 'rgb(215,125,126)', fill: 'rgb(215,125,126)' }} />
+                <LogoutIcon className={styles.logoutIcon} style={{ color: "rgb(215,125,126)", fill: "rgb(215,125,126)" }} />
                 <span className={styles.logoutText}>Вийти</span>
               </button>
             )}
           </div>
-
         </aside>
 
         <main className={styles.contentArea}>
@@ -381,9 +351,7 @@ const NavBar = ({ children }) => {
         </main>
       </div>
 
-      {compose && (
-        <ComposeModal onClose={() => setCompose(false)} onSent={fetchNotifs} />
-      )}
+      {compose && <ComposeModal onClose={() => setCompose(false)} onSent={fetchNotifs} />}
     </div>
   );
 };

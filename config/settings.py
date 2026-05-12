@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from datetime import timedelta
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'apps.notifications',
     'channels',
+    'rest_framework_simplejwt.token_blacklist',
 
 ]
 
@@ -146,8 +148,13 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME":  timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+ 
+    "ROTATE_REFRESH_TOKENS":  True,
+    "BLACKLIST_AFTER_ROTATION": True,
+ 
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 AUTH_USER_MODEL = 'users.User'
@@ -167,3 +174,19 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
+
+# ── Cookie налаштування (використовуємо у своїх views) ───────────────────────
+AUTH_COOKIE                  = "refresh_token"
+AUTH_COOKIE_MAX_AGE          = 60 * 60 * 24 * 30
+AUTH_COOKIE_SECURE           = False
+AUTH_COOKIE_HTTP_ONLY        = True
+AUTH_COOKIE_PATH             = "/api/users/"
+AUTH_COOKIE_SAMESITE         = "Lax"
+ 
+# ── CORS — дозволяємо credentials (cookie) ───────────────────────────────────
+CORS_ALLOW_ALL_ORIGINS       = False
+CORS_ALLOWED_ORIGINS         = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
+CORS_ALLOW_CREDENTIALS       = True
