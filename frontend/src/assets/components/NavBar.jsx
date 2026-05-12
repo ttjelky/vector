@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { useTabs } from "../../TabsContext";
 import { getTabsForRole, COMMON_TABS } from "../../navConfig";
 import styles from "./styles/NavBar.module.css";
@@ -19,6 +19,9 @@ import NewsIcon        from "./static/icons/News.svg?react";
 
 import { ComposeModal, NotificationDropdown } from './Notifications';
 import { mediaUrl, getAccessToken, getUserRole, clearAccessToken, logoutUser } from '../../api';
+import { useSearch } from '../../SearchContext';
+import SearchOverlay from './SearchOverlay';
+import { ConfirmDeleteModal } from './TournamentShared';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:8000/api';
 const getToken = () => getAccessToken();
@@ -210,7 +213,77 @@ const MobileSearch = () => {
 /* ─── Main NavBar ─── */
 const NavBar = ({ children }) => {
   const { openTabs, closeTab, removeTabById } = useTabs();
+  const { searchQuery, setSearchQuery, clearSearch } = useSearch();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Сторінки де пошук фільтрує вбудований список — оверлей не потрібен
+  const TOURNAMENT_PATHS = ["/tournaments", "/admin/tournaments", "/participant/tournaments"];
+  const isOnTournamentsPage = TOURNAMENT_PATHS.some(p => location.pathname.startsWith(p));
+
+  // Стан оверлею
+  const [overlayOpen,    setOverlayOpen]    = useState(false);
+  const [searchResults,  setSearchResults]  = useState([]);
+  const [searchLoading,  setSearchLoading]  = useState(false);
+  const searchDebounce = useRef(null);
+
+  // Debounced пошук через API
+  useEffect(() => {
+    const q = searchQuery.trim();
+
+    if (!q || isOnTournamentsPage) {
+      setOverlayOpen(false);
+      setSearchResults([]);
+      return;
+    }
+
+    setOverlayOpen(true);
+    setSearchLoading(true);
+
+    clearTimeout(searchDebounce.current);
+    searchDebounce.current = setTimeout(async () => {
+      try {
+        // Спочатку пробуємо пошук через API (?search=)
+        const res = await fetch(
+          `${API_BASE}/tournaments/?search=${encodeURIComponent(q)}`,
+          { headers: { Authorization: `Bearer ${getToken()}` } }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const all = Array.isArray(data) ? data : (data.results ?? []);
+
+          // Якщо API повернув результати — перевіряємо чи він справді фільтрує.
+          // Якщо всі результати не відповідають запиту — фільтруємо самостійно на клієнті.
+          const lower = q.toLowerCase();
+          const filtered = all.filter(t =>
+            t.name?.toLowerCase().includes(lower)
+          );
+
+          // Якщо після клієнтського фільтру є результати — показуємо їх.
+          // Якщо filtered порожній, але all не порожній — API не фільтрує,
+          // тому показуємо filtered (порожній список "не знайдено").
+          // Якщо all порожній — API сам вже відфільтрував правильно.
+          setSearchResults(all.length === 0 ? [] : filtered);
+        }
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(searchDebounce.current);
+  }, [searchQuery, isOnTournamentsPage]);
+
+  // Закриваємо оверлей при переході на іншу сторінку
+  useEffect(() => {
+    setOverlayOpen(false);
+  }, [location.pathname]);
+
+  const handleCloseOverlay = useCallback(() => {
+    setOverlayOpen(false);
+    clearSearch();
+  }, [clearSearch]);
   const [fullUserName, setFullUserName] = useState('');
   const [avatar, setAvatar]             = useState(null);
 
@@ -227,6 +300,8 @@ const NavBar = ({ children }) => {
   const [showLogout, setShowLogout] = useState(
     () => JSON.parse(localStorage.getItem("setting_logout") ?? "true")
   );
+  const [logoutConfirm, setLogoutConfirm] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useTournamentRemovalPolling(openTabs, removeTabById);
 
@@ -330,10 +405,21 @@ const NavBar = ({ children }) => {
     setNotifs(n => n.map(x => x.id === id ? { ...x, is_read: true } : x));
   };
 
-  const handleLogout = async (e) => {
+  const handleLogout = (e) => {
     e.preventDefault();
-    try { await logoutUser(); } catch {}
-    clearAccessToken();
+    setLogoutConfirm(true);
+  };
+
+  const doLogout = async () => {
+    setLogoutLoading(true);
+    try {
+      await logoutUser();
+    } catch {}
+
+    // ── Повне очищення стану ──────────────────────────────────────────────
+    clearAccessToken();                          // access token + роль з пам'яті
+
+    // Актуальні ключі
     localStorage.removeItem("userRole");
     localStorage.removeItem("fullUserName");
     localStorage.removeItem("role");
@@ -438,6 +524,14 @@ const NavBar = ({ children }) => {
         {/* Анімований пошук — на мобілі розширюється, на десктопі звичайний */}
         <MobileSearch />
 
+        {overlayOpen && (
+          <SearchOverlay
+            results={searchResults}
+            loading={searchLoading}
+            onClose={handleCloseOverlay}
+          />
+        )}
+
         <div className={styles.navbarUserActions}>
           <span className={styles.userName}>{fullUserName}</span>
           {avatar
@@ -517,6 +611,18 @@ const NavBar = ({ children }) => {
       </div>
 
       {compose && <ComposeModal onClose={() => setCompose(false)} onSent={fetchNotifs} />}
+
+      {logoutConfirm && (
+        <ConfirmDeleteModal
+          icon="🚪"
+          title="Вийти з акаунту?"
+          description="Ви впевнені, що хочете вийти? Всі незбережені дані буде втрачено."
+          confirmLabel="Так, вийти"
+          onConfirm={doLogout}
+          onCancel={() => setLogoutConfirm(false)}
+          loading={logoutLoading}
+        />
+      )}
     </div>
   );
 };

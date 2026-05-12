@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchProfile, updateProfile } from "../../api/profile";
 import styles from "../components/styles/profile.module.css";
 import NavBar from "../components/NavBar";
-import API, { mediaUrl } from "../../api";
+import API, { mediaUrl, getAccessToken, clearAccessToken, logoutUser } from "../../api";
+import { ConfirmDeleteModal } from "../components/TournamentShared";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -23,6 +25,7 @@ function calcTotal(scores) {
 
 const Profile = () => {
     const role = localStorage.getItem("userRole") ?? "participant";
+    const navigate = useNavigate();
 
     const [profile,  setProfile]  = useState(null);
     const [editMode, setEditMode] = useState(false);
@@ -30,6 +33,9 @@ const Profile = () => {
     const [preview,  setPreview]  = useState(null);
     const [loading,  setLoading]  = useState(true);
     const [toast,    setToast]    = useState(false);
+
+    const [logoutConfirm, setLogoutConfirm] = useState(false);
+    const [logoutLoading, setLogoutLoading] = useState(false);
 
     // jury
     const [submissions,   setSubmissions]   = useState([]);
@@ -121,6 +127,19 @@ const Profile = () => {
             avatar:     null,
         });
         setPreview(mediaUrl(profile.avatar));
+    };
+
+    const doLogout = async () => {
+        setLogoutLoading(true);
+        try { await logoutUser(); } catch {}
+        clearAccessToken();
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("fullUserName");
+        localStorage.removeItem("role");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userId");
+        window.dispatchEvent(new Event("auth-changed"));
+        navigate("/");
     };
 
     const getInitials = (first, last) => {
@@ -219,6 +238,13 @@ const Profile = () => {
                                     <button onClick={() => setEditMode(true)} className={styles.btnPrimary}>
                                         Редагувати
                                     </button>
+                                    <button
+                                        onClick={() => setLogoutConfirm(true)}
+                                        className={styles.btnSecondary}
+                                        style={{ color: "#dc2626", borderColor: "#fecaca" }}
+                                    >
+                                        Вийти
+                                    </button>
                                 </div>
                             </>
                         )}
@@ -249,6 +275,18 @@ const Profile = () => {
                     Профіль оновлено
                 </div>
             </div>
+
+            {logoutConfirm && (
+                <ConfirmDeleteModal
+                    icon="🚪"
+                    title="Вийти з акаунту?"
+                    description="Ви впевнені, що хочете вийти? Всі незбережені дані буде втрачено."
+                    confirmLabel="Так, вийти"
+                    onConfirm={doLogout}
+                    onCancel={() => setLogoutConfirm(false)}
+                    loading={logoutLoading}
+                />
+            )}
         </NavBar>
     );
 };

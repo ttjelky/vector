@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { TabsProvider } from "./TabsContext";
+import { SearchProvider } from "./SearchContext";
 import { restoreSession, clearAccessToken, setUserRole } from "./api";
 
 // Pages
@@ -135,9 +136,11 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <TabsProvider>
-        <AppRoutes />
-      </TabsProvider>
+      <SearchProvider>
+        <TabsProvider>
+          <AppRoutes />
+        </TabsProvider>
+      </SearchProvider>
     </BrowserRouter>
   );
 };

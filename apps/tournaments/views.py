@@ -1343,9 +1343,10 @@ class LeaderboardView(APIView):
             )
         )
 
+        data  = {}
+        names = {}
+
         if tournament.tournament_type == 'team':
-            data  = {}
-            names = {}
             for grade in grades:
                 sub  = grade.submission
                 team = sub.team
@@ -1373,6 +1374,18 @@ class LeaderboardView(APIView):
                     'total':        round(total, 1),
                 })
         else:
+            for grade in grades:
+                sub         = grade.submission
+                participant = sub.participant
+                if not participant:
+                    continue
+                pid = participant.id
+                rid = sub.task.round_id
+                if pid not in data:
+                    names[pid] = participant.get_full_name() or participant.username
+                    data[pid]  = {}
+                data[pid].setdefault(rid, []).append(grade.total)
+
             profile_map = {
                 p.user_id: p.avatar.url if p.avatar else None
                 for p in UserProfile.objects.filter(user_id__in=data.keys()).select_related()

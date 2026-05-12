@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTabs } from "../../TabsContext";
+import { useSearch } from "../../SearchContext";
 import API from "../../api";
 import NavBar from "../components/NavBar";
 import CreateTournamentModal from "../components/CreateTournamentModal";
@@ -37,6 +38,7 @@ const AdminTournaments = () => {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { addTab } = useTabs();
+  const { searchQuery } = useSearch();
 
   const [tournaments, setTournaments] = useState([]);
   const [loading,     setLoading]     = useState(true);
@@ -91,12 +93,27 @@ const AdminTournaments = () => {
   const sortedActive  = useMemo(() => sortTournaments(active,  sortBy, sortAsc), [active,  sortBy, sortAsc]);
   const sortedArchive = useMemo(() => sortTournaments(archive, sortBy, sortAsc), [archive, sortBy, sortAsc]);
 
+  // Фільтрація по пошуку
+  const q = searchQuery.trim().toLowerCase();
+  const filteredActive  = useMemo(() =>
+    q ? sortedActive.filter(t =>
+      t.name?.toLowerCase().includes(q) ||
+      t.description?.toLowerCase().includes(q)
+    ) : sortedActive,
+  [sortedActive, q]);
+  const filteredArchive = useMemo(() =>
+    q ? sortedArchive.filter(t =>
+      t.name?.toLowerCase().includes(q) ||
+      t.description?.toLowerCase().includes(q)
+    ) : sortedArchive,
+  [sortedArchive, q]);
+
   const openTournament = (tournament) => {
     addTab({ id: tournament.id, name: tournament.name });
     navigate(`/tournament/${tournament.id}`);
   };
 
-  const displayList = tab === "archive" ? sortedArchive : sortedActive;
+  const displayList = tab === "archive" ? filteredArchive : filteredActive;
 
   return (
     <NavBar>
@@ -199,7 +216,7 @@ const AdminTournaments = () => {
             )}
 
             {/* ── Архів внизу активної вкладки (collapsed) ── */}
-            {tab === "active" && sortedArchive.length > 0 && (
+            {tab === "active" && filteredArchive.length > 0 && (
               <div className={styles.archiveSection}>
                 <div className={styles.archiveHeader}>
                   <div className={styles.archiveHeaderLine} />
@@ -207,7 +224,7 @@ const AdminTournaments = () => {
                     className={styles.archiveToggleBtn}
                     onClick={() => setArchiveOpen((v) => !v)}
                   >
-                    🗄 Архів ({sortedArchive.length})
+                    🗄 Архів ({filteredArchive.length})
                     <i className={`${styles.archiveChevron} ${archiveOpen ? styles.archiveChevronOpen : ""}`}>▼</i>
                   </button>
                   <div className={styles.archiveHeaderLine} />
@@ -215,7 +232,7 @@ const AdminTournaments = () => {
 
                 {archiveOpen && (
                   <div className={styles.archiveGrid}>
-                    {sortedArchive.map((tournament) => (
+                    {filteredArchive.map((tournament) => (
                       <div
                         key={tournament.id}
                         className={styles.archiveCard}
