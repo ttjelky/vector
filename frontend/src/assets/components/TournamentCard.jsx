@@ -73,7 +73,19 @@ export default function TournamentCard({
       if (customImage) {
         return (
           <div className={styles.previewImage}>
-            <img src={customImage} alt={name} className={styles.cardImg} />
+            <img
+              src={customImage}
+              alt={name}
+              className={styles.cardImg}
+              style={{
+                transform: "translateZ(0)",
+                WebkitTransform: "translateZ(0)",
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                willChange: "auto",
+                imageRendering: "auto",
+              }}
+            />
           </div>
         );
       }
