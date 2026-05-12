@@ -21,6 +21,7 @@ import { ComposeModal, NotificationDropdown } from './Notifications';
 import { mediaUrl, getAccessToken, getUserRole, clearAccessToken, logoutUser } from '../../api';
 import { useSearch } from '../../SearchContext';
 import SearchOverlay from './SearchOverlay';
+import { ConfirmDeleteModal } from './TournamentShared';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:8000/api';
 const getToken = () => getAccessToken();
@@ -227,6 +228,8 @@ const NavBar = ({ children }) => {
   const [showLogout, setShowLogout] = useState(
     () => JSON.parse(localStorage.getItem("setting_logout") ?? "true")
   );
+  const [logoutConfirm, setLogoutConfirm] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useTournamentRemovalPolling(openTabs, removeTabById);
 
@@ -332,10 +335,14 @@ const NavBar = ({ children }) => {
     setNotifs(n => n.map(x => x.id === id ? { ...x, is_read: true } : x));
   };
 
-  const handleLogout = async (e) => {
+  const handleLogout = (e) => {
     e.preventDefault();
+    setLogoutConfirm(true);
+  };
+
+  const doLogout = async () => {
+    setLogoutLoading(true);
     try {
-      // Інвалідуємо refresh token на бекенді і видаляємо httpOnly cookie
       await logoutUser();
     } catch {}
 
@@ -563,6 +570,18 @@ const NavBar = ({ children }) => {
       </div>
 
       {compose && <ComposeModal onClose={() => setCompose(false)} onSent={fetchNotifs} />}
+
+      {logoutConfirm && (
+        <ConfirmDeleteModal
+          icon="🚪"
+          title="Вийти з акаунту?"
+          description="Ви впевнені, що хочете вийти? Всі незбережені дані буде втрачено."
+          confirmLabel="Так, вийти"
+          onConfirm={doLogout}
+          onCancel={() => setLogoutConfirm(false)}
+          loading={logoutLoading}
+        />
+      )}
     </div>
   );
 };

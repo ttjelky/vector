@@ -2,11 +2,11 @@ import styles from "./styles/CreateTournamentModal.module.css";
 import "./styles/richContent.css";
 
 export const STOCK_IMAGES = [
-  { id: "blue",  gradient: "linear-gradient(135deg, #c0caf7 0%, #95b7d7 100%)" },
+  { id: "blue",  gradient: "linear-gradient(135deg, #c0caf7 0%, #5fa3e3 100%)" },
   { id: "green",  gradient: "linear-gradient(135deg, #c8f6b3 0%, #97bc69 100%)" },
   { id: "purple", gradient: "linear-gradient(135deg, #f9a7d7 0%, #b857f5 100%)" },
-  { id: "golden", gradient: "linear-gradient(135deg, #fddaae 0%, #e0c756 100%)" },
-  { id: "red",    gradient: "linear-gradient(135deg, #fdb5ae 0%, #d04d3e 100%)" },
+  { id: "golden", gradient: "linear-gradient(135deg, #fce3c4 0%, #e0c756 100%)" },
+  { id: "red",    gradient: "linear-gradient(135deg, #fdb5ae 0%, #cc2b19 100%)" },
   { id: "of us",  gradient: "linear-gradient(135deg, #6386e5 0%, #c95344 100%)" },
 ];
 
