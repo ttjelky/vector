@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { useTabs } from "../../TabsContext";
 import { getTabsForRole, COMMON_TABS } from "../../navConfig";
 import styles from "./styles/NavBar.module.css";
@@ -19,6 +19,8 @@ import NewsIcon        from "./static/icons/News.svg?react";
 
 import { ComposeModal, NotificationDropdown } from './Notifications';
 import { mediaUrl, getAccessToken, getUserRole, clearAccessToken, logoutUser } from '../../api';
+import { useSearch } from '../../SearchContext';
+import SearchOverlay from './SearchOverlay';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:8000/api';
 const getToken = () => getAccessToken();
@@ -138,7 +140,77 @@ const BurgerButton = ({ isOpen, onClick }) => (
 /* ─── Main NavBar ─── */
 const NavBar = ({ children }) => {
   const { openTabs, closeTab, removeTabById } = useTabs();
+  const { searchQuery, setSearchQuery, clearSearch } = useSearch();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Сторінки де пошук фільтрує вбудований список — оверлей не потрібен
+  const TOURNAMENT_PATHS = ["/tournaments", "/admin/tournaments", "/participant/tournaments"];
+  const isOnTournamentsPage = TOURNAMENT_PATHS.some(p => location.pathname.startsWith(p));
+
+  // Стан оверлею
+  const [overlayOpen,    setOverlayOpen]    = useState(false);
+  const [searchResults,  setSearchResults]  = useState([]);
+  const [searchLoading,  setSearchLoading]  = useState(false);
+  const searchDebounce = useRef(null);
+
+  // Debounced пошук через API
+  useEffect(() => {
+    const q = searchQuery.trim();
+
+    if (!q || isOnTournamentsPage) {
+      setOverlayOpen(false);
+      setSearchResults([]);
+      return;
+    }
+
+    setOverlayOpen(true);
+    setSearchLoading(true);
+
+    clearTimeout(searchDebounce.current);
+    searchDebounce.current = setTimeout(async () => {
+      try {
+        // Спочатку пробуємо пошук через API (?search=)
+        const res = await fetch(
+          `${API_BASE}/tournaments/?search=${encodeURIComponent(q)}`,
+          { headers: { Authorization: `Bearer ${getToken()}` } }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          const all = Array.isArray(data) ? data : (data.results ?? []);
+
+          // Якщо API повернув результати — перевіряємо чи він справді фільтрує.
+          // Якщо всі результати не відповідають запиту — фільтруємо самостійно на клієнті.
+          const lower = q.toLowerCase();
+          const filtered = all.filter(t =>
+            t.name?.toLowerCase().includes(lower)
+          );
+
+          // Якщо після клієнтського фільтру є результати — показуємо їх.
+          // Якщо filtered порожній, але all не порожній — API не фільтрує,
+          // тому показуємо filtered (порожній список "не знайдено").
+          // Якщо all порожній — API сам вже відфільтрував правильно.
+          setSearchResults(all.length === 0 ? [] : filtered);
+        }
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(searchDebounce.current);
+  }, [searchQuery, isOnTournamentsPage]);
+
+  // Закриваємо оверлей при переході на іншу сторінку
+  useEffect(() => {
+    setOverlayOpen(false);
+  }, [location.pathname]);
+
+  const handleCloseOverlay = useCallback(() => {
+    setOverlayOpen(false);
+    clearSearch();
+  }, [clearSearch]);
   const [fullUserName, setFullUserName] = useState('');
   const [avatar, setAvatar]             = useState(null);
 
@@ -387,8 +459,22 @@ const NavBar = ({ children }) => {
           <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" style={{ opacity: 0.4, flexShrink: 0 }}>
             <circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/>
           </svg>
-          <input type="search" placeholder="Пошук..." className={styles.searchInput} />
+          <input
+            type="search"
+            placeholder="Пошук турнірів..."
+            className={styles.searchInput}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
+
+        {overlayOpen && (
+          <SearchOverlay
+            results={searchResults}
+            loading={searchLoading}
+            onClose={handleCloseOverlay}
+          />
+        )}
 
         <div className={styles.navbarUserActions}>
           <span className={styles.userName}>{fullUserName}</span>
