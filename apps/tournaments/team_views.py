@@ -46,7 +46,7 @@ def _get_tournament_or_404(pk):
 
 def _get_team_or_404(tournament_pk, team_pk):
     try:
-        return Team.objects.prefetch_related('members__user').select_related('captain').get(
+        return Team.objects.prefetch_related('members__user__profile').select_related('captain').get(
             pk=team_pk, tournament_id=tournament_pk
         )
     except Team.DoesNotExist:
@@ -82,15 +82,15 @@ class TeamListCreateView(APIView):
 
         qs = Team.objects.filter(
             tournament_id=tournament_pk
-        ).prefetch_related('members__user').select_related('captain')
+        ).prefetch_related('members__user__profile').select_related('captain')
 
         if privileged:
             # Адмін/власник бачить всі команди (і чернетки і зареєстровані)
-            return Response(TeamAdminSerializer(qs, many=True).data)
+            return Response(TeamAdminSerializer(qs, many=True, context={'request': request}).data)
         else:
-            # Учасники бачать тільки зареєстровані команди
+            # Учасники бачають тільки зареєстровані команди
             return Response(TeamSerializer(
-                qs.filter(status=Team.STATUS_REGISTERED), many=True
+                qs.filter(status=Team.STATUS_REGISTERED), many=True, context={'request': request}
             ).data)
 
     def post(self, request, tournament_pk):
@@ -106,7 +106,7 @@ class TeamListCreateView(APIView):
             return Response(serializer.errors, status=400)
 
         team = serializer.save()
-        return Response(TeamSerializer(team).data, status=201)
+        return Response(TeamSerializer(team, context={"request": request}).data, status=201)
 
 
 # ── TeamDetailView ────────────────────────────────────────────────────────────
@@ -118,7 +118,7 @@ class TeamDetailView(APIView):
         team = _get_team_or_404(tournament_pk, team_pk)
         if not team:
             return Response({'detail': 'Команду не знайдено.'}, status=404)
-        return Response(TeamSerializer(team).data)
+        return Response(TeamSerializer(team, context={"request": request}).data)
 
     def patch(self, request, tournament_pk, team_pk):
         team = _get_team_or_404(tournament_pk, team_pk)
@@ -137,7 +137,7 @@ class TeamDetailView(APIView):
                 if attr in request.data:
                     setattr(team, attr, request.data[attr])
             team.save()
-            return Response(TeamSerializer(team).data)
+            return Response(TeamSerializer(team, context={"request": request}).data)
 
         # Капітан: через серіалізатор з валідацією статусу
         serializer = TeamUpdateSerializer(
@@ -147,7 +147,7 @@ class TeamDetailView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
         serializer.save()
-        return Response(TeamSerializer(team).data)
+        return Response(TeamSerializer(team, context={"request": request}).data)
 
     def delete(self, request, tournament_pk, team_pk):
         team = _get_team_or_404(tournament_pk, team_pk)
@@ -287,7 +287,7 @@ class TeamRegisterView(APIView):
 
         team.status = Team.STATUS_REGISTERED
         team.save(update_fields=['status'])
-        return Response(TeamSerializer(team).data)
+        return Response(TeamSerializer(team, context={"request": request}).data)
 
 
 # ── TeamRosterLockView ────────────────────────────────────────────────────────
@@ -333,7 +333,7 @@ class MyTeamView(APIView):
         team = Team.objects.filter(
             tournament_id=tournament_pk,
             captain=user,
-        ).prefetch_related('members__user').select_related('captain').first()
+        ).prefetch_related('members__user__profile').select_related('captain').first()
 
         # Учасник (accepted)
         if not team:
@@ -343,14 +343,14 @@ class MyTeamView(APIView):
                 status=TeamMember.STATUS_ACCEPTED,
             ).select_related('team').first()
             if membership:
-                team = Team.objects.prefetch_related('members__user').select_related('captain').get(
+                team = Team.objects.prefetch_related('members__user__profile').select_related('captain').get(
                     pk=membership.team_id
                 )
 
         if not team:
             return Response({'detail': 'Ви не перебуваєте в жодній команді.'}, status=404)
 
-        data = TeamSerializer(team).data
+        data = TeamSerializer(team, context={"request": request}).data
         data['is_captain'] = (team.captain_id == user.pk)
         return Response(data)
 

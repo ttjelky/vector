@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import styles from "./styles/LeaderboardTab.module.css";
 import detailStyles from "./styles/LeaderboardDetail.module.css";
-import API from "../../api";
+import API, { mediaUrl } from "../../api";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -18,13 +18,62 @@ function getAvatarColor(str = "") {
 
 const MEDAL = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
+// ─── AvatarWithFallback ───────────────────────────────────────────────────────
+
+function AvatarWithFallback({ name, avatarPath, size = 32, className, style: extraStyle }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const url = mediaUrl(avatarPath);
+
+  const baseStyle = {
+    width: size,
+    height: size,
+    borderRadius: "50%",
+    flexShrink: 0,
+    overflow: "hidden",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    ...extraStyle,
+  };
+
+  if (url && !imgFailed) {
+    return (
+      <div className={className} style={{ ...baseStyle, background: "transparent" }}>
+        <img
+          src={url}
+          alt={name}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          onError={() => setImgFailed(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={className}
+      style={{
+        ...baseStyle,
+        background: getAvatarColor(name),
+        fontSize: size * 0.36,
+        fontWeight: 600,
+        color: "#374151",
+      }}
+    >
+      {getInitials(name)}
+    </div>
+  );
+}
+
+// ─── aggregateFromSubmissions ─────────────────────────────────────────────────
+
 function aggregateFromSubmissions(submissions) {
   const byParticipant = {};
   submissions.forEach(sub => {
     const name = sub.author_name || "Невідомий";
     const pid  = sub.participant_id || name;
     if (!byParticipant[pid]) {
-      byParticipant[pid] = { participant_id: pid, participant_name: name, round_scores: {}, total: 0 };
+      byParticipant[pid] = { participant_id: pid, participant_name: name, avatar: null, round_scores: {}, total: 0 };
     }
     const grade = sub.my_grade;
     if (!grade) return;
@@ -39,6 +88,8 @@ function aggregateFromSubmissions(submissions) {
   });
   return Object.values(byParticipant);
 }
+
+// ─── exportToExcel ────────────────────────────────────────────────────────────
 
 async function exportToExcel({ ranked, roundIds, roundMap, tournamentId, isTeam }) {
   const XLSX = await import("xlsx");
@@ -357,7 +408,7 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
   const [loading,       setLoading]       = useState(true);
   const [error,         setError]         = useState(null);
   const [showJuryBreak, setShowJuryBreak] = useState(false);
-  const [activeRound,   setActiveRound]   = useState(null); // null = всі раунди
+  const [activeRound,   setActiveRound]   = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -365,14 +416,12 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
     API.get(`/tournaments/${tournamentId}/leaderboard/${participantId}/`)
       .then(r => {
         setData(r.data);
-        // Якщо тільки один раунд — одразу його показуємо
         if (r.data.rounds?.length === 1) setActiveRound(r.data.rounds[0].round_id);
       })
       .catch(() => setError("Не вдалося завантажити деталізацію."))
       .finally(() => setLoading(false));
   }, [tournamentId, participantId]);
 
-  // Колір для кожного критерію (стабільний)
   const criteriaColors = useMemo(() => {
     const palette = [
       "#6366f1", "#0ea5e9", "#10b981", "#f59e0b",
@@ -411,8 +460,11 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
     </div>
   );
 
-  const { participant_name, rounds = [], grand_total, criteria_avg = {}, criteria_meta = [] } = data;
-  const visibleRounds = activeRound ? rounds.filter(r => r.round_id === activeRound) : rounds;
+  const { participant_name, avatar, rounds = [], grand_total, criteria_avg = {}, criteria_meta = [] } = data;
+
+  const visibleRounds = activeRound
+    ? rounds.filter(r => r.round_id === activeRound)
+    : rounds;
 
   return (
     <div className={detailStyles.panel}>
@@ -434,9 +486,12 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
       </div>
 
       <div className={detailStyles.hero}>
-        <div className={detailStyles.heroAvatar} style={{ background: getAvatarColor(participant_name) }}>
-          {getInitials(participant_name)}
-        </div>
+        <AvatarWithFallback
+          name={participant_name}
+          avatarPath={avatar}
+          size={64}
+          className={detailStyles.heroAvatar}
+        />
         <div className={detailStyles.heroInfo}>
           <h2 className={detailStyles.heroName}>{participant_name}</h2>
           <span className={detailStyles.heroTotal}>Загальний бал: <strong>{grand_total}</strong></span>
@@ -482,14 +537,72 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
       )}
 
       {visibleRounds.map(round => (
-        <RoundSection
-          key={round.round_id}
-          round={round}
-          criteria_meta={criteria_meta}
-          criteriaColors={criteriaColors}
-          isPrivileged={isPrivileged}
-          showJuryBreak={showJuryBreak}
-        />
+        <div key={round.round_id} className={detailStyles.roundSection}>
+          <div className={detailStyles.roundSectionHeader}>
+            <h3 className={detailStyles.roundTitle}>{round.round_title}</h3>
+            <span className={detailStyles.roundAvg}>
+              Середній бал: <strong>{round.avg_total}</strong>
+            </span>
+          </div>
+
+          {criteria_meta.length > 0 && (
+            <div className={detailStyles.criteriaGrid}>
+              {criteria_meta.map(c => {
+                const val = round.criteria_avg?.[c.key] ?? null;
+                if (val === null) return null;
+                return (
+                  <div key={c.key} className={detailStyles.criteriaRow}>
+                    <div className={detailStyles.criteriaLabelRow}>
+                      <span className={detailStyles.criteriaLabel}>{c.label}</span>
+                      <span className={detailStyles.criteriaValue} style={{ color: criteriaColors[c.key] }}>
+                        {val} <span className={detailStyles.criteriaMax}>/ {c.max}</span>
+                      </span>
+                    </div>
+                    <ScoreBar value={val} max={c.max} color={criteriaColors[c.key]} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {isPrivileged && showJuryBreak && round.jury_breakdown?.length > 0 && (
+            <div className={detailStyles.jurySection}>
+              <p className={detailStyles.jurySectionTitle}>
+                <JuryIcon /> Оцінки журі
+              </p>
+              <div className={detailStyles.juryTable}>
+                <div className={detailStyles.juryTableHead}>
+                  <span className={detailStyles.juryTableThName}>Журі</span>
+                  {criteria_meta.map(c => (
+                    <span key={c.key} className={detailStyles.juryTableTh} title={c.label}>
+                      {c.label.split(" ")[0]}
+                    </span>
+                  ))}
+                  <span className={detailStyles.juryTableThTotal}>Разом</span>
+                </div>
+                {round.jury_breakdown.map(j => (
+                  <div key={j.juror_id} className={detailStyles.juryTableRow}>
+                    <span className={detailStyles.juryTableName}>
+                      <AvatarWithFallback
+                        name={j.juror_name}
+                        avatarPath={j.juror_avatar}
+                        size={24}
+                        style={{ marginRight: 6 }}
+                      />
+                      {j.juror_name}
+                    </span>
+                    {criteria_meta.map(c => (
+                      <span key={c.key} className={detailStyles.juryTableCell}>
+                        {j.scores?.[c.key] ?? <span className={detailStyles.noScore}>—</span>}
+                      </span>
+                    ))}
+                    <span className={detailStyles.juryTableTotal}>{j.total}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       ))}
     </div>
   );
@@ -537,6 +650,7 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
   const [exporting,     setExporting]     = useState(false);
   const [lastUpdated,   setLastUpdated]   = useState(null);
   const [refreshing,    setRefreshing]    = useState(false);
+  const [selectedPid,   setSelectedPid]   = useState(null);
 
   const canAlwaysSee = isOwner || myRole === "admin";
   const isTeam = tournamentType === "team";
@@ -599,7 +713,6 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
     }
   };
 
-  // Обчислення roundIds / roundMap (тільки раунди що є в leaderboard)
   const { roundIds, roundMap } = useMemo(() => {
     const ids = new Set();
     leaderboard.forEach(p => Object.keys(p.round_scores ?? {}).forEach(id => ids.add(id)));
@@ -681,7 +794,6 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
 
   return (
     <div className={styles.wrap}>
-      {/* Тип турніру — бейдж */}
       {isTeam && (
         <div className={styles.teamBadge}>👥 Командний турнір — результати по командах</div>
       )}
@@ -806,9 +918,12 @@ export default function LeaderboardTab({ tournamentId, tournamentType, rounds = 
                     </td>
                     <td className={styles.tdName}>
                       <div className={styles.participant}>
-                        <div className={styles.avatar} style={{ background: getAvatarColor(getRowName(p)) }}>
-                          {getInitials(getRowName(p))}
-                        </div>
+                        <AvatarWithFallback
+                          name={getRowName(p)}
+                          avatarPath={p.avatar}
+                          size={32}
+                          className={styles.avatar}
+                        />
                         <div className={styles.participantInfo}>
                           <span className={styles.participantName}>{getRowName(p)}</span>
                           {isTeam && p.members_count && (

@@ -17,9 +17,11 @@ import Logo            from "./static/VectorLogo.svg";
 import cross           from "./static/icons/cross.svg";
 import NewsIcon        from "./static/icons/News.svg?react";
 
-import { ComposeModal, NotificationDropdown } from "./Notifications";
+import { ComposeModal, NotificationDropdown } from './Notifications';
+import { mediaUrl } from '../../api';
 
-import API, { logoutUser, getAccessToken, clearAccessToken, getUserRole } from "../../api";
+const API_BASE = 'http://127.0.0.1:8000/api';
+const getToken = () => localStorage.getItem('accessToken');
 
 const ICON_MAP = {
   home:        HomeIcon,
@@ -180,13 +182,20 @@ const NavBar = ({ children }) => {
 
   const initialTabIds = useRef(new Set(openTabs.map((t) => String(t.id))));
 
+  // ── Початкове завантаження профілю ───────────────────────────────────────
   useEffect(() => {
     const storedName = localStorage.getItem("fullUserName");
     if (storedName) setFullUserName(storedName.trim());
 
-    if (getAccessToken()) {
-      API.get("/users/profile/")
-        .then((r) => { if (r.data?.avatar) setAvatar(`http://127.0.0.1:8000${r.data.avatar}`); })
+    const token = getToken();
+    if (token) {
+      fetch(`${API_BASE}/users/profile/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => {
+          if (d?.avatar) setAvatar(mediaUrl(d.avatar));
+        })
         .catch(() => {});
     }
   }, []);
@@ -194,6 +203,7 @@ const NavBar = ({ children }) => {
   useEffect(() => {
     const handler = (e) => {
       if (e.detail?.fullUserName) setFullUserName(e.detail.fullUserName);
+      // avatar вже абсолютний URL (підготовлений у Profile.jsx через mediaUrl)
       if (e.detail?.avatar !== undefined) setAvatar(e.detail.avatar);
     };
     window.addEventListener("profile-updated", handler);

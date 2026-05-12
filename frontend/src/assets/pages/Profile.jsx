@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { fetchProfile, updateProfile } from "../../api/profile";
 import styles from "../components/styles/profile.module.css";
 import NavBar from "../components/NavBar";
-import API from "../../api";
+import API, { mediaUrl } from "../../api";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -19,7 +19,7 @@ function calcTotal(scores) {
     return vals.length === 0 ? null : vals.reduce((a, b) => a + b, 0);
 }
 
-// ── ProfileCard ───────────────────────────────────────────────────────────────
+// ── Profile ───────────────────────────────────────────────────────────────────
 
 const Profile = () => {
     const role = localStorage.getItem("userRole") ?? "participant";
@@ -32,12 +32,12 @@ const Profile = () => {
     const [toast,    setToast]    = useState(false);
 
     // jury
-    const [submissions,    setSubmissions]    = useState([]);
-    const [subsLoading,    setSubsLoading]    = useState(false);
+    const [submissions,   setSubmissions]   = useState([]);
+    const [subsLoading,   setSubsLoading]   = useState(false);
 
     // admin
-    const [tournaments,    setTournaments]    = useState([]);
-    const [tournsLoading,  setTournsLoading]  = useState(false);
+    const [tournaments,   setTournaments]   = useState([]);
+    const [tournsLoading, setTournsLoading] = useState(false);
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -50,14 +50,13 @@ const Profile = () => {
                     email:      data.email      || "",
                     avatar:     null,
                 });
-                setPreview(data.avatar ? `http://127.0.0.1:8000${data.avatar}` : null);
+                setPreview(mediaUrl(data.avatar));
             }
             setLoading(false);
         };
         loadProfile();
     }, []);
 
-    // Jury: завантаження оцінених/неоцінених робіт
     useEffect(() => {
         if (role !== "jury") return;
         setSubsLoading(true);
@@ -67,7 +66,6 @@ const Profile = () => {
             .finally(() => setSubsLoading(false));
     }, [role]);
 
-    // Admin: завантаження турнірів
     useEffect(() => {
         if (role !== "admin") return;
         setTournsLoading(true);
@@ -91,21 +89,27 @@ const Profile = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const updated = await updateProfile(formData);
+        if (!updated) return;
+
         setProfile(updated);
         setEditMode(false);
-        setPreview(updated.avatar ? `http://127.0.0.1:8000${updated.avatar}` : null);
+
+        const avatarAbsolute = mediaUrl(updated.avatar);
+        setPreview(avatarAbsolute);
 
         const fullName = `${updated.first_name} ${updated.last_name}`.trim();
         localStorage.setItem("fullUserName", fullName);
+
         window.dispatchEvent(new CustomEvent("profile-updated", {
             detail: {
                 fullUserName: fullName,
-                avatar: updated.avatar ? `http://127.0.0.1:8000${updated.avatar}` : null,
-            }
+                avatar: avatarAbsolute,
+            },
         }));
 
+        // +200ms щоб анімація виходу встигла відпрацювати
         setToast(true);
-        setTimeout(() => setToast(false), 2500);
+        setTimeout(() => setToast(false), 2700);
     };
 
     const handleCancel = () => {
@@ -116,7 +120,7 @@ const Profile = () => {
             email:      profile.email      || "",
             avatar:     null,
         });
-        setPreview(profile.avatar ? `http://127.0.0.1:8000${profile.avatar}` : null);
+        setPreview(mediaUrl(profile.avatar));
     };
 
     const getInitials = (first, last) => {
@@ -236,6 +240,7 @@ const Profile = () => {
                     )}
                 </div>
 
+                {/* ── Toast ── */}
                 <div className={`${styles.toast} ${toast ? styles.toastShow : ""}`}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -267,7 +272,6 @@ function JurySubmissions({ submissions, loading }) {
 
     return (
         <div>
-            {/* Статистика */}
             <div className={styles.statsRow}>
                 <div className={styles.statChip}>
                     <span className={styles.statValue}>{submissions.length}</span>
@@ -283,7 +287,6 @@ function JurySubmissions({ submissions, loading }) {
                 </div>
             </div>
 
-            {/* Фільтр */}
             <div className={styles.filterRow}>
                 {[
                     { key: "all",     label: "Всі" },
@@ -300,7 +303,6 @@ function JurySubmissions({ submissions, loading }) {
                 ))}
             </div>
 
-            {/* Список */}
             <div className={styles.submissionList}>
                 {filtered.map(sub => {
                     const isGraded = sub.my_grade != null;
@@ -339,10 +341,9 @@ function AdminTournamentsList({ tournaments, loading }) {
     return (
         <div className={styles.tournamentList}>
             {tournaments.map(t => {
-                const now   = new Date();
-                const start = t.start_date ? new Date(t.start_date) : null;
-                const regStart = t.registration_start ? new Date(t.registration_start) : null;
-                const regEnd   = t.registration_end   ? new Date(t.registration_end)   : null;
+                const now      = new Date();
+                const start    = t.start_date          ? new Date(t.start_date)          : null;
+                const regEnd   = t.registration_end    ? new Date(t.registration_end)    : null;
 
                 let status = "Активний";
                 let statusClass = styles.statusActive;
