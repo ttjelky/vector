@@ -7,7 +7,7 @@
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
 }
 
-/* ─── Cover — з відступами з усіх боків ──────────────────────────────────── */
+/* ─── Cover ───────────────────────────────────────────────────────────────── */
 
 .cover {
   margin: 10px 10px 0;
@@ -29,7 +29,7 @@
   display: block;
 }
 
-/* ─── Header — чистий білий, без зайвих карток ───────────────────────────── */
+/* ─── Header ──────────────────────────────────────────────────────────────── */
 
 .header {
   padding: 20px 28px 0;
@@ -41,6 +41,12 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  min-width: 0;
+}
+
+.headerContent > div:first-child {
+  min-width: 0;
+  flex: 1;
 }
 
 .title {
@@ -49,6 +55,14 @@
   color: #111;
   margin: 0 0 4px;
   letter-spacing: -0.022em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  max-width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .subtitle {
@@ -57,9 +71,29 @@
   margin: 0;
   line-height: 1.5;
   max-width: 520px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
-/* ─── Tab bar — underline навігація ──────────────────────────────────────── */
+/* ─── Header badges ───────────────────────────────────────────────────────── */
+
+.headerBadges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .headerBadges {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+}
+
+/* ─── Tab bar ─────────────────────────────────────────────────────────────── */
 
 .tabBar {
   display: flex;
@@ -67,7 +101,6 @@
   padding: 0 28px;
   gap: 0;
   border-bottom: 1px solid #ebebeb;
-  /* прокрутка на вузьких екранах */
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -98,13 +131,8 @@
   outline: none;
 }
 
-.tabBtn:last-child {
-  margin-right: 0;
-}
-
-.tabBtn:hover {
-  color: #444;
-}
+.tabBtn:last-child { margin-right: 0; }
+.tabBtn:hover { color: #444; }
 
 .tabBtn:focus-visible {
   color: #111;
@@ -118,7 +146,7 @@
   border-bottom-color: #111;
 }
 
-/* ─── Лічильник у вкладці (напр. кількість учасників) ────────────────────── */
+/* ─── Tab count ───────────────────────────────────────────────────────────── */
 
 .tabCount {
   display: inline-flex;
@@ -193,7 +221,7 @@
 .deleteBtn:hover  { background: #fee2e2; border-color: #f89595; }
 .deleteBtn:active { transform: scale(0.97); }
 
-/* ─── Unregistered team participant glass badge ───────────────────────────── */
+/* ─── Unregistered badge ──────────────────────────────────────────────────── */
 
 .unregisteredBadge {
   position: fixed;
@@ -251,9 +279,7 @@
   text-underline-offset: 2px;
 }
 
-.unregisteredBadgeLink:hover {
-  color: #555;
-}
+.unregisteredBadgeLink:hover { color: #555; }
 
 .unregisteredBadgeClose {
   flex-shrink: 0;

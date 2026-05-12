@@ -27,6 +27,8 @@
   max-width: 380px;
   flex-shrink: 0;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .detailsCard {
@@ -37,6 +39,8 @@
   flex: 1;
   min-width: 0;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .cardTitle {
@@ -136,6 +140,9 @@
   font-size: 14px;
   font-weight: 500;
   color: #111;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ── Form ───────────────────────────────────────────────────────── */
@@ -321,6 +328,9 @@
   border-radius: 12px;
   border: 1px solid rgba(0,0,0,0.06);
   transition: background 0.12s;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .submissionItem:hover { background: #f0f1f4; }
@@ -330,12 +340,15 @@
   flex-direction: column;
   gap: 3px;
   min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 
 .submissionTitle {
   font-size: 13px;
   font-weight: 600;
   color: #111;
+  word-break: break-all;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -344,6 +357,10 @@
 .submissionRound {
   font-size: 11px;
   color: #888;
+  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .submissionMeta {
@@ -376,6 +393,9 @@
   border-radius: 12px;
   border: 1px solid rgba(0,0,0,0.06);
   transition: background 0.12s;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .tournamentItem:hover { background: #f0f1f4; }
@@ -385,12 +405,15 @@
   flex-direction: column;
   gap: 3px;
   min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 
 .tournamentItemName {
   font-size: 13px;
   font-weight: 600;
   color: #111;
+  word-break: break-all;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -399,6 +422,10 @@
 .tournamentItemDesc {
   font-size: 11px;
   color: #888;
+  word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tournamentItemMeta {
