@@ -135,6 +135,78 @@ const BurgerButton = ({ isOpen, onClick }) => (
   </button>
 );
 
+/* ─── Animated Search ─── */
+const MobileSearch = () => {
+  const [expanded, setExpanded] = useState(false);
+  const inputRef = useRef(null);
+  const wrapRef  = useRef(null);
+
+  const expand = () => {
+    setExpanded(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const collapse = () => {
+    setExpanded(false);
+    inputRef.current?.blur();
+  };
+
+  // Клік поза — звужуємо
+  useEffect(() => {
+    if (!expanded) return;
+    const handler = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) collapse();
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [expanded]);
+
+  return (
+    <div
+      ref={wrapRef}
+      className={`${styles.search} ${expanded ? styles.searchExpanded : ''}`}
+      onClick={!expanded ? expand : undefined}
+      style={{ cursor: expanded ? 'text' : 'pointer' }}
+    >
+      <svg
+        width="15" height="15" viewBox="0 0 20 20"
+        fill="none" stroke="currentColor" strokeWidth="2"
+        style={{ opacity: 0.4, flexShrink: 0, transition: 'opacity 0.2s' }}
+      >
+        <circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/>
+      </svg>
+      <input
+        ref={inputRef}
+        type="search"
+        placeholder="Пошук..."
+        className={styles.searchInput}
+        onFocus={expand}
+        tabIndex={expanded ? 0 : -1}
+        style={{ pointerEvents: expanded ? 'auto' : 'none' }}
+      />
+      {expanded && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); collapse(); }}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: '0 2px', display: 'flex', alignItems: 'center',
+            flexShrink: 0, color: '#aaa', fontSize: 18, lineHeight: 1,
+            transition: 'color 0.15s',
+          }}
+          aria-label="Закрити пошук"
+        >
+          ×
+        </button>
+      )}
+    </div>
+  );
+};
+
 /* ─── Main NavBar ─── */
 const NavBar = ({ children }) => {
   const { openTabs, closeTab, removeTabById } = useTabs();
@@ -178,13 +250,12 @@ const NavBar = ({ children }) => {
     return () => { window.removeEventListener("settings-updated", applyWarm); window.removeEventListener("storage", applyWarm); };
   }, []);
 
-  // Роль — спочатку з пам'яті (безпечно), fallback на localStorage для UI
   const role     = getUserRole() ?? localStorage.getItem("userRole") ?? "participant";
   const roleTabs = getTabsForRole(role);
 
   const initialTabIds = useRef(new Set(openTabs.map((t) => String(t.id))));
 
-  // ── Початкове завантаження профілю ───────────────────────────────────────
+  // Профіль
   useEffect(() => {
     const storedName = localStorage.getItem("fullUserName");
     if (storedName) setFullUserName(storedName.trim());
@@ -205,14 +276,13 @@ const NavBar = ({ children }) => {
   useEffect(() => {
     const handler = (e) => {
       if (e.detail?.fullUserName) setFullUserName(e.detail.fullUserName);
-      // avatar вже абсолютний URL (підготовлений у Profile.jsx через mediaUrl)
       if (e.detail?.avatar !== undefined) setAvatar(e.detail.avatar);
     };
     window.addEventListener("profile-updated", handler);
     return () => window.removeEventListener("profile-updated", handler);
   }, []);
 
-  // Mobile sidebar scroll lock
+  // Mobile scroll lock
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -262,35 +332,24 @@ const NavBar = ({ children }) => {
 
   const handleLogout = async (e) => {
     e.preventDefault();
-    try {
-      // Інвалідуємо refresh token на бекенді і видаляємо httpOnly cookie
-      await logoutUser();
-    } catch {}
-
-    // ── Повне очищення стану ──────────────────────────────────────────────
-    clearAccessToken();                          // access token + роль з пам'яті
-
-    // Актуальні ключі
+    try { await logoutUser(); } catch {}
+    clearAccessToken();
     localStorage.removeItem("userRole");
     localStorage.removeItem("fullUserName");
-    // Legacy-ключі старого коду
     localStorage.removeItem("role");
     localStorage.removeItem("userName");
     localStorage.removeItem("userId");
-
-    // Скидаємо локальний UI-стан навбару
     setFullUserName("");
     setAvatar(null);
     setNotifs([]);
     setBellOpen(false);
-
     window.dispatchEvent(new Event("auth-changed"));
     navigate("/");
   };
 
   const hasUnread = notifs.some((n) => !n.is_read);
 
-  // ── Desktop nav content ────────────────────────────────────────────────────
+  // ── Desktop nav content ──────────────────────────────────────────────────
   const desktopNavContent = () => (
     <>
       <nav className={styles.primaryNav}>
@@ -302,9 +361,7 @@ const NavBar = ({ children }) => {
                 <div className={styles.openedList}>
                   {openTabs.map((tab) => (
                     <TournamentTab
-                      key={tab.id}
-                      tab={tab}
-                      onClose={closeTab}
+                      key={tab.id} tab={tab} onClose={closeTab}
                       animate={!initialTabIds.current.has(String(tab.id))}
                     />
                   ))}
@@ -325,10 +382,9 @@ const NavBar = ({ children }) => {
     </>
   );
 
-  // ── Mobile nav content — uses inline styles to bypass CSS Modules scoping ──
+  // ── Mobile nav content ──────────────────────────────────────────────────
   const mobileNavContent = () => (
     <>
-      {/* МЕНЮ */}
       <div style={{ marginBottom: 20 }}>
         <p style={{
           fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
@@ -342,9 +398,7 @@ const NavBar = ({ children }) => {
                 <div className={styles.openedList}>
                   {openTabs.map((tab) => (
                     <TournamentTab
-                      key={tab.id}
-                      tab={tab}
-                      onClose={closeTab}
+                      key={tab.id} tab={tab} onClose={closeTab}
                       animate={!initialTabIds.current.has(String(tab.id))}
                       onNavClick={handleNavClick}
                     />
@@ -355,8 +409,6 @@ const NavBar = ({ children }) => {
           ))}
         </ul>
       </div>
-
-      {/* ІНШЕ */}
       <div>
         <p style={{
           fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
@@ -383,12 +435,8 @@ const NavBar = ({ children }) => {
           <img src={Logo} alt="Vector" className={styles.logo} />
         </div>
 
-        <div className={styles.search}>
-          <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" style={{ opacity: 0.4, flexShrink: 0 }}>
-            <circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/>
-          </svg>
-          <input type="search" placeholder="Пошук..." className={styles.searchInput} />
-        </div>
+        {/* Анімований пошук — на мобілі розширюється, на десктопі звичайний */}
+        <MobileSearch />
 
         <div className={styles.navbarUserActions}>
           <span className={styles.userName}>{fullUserName}</span>
@@ -443,18 +491,12 @@ const NavBar = ({ children }) => {
         {/* ── Mobile sidebar drawer ── */}
         {mobileOpen && (
           <aside className={`${styles.mobileSidebar} ${mobileClosing ? styles.mobileSidebarClosing : styles.mobileSidebarOpen}`}>
-
-            {/* Logo header */}
             <div className={styles.mobileSidebarHeader}>
               <img src={Logo} alt="Vector" className={styles.mobileSidebarLogo} />
             </div>
-
-            {/* Nav body — inline styles bypass CSS Modules scoping */}
             <div className={styles.mobileSidebarBody}>
               {mobileNavContent()}
             </div>
-
-            {/* Logout footer */}
             <div className={styles.mobileSidebarFooter}>
               {showLogout && (
                 <div className={styles.logoutSection}>
@@ -465,7 +507,6 @@ const NavBar = ({ children }) => {
                 </div>
               )}
             </div>
-
           </aside>
         )}
 
@@ -473,7 +514,6 @@ const NavBar = ({ children }) => {
         <main className={styles.contentArea}>
           {children}
         </main>
-
       </div>
 
       {compose && <ComposeModal onClose={() => setCompose(false)} onSent={fetchNotifs} />}

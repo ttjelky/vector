@@ -221,6 +221,7 @@
 
 /* ═══════════════════════════════════════════
    COMPOSE OVERLAY
+   position: fixed + portal → завжди поверх всього
 ═══════════════════════════════════════════ */
 .composeOverlay {
   position: fixed;
@@ -232,8 +233,9 @@
   justify-content: center;
   align-items: center;
   padding: 20px;
-  z-index: 9999;
+  z-index: 99999;           /* вище за будь-який інший z-index у проєкті */
   animation: overlayIn 0.32s ease forwards;
+  overscroll-behavior: contain;
 }
 .composeOverlayOut { animation: overlayOut 0.32s ease forwards !important; }
 
@@ -241,7 +243,7 @@
 @keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
 
 /* ═══════════════════════════════════════════
-   COMPOSE MODAL
+   COMPOSE MODAL — десктоп
 ═══════════════════════════════════════════ */
 .composeModal {
   background: #ffffff;
@@ -249,6 +251,7 @@
   border: 1px solid lightgray;
   width: min(560px, 96vw);
   max-height: 90vh;
+  max-height: 90dvh;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -266,6 +269,7 @@
   to   { opacity: 0; transform: scale(0.94) translateY(12px); filter: blur(1px); }
 }
 
+/* ── Header ── */
 .composeHeader {
   display: flex;
   align-items: center;
@@ -321,19 +325,29 @@
 .composeClose:hover  { background: #ececec; transform: scale(1.08); }
 .composeClose:active { transform: scale(0.94); }
 
+/* ── Body ── */
 .composeBody {
   flex: 1;
   padding: 72px 28px 88px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
 }
 .composeBody::-webkit-scrollbar { display: none; }
 
-.composeField { display: flex; flex-direction: column; gap: 6px; }
+/* ── Fields ── */
+.composeField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.composeField:last-child { margin-bottom: 0; }
 
 .composeField label {
   font-size: 12.5px;
@@ -498,6 +512,7 @@
   gap: 5px;
 }
 
+/* ── Footer ── */
 .composeFooter {
   display: flex;
   align-items: center;
@@ -517,6 +532,7 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* pointer-events: auto тут — кнопки клікабельні */
 .footerActions {
   display: flex;
   align-items: center;
@@ -554,7 +570,6 @@
   background: #111;
   color: #fff;
   font-family: inherit;
-  margin-left: 10px;
   transition: background 0.13s, transform 0.15s;
 }
 .sendBtn:hover:not(:disabled)  { background: #222; transform: translateY(-1px); }
@@ -563,37 +578,33 @@
 
 /* ═══════════════════════════════════════════
    MOBILE ≤ 768px
+   Dropdown — через портал, тому position:fixed гарантовано працює
 ═══════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .composeOverlay { padding: 0; align-items: flex-end; }
-  .composeModal {
+
+  /* ── Dropdown bottom sheet ── */
+  .dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
     width: 100%;
     max-width: 100%;
-    max-height: 92vh;
-    border-radius: 28px 28px 0 0;
-  }
-  .linkRow { flex-direction: column; }
-  .addBtn  { width: 100%; }
-
-  /*
-   * ГОЛОВНИЙ ФІКС:
-   * position:absolute right:0 від bellWrap не працює на мобілі —
-   * bellWrap не в правому куті екрану.
-   * Переводимо на position:fixed знизу.
-   */
-  .dropdown {
-    position: fixed !important;
-    top: auto !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
     border-radius: 20px 20px 0 0;
-    max-height: 70vh;
+    max-height: 70dvh;
     overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     box-shadow: 0 -4px 24px rgba(0,0,0,0.10);
+    animation: slideUp 0.28s cubic-bezier(.22,.68,0,1.2) both;
+    z-index: 9000;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   .dropBody {
@@ -601,10 +612,94 @@
     max-height: none;
   }
 
+  .dropHeader {
+    padding: 16px 16px 12px;
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 2;
+  }
+
+  /* ── Compose overlay: bottom sheet на мобілці ── */
+  .composeOverlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  /* ── Compose modal: bottom sheet ── */
+  .composeModal {
+    width: 100%;
+    max-width: 100%;
+    /* dvh щоб враховував keyboard/safe-area */
+    max-height: 90dvh;
+    border-radius: 24px 24px 0 0;
+    border-bottom: none;
+    /* slide-up замість scale */
+    animation: sheetIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes sheetIn {
+    from { opacity: 0; transform: translateY(100%); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .composeModalOut {
+    animation: sheetOut 0.28s cubic-bezier(0.4, 0, 1, 1) forwards !important;
+  }
+
+  @keyframes sheetOut {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(100%); }
+  }
+
+  /* drag indicator зверху */
+  .composeModal::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(0,0,0,0.12);
+    z-index: 20;
+  }
+
+  .composeHeader {
+    padding: 24px 20px 16px;
+  }
+
+  .composeBody {
+    padding: 72px 16px 96px;
+  }
+
+  /* Safe-area для телефонів з чубчиком */
+  .composeFooter {
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  }
+
+  /* Кнопки на мобілці — більші touch targets */
+  .cancelBtn {
+    padding: 10px 20px;
+    font-size: 15px;
+  }
+  .sendBtn {
+    padding: 10px 22px;
+    font-size: 15px;
+  }
+
+  /* linkRow вертикально */
+  .linkRow { flex-direction: column; }
+  .addBtn  { width: 100%; }
+
+  /* Notification items */
   .notifItem {
     overflow: hidden;
     max-width: 100%;
     box-sizing: border-box;
+    padding: 13px 16px;
   }
 
   .notifText {
@@ -622,7 +717,31 @@
   }
 }
 
+/* ── Mobile backdrop (портал) ── */
+.mobileBackdrop {
+  display: none;
+}
+@media (max-width: 768px) {
+  .mobileBackdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 8999;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+}
+
+/* ── iPhone SE (375px) ── */
 @media (max-width: 390px) {
-  .composeBody   { padding: 68px 16px 84px; }
-  .composeHeader { padding: 16px; }
+  .composeBody   { padding: 68px 14px 88px; }
+  .composeHeader { padding: 22px 16px 14px; }
+  .composeTitle  { font-size: 15px; padding: 5px 14px; }
+
+  .composeField input,
+  .composeField textarea,
+  .recipientWrap input {
+    font-size: 16px; /* запобігає zoom на iOS при фокусі */
+  }
 }

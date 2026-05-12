@@ -1,8 +1,24 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import nStyles from './styles/Notifications.module.css';
 
 const API = 'http://127.0.0.1:8000/api';
 const getToken = () => localStorage.getItem('accessToken');
+
+// ── Body scroll lock ───────────────────────────────────────────────────────────
+const useScrollLock = (active) => {
+  useEffect(() => {
+    if (!active) return;
+    const prev            = document.body.style.overflow;
+    const prevTouch       = document.body.style.touchAction;
+    document.body.style.overflow    = 'hidden';
+    document.body.style.touchAction = 'none';
+    return () => {
+      document.body.style.overflow    = prev;
+      document.body.style.touchAction = prevTouch;
+    };
+  }, [active]);
+};
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 const Ico = ({ children, size = 16 }) => (
@@ -86,8 +102,8 @@ const RecipientInput = ({ value, onChange, onSelect }) => {
   );
 };
 
-// ── Compose Modal ─────────────────────────────────────────────────────────────
-export const ComposeModal = ({ onClose, onSent }) => {
+// ── Compose Modal Inner (реальний UI) ─────────────────────────────────────────
+const ComposeModalInner = ({ onClose, onSent }) => {
   const [toQuery, setToQuery]       = useState('');
   const [toUsername, setToUsername] = useState('');
   const [tournament, setTournament] = useState('');
@@ -102,9 +118,17 @@ export const ComposeModal = ({ onClose, onSent }) => {
   const [closing, setClosing]       = useState(false);
   const fileRef = useRef();
 
+  // Лочимо скрол завжди поки модалка відкрита
+  useScrollLock(true);
+
   const handleClose = () => {
     setClosing(true);
     setTimeout(() => onClose(), 320);
+  };
+
+  // Закрити по кліку на overlay
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) handleClose();
   };
 
   const addLink = () => {
@@ -152,8 +176,12 @@ export const ComposeModal = ({ onClose, onSent }) => {
   };
 
   return (
-    <div className={`${nStyles.composeOverlay} ${closing ? nStyles.composeOverlayOut : ''}`}>
+    <div
+      className={`${nStyles.composeOverlay} ${closing ? nStyles.composeOverlayOut : ''}`}
+      onClick={handleOverlayClick}
+    >
       <div className={`${nStyles.composeModal} ${closing ? nStyles.composeModalOut : ''}`}>
+
         <div className={nStyles.composeHeader}>
           <span className={nStyles.composeTitle}>Нове повідомлення</span>
           <button className={nStyles.composeClose} onClick={handleClose}><CloseIco /></button>
@@ -215,18 +243,28 @@ export const ComposeModal = ({ onClose, onSent }) => {
         </div>
 
         <div className={nStyles.composeFooter}>
-          <button className={nStyles.cancelBtn} onClick={handleClose}>Скасувати</button>
-          <button className={nStyles.sendBtn} onClick={handleSend} disabled={sending}>
-            <SendIco /> {sending ? 'Надсилається...' : 'Надіслати'}
-          </button>
+          <div className={nStyles.footerActions}>
+            <button className={nStyles.cancelBtn} onClick={handleClose}>Скасувати</button>
+            <button className={nStyles.sendBtn} onClick={handleSend} disabled={sending}>
+              <SendIco /> {sending ? 'Надсилається...' : 'Надіслати'}
+            </button>
+          </div>
         </div>
+
       </div>
     </div>
   );
 };
 
-// ── Notification Dropdown ─────────────────────────────────────────────────────
-export const NotificationDropdown = ({ notifs, loading, onCompose, onMarkAllRead, onMarkOne }) => (
+// ── ComposeModal — ЗАВЖДИ через портал у document.body ────────────────────────
+// Незалежно від того де рендериться батьківський компонент —
+// модалка завжди виходить на найвищий рівень DOM,
+// тому жоден батьківський overflow/transform/will-change її не ламає.
+export const ComposeModal = (props) =>
+  ReactDOM.createPortal(<ComposeModalInner {...props} />, document.body);
+
+// ── Dropdown content (shared) ─────────────────────────────────────────────────
+const DropdownContent = ({ notifs, loading, onCompose, onMarkAllRead, onMarkOne }) => (
   <div className={nStyles.dropdown}>
     <div className={nStyles.dropHeader}>
       <span className={nStyles.dropTitle}>Сповіщення</span>
@@ -281,3 +319,29 @@ export const NotificationDropdown = ({ notifs, loading, onCompose, onMarkAllRead
     </div>
   </div>
 );
+
+// ── Notification Dropdown ─────────────────────────────────────────────────────
+export const NotificationDropdown = (props) => {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  // Лочимо скрол поки дропдаун відкритий на мобілці
+  useScrollLock(isMobile);
+
+  if (isMobile) {
+    return ReactDOM.createPortal(
+      <>
+        <div className={nStyles.mobileBackdrop} onClick={props.onClose} />
+        <DropdownContent {...props} />
+      </>,
+      document.body
+    );
+  }
+
+  return <DropdownContent {...props} />;
+};
