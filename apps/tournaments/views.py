@@ -441,7 +441,12 @@ class TournamentMemberListView(generics.ListAPIView):
     def get_queryset(self):
         return TournamentMember.objects.filter(
             tournament_id=self.kwargs['tournament_pk']
-        ).select_related('user')
+        ).select_related('user', 'user__profile')
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['request'] = self.request
+        return ctx
 
 
 class TournamentMemberDeleteView(generics.DestroyAPIView):
