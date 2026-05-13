@@ -146,6 +146,7 @@
   letter-spacing: -0.04em;
   line-height: 1.15;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  word-break: break-all;
 }
 
 .drawerSubtitle {

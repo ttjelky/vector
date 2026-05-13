@@ -9,8 +9,8 @@ const getToken = () => localStorage.getItem('accessToken');
 const useScrollLock = (active) => {
   useEffect(() => {
     if (!active) return;
-    const prev            = document.body.style.overflow;
-    const prevTouch       = document.body.style.touchAction;
+    const prev      = document.body.style.overflow;
+    const prevTouch = document.body.style.touchAction;
     document.body.style.overflow    = 'hidden';
     document.body.style.touchAction = 'none';
     return () => {
@@ -102,7 +102,7 @@ const RecipientInput = ({ value, onChange, onSelect }) => {
   );
 };
 
-// ── Compose Modal Inner (реальний UI) ─────────────────────────────────────────
+// ── Compose Modal Inner ────────────────────────────────────────────────────────
 const ComposeModalInner = ({ onClose, onSent }) => {
   const [toQuery, setToQuery]       = useState('');
   const [toUsername, setToUsername] = useState('');
@@ -118,7 +118,6 @@ const ComposeModalInner = ({ onClose, onSent }) => {
   const [closing, setClosing]       = useState(false);
   const fileRef = useRef();
 
-  // Лочимо скрол завжди поки модалка відкрита
   useScrollLock(true);
 
   const handleClose = () => {
@@ -126,7 +125,6 @@ const ComposeModalInner = ({ onClose, onSent }) => {
     setTimeout(() => onClose(), 320);
   };
 
-  // Закрити по кліку на overlay
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) handleClose();
   };
@@ -256,69 +254,83 @@ const ComposeModalInner = ({ onClose, onSent }) => {
   );
 };
 
-// ── ComposeModal — ЗАВЖДИ через портал у document.body ────────────────────────
-// Незалежно від того де рендериться батьківський компонент —
-// модалка завжди виходить на найвищий рівень DOM,
-// тому жоден батьківський overflow/transform/will-change її не ламає.
+// ── ComposeModal — завжди через портал у document.body ────────────────────────
 export const ComposeModal = (props) =>
   ReactDOM.createPortal(<ComposeModalInner {...props} />, document.body);
 
-// ── Dropdown content (shared) ─────────────────────────────────────────────────
-const DropdownContent = ({ notifs, loading, onCompose, onMarkAllRead, onMarkOne }) => (
-  <div className={nStyles.dropdown}>
-    <div className={nStyles.dropHeader}>
-      <span className={nStyles.dropTitle}>Сповіщення</span>
-      <div style={{ display: 'flex', gap: 8 }}>
-        {notifs.some(n => !n.is_read) && (
-          <button className={nStyles.markReadBtn} onClick={onMarkAllRead}>Прочитати всі</button>
+// ── Dropdown content ──────────────────────────────────────────────────────────
+const DropdownContent = ({ notifs, loading, onCompose, onMarkAllRead, onMarkOne }) => {
+  // ── FIX: onPointerDown спрацьовує миттєво при торканні,
+  // до того як backdrop встигає отримати будь-яку подію.
+  // preventDefault() блокує наступний синтетичний click.
+  // stopPropagation() не дає події дійти до backdrop.
+  const handleComposePointerDown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onCompose();
+  };
+
+  return (
+    <div className={nStyles.dropdown}>
+      <div className={nStyles.dropHeader}>
+        <span className={nStyles.dropTitle}>Сповіщення</span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {notifs.some(n => !n.is_read) && (
+            <button className={nStyles.markReadBtn} onClick={onMarkAllRead}>Прочитати всі</button>
+          )}
+          <button
+            className={nStyles.composeBtn}
+            onPointerDown={handleComposePointerDown}
+          >
+            ✉ Написати
+          </button>
+        </div>
+      </div>
+      <div className={nStyles.dropBody}>
+        {loading ? (
+          <div className={nStyles.empty}><p>Завантаження...</p></div>
+        ) : notifs.length === 0 ? (
+          <div className={nStyles.empty}>
+            <BellEmptyIco />
+            <p>Немає нових сповіщень</p>
+          </div>
+        ) : (
+          notifs.map(n => (
+            <div
+              key={n.id}
+              className={`${nStyles.notifItem} ${n.is_read ? '' : nStyles.unread}`}
+              onClick={() => !n.is_read && onMarkOne(n.id)}
+            >
+              {n.sender_full && <span className={nStyles.notifSender}>від {n.sender_full || n.sender}</span>}
+              {n.subject     && <p className={nStyles.notifSubject}>{n.subject}</p>}
+              <p className={nStyles.notifText}>{n.text}</p>
+              {n.tournament  && <span className={nStyles.notifTournament}>🏆 {n.tournament}</span>}
+              {n.links?.length > 0 && (
+                <div className={nStyles.notifLinks}>
+                  {n.links.map((l, i) => (
+                    <a key={i} href={l.url} target="_blank" rel="noreferrer" className={nStyles.notifLink}>
+                      🔗 {l.label || l.url}
+                    </a>
+                  ))}
+                </div>
+              )}
+              {n.attachments?.length > 0 && (
+                <div className={nStyles.notifLinks}>
+                  {n.attachments.map((a, i) => (
+                    <a key={i} href={`http://127.0.0.1:8000${a.url}`} target="_blank" rel="noreferrer" className={nStyles.notifLink}>
+                      📎 {a.name}
+                    </a>
+                  ))}
+                </div>
+              )}
+              <span className={nStyles.notifTime}>{n.created_at}</span>
+            </div>
+          ))
         )}
-        <button className={nStyles.composeBtn} onClick={onCompose}>✉ Написати</button>
       </div>
     </div>
-    <div className={nStyles.dropBody}>
-      {loading ? (
-        <div className={nStyles.empty}><p>Завантаження...</p></div>
-      ) : notifs.length === 0 ? (
-        <div className={nStyles.empty}>
-          <BellEmptyIco />
-          <p>Немає нових сповіщень</p>
-        </div>
-      ) : (
-        notifs.map(n => (
-          <div
-            key={n.id}
-            className={`${nStyles.notifItem} ${n.is_read ? '' : nStyles.unread}`}
-            onClick={() => !n.is_read && onMarkOne(n.id)}
-          >
-            {n.sender_full && <span className={nStyles.notifSender}>від {n.sender_full || n.sender}</span>}
-            {n.subject     && <p className={nStyles.notifSubject}>{n.subject}</p>}
-            <p className={nStyles.notifText}>{n.text}</p>
-            {n.tournament  && <span className={nStyles.notifTournament}>🏆 {n.tournament}</span>}
-            {n.links?.length > 0 && (
-              <div className={nStyles.notifLinks}>
-                {n.links.map((l, i) => (
-                  <a key={i} href={l.url} target="_blank" rel="noreferrer" className={nStyles.notifLink}>
-                    🔗 {l.label || l.url}
-                  </a>
-                ))}
-              </div>
-            )}
-            {n.attachments?.length > 0 && (
-              <div className={nStyles.notifLinks}>
-                {n.attachments.map((a, i) => (
-                  <a key={i} href={`http://127.0.0.1:8000${a.url}`} target="_blank" rel="noreferrer" className={nStyles.notifLink}>
-                    📎 {a.name}
-                  </a>
-                ))}
-              </div>
-            )}
-            <span className={nStyles.notifTime}>{n.created_at}</span>
-          </div>
-        ))
-      )}
-    </div>
-  </div>
-);
+  );
+};
 
 // ── Notification Dropdown ─────────────────────────────────────────────────────
 export const NotificationDropdown = (props) => {
@@ -330,13 +342,16 @@ export const NotificationDropdown = (props) => {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  // Лочимо скрол поки дропдаун відкритий на мобілці
   useScrollLock(isMobile);
 
   if (isMobile) {
     return ReactDOM.createPortal(
       <>
-        <div className={nStyles.mobileBackdrop} onClick={props.onClose} />
+        {/* backdrop слухає onPointerDown — але кнопка зупиняє propagation раніше */}
+        <div
+          className={nStyles.mobileBackdrop}
+          onPointerDown={props.onClose}
+        />
         <DropdownContent {...props} />
       </>,
       document.body

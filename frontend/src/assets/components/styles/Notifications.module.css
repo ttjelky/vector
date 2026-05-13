@@ -221,7 +221,6 @@
 
 /* ═══════════════════════════════════════════
    COMPOSE OVERLAY
-   position: fixed + portal → завжди поверх всього
 ═══════════════════════════════════════════ */
 .composeOverlay {
   position: fixed;
@@ -233,7 +232,7 @@
   justify-content: center;
   align-items: center;
   padding: 20px;
-  z-index: 99999;           /* вище за будь-який інший z-index у проєкті */
+  z-index: 99999;
   animation: overlayIn 0.32s ease forwards;
   overscroll-behavior: contain;
 }
@@ -532,7 +531,6 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* pointer-events: auto тут — кнопки клікабельні */
 .footerActions {
   display: flex;
   align-items: center;
@@ -578,7 +576,6 @@
 
 /* ═══════════════════════════════════════════
    MOBILE ≤ 768px
-   Dropdown — через портал, тому position:fixed гарантовано працює
 ═══════════════════════════════════════════ */
 @media (max-width: 768px) {
 
@@ -630,11 +627,9 @@
   .composeModal {
     width: 100%;
     max-width: 100%;
-    /* dvh щоб враховував keyboard/safe-area */
     max-height: 90dvh;
     border-radius: 24px 24px 0 0;
     border-bottom: none;
-    /* slide-up замість scale */
     animation: sheetIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
@@ -669,6 +664,12 @@
 
   .composeHeader {
     padding: 24px 20px 16px;
+  }
+
+  /* ── FIX: ховаємо хрестик на мобілці ── */
+  /* закрити можна тапом на overlay або свайпом вниз */
+  .composeClose {
+    display: none;
   }
 
   .composeBody {
