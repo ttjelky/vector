@@ -25,7 +25,7 @@
 
 Vector goes beyond typical programming contest platforms. Any subject, any discipline — organizers can configure tournaments with custom rounds, tasks, jury members, and certificates, in both **individual and team formats**.
 
-Built from scratch over **3 months** as a solo project: custom REST API, React SPA with role-based access, real-time search, and a fully responsive UI.
+Built from scratch over **3 months** as a team project for a SFLU Tournament: custom REST API, React SPA with role-based access, real-time search, and a fully responsive UI.
 
 ---
 
@@ -84,11 +84,7 @@ vector/
 ├── apps/                        # Django apps
 │   ├── users/                   # Auth, profiles
 │   ├── tournaments/             # Tournament logic
-│   ├── teams/                   # Teams
-│   ├── submissions/             # Task submissions
 │   ├── notifications/           # Notifications
-│   ├── certificates/            # Certificates
-│   └── jury/                    # Jury
 ├── config/                      # Django settings
 ├── frontend/                    # React SPA
 │   └── src/
@@ -202,6 +198,6 @@ POST   /api/notifications/mark-read/  Mark notifications as read
 
 ---
 
-## Author
+## Authors
 
-Built by **Oleksii Bezklynskyi** as a solo project over 3 months.
+Built by **Oleksii Bezklynskyi**, **Serhii Deineha** and **Artem Tsvelyh** as a team project over 3 months.
