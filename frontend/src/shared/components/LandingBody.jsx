@@ -10,11 +10,11 @@ import HeroImage from "@static/HeroImage.png";
 import HeroImage2 from "@static/HeroImage2.png";
 import HelloS from "@static/stickers/HelloS.svg";
 import YouCanS from "@static/stickers/YouCanS.svg";
-import BlackButton from "./blackbutton";
-import WhiteButton from "./WhiteButton";
+import { BlackButton } from "./blackbutton";
+import { WhiteButton } from "./WhiteButton";
 import iPad from "@static/Ipad.png";
-import CopyPopup from "./CopyPopup";
-import joinStyles from "@shared/styles/JoinTournamentPage.module.css";
+import { CopyPopup } from "./CopyPopup";
+import joinStyles from "@features/tournaments/styles/JoinTournamentPage.module.css";
 
 function extractToken(input) {
     const trimmed = input.trim();
@@ -224,4 +224,4 @@ const LandingBody = () => {
     );
 }
 
-export default LandingBody;
+export { LandingBody };

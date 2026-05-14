@@ -1,8 +1,8 @@
 import React from "react";
 import { useState, useRef, useEffect } from "react";
-import NavBar from "@shared/components/NavBar";
+import { NavBar } from "@shared/components/NavBar";
 import styles from "@shared/styles/Help.module.css"
-import CopyPopup from "@shared/components/CopyPopup";
+import { CopyPopup } from "@shared/components/CopyPopup";
 import { X } from "lucide-react";
 
 function FAQItem({ item, isOpen, onToggle }) {
@@ -100,4 +100,4 @@ const Help = () => {
     );
 };
 
-export default Help;
+export { Help };

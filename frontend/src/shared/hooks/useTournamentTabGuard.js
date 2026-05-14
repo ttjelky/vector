@@ -51,4 +51,4 @@ const useTournamentTabGuard = (
   }, [isDeleted, isKicked, tournamentId, removeTabById, navigate, redirectTo]);
 };
 
-export default useTournamentTabGuard;
+export { useTournamentTabGuard };

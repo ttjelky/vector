@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import logo from "@static/VectorLogo.svg";
 import styles from "@shared/styles/landingNavBar.module.css";
-import BlackButton from "./blackbutton";
-import WhiteButton from "./WhiteButton";
+import { BlackButton } from "./blackbutton";
+import { WhiteButton } from "./WhiteButton";
 import { useNavigate } from "react-router-dom";
-import Login from "@pages/Login";
-import Register from "@pages/Register";
-import Forgot from "@pages/Forgot";
+import { Login } from "@features/auth";
+import { Register } from "@features/auth";
+import { Forgot } from "@features/auth";
 
 const LandingNavBar = () => {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -136,4 +136,4 @@ const LandingNavBar = () => {
     );
 };
 
-export default LandingNavBar;
+export { LandingNavBar };

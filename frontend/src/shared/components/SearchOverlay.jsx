@@ -2,8 +2,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTabs } from "@shared/contexts/TabsContext";
 import { useSearch } from "@shared/contexts/SearchContext";
-import { computeStatus } from "./tournamentHelpers";
-import { STOCK_IMAGES, getDescriptionPreview, StatusBadge } from "./TournamentCard";
+import { computeStatus, STOCK_IMAGES, getDescriptionPreview, StatusBadge } from "@features/tournaments";
 import styles from "@shared/styles/SearchOverlay.module.css";
 
 // ─── Підсвічування збігу в тексті ────────────────────────────────────────────
@@ -79,7 +78,7 @@ function SearchCard({ tournament, onClick, query }) {
 }
 
 // ─── SearchOverlay ────────────────────────────────────────────────────────────
-export default function SearchOverlay({ results, loading, onClose }) {
+export function SearchOverlay({ results, loading, onClose }) {
   const navigate        = useNavigate();
   const { addTab }      = useTabs();
   const { clearSearch, searchQuery } = useSearch();

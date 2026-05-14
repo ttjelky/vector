@@ -9,4 +9,4 @@ function BlackButton({text, onClick}) {
     )
 }
 
-export default BlackButton
+export { BlackButton };

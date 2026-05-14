@@ -20,8 +20,8 @@ import NewsIcon        from "@static/icons/News.svg?react";
 import { ComposeModal, NotificationDropdown } from './Notifications';
 import { mediaUrl, getAccessToken, getUserRole, clearAccessToken, logoutUser } from '@api';
 import { useSearch } from '@shared/contexts/SearchContext';
-import SearchOverlay from './SearchOverlay';
-import { ConfirmDeleteModal } from './TournamentShared';
+import { SearchOverlay } from './SearchOverlay';
+import { ConfirmDeleteModal } from "@features/tournaments";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:8000/api';
 const getToken = () => getAccessToken();
@@ -139,7 +139,7 @@ const BurgerButton = ({ isOpen, onClick }) => (
 );
 
 /* ─── Animated Search ─── */
-const MobileSearch = () => {
+const MobileSearch = ({ onSearch }) => {
   const [expanded, setExpanded] = useState(false);
   const inputRef = useRef(null);
   const wrapRef  = useRef(null);
@@ -152,6 +152,7 @@ const MobileSearch = () => {
   const collapse = () => {
     setExpanded(false);
     inputRef.current?.blur();
+    onSearch("");
   };
 
   // Клік поза — звужуємо
@@ -187,6 +188,7 @@ const MobileSearch = () => {
         type="search"
         placeholder="Пошук..."
         className={styles.searchInput}
+        onChange={(e) => onSearch(e.target.value)}
         onFocus={expand}
         tabIndex={expanded ? 0 : -1}
         style={{ pointerEvents: expanded ? 'auto' : 'none' }}
@@ -243,7 +245,6 @@ const NavBar = ({ children }) => {
     clearTimeout(searchDebounce.current);
     searchDebounce.current = setTimeout(async () => {
       try {
-        // Спочатку пробуємо пошук через API (?search=)
         const res = await fetch(
           `${API_BASE}/tournaments/?search=${encodeURIComponent(q)}`,
           { headers: { Authorization: `Bearer ${getToken()}` } }
@@ -252,17 +253,11 @@ const NavBar = ({ children }) => {
           const data = await res.json();
           const all = Array.isArray(data) ? data : (data.results ?? []);
 
-          // Якщо API повернув результати — перевіряємо чи він справді фільтрує.
-          // Якщо всі результати не відповідають запиту — фільтруємо самостійно на клієнті.
           const lower = q.toLowerCase();
           const filtered = all.filter(t =>
             t.name?.toLowerCase().includes(lower)
           );
 
-          // Якщо після клієнтського фільтру є результати — показуємо їх.
-          // Якщо filtered порожній, але all не порожній — API не фільтрує,
-          // тому показуємо filtered (порожній список "не знайдено").
-          // Якщо all порожній — API сам вже відфільтрував правильно.
           setSearchResults(all.length === 0 ? [] : filtered);
         }
       } catch {
@@ -284,6 +279,7 @@ const NavBar = ({ children }) => {
     setOverlayOpen(false);
     clearSearch();
   }, [clearSearch]);
+
   const [fullUserName, setFullUserName] = useState('');
   const [avatar, setAvatar]             = useState(null);
 
@@ -416,10 +412,7 @@ const NavBar = ({ children }) => {
       await logoutUser();
     } catch {}
 
-    // ── Повне очищення стану ──────────────────────────────────────────────
-    clearAccessToken();                          // access token + роль з пам'яті
-
-    // Актуальні ключі
+    clearAccessToken();
     localStorage.removeItem("userRole");
     localStorage.removeItem("fullUserName");
     localStorage.removeItem("role");
@@ -521,8 +514,7 @@ const NavBar = ({ children }) => {
           <img src={Logo} alt="Vector" className={styles.logo} />
         </div>
 
-        {/* Анімований пошук — на мобілі розширюється, на десктопі звичайний */}
-        <MobileSearch />
+        <MobileSearch onSearch={setSearchQuery} />
 
         {overlayOpen && (
           <SearchOverlay
@@ -627,4 +619,4 @@ const NavBar = ({ children }) => {
   );
 };
 
-export default NavBar;
+export { NavBar };

@@ -571,6 +571,29 @@ class CertificateDetailView(APIView):
         return Response(status=204)
 
 
+class CertificateDownloadView(APIView):
+    """GET /tournaments/<tournament_pk>/certificates/<cert_id>/download/
+    Повертає PDF-файл сертифіката як вкладення (attachment).
+    Доступно власнику сертифіката або адміну турніру.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, tournament_pk, cert_id):
+        try:
+            cert = Certificate.objects.get(pk=cert_id, tournament_id=tournament_pk)
+        except Certificate.DoesNotExist:
+            return Response({'detail': 'Сертифікат не знайдено.'}, status=404)
+        if not _is_admin(request.user, tournament_pk) and cert.recipient != request.user:
+            return Response({'detail': 'Доступ заборонено.'}, status=403)
+        if not cert.pdf_file:
+            return Response({'detail': 'PDF ще не згенеровано.'}, status=404)
+        response = FileResponse(cert.pdf_file.open('rb'), content_type='application/pdf')
+        response['Content-Disposition'] = (
+            f'attachment; filename="certificate_{cert.recipient.username}_{cert.cert_type}.pdf"'
+        )
+        return response
+
+
 class MyCertificatesView(APIView):
     permission_classes = [IsAuthenticated]
 

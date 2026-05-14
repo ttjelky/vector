@@ -39,7 +39,7 @@ from .api.views.certificate import (
     CertificateListView,
     CertificateGenerateView,
     CertificateDetailView,
-    CertificateDownloadView,  # <-- окремий view для завантаження
+    CertificateDownloadView,
     MyCertificatesView,
     StockTemplateListView,
     StockTemplateGenerateView,

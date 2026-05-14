@@ -1,6 +1,6 @@
-import LandingNavBar from "@shared/components/LandingNavBar";
-import LandingBody from "@shared/components/LandingBody";
-import LandingFooter from "@shared/components/LandingFooter";
+import { LandingNavBar } from "@shared/components/LandingNavBar";
+import { LandingBody } from "@shared/components/LandingBody";
+import { LandingFooter } from "@shared/components/LandingFooter";
 
 const Landing = () => {
   return (
@@ -13,4 +13,4 @@ const Landing = () => {
   );
 };
 
-export default Landing;
+export { Landing };

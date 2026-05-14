@@ -125,4 +125,4 @@ export const logoutUser   = ()            =>
 
 export const getProfile   = ()            => API.get("/users/profile/");
 
-export default API;
+export { API };

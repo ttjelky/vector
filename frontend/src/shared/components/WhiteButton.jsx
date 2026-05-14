@@ -9,4 +9,4 @@ function WhiteButton({text, onClick}) {
     )
 }
 
-export default WhiteButton
+export { WhiteButton };

@@ -5,23 +5,23 @@ import { SearchProvider } from '@shared/contexts/SearchContext'
 import { restoreSession, clearAccessToken, setUserRole } from "./api";
 
 // Pages
-import Landing              from "@pages/Landing";
-import AdminDashboard       from "@pages/AdminDashboard";
-import ParticipantDashboard from "@pages/ParticipantDashboard";
-import AdminTournaments     from "@pages/AdminTournaments";
-import ParticipantTournaments from "@pages/ParticipantTournaments";
-import JuryDashboard        from "@pages/JuryDashboard";
-import Help                 from "@pages/Help";
-import Profile              from "@pages/Profile";
-import Settings             from "@pages/Settings";
-import Works                from "@pages/Works";
-import Tournaments          from "@pages/Tournaments";
-import ResetPassword        from "@pages/ResetPassword";
-import TournamentPage       from "@pages/TournamentPage";
-import JoinTournamentPage   from "@pages/JoinTournamentPage";
-import ProtectedRoute       from "@shared/components/ProtectedRoute";
-import News                 from "@pages/News";
-import TeamInvitePage       from "@pages/TeamInvitePage";
+import { Landing }              from "@pages/Landing";
+import { AdminDashboard }       from "@features/dashboard";
+import { ParticipantDashboard } from "@features/dashboard";
+import { AdminTournaments }     from "@features/tournaments";
+import { ParticipantTournaments } from "@features/tournaments";
+import { JuryDashboard }        from "@features/jury";
+import { Help }                from "@pages/Help";
+import { Profile }              from "@features/profile";
+import { Settings }             from "@features/profile";
+import { Works }                from "@features/submissions";
+import { Tournaments }          from "@features/tournaments";
+import { ResetPassword }        from "@features/auth";
+import { TournamentPage }       from "@features/tournaments";
+import { JoinTournamentPage }   from "@features/tournaments";
+import { ProtectedRoute } from "@shared/components/ProtectedRoute";
+import { News }                 from "@features/news";
+import { TeamInvitePage }       from "@features/teams";
 
 
 // ── AuthExpiredHandler ────────────────────────────────────────────────────────
@@ -145,4 +145,4 @@ const App = () => {
   );
 };
 
-export default App;
+export { App };

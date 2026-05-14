@@ -18,4 +18,4 @@ const LandingFooter = () => {
     );
 };
 
-export default LandingFooter;
+export { LandingFooter };

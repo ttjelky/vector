@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import styles from "@shared/styles/copyPopup.module.css";
 
-export default function CopyPopup({ label, copyText, duration = 1000 }) {
+export function CopyPopup({ label, copyText, duration = 1000 }) {
   const [visible, setVisible] = useState(false);
 
   const handleClick = () => {
