@@ -77,12 +77,13 @@ class TeamSerializer(serializers.ModelSerializer):
 
     def get_registration_status(self, obj):
         t = obj.tournament
+        if t.registration_open():
+            return 'open'
+        from django.utils import timezone
         now = timezone.now()
-        if t.registration_end and now > t.registration_end:
-            return 'closed'
         if t.registration_start and now < t.registration_start:
             return 'not_started'
-        return 'open'
+        return 'closed'
 
 
 class TeamCreateSerializer(serializers.Serializer):

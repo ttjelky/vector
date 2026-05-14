@@ -252,6 +252,12 @@ class TournamentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset           = Tournament.objects.all()
     serializer_class   = TournamentSerializer
     permission_classes = [IsAuthenticated, IsTournamentMemberOrOwner]
+    parser_classes     = [MultiPartParser, FormParser]
+
+    def update(self, request, *args, **kwargs):
+        # Завжди partial=True — щоб не затирати поля які не передані
+        kwargs['partial'] = True
+        return super().update(request, *args, **kwargs)
 
 
 # ── My role ───────────────────────────────────────────────────────────────────

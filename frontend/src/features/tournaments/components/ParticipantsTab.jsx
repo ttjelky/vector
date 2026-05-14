@@ -707,8 +707,8 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
             </span>
 
             <div className={styles.headerActions}>
-              {/* Кнопка винятку — тільки ongoing/finished */}
-              {isOwner && activeTab === "participant" &&
+              {/* Кнопка винятку — тільки ongoing/finished і тільки якщо є дати реєстрації */}
+              {isOwner && activeTab === "participant" && !isOpenAndActive &&
                 (tournamentStatus === "ongoing" || tournamentStatus === "finished") && (
                 exceptionActive ? (
                   <button
@@ -765,8 +765,8 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
             </div>
           </div>
 
-          {/* Панель налаштування винятку */}
-          {showException && isOwner && activeTab === "participant" && (
+          {/* Панель налаштування винятку — тільки якщо є дати реєстрації */}
+          {showException && isOwner && activeTab === "participant" && !isOpenAndActive && (
             <div className={styles.exceptionPanel}>
               <span className={styles.exceptionPanelTitle}>Тимчасово відкрити реєстрацію</span>
               <div className={styles.exceptionPanelRow}>
