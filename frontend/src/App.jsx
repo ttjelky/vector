@@ -1,27 +1,27 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import { TabsProvider } from "./TabsContext";
-import { SearchProvider } from "./SearchContext";
+import { TabsProvider }   from '@shared/contexts/TabsContext'
+import { SearchProvider } from '@shared/contexts/SearchContext'
 import { restoreSession, clearAccessToken, setUserRole } from "./api";
 
 // Pages
-import Landing              from "./assets/pages/Landing";
-import AdminDashboard       from "./assets/pages/AdminDashboard";
-import ParticipantDashboard from "./assets/pages/ParticipantDashboard";
-import AdminTournaments     from "./assets/pages/AdminTournaments";
-import ParticipantTournaments from "./assets/pages/ParticipantTournaments";
-import JuryDashboard        from "./assets/pages/JuryDashboard";
-import Help                 from "./assets/pages/Help";
-import Profile              from "./assets/pages/Profile";
-import Settings             from "./assets/pages/Settings";
-import Works                from "./assets/pages/Works";
-import Tournaments          from "./assets/pages/Tournaments";
-import ResetPassword        from "./assets/pages/ResetPassword";
-import TournamentPage       from "./assets/pages/TournamentPage";
-import JoinTournamentPage   from "./assets/pages/JoinTournamentPage";
-import ProtectedRoute       from "./assets/components/ProtectedRoute";
-import News                 from "./assets/pages/News";
-import TeamInvitePage       from "./assets/pages/TeamInvitePage";
+import Landing              from "@pages/Landing";
+import AdminDashboard       from "@pages/AdminDashboard";
+import ParticipantDashboard from "@pages/ParticipantDashboard";
+import AdminTournaments     from "@pages/AdminTournaments";
+import ParticipantTournaments from "@pages/ParticipantTournaments";
+import JuryDashboard        from "@pages/JuryDashboard";
+import Help                 from "@pages/Help";
+import Profile              from "@pages/Profile";
+import Settings             from "@pages/Settings";
+import Works                from "@pages/Works";
+import Tournaments          from "@pages/Tournaments";
+import ResetPassword        from "@pages/ResetPassword";
+import TournamentPage       from "@pages/TournamentPage";
+import JoinTournamentPage   from "@pages/JoinTournamentPage";
+import ProtectedRoute       from "@shared/components/ProtectedRoute";
+import News                 from "@pages/News";
+import TeamInvitePage       from "@pages/TeamInvitePage";
 
 
 // ── AuthExpiredHandler ────────────────────────────────────────────────────────
