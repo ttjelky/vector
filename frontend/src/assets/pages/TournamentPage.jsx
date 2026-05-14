@@ -116,10 +116,13 @@ export default function TournamentPage() {
   const handleRoundCreated = (newRound) => setRounds((prev) => [...prev, newRound]);
   const isTeamTournament = tournament?.tournament_type === "team";
 
+  // Плашка показується тільки якщо команди взагалі немає.
+  // Якщо команда є (навіть у статусі draft) — учасник вже почав процес
+  // і плашка більше не потрібна.
   const isTeamParticipantUnregistered =
     isTeamTournament &&
     !isJuryPanel &&
-    (!myTeam || myTeam.status !== "registered");
+    !myTeam;
 
   const isRegistered = isTeamTournament
     ? myTeam?.status === "registered"

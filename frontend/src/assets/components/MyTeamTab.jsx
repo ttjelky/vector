@@ -527,7 +527,17 @@ export default function MyTeamTab({ tournamentId, tournament, myRole, tournament
   const [loading,  setLoading]  = useState(true);
   const [creating, setCreating] = useState(false);
 
-  const registrationOpen = tournamentStatus === "registration";
+  // Реєстрація відкрита якщо:
+  // 1. статус турніру "registration", АБО
+  // 2. дати реєстрації не вказані взагалі (вільна реєстрація), АБО
+  // 3. є активний виняток реєстрації
+  const noRegDates = !tournament?.registration_start && !tournament?.registration_end;
+  const hasException = tournament?.registration_exception_until
+    && new Date(tournament.registration_exception_until).getTime() > Date.now();
+  const registrationOpen =
+    tournamentStatus === "registration" ||
+    noRegDates ||
+    !!hasException;
 
   // Оновлює локальний стан і сповіщає TournamentPage.
   // Приймає або дані, або updater-функцію (для оптимістичних оновлень).

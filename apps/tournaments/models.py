@@ -67,22 +67,36 @@ class Tournament(models.Model):
     def registration_open(self):
         from django.utils import timezone
         now = timezone.now()
-        start = self.start_date
-        reg_end = self.registration_end
-        if start and now >= start and (not reg_end or now <= reg_end):
-            return True
+
+        # Виняток завжди має найвищий пріоритет
         if self.registration_exception_until and now < self.registration_exception_until:
             return True
+
+        # Якщо registration_start і registration_end обидва не задані —
+        # реєстрація вільна (відкрита без обмежень)
+        if not self.registration_start and not self.registration_end:
+            return True
+
+        # Якщо задані обидва — перевіряємо вікно реєстрації
+        if self.registration_start and self.registration_end:
+            return self.registration_start <= now <= self.registration_end
+
+        # Якщо задано тільки registration_start — відкрито після нього
+        if self.registration_start and not self.registration_end:
+            return now >= self.registration_start
+
+        # Якщо задано тільки registration_end — відкрито до нього
+        if self.registration_end and not self.registration_start:
+            return now <= self.registration_end
+
         return False
 
     def __str__(self):
         return self.name
 
     def is_registration_open(self):
-        now = timezone.now()
-        if self.registration_start and self.registration_end:
-            return self.registration_start <= now <= self.registration_end
-        return False
+        """Alias для registration_open() — для зворотної сумісності."""
+        return self.registration_open()
 
     def get_invite_token_for_role(self, role):
         return {'participant': self.invite_token, 'jury': self.jury_invite_token, 'admin': self.admin_invite_token}.get(role)
@@ -196,16 +210,16 @@ class Team(models.Model):
         Склад можна редагувати якщо:
           • статус — draft  (не зареєстрована)
           • roster_locked == False
-          • реєстрація у турнірі ще відкрита
+          • реєстрація у турнірі відкрита (враховує виняток)
         Адміни обходять цю перевірку у views.
         """
         if self.status == self.STATUS_REGISTERED:
             return False
         if self.roster_locked:
             return False
-        t = self.tournament
-        now = timezone.now()
-        if t.registration_end and now > t.registration_end:
+        # Використовуємо той самий метод що і для реєстрації
+        # щоб виняток і вільна реєстрація враховувались
+        if not self.tournament.registration_open():
             return False
         return True
 

@@ -207,7 +207,9 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
   const isPrivileged = myRole === "owner" || myRole === "admin";
 
   const exceptionActive = exceptionUntil && new Date() < new Date(exceptionUntil);
-  const canRegisterNow  = tournamentStatus === "registration" || exceptionActive;
+  // Вільна реєстрація: якщо дати не вказані — реєстрація завжди відкрита
+  const noRegDates    = !tournament?.registration_start && !tournament?.registration_end;
+  const canRegisterNow = tournamentStatus === "registration" || exceptionActive || noRegDates;
   const canInvite    = isOwner && canRegisterNow;
 
   const mergeTeams = useCallback((fresh) => {
@@ -401,8 +403,8 @@ export default function TeamsTab({ tournamentId, myRole, tournament, tournamentS
           {registered.length}{tournament?.max_teams ? ` / ${tournament.max_teams}` : ""} команд
         </span>
         <div className={styles.headerActions}>
-          {/* Кнопка винятку — тільки ongoing/finished */}
-          {isOwner && (tournamentStatus === "ongoing" || tournamentStatus === "finished") && (
+          {/* Кнопка винятку — тільки коли є дати реєстрації і статус ongoing/finished */}
+          {isOwner && !noRegDates && (tournamentStatus === "ongoing" || tournamentStatus === "finished") && (
             exceptionActive ? (
               <button
                 className={styles.exceptionActiveBtn}

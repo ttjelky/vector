@@ -83,14 +83,14 @@ class TeamSerializer(serializers.ModelSerializer):
         return obj.is_roster_editable()
 
     def get_registration_status(self, obj):
-        from django.utils import timezone
         t = obj.tournament
+        if t.registration_open():
+            return 'open'
+        from django.utils import timezone
         now = timezone.now()
-        if t.registration_end and now > t.registration_end:
-            return 'closed'
         if t.registration_start and now < t.registration_start:
             return 'not_started'
-        return 'open'
+        return 'closed'
 
 
 # ── Team (create) ─────────────────────────────────────────────────────────────
