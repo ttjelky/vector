@@ -28,7 +28,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from ...models import Tournament, TournamentMember, Team, TeamMember
-from ..team_serializers import (
+from ..serializers import (
     TeamSerializer, TeamCreateSerializer, TeamUpdateSerializer,
     TeamInviteMemberSerializer, TeamMemberSerializer,
     TeamAdminSerializer,

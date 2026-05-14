@@ -1,14 +1,11 @@
-# tournaments/team_serializers.py
-
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
-from ..models import Team, TeamMember, Tournament
+from ...models import Team, TeamMember
 
 User = get_user_model()
 
-
-# ── User (compact) ────────────────────────────────────────────────────────────
 
 class UserCompactSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
@@ -34,8 +31,6 @@ class UserCompactSerializer(serializers.ModelSerializer):
         return None
 
 
-# ── TeamMember (read) ─────────────────────────────────────────────────────────
-
 class TeamMemberSerializer(serializers.ModelSerializer):
     user = UserCompactSerializer(read_only=True)
 
@@ -45,14 +40,12 @@ class TeamMemberSerializer(serializers.ModelSerializer):
         read_only_fields = ['status', 'added_at']
 
 
-# ── Team (read) ───────────────────────────────────────────────────────────────
-
 class TeamSerializer(serializers.ModelSerializer):
-    captain        = UserCompactSerializer(read_only=True)
-    members        = TeamMemberSerializer(many=True, read_only=True)
-    member_count   = serializers.SerializerMethodField()
-    can_register   = serializers.SerializerMethodField()
-    is_editable    = serializers.SerializerMethodField()
+    captain             = UserCompactSerializer(read_only=True)
+    members             = TeamMemberSerializer(many=True, read_only=True)
+    member_count        = serializers.SerializerMethodField()
+    can_register        = serializers.SerializerMethodField()
+    is_editable         = serializers.SerializerMethodField()
     registration_status = serializers.SerializerMethodField()
 
     class Meta:
@@ -83,7 +76,6 @@ class TeamSerializer(serializers.ModelSerializer):
         return obj.is_roster_editable()
 
     def get_registration_status(self, obj):
-        from django.utils import timezone
         t = obj.tournament
         now = timezone.now()
         if t.registration_end and now > t.registration_end:
@@ -92,8 +84,6 @@ class TeamSerializer(serializers.ModelSerializer):
             return 'not_started'
         return 'open'
 
-
-# ── Team (create) ─────────────────────────────────────────────────────────────
 
 class TeamCreateSerializer(serializers.Serializer):
     name    = serializers.CharField(max_length=200)
@@ -139,8 +129,6 @@ class TeamCreateSerializer(serializers.Serializer):
         )
 
 
-# ── Team (update) ─────────────────────────────────────────────────────────────
-
 class TeamUpdateSerializer(serializers.Serializer):
     name    = serializers.CharField(max_length=200, required=False)
     city    = serializers.CharField(max_length=100, required=False, allow_blank=True)
@@ -158,8 +146,6 @@ class TeamUpdateSerializer(serializers.Serializer):
         instance.save()
         return instance
 
-
-# ── Invite member ─────────────────────────────────────────────────────────────
 
 class TeamInviteMemberSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -214,8 +200,6 @@ class TeamInviteMemberSerializer(serializers.Serializer):
         )
 
 
-# ── Admin serializer ──────────────────────────────────────────────────────────
-
 class TeamAdminSerializer(serializers.ModelSerializer):
     captain       = UserCompactSerializer(read_only=True)
     members       = serializers.SerializerMethodField()
@@ -253,7 +237,10 @@ class TeamAdminSerializer(serializers.ModelSerializer):
             avatar = None
             try:
                 if m.user.profile.avatar:
-                    avatar = request.build_absolute_uri(m.user.profile.avatar.url) if request else m.user.profile.avatar.url
+                    avatar = (
+                        request.build_absolute_uri(m.user.profile.avatar.url)
+                        if request else m.user.profile.avatar.url
+                    )
             except Exception:
                 pass
             result.append({
