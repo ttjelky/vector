@@ -27,8 +27,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Tournament, TournamentMember, Team, TeamMember
-from .team_serializers import (
+from ...models import Tournament, TournamentMember, Team, TeamMember
+from ..team_serializers import (
     TeamSerializer, TeamCreateSerializer, TeamUpdateSerializer,
     TeamInviteMemberSerializer, TeamMemberSerializer,
     TeamAdminSerializer,
@@ -420,7 +420,7 @@ class TeamInviteAcceptView(APIView):
             membership.save(update_fields=['status'])
 
         # Додаємо юзера як учасника турніру якщо ще не доданий
-        from .models import TournamentMember
+        from ...models import TournamentMember
         TournamentMember.objects.get_or_create(
             tournament=team.tournament,
             user=request.user,

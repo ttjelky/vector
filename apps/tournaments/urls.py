@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import (
+from .api.views.tournament import (
     DistributeSubmissionsView, TournamentCreateView, TournamentDetailView,
     MyTournamentRoleView, LeaveTournamentView,
     TournamentInviteLinkView, RegeneratePinView,
@@ -20,21 +20,21 @@ from .views import (
     AnnouncementListCreateView, AnnouncementDetailView, AnnouncementReactView,
     AnnouncementCommentListCreateView, AnnouncementCommentDetailView, AnnouncementCommentReactView,
 )
-from .team_views import (
+from .api.views.team import (
     TeamListCreateView, TeamDetailView,
     TeamInviteView, TeamMemberRemoveView,
     TeamRegisterView, TeamRosterLockView,
     MyTeamView,
     TeamInviteInfoView, TeamInviteAcceptView, TeamInviteDeclineView,
 )
-from .jury_views import JuryPendingSubmissionsView, JurySubmissionsView, JuryGradeView
-from .criteria_views import (
+from .api.views.jury import JuryPendingSubmissionsView, JurySubmissionsView, JuryGradeView
+from .api.views.criteria import (
       TournamentCriteriaView,
       TournamentCriterionDetailView,
   )
-from .team_leaderboard_view import TeamLeaderboardDetailView
+from .api.views.leaderboard import TeamLeaderboardDetailView
 
-from .certificate_views import (
+from .api.views.certificate import (
     CertificateTemplateListView,
     CertificateTemplateDetailView,
     CertificateListView,

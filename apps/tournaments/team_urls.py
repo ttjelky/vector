@@ -3,7 +3,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 from django.urls import path
-from .team_views import (
+from .api.views.team import (
     TeamListCreateView,
     TeamDetailView,
     TeamInviteView,

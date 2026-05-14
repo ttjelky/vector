@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from reportlab.lib.utils import ImageReader
 
-from .models import (
+from ...models import (
     Tournament, TournamentMember,
     CertificateTemplate, Certificate,
     CERT_TYPE_CHOICES,

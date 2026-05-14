@@ -3,7 +3,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from .models import Team, TeamMember, Tournament
+from ..models import Team, TeamMember, Tournament
 
 User = get_user_model()
 

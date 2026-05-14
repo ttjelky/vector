@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from .models import TournamentMember
+from ..models import TournamentMember
 
 
 def get_tournament_id(view):

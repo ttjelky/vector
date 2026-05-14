@@ -19,7 +19,7 @@ from rest_framework import serializers, status
 from django.shortcuts import get_object_or_404
 from django.utils.text import slugify
 
-from .models import Tournament, TournamentMember, JuryGradingCriterion
+from ...models import Tournament, TournamentMember, JuryGradingCriterion
 
 
 # ── Serializer ────────────────────────────────────────────────────────────────

@@ -40,12 +40,12 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import (
+from ...models import (
     Tournament, TournamentMember,
     Team, TeamMember,
     Round, Task, Submission, Grade,
 )
-from .team_views import _get_tournament_or_404, _is_privileged
+from .team import _get_tournament_or_404, _is_privileged
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
@@ -68,7 +68,7 @@ def _leaderboard_published(tournament):
     if hasattr(tournament, 'leaderboard_published'):
         return bool(tournament.leaderboard_published)
     try:
-        from .models import LeaderboardSettings
+        from ...models import LeaderboardSettings
         settings = LeaderboardSettings.objects.get(tournament=tournament)
         return settings.is_published
     except Exception:

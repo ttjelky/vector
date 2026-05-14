@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import (
+from ..models import (
     Tournament, TournamentMember,
     Round, RoundLink, RoundAttachment,
     Task, TaskLink, TaskAttachment,

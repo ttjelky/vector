@@ -6,7 +6,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db.models import Count, Q
 
-from .models import (
+from ...models import (
     Tournament, TournamentMember,
     Submission, Grade, JuryAssignment,
     JuryGradingCriterion,

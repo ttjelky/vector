@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError, PermissionDenied
 
-from .models import (
+from ...models import (
     Tournament, TournamentMember,
     Round, RoundLink, RoundAttachment,
     Task, TaskLink, TaskAttachment,
@@ -17,7 +17,7 @@ from .models import (
     generate_invite_pin,
     Announcement, AnnouncementComment, AnnouncementReaction,
 )
-from .serializers import (
+from ..serializers import (
     TournamentSerializer, TournamentMemberSerializer, JoinByTokenSerializer,
     RoundSerializer, RoundLinkSerializer, RoundAttachmentSerializer,
     TaskSerializer, TaskLinkSerializer, TaskAttachmentSerializer,
@@ -26,7 +26,7 @@ from .serializers import (
     JuryAssignmentSerializer,
     AnnouncementSerializer, AnnouncementCommentSerializer,
 )
-from .permissions import IsTournamentOwner, IsTournamentMemberOrOwner, IsTournamentParticipant, IsTournamentJury
+from ..permissions import IsTournamentOwner, IsTournamentMemberOrOwner, IsTournamentParticipant, IsTournamentJury
 from apps.users.models import Profile as UserProfile
 
 BASE_URL = "http://localhost:5173"
@@ -641,7 +641,7 @@ class SubmissionListCreateView(generics.ListCreateAPIView):
             pk=self.kwargs['task_pk']
         )
         if task_obj.round.tournament.tournament_type == 'team':
-            from .models import TeamMember
+            from ...models import TeamMember
             # Шукаємо команду юзера (капітан або учасник)
             team = Team.objects.filter(
                 tournament=task_obj.round.tournament, captain=self.request.user
@@ -677,7 +677,7 @@ class SubmissionListCreateView(generics.ListCreateAPIView):
         tournament = task.round.tournament
 
         if tournament.tournament_type == 'team':
-            from .models import TeamMember
+            from ...models import TeamMember
             # Спочатку шукаємо як капітан
             team = Team.objects.filter(
                 tournament=tournament, captain=self.request.user
@@ -729,7 +729,7 @@ class SubmissionDetailView(generics.RetrieveUpdateDestroyAPIView):
             # GET: перевіряємо що юзер є учасником цієї команди або капітаном
             tournament = obj.task.round.tournament
             if tournament.tournament_type == 'team' and obj.team:
-                from .models import TeamMember
+                from ...models import TeamMember
                 is_captain = obj.team.captain_id == self.request.user.pk
                 is_member  = TeamMember.objects.filter(
                     team=obj.team,
@@ -1444,7 +1444,7 @@ class ParticipantGradesNewsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        from .models import TeamMember
+        from ...models import TeamMember
 
         # 1. Оцінки за особисті здачі (одиночний формат)
         personal_grades = (
