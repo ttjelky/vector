@@ -235,7 +235,7 @@ def jury_submissions(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])  # виправлено: було публічним endpoint
+@permission_classes([IsAuthenticated])
 def dashboard_data(request):
     return JsonResponse({
         "total_users":  User.objects.count(),
