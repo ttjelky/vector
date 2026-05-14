@@ -68,7 +68,14 @@ body, html {
   gap: 8px;
   pointer-events: all;
   transition: background 0.2s ease, box-shadow 0.2s ease;
+  cursor: text !important;
 }
+
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 .search:focus-within {
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 4px 16px rgba(0,0,0,0.10);
