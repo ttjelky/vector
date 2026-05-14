@@ -1,4 +1,3 @@
-
 * {
   font-family: DM Sans, sans-serif;
 }
@@ -79,6 +78,7 @@
   font-weight: 700;
   margin: 0 0 12px;
   color: #1a1a2e;
+  word-break: break-all;
 }
 
 .description {

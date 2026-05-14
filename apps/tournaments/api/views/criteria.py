@@ -1,23 +1,9 @@
-"""
-apps/tournaments/criteria_views.py
-
-Ендпоінти для керування критеріями оцінювання журі.
-
-Додай у urls.py турнірів:
-  from .criteria_views import (
-      TournamentCriteriaView,
-      TournamentCriterionDetailView,
-  )
-  path('tournaments/<int:pk>/criteria/',        TournamentCriteriaView.as_view(),        name='tournament-criteria'),
-  path('tournaments/<int:pk>/criteria/<int:cid>/', TournamentCriterionDetailView.as_view(), name='tournament-criterion-detail'),
-"""
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import serializers, status
 
 from django.shortcuts import get_object_or_404
-from django.utils.text import slugify
 
 from ...models import Tournament, TournamentMember, JuryGradingCriterion
 
@@ -37,8 +23,23 @@ class CriterionSerializer(serializers.ModelSerializer):
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+def _safe_key(text: str) -> str:
+    """
+    Перетворює довільний рядок (включно з кирилицею) на безпечний slug-ключ.
+    Замінює пробіли та спецсимволи на дефіс, залишає літери будь-якого алфавіту та цифри.
+    Приклад: "Оригінальність" → "оригінальність", "my score!" → "my-score"
+    """
+    import re
+    text = text.strip().lower()
+    # Замінюємо все що не є літерою (будь-якого алфавіту), цифрою або дефісом — на дефіс
+    text = re.sub(r'[^\w\-]', '-', text, flags=re.UNICODE)
+    # Підряд ідучі дефіси → один
+    text = re.sub(r'-+', '-', text)
+    text = text.strip('-')
+    return text or "criterion"
+
+
 def _assert_privileged(user, tournament):
-    """Піднімає PermissionDenied якщо юзер не є owner/admin турніру."""
     from rest_framework.exceptions import PermissionDenied
     is_privileged = TournamentMember.objects.filter(
         tournament=tournament,
@@ -50,12 +51,8 @@ def _assert_privileged(user, tournament):
 
 
 def _unique_key(base_key: str, tournament: Tournament, exclude_id=None) -> str:
-    """
-    Генерує унікальний slug-ключ у межах турніру.
-    Якщо 'originality' вже є → 'originality-2', 'originality-3' і т.д.
-    """
-    key   = slugify(base_key) or "criterion"
-    qs    = JuryGradingCriterion.objects.filter(tournament=tournament, key=key)
+    key = _safe_key(base_key)
+    qs  = JuryGradingCriterion.objects.filter(tournament=tournament, key=key)
     if exclude_id:
         qs = qs.exclude(id=exclude_id)
     if not qs.exists():
@@ -75,9 +72,9 @@ def _unique_key(base_key: str, tournament: Tournament, exclude_id=None) -> str:
 
 class TournamentCriteriaView(APIView):
     """
-    GET  /api/tournaments/<pk>/criteria/          → список критеріїв
-    POST /api/tournaments/<pk>/criteria/          → створити критерій
-    PUT  /api/tournaments/<pk>/criteria/          → замінити ВСІ критерії одразу (bulk replace)
+    GET  /api/tournaments/<pk>/criteria/   → список критеріїв
+    POST /api/tournaments/<pk>/criteria/   → створити критерій
+    PUT  /api/tournaments/<pk>/criteria/   → замінити ВСІ критерії (bulk replace)
     """
     permission_classes = [IsAuthenticated]
 
@@ -94,7 +91,6 @@ class TournamentCriteriaView(APIView):
         _assert_privileged(request.user, tournament)
 
         data = request.data.copy()
-        # Авто-генерація ключа з label якщо не вказано
         if not data.get("key") and data.get("label"):
             data["key"] = _unique_key(data["label"], tournament)
         else:
@@ -111,15 +107,6 @@ class TournamentCriteriaView(APIView):
         return Response(CriterionSerializer(criterion).data, status=status.HTTP_201_CREATED)
 
     def put(self, request, pk):
-        """
-        Bulk replace — приймає список критеріїв і замінює всі одразу.
-        Використовується при збереженні форми створення/редагування турніру.
-
-        Body: [
-          {"label": "Оригінальність", "max_score": 10, "group": "", "hint": "", "order": 0},
-          ...
-        ]
-        """
         tournament = self._tournament(pk)
         _assert_privileged(request.user, tournament)
 
@@ -127,16 +114,14 @@ class TournamentCriteriaView(APIView):
         if not isinstance(items, list):
             return Response({"detail": "Очікується масив критеріїв."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Видаляємо старі
         tournament.grading_criteria.all().delete()
 
         created = []
         for i, item in enumerate(items):
-            data = dict(item)
+            data  = dict(item)
             label = data.get("label", "").strip()
             if not label:
                 continue
-            # Авто-ключ
             data["key"]   = _unique_key(data.get("key") or label, tournament)
             data["order"] = data.get("order", i)
             s = CriterionSerializer(data=data)
