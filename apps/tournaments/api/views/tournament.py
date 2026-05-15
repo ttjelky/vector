@@ -113,6 +113,15 @@ def _get_membership_role(request, tournament_pk):
     return m.role if m else None
 
 
+def _get_max_total(tournament):
+    """Повертає максимальну суму балів для турніру (з кастомних або дефолтних критеріїв)."""
+    from ...models import JuryGradingCriterion
+    qs = JuryGradingCriterion.objects.filter(tournament=tournament)
+    if qs.exists():
+        return sum(c.max_score for c in qs)
+    return MAX_TOTAL
+
+
 def _run_distribution(tournament_id, min_reviews: int, max_per_juror: int) -> list[JuryAssignment]:
     """
     Рандомний розподіл подань між членами журі.
@@ -862,7 +871,7 @@ class JurySubmissionsView(APIView):
         return Response({
             'submissions':     subs_data,
             'criteria':        DEFAULT_CRITERIA,
-            'max_total':       MAX_TOTAL,
+            'max_total':       _get_max_total(tournament),
             'has_assignments': has_assignments,
             'is_team':         is_team,
         })
@@ -953,12 +962,14 @@ class JuryGradeView(APIView):
             },
         )
 
+        tournament = submission.task.round.tournament
+
         return Response({
             'id':         grade.id,
             'scores':     grade.scores,
             'comment':    grade.comment,
             'total':      grade.total,
-            'max_total':  MAX_TOTAL,
+            'max_total':  _get_max_total(tournament),
             'updated_at': grade.updated_at,
         }, status=status.HTTP_200_OK)
 
@@ -1228,15 +1239,32 @@ class SubmissionGradeView(APIView):
 
         comments = [g.comment for g in grades if g.comment]
 
-        criteria_labels = {c["key"]: c["label"] for c in DEFAULT_CRITERIA}
-        criteria_max    = {c["key"]: c["max"]   for c in DEFAULT_CRITERIA}
+        try:
+            tournament = Tournament.objects.get(pk=tournament_pk)
+        except Tournament.DoesNotExist:
+            tournament = None
+
+        from ...models import JuryGradingCriterion
+        if tournament:
+            _crit_qs = JuryGradingCriterion.objects.filter(tournament=tournament).order_by('order')
+        else:
+            _crit_qs = JuryGradingCriterion.objects.none()
+
+        if _crit_qs.exists():
+            criteria_labels = {c.key: c.label for c in _crit_qs}
+            criteria_max    = {c.key: c.max_score for c in _crit_qs}
+            actual_max_total = sum(c.max_score for c in _crit_qs)
+        else:
+            criteria_labels  = {c["key"]: c["label"] for c in DEFAULT_CRITERIA}
+            criteria_max     = {c["key"]: c["max"]   for c in DEFAULT_CRITERIA}
+            actual_max_total = MAX_TOTAL
 
         latest_grade = grades.order_by('-updated_at').first()
 
         return Response({
             'scores':       avg_scores,
             'total':        avg_total,
-            'max_total':    MAX_TOTAL,
+            'max_total':    actual_max_total,
             'comment':      comments[0] if comments else "",
             'criteria':     criteria_labels,
             'criteria_max': criteria_max,
@@ -1395,7 +1423,7 @@ class LeaderboardView(APIView):
                 p.user_id: p.avatar.url if p.avatar else None
                 for p in UserProfile.objects.filter(user_id__in=data.keys()).select_related()
             }
- 
+
             participants = []
             for pid, round_data in data.items():
                 round_scores = {}
@@ -1503,10 +1531,14 @@ class ParticipantGradesNewsView(APIView):
             round_     = task.round
             tournament = round_.tournament
 
-            criteria_list = [
-                {"key": c["key"], "label": c["label"], "max": c["max"]}
-                for c in DEFAULT_CRITERIA
-            ]
+            from ...models import JuryGradingCriterion
+            _qs = JuryGradingCriterion.objects.filter(tournament=tournament).order_by('order')
+            if _qs.exists():
+                criteria_list      = [{"key": c.key, "label": c.label, "max": c.max_score} for c in _qs]
+                computed_max_total = sum(c.max_score for c in _qs)
+            else:
+                criteria_list      = [{"key": c["key"], "label": c["label"], "max": c["max"]} for c in DEFAULT_CRITERIA]
+                computed_max_total = MAX_TOTAL
 
             jury = grade.juror
             jury_name = f"{jury.first_name} {jury.last_name}".strip() or jury.username
@@ -1520,7 +1552,7 @@ class ParticipantGradesNewsView(APIView):
                 "criteria":     criteria_list,
                 "scores":       grade.scores or {},
                 "total":        grade.total,
-                "max_total":    MAX_TOTAL,
+                "max_total":    computed_max_total,
                 "comment":      grade.comment or "",
                 "graded_at":    grade.updated_at,
                 "read":         False,
@@ -1596,7 +1628,7 @@ class LeaderboardDetailView(APIView):
             or participant.username
             or f"Учасник #{participant_pk}"
         )
- 
+
         # Аватарка учасника
         try:
             participant_profile = UserProfile.objects.get(user=participant)
@@ -1619,17 +1651,17 @@ class LeaderboardDetailView(APIView):
                 or juror.username
             )
 
-            # Аватарка журі (кешуємо)
+            # Аватарка журі
             try:
                 juror_profile = UserProfile.objects.get(user=juror)
                 juror_avatar = juror_profile.avatar.url if juror_profile.avatar else None
             except UserProfile.DoesNotExist:
                 juror_avatar = None
- 
+
             round_data[rid]['grades'].append({
                 'juror_id':     juror.id,
                 'juror_name':   jname,
-                'juror_avatar': juror_avatar,   # ← НОВЕ
+                'juror_avatar': juror_avatar,
                 'total':        grade.total,
                 'scores':       grade.scores or {},
             })

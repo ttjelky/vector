@@ -16,9 +16,24 @@ function GradeCard({ grade }) {
               : pct >= 50 ? "#f59e0b"
               : "#ef4444";
 
+  const getLabel = (key) => {
+    const found = grade.criteria?.find?.(c => c.key === key);
+    if (found?.label) return found.label;
+    if (grade.scores_meta?.[key]?.label) return grade.scores_meta[key].label;
+    return key;
+  };
+
+  const getMax = (key) => {
+    const found = grade.criteria?.find?.(c => c.key === key);
+    if (found?.max_score != null) return found.max_score;
+    if (found?.max != null) return found.max;
+    if (grade.scores_meta?.[key]?.max_score) return grade.scores_meta[key].max_score;
+    const criteriaCount = grade.criteria?.length || Object.keys(grade.scores || {}).length || 1;
+    return Math.round((grade.max_total || 10) / criteriaCount);
+  };
+
   return (
     <div className={styles.gradeCard}>
-      {/* Score ring */}
       <div className={styles.gradeRing} style={{ "--clr": color, "--pct": pct }}>
         <svg viewBox="0 0 44 44" className={styles.ringSvg}>
           <circle cx="22" cy="22" r="18" className={styles.ringBg} />
@@ -37,19 +52,20 @@ function GradeCard({ grade }) {
       </div>
 
       <div className={styles.gradeBody}>
-        <p className={styles.gradeTask}>{grade.task_title}</p>
-        <p className={styles.gradeRound}>
+        <p className={styles.gradeTask} title={grade.task_title}>
+          {grade.task_title}
+        </p>
+        <p className={styles.gradeRound} title={`${grade.round_title} · ${grade.tournament}`}>
           {grade.round_title} · {grade.tournament}
         </p>
 
-        {/* Score breakdown */}
         <div className={styles.gradeCriteria}>
           {Object.entries(grade.scores).map(([key, val]) => {
-            const max   = grade.criteria?.find?.(c => c.key === key)?.max ?? 10;
-            const label = grade.criteria?.find?.(c => c.key === key)?.label ?? key;
+            const max   = getMax(key);
+            const label = getLabel(key);
             return (
               <div key={key} className={styles.criterionRow}>
-                <span className={styles.criterionLabel}>{label}</span>
+                <span className={styles.criterionLabel} title={label}>{label}</span>
                 <div className={styles.criterionBar}>
                   <div
                     className={styles.criterionFill}
@@ -67,7 +83,9 @@ function GradeCard({ grade }) {
         )}
 
         <div className={styles.gradeMeta}>
-          <span className={styles.gradeJury}>від {grade.jury_name}</span>
+          <span className={styles.gradeJury} title={`від ${grade.jury_name}`}>
+            від {grade.jury_name}
+          </span>
           <span className={styles.gradeMax}>{grade.total} / {grade.max_total}</span>
         </div>
       </div>
@@ -105,13 +123,11 @@ const ParticipantDashboard = () => {
   const [loadingG,      setLoadingG]      = useState(true);
   const [loadingN,      setLoadingN]      = useState(true);
 
-  // carousel
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating,  setIsAnimating]  = useState(false);
   const [animDir,      setAnimDir]      = useState("next");
   const timerRef = useRef(null);
 
-  // ── fetch ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     API.get("/tournaments/")
       .then(r => setTournaments(r.data))
@@ -129,7 +145,6 @@ const ParticipantDashboard = () => {
       .finally(() => setLoadingN(false));
   }, []);
 
-  // ── mark read ──────────────────────────────────────────────────────────────
   const markOneRead = async (id) => {
     await API.post(`/notifications/mark-read/${id}/`);
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
@@ -140,7 +155,6 @@ const ParticipantDashboard = () => {
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
   };
 
-  // ── carousel ───────────────────────────────────────────────────────────────
   const goTo = useCallback((dir) => {
     if (isAnimating || tournaments.length === 0) return;
     setAnimDir(dir);
@@ -170,7 +184,6 @@ const ParticipantDashboard = () => {
   const current     = tournaments[currentIndex];
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
-  // Stat: середній бал по всіх оцінках
   const avgScore = grades.length > 0
     ? Math.round(grades.reduce((s, g) => s + (g.max_total > 0 ? (g.total / g.max_total) * 100 : 0), 0) / grades.length)
     : null;
@@ -179,13 +192,11 @@ const ParticipantDashboard = () => {
     <NavBar>
       <div className={styles.contentArea}>
 
-        {/* ── Header ── */}
         <div className={styles.pageHeader}>
           <h2 className={styles.pageTitle}>Особистий кабінет</h2>
           <p className={styles.pageSubtitle}>Ваші турніри, оцінки та сповіщення</p>
         </div>
 
-        {/* ── Stat strip ── */}
         {!loadingG && grades.length > 0 && (
           <div className={styles.statStrip}>
             <div className={styles.statChip}>
@@ -211,10 +222,8 @@ const ParticipantDashboard = () => {
           </div>
         )}
 
-        {/* ── Main grid: турніри + оцінки ── */}
         <div className={styles.mainGrid}>
 
-          {/* LEFT — Tournament carousel */}
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>Мої турніри</h3>
@@ -278,7 +287,6 @@ const ParticipantDashboard = () => {
             </div>
           </section>
 
-          {/* RIGHT — Grades horizontal scroll */}
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>
@@ -315,7 +323,6 @@ const ParticipantDashboard = () => {
           </section>
         </div>
 
-        {/* ── Notifications ── */}
         <section className={styles.notifSection}>
           <div className={styles.sectionHeader}>
             <h3 className={styles.sectionTitle}>
