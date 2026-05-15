@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { API } from '@api';
+import { API, getAccessToken } from '@api';
 import { Login, Register, Forgot } from "@features/auth";
 import styles from "../styles/JoinTournamentPage.module.css";
 import Logo from "@static/LogoOnly.png";
@@ -27,7 +27,7 @@ export function JoinTournamentPage() {
   const [showRegister, setShowRegister] = useState(false);
   const [showForgot,   setShowForgot]   = useState(false);
 
-  const isLoggedIn = () => !!localStorage.getItem("accessToken");
+  const isLoggedIn = () => Boolean(getAccessToken());
 
   useEffect(() => {
     API.get(`/tournaments/join/${token}/preview/`)

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { fetchProfile, updateProfile } from "../api/profile";
+import { mediaUrl } from "@api";
 import styles from "../styles/profile.module.css";
 import { NavBar } from "@shared/components/NavBar";
 
@@ -25,11 +26,7 @@ const Profile = () => {
                     email: data.email || "",
                     avatar: null,
                 });
-                setPreview(
-                    updated.avatar
-                        ? `http://127.0.0.1:8000${updated.avatar}`
-                        : null
-                );
+                setPreview(data.avatar ? mediaUrl(data.avatar) : null);
             }
             setLoading(false);
         };
@@ -74,6 +71,7 @@ const Profile = () => {
             <div className={styles.avatarWrapper}>
                 <img
                     src={preview || "/default-avatar.png"}
+                    alt="Avatar"
                     className={styles.avatar}
                 />
                 {editMode && (

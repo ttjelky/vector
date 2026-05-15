@@ -1,9 +1,10 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import { getAccessToken, mediaUrl } from '@api';
 import nStyles from '@shared/styles/Notifications.module.css';
 
-const API = 'http://127.0.0.1:8000/api';
-const getToken = () => localStorage.getItem('accessToken');
+const API = import.meta.env.VITE_API_BASE ?? '/api';
+const getToken = () => getAccessToken();
 
 // ── Body scroll lock ───────────────────────────────────────────────────────────
 const useScrollLock = (active) => {
@@ -317,7 +318,7 @@ const DropdownContent = ({ notifs, loading, onCompose, onMarkAllRead, onMarkOne 
               {n.attachments?.length > 0 && (
                 <div className={nStyles.notifLinks}>
                   {n.attachments.map((a, i) => (
-                    <a key={i} href={`http://127.0.0.1:8000${a.url}`} target="_blank" rel="noreferrer" className={nStyles.notifLink}>
+                    <a key={i} href={mediaUrl(a.url)} target="_blank" rel="noreferrer" className={nStyles.notifLink}>
                       📎 {a.name}
                     </a>
                   ))}

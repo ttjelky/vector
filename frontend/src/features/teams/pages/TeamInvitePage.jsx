@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { API } from '@api';
+import { API, getAccessToken } from '@api';
 import { Login } from "@features/auth";
 import styles from "../styles/JoinByCodeModal.module.css";
 
@@ -14,7 +14,7 @@ export function TeamInvitePage() {
   const [acting,    setActing]    = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
-  const isLoggedIn = () => !!localStorage.getItem("accessToken");
+  const isLoggedIn = () => Boolean(getAccessToken());
 
   const loadInvite = () => {
     setLoading(true);

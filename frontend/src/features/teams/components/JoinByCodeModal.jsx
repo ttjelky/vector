@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API } from '@api';
+import { API, getAccessToken } from '@api';
 import { Login } from "@features/auth";
 import { Register } from "@features/auth";
 import { Forgot } from "@features/auth";
@@ -33,7 +33,7 @@ export function JoinByCodeModal({ onClose }) {
   const [showRegister, setShowRegister] = useState(false);
   const [showForgot,   setShowForgot]   = useState(false);
 
-  const isLoggedIn = () => !!localStorage.getItem("accessToken");
+  const isLoggedIn = () => Boolean(getAccessToken());
 
   const handleTokenSubmit = async () => {
     const token = extractToken(tokenInput);

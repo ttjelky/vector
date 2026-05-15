@@ -221,7 +221,7 @@ const JuryDashboard = () => {
                       current.custom_image
                         ? (current.custom_image.startsWith("http")
                             ? current.custom_image
-                            : `http://localhost:8000${current.custom_image}`)
+                            : mediaUrl(current.custom_image))
                         : null
                     }
                   />

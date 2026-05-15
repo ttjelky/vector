@@ -23,7 +23,7 @@ import { useSearch } from '@shared/contexts/SearchContext';
 import { SearchOverlay } from './SearchOverlay';
 import { ConfirmDeleteModal } from "@features/tournaments";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:8000/api';
+const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
 const getToken = () => getAccessToken();
 
 const ICON_MAP = {

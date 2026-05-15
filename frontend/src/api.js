@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const MEDIA_URL = import.meta.env.VITE_MEDIA_URL ?? 'http://127.0.0.1:8000';
+export const MEDIA_URL = import.meta.env.VITE_MEDIA_URL ?? '';
 
 // Конвертує відносний /media/... URL в абсолютний.
 // Якщо вже абсолютний — повертає як є.
@@ -10,9 +10,7 @@ export function mediaUrl(path) {
   return `${MEDIA_URL}${path}`;
 }
 
-const API_URL = 'http://127.0.0.1:8000/api/users/';
-
-const BASE = "/api";  // проксюється через Vite → 127.0.0.1:8000, cookie same-site
+const BASE = "/api";  // проксюється через Vite → backend на тому ж хості, cookie same-site
 
 // ── In-memory стан ────────────────────────────────────────────────────────────
 let _accessToken = null;

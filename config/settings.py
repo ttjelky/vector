@@ -14,7 +14,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # ========================== SECURITY ==========================
 SECRET_KEY = env('SECRET_KEY')
-DEBUG = env.bool('DEBUG', default=True)
+DEBUG = env.bool('DEBUG', default=False)  # Production default: False
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
@@ -107,12 +107,12 @@ SIMPLE_JWT = {
 
 # ========================== EMAIL ==========================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = env.int('EMAIL_PORT', default=587)
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = 'Vector <vectorcommandreset@gmail.com>'
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Vector <noreply@vector.com>')
 
 # ========================== CORS ==========================
 CORS_ALLOW_ALL_ORIGINS = False
@@ -130,14 +130,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 STATIC_URL = 'static/'
 
-# ========================== OTHER ==========================
-DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
-FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
-
+# ========================== SECURITY ==========================
 # Cookie settings
 AUTH_COOKIE = "refresh_token"
 AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
-AUTH_COOKIE_SECURE = False
+AUTH_COOKIE_SECURE = env.bool('AUTH_COOKIE_SECURE', default=False)  # True for HTTPS
 AUTH_COOKIE_HTTP_ONLY = True
 AUTH_COOKIE_PATH = "/"
 AUTH_COOKIE_SAMESITE = "Lax"

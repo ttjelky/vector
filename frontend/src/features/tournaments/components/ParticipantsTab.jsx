@@ -82,7 +82,7 @@ function getDisplayName(member) {
 
 function MemberAvatar({ member }) {
   const src = member.avatar
-    ? (member.avatar.startsWith("http") ? member.avatar : `http://127.0.0.1:8000${member.avatar}`)
+    ? (member.avatar.startsWith("http") ? member.avatar : mediaUrl(member.avatar))
     : null;
   const initials = (member.full_name || member.username || "?")
     .split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTabs } from "@shared/contexts/TabsContext";
-import { API } from '@api';
+import { API, mediaUrl } from '@api';
 import { NavBar } from "@shared/components/NavBar";
 import { TournamentCard } from "@features/tournaments";
 import styles from "../styles/admindashboard.module.css";
@@ -167,7 +167,7 @@ const AdminDashboard = () => {
                     stockImage={current.stock_image}
                     customImage={
                       current.custom_image
-                        ? (current.custom_image.startsWith("http") ? current.custom_image : `http://localhost:8000${current.custom_image}`)
+                        ? (current.custom_image.startsWith("http") ? current.custom_image : mediaUrl(current.custom_image))
                         : null
                     }
                   />
