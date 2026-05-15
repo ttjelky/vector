@@ -89,7 +89,7 @@ function ParticipantCertificates({ tournamentId }) {
   const [message,      setMessage]      = useState(null);
 
   useEffect(() => {
-    api.get(`/tournaments/${tournamentId}/certificates/`)
+    API.get(`/tournaments/${tournamentId}/certificates/`)
       .then(({ data }) => setCertificates(data))
       .catch(() => setMessage({ type: "error", text: "Не вдалося завантажити сертифікати" }))
       .finally(() => setLoading(false));
@@ -97,7 +97,7 @@ function ParticipantCertificates({ tournamentId }) {
 
   async function handleDownload(certId, recipientName) {
     try {
-      const resp = await api.get(
+      const resp = await API.get(
         `/tournaments/${tournamentId}/certificates/${certId}/download/`,
         { responseType: "blob" }
       );
@@ -181,7 +181,7 @@ function AdminCertificates({ tournamentId, isAdmin, isTeamTournament }) {
 
   async function fetchTemplates() {
     try {
-      const { data } = await api.get(`/tournaments/${tid}/certificates/templates/`);
+      const { data } = await API.get(`/tournaments/${tid}/certificates/templates/`);
       setTemplates(data);
     } catch {
       notify("error", "Не вдалося завантажити шаблони");
@@ -190,7 +190,7 @@ function AdminCertificates({ tournamentId, isAdmin, isTeamTournament }) {
 
   async function fetchCertificates() {
     try {
-      const { data } = await api.get(`/tournaments/${tid}/certificates/`);
+      const { data } = await API.get(`/tournaments/${tid}/certificates/`);
       setCertificates(data);
     } catch {
       notify("error", "Не вдалося завантажити список сертифікатів");
@@ -199,14 +199,14 @@ function AdminCertificates({ tournamentId, isAdmin, isTeamTournament }) {
 
   async function fetchParticipants(role = "participant") {
     try {
-      const { data } = await api.get(`/tournaments/${tid}/members/`);
+      const { data } = await API.get(`/tournaments/${tid}/members/`);
       setParticipants(data.filter(m => m.user_role === role));
     } catch {}
   }
 
   async function fetchTeams() {
     try {
-      const { data } = await api.get(`/tournaments/${tid}/teams/`);
+      const { data } = await API.get(`/tournaments/${tid}/teams/`);
       setTeams(data.filter(t => t.status === "registered"));
     } catch {}
   }
@@ -223,7 +223,7 @@ function AdminCertificates({ tournamentId, isAdmin, isTeamTournament }) {
       form.append("cert_type", certType);
       form.append("template_image", file);
       Object.entries(settings).forEach(([k, v]) => form.append(k, v));
-      await api.post(`/tournaments/${tid}/certificates/templates/`, form, {
+      await API.post(`/tournaments/${tid}/certificates/templates/`, form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       notify("success", "Шаблон збережено");
@@ -243,7 +243,7 @@ function AdminCertificates({ tournamentId, isAdmin, isTeamTournament }) {
       // Для командного турніру з типом "jury" — відправляємо user_ids (не team_ids)
       if (isTeamTournament && certType !== "jury") body.team_ids = teamIds ?? [];
       else body.user_ids = userIds ?? [];
-      const { data } = await api.post(`/tournaments/${tid}/certificates/stock-generate/`, body);
+      const { data } = await API.post(`/tournaments/${tid}/certificates/stock-generate/`, body);
       notify("success", `Згенеровано ${data.generated} сертифікат(ів)${data.errors?.length ? `, помилок: ${data.errors.length}` : ""}`);
       fetchCertificates();
     } catch (e) {
@@ -255,7 +255,7 @@ function AdminCertificates({ tournamentId, isAdmin, isTeamTournament }) {
 
   async function handleDownload(certId, recipientName) {
     try {
-      const resp = await api.get(`/tournaments/${tid}/certificates/${certId}/download/`, { responseType: "blob" });
+      const resp = await API.get(`/tournaments/${tid}/certificates/${certId}/download/`, { responseType: "blob" });
       const url = URL.createObjectURL(new Blob([resp.data], { type: "application/pdf" }));
       const a = document.createElement("a");
       a.href = url;
@@ -270,7 +270,7 @@ function AdminCertificates({ tournamentId, isAdmin, isTeamTournament }) {
   async function handleDeleteTemplate(tmplId) {
     if (!window.confirm("Видалити шаблон?")) return;
     try {
-      await api.delete(`/tournaments/${tid}/certificates/templates/${tmplId}/`);
+      await API.delete(`/tournaments/${tid}/certificates/templates/${tmplId}/`);
       notify("success", "Шаблон видалено");
       fetchTemplates();
     } catch {

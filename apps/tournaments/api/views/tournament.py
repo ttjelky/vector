@@ -122,6 +122,19 @@ def _get_max_total(tournament):
     return MAX_TOTAL
 
 
+def _get_criteria(tournament):
+    """
+    Повертає список критеріїв для турніру.
+    Якщо є кастомні — повертає їх, інакше DEFAULT_CRITERIA.
+    Формат: [{ key, label, max }, ...]
+    """
+    from ...models import JuryGradingCriterion
+    qs = JuryGradingCriterion.objects.filter(tournament=tournament).order_by('order')
+    if qs.exists():
+        return [{'key': c.key, 'label': c.label, 'max': c.max_score} for c in qs]
+    return DEFAULT_CRITERIA
+
+
 def _run_distribution(tournament_id, min_reviews: int, max_per_juror: int) -> list[JuryAssignment]:
     """
     Рандомний розподіл подань між членами журі.
@@ -870,7 +883,7 @@ class JurySubmissionsView(APIView):
 
         return Response({
             'submissions':     subs_data,
-            'criteria':        DEFAULT_CRITERIA,
+            'criteria':        _get_criteria(tournament),
             'max_total':       _get_max_total(tournament),
             'has_assignments': has_assignments,
             'is_team':         is_team,
@@ -935,7 +948,10 @@ class JuryGradeView(APIView):
         scores  = serializer.validated_data['scores']
         comment = serializer.validated_data['comment']
 
-        for criterion in DEFAULT_CRITERIA:
+        tournament = submission.task.round.tournament
+        active_criteria = _get_criteria(tournament)
+
+        for criterion in active_criteria:
             key     = criterion['key']
             max_val = criterion['max']
             val     = scores.get(key)
@@ -950,7 +966,7 @@ class JuryGradeView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-        total = sum(scores.values())
+        total = sum(scores.get(c['key'], 0) for c in active_criteria)
 
         grade, _ = Grade.objects.update_or_create(
             submission=submission,
@@ -961,8 +977,6 @@ class JuryGradeView(APIView):
                 'total':   total,
             },
         )
-
-        tournament = submission.task.round.tournament
 
         return Response({
             'id':         grade.id,
@@ -1255,9 +1269,10 @@ class SubmissionGradeView(APIView):
             criteria_max    = {c.key: c.max_score for c in _crit_qs}
             actual_max_total = sum(c.max_score for c in _crit_qs)
         else:
-            criteria_labels  = {c["key"]: c["label"] for c in DEFAULT_CRITERIA}
-            criteria_max     = {c["key"]: c["max"]   for c in DEFAULT_CRITERIA}
-            actual_max_total = MAX_TOTAL
+            _def_crit        = _get_criteria(tournament)
+            criteria_labels  = {c["key"]: c["label"] for c in _def_crit}
+            criteria_max     = {c["key"]: c["max"]   for c in _def_crit}
+            actual_max_total = sum(c["max"] for c in _def_crit)
 
         latest_grade = grades.order_by('-updated_at').first()
 
@@ -1537,7 +1552,7 @@ class ParticipantGradesNewsView(APIView):
                 criteria_list      = [{"key": c.key, "label": c.label, "max": c.max_score} for c in _qs]
                 computed_max_total = sum(c.max_score for c in _qs)
             else:
-                criteria_list      = [{"key": c["key"], "label": c["label"], "max": c["max"]} for c in DEFAULT_CRITERIA]
+                criteria_list      = _get_criteria(tournament)
                 computed_max_total = MAX_TOTAL
 
             jury = grade.juror
@@ -1666,7 +1681,7 @@ class LeaderboardDetailView(APIView):
                 'scores':       grade.scores or {},
             })
 
-        all_criteria_keys = [c['key'] for c in DEFAULT_CRITERIA]
+        all_criteria_keys = [c['key'] for c in _get_criteria(tournament)]
 
         def _avg_criteria(grade_list):
             sums   = defaultdict(float)
@@ -1728,7 +1743,7 @@ class LeaderboardDetailView(APIView):
             'rounds':           rounds_out,
             'grand_total':      round(grand_total, 1),
             'criteria_avg':     grand_criteria_avg,
-            'criteria_meta':    DEFAULT_CRITERIA,
+            'criteria_meta':    _get_criteria(tournament),
         })
 
 
