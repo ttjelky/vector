@@ -85,7 +85,7 @@
 
 /* ── Body ────────────────────────────────────────────────────────────────── */
 .form {
-  padding: 80px 24px 80px;
+  padding: 40px 24px 100px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -101,11 +101,11 @@
 
 /* ── Fields ──────────────────────────────────────────────────────────────── */
 .fieldLabel {
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 500;
   color: #666;
   margin-left: 4px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .input {
