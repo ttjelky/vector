@@ -176,10 +176,17 @@ export function TournamentPage() {
   return (
     <NavBar>
       <div className={styles.page}>
-        <div className={styles.cover} style={coverStyle}>
+        <div className={styles.coverWrap}>
           {tournament.image_mode === "custom" && tournament.custom_image && (
-            <img src={mediaUrl(tournament.custom_image)} alt={tournament.name} className={styles.coverImg} />
+            <div className={styles.coverReflectLeft} aria-hidden="true">
+              <img src={mediaUrl(tournament.custom_image)} alt="" className={styles.coverReflectLeftImg} />
+            </div>
           )}
+          <div className={styles.cover} style={coverStyle}>
+            {tournament.image_mode === "custom" && tournament.custom_image && (
+              <img src={mediaUrl(tournament.custom_image)} alt={tournament.name} className={styles.coverImg} />
+            )}
+          </div>
         </div>
 
         <div className={styles.header}>

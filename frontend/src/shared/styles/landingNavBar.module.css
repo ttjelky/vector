@@ -32,7 +32,9 @@ html {
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow:
         0 4px 30px rgba(0, 0, 0, 0.05),
-        0 1px 1px rgba(0, 0, 0, 0.02);
+        0 1px 1px rgba(0, 0, 0, 0.02),
+        0 0 0 0.5px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
     border-radius: 35px;
     flex-shrink: 0;
 }
@@ -48,7 +50,9 @@ html {
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow:
         0 4px 30px rgba(0, 0, 0, 0.05),
-        0 1px 1px rgba(0, 0, 0, 0.02);
+        0 1px 1px rgba(0, 0, 0, 0.02),
+        0 0 0 0.5px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
     border-radius: 75px;
     list-style: none;
     display: flex;
@@ -92,6 +96,7 @@ html {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5);
     border-radius: 14px;
     cursor: pointer;
     transition: background 0.2s;
@@ -132,7 +137,7 @@ html {
     -webkit-backdrop-filter: blur(22px);
     border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 24px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5);
     overflow: hidden;
 
     max-height: 0;

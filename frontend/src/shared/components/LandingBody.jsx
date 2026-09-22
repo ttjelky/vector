@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "@shared/styles/landingBody.module.css";
-import logotext from "@static/VectorLogoText.svg";
+import logotext from "@static/VectorLogo.png";
 import Cableicon from "@static/icons/Cableicon.svg";
 import Earthicon from "@static/icons/Earthicon.svg";
 import Charticon from "@static/icons/Charticon.svg";

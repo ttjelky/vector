@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "@shared/styles/landingFooter.module.css";
-import Logo from "@static/LogoOnly.svg";
+import Logo from "@static/VectorFavicon.png";
 
 const LandingFooter = () => {
     return (

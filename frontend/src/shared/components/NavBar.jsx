@@ -13,7 +13,7 @@ import ProfileIcon     from "@static/icons/Profile.svg?react";
 import InfoIcon        from "@static/icons/Info.svg?react";
 import LogoutIcon      from "@static/icons/Logout.svg?react";
 import BellIcon        from "@static/icons/Bell.svg?react";
-import Logo            from "@static/VectorLogo.svg";
+import Logo            from "@static/VectorLogo.png";
 import cross           from "@static/icons/cross.svg";
 import NewsIcon        from "@static/icons/News.svg?react";
 
@@ -323,6 +323,7 @@ const NavBar = ({ children }) => {
 
   const role     = getUserRole() ?? localStorage.getItem("userRole") ?? "participant";
   const roleTabs = getTabsForRole(role);
+  const homePath = role === "admin" ? "/admindashboard" : role === "jury" ? "/jury" : "/dashboard";
 
   const initialTabIds = useRef(new Set(openTabs.map((t) => String(t.id))));
 
@@ -467,7 +468,7 @@ const NavBar = ({ children }) => {
       <div style={{ marginBottom: 20 }}>
         <p style={{
           fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
-          textTransform: 'uppercase', color: '#aab0bc',
+          textTransform: 'uppercase', color: '#111',
           margin: '0 0 8px 12px',
         }}>Меню</p>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -491,7 +492,7 @@ const NavBar = ({ children }) => {
       <div>
         <p style={{
           fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
-          textTransform: 'uppercase', color: '#aab0bc',
+          textTransform: 'uppercase', color: '#111',
           margin: '0 0 8px 12px',
         }}>Інше</p>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -510,9 +511,9 @@ const NavBar = ({ children }) => {
       <header className={styles.topNavbar}>
         <BurgerButton isOpen={mobileOpen} onClick={mobileOpen ? closeMobile : openMobile} />
 
-        <div className={styles.navbarLogo}>
+        <NavLink to={homePath} className={styles.navbarLogo} aria-label="На головну">
           <img src={Logo} alt="Vector" className={styles.logo} />
-        </div>
+        </NavLink>
 
         <MobileSearch onSearch={setSearchQuery} />
 

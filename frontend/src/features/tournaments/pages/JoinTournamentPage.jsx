@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { API, getAccessToken } from '@api';
 import { Login, Register, Forgot } from "@features/auth";
 import styles from "../styles/JoinTournamentPage.module.css";
-import Logo from "@static/LogoOnly.png";
+import Logo from "@static/VectorFavicon.png";
 import { getDescriptionPreview } from "../components/TournamentCard";
 
 export function JoinTournamentPage() {

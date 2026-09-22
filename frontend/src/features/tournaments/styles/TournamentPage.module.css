@@ -7,17 +7,55 @@
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
 }
 
-/* ─── Cover ───────────────────────────────────────────────────────────────── */
+/* ─── Cover ─────────────────────────────────────────────────────────────────
+   Обкладинка — від краю до краю сторінки, без заокруглень, заведена
+   під навбар.
+   Ліворуч (під сайдбаром) — дзеркальне відображення: сайдбар скляний,
+   тому зображення крізь нього трохи просвічує. Вліво смуга згасає —
+   ілюзія, що зображення тягнеться з-за меж екрана. */
+
+.coverWrap {
+  margin: 0 0 0 -232px;
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Дзеркальна смуга під сайдбаром: копія зображення ТОЧНО того ж розміру
+   й з тим же обрізанням, що й основна обкладинка (ширина = ширина обкладинки,
+   той самий object-fit), відзеркалена по горизонталі правим краєм до стику —
+   шов безшовний. Зліва обрізається краєм екрана: зображення наче виходить
+   за межі екрана. */
+.coverReflectLeft {
+  width: 232px;
+  flex: 0 0 232px;
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+  pointer-events: none;
+  user-select: none;
+}
+
+.coverReflectLeftImg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: calc(100vw - 232px);
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  transform: scaleX(-1);
+}
 
 .cover {
-  margin: 10px 10px 0;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
   height: 200px;
   background: #e8e8ec;
   overflow: hidden;
-  border-radius: 18px;
-  box-shadow:
-    0 4px 16px rgba(0,0,0,0.08),
-    0 16px 40px rgba(0,0,0,0.07);
+  border-radius: 0;
+  box-shadow: none;
   position: relative;
   z-index: 2;
 }
@@ -27,6 +65,11 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+@media (max-width: 992px) {
+  .coverWrap { margin-left: 0; }
+  .coverReflectLeft { display: none; }
 }
 
 /* ─── Header ──────────────────────────────────────────────────────────────── */
@@ -243,6 +286,7 @@
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.07),
     0 1px 4px rgba(0, 0, 0, 0.04),
+    0 0 0 0.5px rgba(0, 0, 0, 0.06),
     inset 0 1px 0 rgba(255,255,255,0.75);
   animation: badgeSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }

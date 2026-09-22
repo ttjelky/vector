@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import logo from "@static/VectorLogo.svg";
+import logo from "@static/VectorLogo.png";
 import styles from "@shared/styles/landingNavBar.module.css";
 import { BlackButton } from "./blackbutton";
 import { WhiteButton } from "./WhiteButton";
