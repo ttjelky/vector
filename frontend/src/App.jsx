@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { TabsProvider }   from '@shared/contexts/TabsContext'
 import { SearchProvider } from '@shared/contexts/SearchContext'
 import { restoreSession, clearAccessToken, setUserRole } from "./api";
+import "@shared/styles/jellyButtons.css";
+import "@shared/styles/glassMaterial.css";
 
 // Pages
 import { Landing }              from "@pages/Landing";

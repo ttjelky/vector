@@ -23,19 +23,7 @@ html {
     -webkit-font-smoothing: antialiased;
 }
 
-.logoContainer {
-    display: flex;
-    padding: 7px 14px;
-    background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow:
-        0 4px 30px rgba(0, 0, 0, 0.05),
-        0 1px 1px rgba(0, 0, 0, 0.02),
-        0 0 0 0.5px rgba(0, 0, 0, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    border-radius: 35px;
+.logoGlass {
     flex-shrink: 0;
 }
 
@@ -44,9 +32,9 @@ html {
 }
 
 .navBarList {
-    background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow:
         0 4px 30px rgba(0, 0, 0, 0.05),
@@ -71,6 +59,19 @@ html {
     position: relative;
 }
 
+.jellyNav {
+    background: none;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    font-family: "Google Sans", sans-serif;
+    font-weight: 700;
+}
+
 .buttons {
     display: flex;
     gap: 20px;
@@ -83,20 +84,20 @@ html {
     flex-shrink: 0;
 }
 
-/* ── Burger button ── */
+/* ── Burger button — скло дає GlassSurface-обгортка, тут лише прозора кнопка ── */
 .burgerBtn {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 5px;
-    width: 46px;
-    height: 46px;
-    background: rgba(255, 255, 255, 0.35);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border-radius: 14px;
     cursor: pointer;
     transition: background 0.2s;
@@ -125,19 +126,19 @@ html {
     transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ── Mobile dropdown — під кнопкою, справа ── */
+/* ── Mobile dropdown — позиція й анімація; скло дає GlassSurface всередині ── */
 .mobileDropdown {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
     width: 230px;
 
-    background: rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border-radius: 24px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5);
     overflow: hidden;
 
     max-height: 0;
@@ -237,11 +238,6 @@ html {
         height: auto;
     }
 
-    .logoContainer {
-        padding: 6px 10px;
-        border-radius: 24px;
-    }
-
     /* ховаємо десктопні елементи */
     nav,
     .buttons {
@@ -258,10 +254,6 @@ html {
 @media (max-width: 390px) {
     .logo {
         width: 100px;
-    }
-
-    .logoContainer {
-        padding: 5px 8px;
     }
 
     .mobileDropdown {

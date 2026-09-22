@@ -57,9 +57,9 @@ body, html {
   flex: 0 0 auto;
   width: 320px;
   margin: 0 0 0 10px;
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(14px) saturate(1.6);
-  -webkit-backdrop-filter: blur(14px) saturate(1.6);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-radius: 100px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.5);
@@ -78,7 +78,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .search:focus-within {
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--glass-bg);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 4px 16px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.6);
 }
 
@@ -99,9 +99,9 @@ input[type="search"]::-webkit-search-cancel-button {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(14px) saturate(1.6);
-  -webkit-backdrop-filter: blur(14px) saturate(1.6);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-radius: 100px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.5);
@@ -111,7 +111,7 @@ input[type="search"]::-webkit-search-cancel-button {
   transition: background 0.3s ease;
   margin-left: auto;
 }
-.navbarUserActions:hover { background: rgba(255, 255, 255, 0.82); }
+.navbarUserActions:hover { background: var(--glass-bg); }
 
 .userName {
   font-size: 14px;
@@ -184,8 +184,8 @@ input[type="search"]::-webkit-search-cancel-button {
   width: 232px;
   z-index: 50;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.6) 100%);
-  backdrop-filter: blur(12px) saturate(2.4) brightness(1.04);
-  -webkit-backdrop-filter: blur(12px) saturate(2.4) brightness(1.04);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-radius: 0;
   border: none;
   border-right: 1px solid rgba(0, 0, 0, 0.08);
@@ -271,9 +271,9 @@ input[type="search"]::-webkit-search-cancel-button {
   display: none;
   flex-direction: column; justify-content: center; align-items: center; gap: 5px;
   width: 42px; height: 42px; min-width: 42px;
-  background: rgba(255, 255, 255, 0.40);
-  backdrop-filter: blur(16px) saturate(1.6);
-  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow:
     0 2px 8px rgba(0,0,0,0.08),
@@ -289,7 +289,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .burgerBtn:hover {
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--glass-bg);
   box-shadow:
     0 4px 12px rgba(0,0,0,0.10),
     0 12px 32px rgba(0,0,0,0.08),
@@ -299,7 +299,7 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .burgerBtn:active {
   transform: scale(0.94);
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--glass-bg);
 }
 
 .burgerLine {
@@ -324,8 +324,8 @@ input[type="search"]::-webkit-search-cancel-button {
 .mobileOverlay {
   position: fixed; inset: 0; z-index: 199;
   background: rgba(10, 12, 20, 0.22);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 @keyframes overlayIn  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
@@ -342,9 +342,9 @@ input[type="search"]::-webkit-search-cancel-button {
   z-index: 200;
 
   /* Прозорий liquid glass — фон проступає */
-  background: rgba(255, 255, 255, 0.42);
-  backdrop-filter: blur(40px) saturate(2.2) brightness(1.05);
-  -webkit-backdrop-filter: blur(40px) saturate(2.2) brightness(1.05);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 
   /* Темна кромка праворуч — розділення з контентом */
   border: none;
@@ -443,7 +443,7 @@ input[type="search"]::-webkit-search-cancel-button {
   .searchExpanded {
     width: 200px;
     padding: 0 14px;
-    background: rgba(255, 255, 255, 0.90) !important;
+    background: var(--glass-bg) !important;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 4px 16px rgba(0,0,0,0.10) !important;
   }
 

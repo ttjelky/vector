@@ -67,15 +67,15 @@
   padding: 4px 13px;
   border-radius: 20px;
   border: 0.5px solid rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--glass-bg);
   font-size: 12.5px;
   font-weight: 500;
   color: #636366;
   cursor: pointer;
   font-family: inherit;
   letter-spacing: -0.01em;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   transition: all 0.15s ease;
   white-space: nowrap;
   box-shadow: 0 0.5px 2px rgba(0,0,0,0.06);
@@ -119,9 +119,9 @@
 
 /* ─── Create form ─────────────────────────────────────────────────────────── */
 .createForm {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(20px) saturate(1.6);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 0.5px solid rgba(0, 0, 0, 0.1);
   border-radius: 20px;
   padding: 20px 20px 18px;
@@ -322,9 +322,9 @@
 
 /* ─── Card ────────────────────────────────────────────────────────────────── */
 .card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(16px) saturate(1.5);
-  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 0.5px solid rgba(0, 0, 0, 0.09);
   border-radius: 20px;
   overflow: hidden;
@@ -802,9 +802,9 @@
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(24px) saturate(1.8);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 0.5px solid rgba(0,0,0,0.1);
   border-radius: 18px;
   padding: 7px 8px;

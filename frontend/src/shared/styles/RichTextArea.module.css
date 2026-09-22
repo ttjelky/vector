@@ -42,9 +42,9 @@
   width: 32px;
   height: 32px;
   border: none;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(12px) saturate(1.6);
-  -webkit-backdrop-filter: blur(12px) saturate(1.6);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-radius: 50%;
   color: #3a3a3a;
   cursor: pointer;
@@ -119,9 +119,9 @@
   top: calc(100% + 6px);
   left: 0;
   min-width: 170px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(20px) saturate(1.8);
-  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 0.5px solid rgba(0, 0, 0, 0.10);
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
@@ -172,9 +172,9 @@
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(20px) saturate(1.8);
-  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 0.5px solid rgba(0, 0, 0, 0.10);
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
@@ -231,7 +231,7 @@
 /* ── Link popup ── */
 .linkPopup {
   background: rgba(248, 248, 248, 0.95);
-  backdrop-filter: blur(10px);
+  backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid rgba(0, 0, 0, 0.07);
   padding: 10px 12px;
   display: flex;
@@ -284,8 +284,8 @@
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(8px);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
   color: #3a3a3a;
   transition: background 0.1s;
   box-shadow: 0 1px 3px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9);

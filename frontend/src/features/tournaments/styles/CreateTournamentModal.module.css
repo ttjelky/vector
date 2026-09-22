@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(4px);
+  backdrop-filter: var(--glass-blur);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -92,8 +92,8 @@
 
 .closeBtn {
   width: 30px; padding: 5px;
-  background: rgba(255,255,255,0.3);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(255,255,255,0.2);
   box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.05);
   border-radius: 1000px; cursor: pointer; pointer-events: auto;
@@ -104,8 +104,8 @@
 
 .stepIndicator {
   display: flex; align-items: center; gap: 6px;
-  background: rgba(255,255,255,0.55);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(255,255,255,0.3);
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
   border-radius: 1000px; padding: 8px 14px; pointer-events: auto;

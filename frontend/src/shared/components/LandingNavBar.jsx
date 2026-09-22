@@ -7,6 +7,22 @@ import { useNavigate } from "react-router-dom";
 import { Login } from "@features/auth";
 import { Register } from "@features/auth";
 import { Forgot } from "@features/auth";
+import JellyRadio from "./JellyRadio";
+import GlassSurface from "./GlassSurface";
+
+const NAV_ITEMS = [
+    { value: "info", label: "Інфо" },
+    { value: "howToStart", label: "Як почати?" },
+    { value: "contactUs", label: "Зв'язатися з нами" },
+];
+
+const scrollToSection = (value) => {
+    const el = document.getElementById(value);
+    if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+        window.history.replaceState(null, "", `#${value}`);
+    }
+};
 
 const LandingNavBar = () => {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -51,25 +67,34 @@ const LandingNavBar = () => {
     return (
         <header className={styles.header}>
 
-            <div className={styles.logoContainer}>
+            <GlassSurface
+                width="auto"
+                height="auto"
+                borderRadius={35}
+                backgroundOpacity={0.3}
+                saturation={1.6}
+                className={styles.logoGlass}
+            >
                 <a className="landingNavLogo" href="#main">
                     <img src={logo} className={styles.logo} />
                 </a>
-            </div>
+            </GlassSurface>
 
-            {/* Desktop nav — не чіпаємо */}
-            <nav>
-                <ul className={styles.navBarList}>
-                    <li className={styles.navBarItem}>
-                        <a href="#info" className={styles.navBarLink}>Інфо</a>
-                    </li>
-                    <li className={styles.navBarItem}>
-                        <a href="#howToStart" className={styles.navBarLink}>Як почати?</a>
-                    </li>
-                    <li className={styles.navBarItem}>
-                        <a href="#contactUs" className={styles.navBarLink}>Зв'язатися з нами</a>
-                    </li>
-                </ul>
+            {/* Desktop nav — JellyRadio */}
+            <nav className={styles.jellyNav}>
+                <JellyRadio
+                    items={NAV_ITEMS}
+                    defaultValue="info"
+                    onChange={(value) => scrollToSection(value)}
+                    chipColor="#ececee"
+                    activeColor="#18181b"
+                    textColor="#18181b"
+                    activeTextColor="#f5f5f5"
+                    size="md"
+                    gap={8}
+                    radius={22}
+                    ariaLabel="Навігація"
+                />
             </nav>
 
             {/* Desktop buttons — не чіпаємо */}
@@ -80,18 +105,34 @@ const LandingNavBar = () => {
 
             {/* Burger + dropdown (mobile only) */}
             <div className={styles.burgerWrapper} ref={burgerWrapperRef}>
-                <button
-                    className={`${styles.burgerBtn} ${menuOpen ? styles.burgerOpen : ""}`}
-                    onClick={() => setMenuOpen((v) => !v)}
-                    aria-label="Меню"
+                <GlassSurface
+                    width={48}
+                    height={48}
+                    borderRadius={14}
+                    backgroundOpacity={0.35}
+                    saturation={1.6}
                 >
-                    <span />
-                    <span />
-                    <span />
-                </button>
+                    <button
+                        className={`${styles.burgerBtn} ${menuOpen ? styles.burgerOpen : ""}`}
+                        onClick={() => setMenuOpen((v) => !v)}
+                        aria-label="Меню"
+                    >
+                        <span />
+                        <span />
+                        <span />
+                    </button>
+                </GlassSurface>
 
                 <div className={`${styles.mobileDropdown} ${menuOpen ? styles.mobileDropdownOpen : ""}`}>
-                    <ul className={styles.mobileNavList}>
+                    <GlassSurface
+                        width="100%"
+                        height="100%"
+                        borderRadius={24}
+                        backgroundOpacity={0.35}
+                        saturation={1.6}
+                    >
+                        <div style={{ width: "100%" }}>
+                            <ul className={styles.mobileNavList}>
                         <li className={styles.mobileNavItem}>
                             <a href="#info" className={styles.mobileNavLink} onClick={closeMenu}>Інфо</a>
                         </li>
@@ -113,6 +154,8 @@ const LandingNavBar = () => {
                             onClick={() => { closeMenu(); setIsLoginOpen(true); }}
                         />
                     </div>
+                        </div>
+                    </GlassSurface>
                 </div>
             </div>
 

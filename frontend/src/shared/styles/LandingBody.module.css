@@ -60,9 +60,13 @@ html, body {
 }
 
 .LogoText {
-    scale: 1.1;
     position: absolute;
     margin-top: 140px;
+    font-family: "Google Sans", sans-serif;
+    font-size: 120px;
+    font-weight: 700;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
 }
 
 .img1wrapper {
@@ -246,7 +250,7 @@ html, body {
     }
 
     .LogoText {
-        scale: 3;
+        font-size: 100px;
         padding: 5px;
     }
 
@@ -325,10 +329,10 @@ html, body {
 
     /* LogoText — абсолютний, підлаштовуємо під менший контейнер */
     .LogoText {
-        scale: 0.6;
         position: absolute;
         margin-top: 35px;
         margin-bottom: 15px;
+        font-size: 50px;
     }
 
     .HelloS,
@@ -510,7 +514,7 @@ html, body {
     }
 
     .LogoText {
-        scale: 0.6;
+        font-size: 42px;
         margin-top: 25px;
     }
 

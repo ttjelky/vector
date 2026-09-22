@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "@shared/styles/landingBody.module.css";
-import logotext from "@static/VectorLogo.png";
 import Cableicon from "@static/icons/Cableicon.svg";
 import Earthicon from "@static/icons/Earthicon.svg";
 import Charticon from "@static/icons/Charticon.svg";
@@ -91,7 +90,7 @@ const LandingBody = () => {
                 <div className={styles.animate}>
                     <div className={styles.headerContent}>
                         <h1 className={styles.title}>Змагайтеся із</h1>
-                        <img className={styles.LogoText} src={logotext} alt="Vector" />
+                        <span className={styles.LogoText}>Vector</span>
                         <img src={HelloS} className={styles.HelloS}/>
                         <img src={YouCanS} className={styles.YouCanS}/>
                     </div>

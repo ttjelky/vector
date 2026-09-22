@@ -318,9 +318,9 @@
   overflow: hidden;
   transition: box-shadow 0.22s ease, transform 0.18s ease, background 0.2s ease;
 
-  background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid rgba(255, 255, 255, 0.75);
   box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.10),

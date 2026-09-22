@@ -39,8 +39,8 @@
     margin: 5px 0px;
     cursor: pointer;
     width: 100%;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow:
     0 8px 32px 0 rgba(0, 0, 0, 0.1),
@@ -50,7 +50,7 @@
 }
 
 .faqQuestion:hover {
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--glass-bg);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
     transition-duration: 0.2s;
@@ -65,8 +65,8 @@
 .cross {
     width: 40px;
     height: 40px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow:
     0 8px 32px 0 rgba(0, 0, 0, 0.1),
@@ -88,7 +88,7 @@
 
 .active {
   transform: rotate(0deg);
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--glass-bg);
 }
 
 .contactUs {

@@ -1,0 +1,40 @@
+/* ── Желейна поведінка для всіх кнопок проєкту ──────────────────────────
+   hover   — БЕЗ підняття (translateY), лише трохи темніше (brightness);
+   press   — желейне стиснення (вузько-зплющене);
+   release — пружне повернення: overshoot-bezier трохи збільшує кнопку
+             й плавно повертає у звичну форму.
+   JellyRadio-чипи виключено: їх анімує motion (inline-стилі). */
+
+button:not(.jelly-radio__chip):not(:active):not(:disabled) {
+    transform-origin: 50% 50%;
+    transition:
+        transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+        filter 200ms ease,
+        background-color 200ms ease,
+        box-shadow 200ms ease;
+}
+
+@media (hover: hover) {
+    button:not(.jelly-radio__chip):hover:not(:active):not(:disabled) {
+        transform: none;
+        filter: brightness(0.94);
+    }
+}
+
+button:not(.jelly-radio__chip):active:not(:disabled) {
+    transform: scale(0.94, 0.9);
+    filter: brightness(0.9);
+    transition:
+        transform 110ms ease-in,
+        filter 110ms ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button:not(.jelly-radio__chip):not(:disabled) {
+        transition: filter 150ms ease, background-color 150ms ease;
+    }
+
+    button:not(.jelly-radio__chip):active:not(:disabled) {
+        transform: none;
+    }
+}
