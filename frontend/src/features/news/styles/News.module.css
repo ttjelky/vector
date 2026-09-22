@@ -426,21 +426,21 @@
   align-items: center;
   gap: 7px;
   padding: 10px 22px;
-  background: var(--glass-bg);
+  background: var(--btn-secondary-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--btn-secondary-border-color);
   border-radius: 20px;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(60, 60, 67, 0.75);
+  color: var(--btn-secondary-text);
   cursor: pointer;
   transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
 
 .loadMoreBtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--btn-secondary-hover-bg);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   color: #1c1c1e;

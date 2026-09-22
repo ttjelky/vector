@@ -85,8 +85,8 @@
   gap: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: #fff;
-  background: #1a1a1a;
+  color: var(--btn-primary-text);
+  background: var(--btn-primary-bg);
   border: none;
   border-radius: 100px;
   padding: 7px 12px;
@@ -95,13 +95,13 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-.composeBtn:hover { background: #333; }
+.composeBtn:hover { background: var(--btn-primary-hover-bg); }
 
 .markReadBtn {
   font-size: 12px;
   font-weight: 500;
-  color: #999;
-  background: #f2f2f2;
+  color: var(--btn-secondary-text);
+  background: var(--btn-secondary-bg);
   border: none;
   border-radius: 8px;
   padding: 6px 10px;
@@ -110,7 +110,7 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-.markReadBtn:hover { background: #e8e8e8; }
+.markReadBtn:hover { background: var(--btn-secondary-hover-bg); }
 
 .dropBody {
   max-height: 420px;
@@ -462,8 +462,8 @@
   white-space: nowrap;
   padding: 0 18px;
   height: 48px;
-  background: #111;
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   border: none;
   border-radius: 100px;
   font-size: 13px;
@@ -474,7 +474,7 @@
   box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 3px 10px rgba(0,0,0,0.1);
   transition: background 0.13s, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.13s;
 }
-.addBtn:hover  { background: #222; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.22); }
+.addBtn:hover  { background: var(--btn-primary-hover-bg); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.22); }
 .addBtn:active { transform: translateY(0) scale(0.97); }
 
 .chipList { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
@@ -542,17 +542,17 @@
 
 .cancelBtn {
   padding: 8px 18px;
-  background: rgb(241,241,241);
+  background: var(--btn-secondary-bg);
   border-radius: 20px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid lightgray;
-  color: #999;
+  border: 1px solid var(--btn-secondary-border-color);
+  color: var(--btn-secondary-text);
   font-family: inherit;
   transition: background 0.13s, transform 0.15s;
 }
-.cancelBtn:hover  { background: #ebebeb; transform: translateY(-1px); }
+.cancelBtn:hover  { background: var(--btn-secondary-hover-bg); transform: translateY(-1px); }
 .cancelBtn:active { transform: translateY(0) scale(0.97); }
 
 .sendBtn {
@@ -565,12 +565,12 @@
   font-weight: 500;
   cursor: pointer;
   border: none;
-  background: #111;
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   font-family: inherit;
   transition: background 0.13s, transform 0.15s;
 }
-.sendBtn:hover:not(:disabled)  { background: #222; transform: translateY(-1px); }
+.sendBtn:hover:not(:disabled)  { background: var(--btn-primary-hover-bg); transform: translateY(-1px); }
 .sendBtn:active                { transform: translateY(0) scale(0.97); }
 .sendBtn:disabled              { opacity: 0.5; cursor: not-allowed; transform: none; }
 

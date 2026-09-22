@@ -211,10 +211,10 @@
 .btnPrimary {
   flex: 1;
   height: 40px;
-  background: #111;
+  background: var(--btn-primary-bg);
   border: none;
   border-radius: 10px;
-  color: #fff;
+  color: var(--btn-primary-text);
   font-size: 14px;
   font-weight: 500;
   font-family: inherit;
@@ -226,15 +226,15 @@
   gap: 6px;
 }
 
-.btnPrimary:hover { opacity: 0.82; }
+.btnPrimary:hover { background: var(--btn-primary-hover-bg); }
 
 .btnSecondary {
   height: 40px;
   padding: 0 22px;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: var(--btn-secondary-bg);
+  border: 1px solid var(--btn-secondary-border-color);
   border-radius: 10px;
-  color: #333;
+  color: var(--btn-secondary-text);
   font-size: 14px;
   font-weight: 500;
   font-family: inherit;
@@ -242,7 +242,7 @@
   transition: background 0.15s;
 }
 
-.btnSecondary:hover { background: #f5f5f5; }
+.btnSecondary:hover { background: var(--btn-secondary-hover-bg); }
 
 /* ── Stats row ──────────────────────────────────────────────────── */
 .statsRow {

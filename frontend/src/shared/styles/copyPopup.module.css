@@ -4,9 +4,9 @@
     font-size: 30px;
     cursor: pointer;
     border-radius: 30px;
-    border: 2px solid rgb(238, 238, 238);
-    background-color: white;
-    color: black;
+    border: 2px solid var(--btn-secondary-border-color);
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
     position: relative;
     overflow: hidden;
 }

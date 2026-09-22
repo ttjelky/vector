@@ -464,15 +464,15 @@
   padding: 10px 20px;
   font-size: 13.5px;
   font-weight: 600;
-  color: #fff;
-  background: #1d1d1f;
+  color: var(--btn-primary-text);
+  background: var(--btn-primary-bg);
   border: none;
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s, transform 0.1s;
 }
-.submitWorkBtn:hover  { background: #2d2d2f; }
+.submitWorkBtn:hover  { background: var(--btn-primary-hover-bg); }
 .submitWorkBtn:active { transform: scale(0.97); }
 
 /* ─── Grade result block ─────────────────────────────────────────────────────── */
@@ -991,8 +991,8 @@
   padding: 9px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #fff;
-  background: #1d1d1f;
+  color: var(--btn-primary-text);
+  background: var(--btn-primary-bg);
   border: none;
   border-radius: 100px;
   cursor: pointer;
@@ -1000,7 +1000,7 @@
   font-family: inherit;
   transition: background 0.15s;
 }
-.editLinkAddBtn:hover { background: #2d2d2f; }
+.editLinkAddBtn:hover { background: var(--btn-primary-hover-bg); }
 
 /* File picker label */
 .editFilePickBtn {
@@ -1041,29 +1041,29 @@
   padding: 9px 18px;
   font-size: 13.5px;
   font-weight: 500;
-  color: #1d1d1f;
-  background: rgba(0,0,0,0.05);
+  color: var(--btn-secondary-text);
+  background: var(--btn-secondary-bg);
   border: none;
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s;
 }
-.editCancelBtn:hover:not(:disabled) { background: rgba(0,0,0,0.09); }
+.editCancelBtn:hover:not(:disabled) { background: var(--btn-secondary-hover-bg); }
 .editCancelBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .editSaveBtn {
   padding: 9px 20px;
   font-size: 13.5px;
   font-weight: 600;
-  color: #fff;
-  background: #1d1d1f;
+  color: var(--btn-primary-text);
+  background: var(--btn-primary-bg);
   border: none;
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s, transform 0.1s;
 }
-.editSaveBtn:hover:not(:disabled) { background: #2d2d2f; }
+.editSaveBtn:hover:not(:disabled) { background: var(--btn-primary-hover-bg); }
 .editSaveBtn:active { transform: scale(0.97); }
 .editSaveBtn:disabled { opacity: 0.5; cursor: not-allowed; }

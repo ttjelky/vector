@@ -117,8 +117,8 @@
 .btn {
   width: 100%;
   padding: 13px;
-  background: #1f1f1f;
-  color: white;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   box-shadow: 0 4px 12px rgba(52,52,52,0.2);
   border: none;
   border-radius: 100px;
@@ -129,7 +129,7 @@
   margin-top: 4px;
 }
 .btn:hover:not(:disabled) {
-  background: #2b2b2b;
+  background: var(--btn-primary-hover-bg);
   box-shadow: 0 4px 12px rgba(52,52,52,0.2);
   transform: translateY(-1px);
 }
@@ -155,8 +155,8 @@
 .btnSecondary {
   flex: 0 0 auto;
   padding: 13px 18px;
-  background: #f4f4f5;
-  color: #444;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
   border: none;
   border-radius: 100px;
   font-size: 15px;
@@ -166,5 +166,5 @@
   white-space: nowrap;
 }
 .btnSecondary:hover {
-  background: #e8e8ea;
+  background: var(--btn-secondary-hover-bg);
 }

@@ -172,12 +172,12 @@
 }
 .inviteLinkLabel { font-size: 12px; color: #ccc; }
 .copyLinkBtn {
-  font-size: 12px; font-weight: 600; color: #555;
-  background: #f4f4f5; border: 1px solid #ebebeb;
+  font-size: 12px; font-weight: 600; color: var(--btn-secondary-text);
+  background: var(--btn-secondary-bg); border: 1px solid var(--btn-secondary-border-color);
   border-radius: 100px; padding: 5px 13px; cursor: pointer;
   transition: background 0.15s; font-family: inherit;
 }
-.copyLinkBtn:hover { background: #ebebeb; }
+.copyLinkBtn:hover { background: var(--btn-secondary-hover-bg); }
 
 /* ── Footer ─────────────────────────────────────────────────────────────── */
 .formFooter {
@@ -189,26 +189,26 @@
 
 .btnPrimary {
   padding: 11px 26px;
-  background: #111; color: #fff;
+  background: var(--btn-primary-bg); color: var(--btn-primary-text);
   border: none; border-radius: 100px;
   font-size: 14px; font-weight: 600;
   cursor: pointer; font-family: inherit;
   transition: background 0.15s, box-shadow 0.15s;
   letter-spacing: -0.01em;
 }
-.btnPrimary:hover:not(:disabled) { background: #2a2a2a; box-shadow: 0 4px 16px rgba(0,0,0,0.16); }
+.btnPrimary:hover:not(:disabled) { background: var(--btn-primary-hover-bg); box-shadow: 0 4px 16px rgba(0,0,0,0.16); }
 .btnPrimary:disabled { background: #e4e4e7; color: #aaa; cursor: not-allowed; }
 
 .btnDisabledHint { background: #f4f4f5 !important; color: #bbb !important; box-shadow: none !important; }
 
 .btnSecondary {
   padding: 11px 22px;
-  background: none; color: #999;
-  border: 1px solid #e8e8e8; border-radius: 100px;
+  background: var(--btn-secondary-bg); color: var(--btn-secondary-text);
+  border: 1px solid var(--btn-secondary-border-color); border-radius: 100px;
   font-size: 14px; cursor: pointer; font-family: inherit;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-.btnSecondary:hover { background: #fafafa; border-color: #d4d4d8; color: #333; }
+.btnSecondary:hover { background: var(--btn-secondary-hover-bg); border-color: #d4d4d8; color: var(--btn-secondary-text); }
 
 /* ── Messages ───────────────────────────────────────────────────────────── */
 .successMsg {
@@ -312,36 +312,36 @@
 }
 
 .btnPrimary:hover:not(:disabled) {
-  opacity: 0.88;
+  background: var(--btn-primary-hover-bg);
   transform: translateY(-1px);
 }
 
 .btnSecondary {
   border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--btn-secondary-border-color);
   padding: 10px 20px;
   font-size: 14px;
-  background: transparent;
+  background: var(--btn-secondary-bg);
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .btnSecondary:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--btn-secondary-hover-bg);
 }
 
 .copyLinkBtn {
   border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--btn-secondary-border-color);
   padding: 9px 16px;
   font-size: 13px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
-  background: transparent;
+  background: var(--btn-secondary-bg);
 }
 
 .copyLinkBtn:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--btn-secondary-hover-bg);
 }
 
 /* ── Footer ──────────────────────────────────────────────────────────── */

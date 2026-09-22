@@ -367,13 +367,13 @@
   padding: 8px 14px;
   font-size: 13px;
   font-weight: 500;
-  color: #888;
-  background: none;
-  border: 1px solid #e8e8e8;
+  color: var(--btn-secondary-text);
+  background: var(--btn-secondary-bg);
+  border: 1px solid var(--btn-secondary-border-color);
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s, color 0.15s;
 }
 
-.cancelInlineBtn:hover { background: #f5f5f5; color: #444; }
+.cancelInlineBtn:hover { background: var(--btn-secondary-hover-bg); color: #444; }

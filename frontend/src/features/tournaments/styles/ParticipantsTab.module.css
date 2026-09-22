@@ -79,8 +79,8 @@
 
 .inviteBtn {
   padding: 8px 18px;
-  background: #1f1e1e;
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   font-size: 13px;
   font-weight: 500;
   border: none;
@@ -89,7 +89,7 @@
   font-family: inherit;
   transition: background 0.15s, transform 0.1s;
 }
-.inviteBtn:hover   { background: #2a2a2a; }
+.inviteBtn:hover   { background: var(--btn-primary-hover-bg); }
 .inviteBtn:active  { transform: scale(0.97); }
 .inviteBtn:disabled { opacity: 0.5; cursor: default; }
 
@@ -250,8 +250,8 @@
   padding: 9px 20px;
   font-size: 13px;
   font-weight: 600;
-  color: #fff;
-  background: #111;
+  color: var(--btn-primary-text);
+  background: var(--btn-primary-bg);
   border: none;
   border-radius: 100px;
   cursor: pointer;
@@ -259,7 +259,7 @@
   white-space: nowrap;
   transition: background 0.15s, transform 0.1s;
 }
-.createTeamBtn:hover    { background: #333; }
+.createTeamBtn:hover    { background: var(--btn-primary-hover-bg); }
 .createTeamBtn:active   { transform: scale(0.97); }
 .createTeamBtn:disabled { opacity: 0.45; cursor: not-allowed; }
 
@@ -267,15 +267,15 @@
   padding: 9px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #666;
-  background: transparent;
-  border: 1px solid #e4e4e8;
+  color: var(--btn-secondary-text);
+  background: var(--btn-secondary-bg);
+  border: 1px solid var(--btn-secondary-border-color);
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s;
 }
-.cancelCreateBtn:hover { background: #f0f0f2; }
+.cancelCreateBtn:hover { background: var(--btn-secondary-hover-bg); }
 
 .addError {
   font-size: 12.5px;
@@ -383,11 +383,11 @@
 
 .teamActionBtnSave {
   composes: teamActionBtn;
-  background: #111;
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   font-weight: 700;
 }
-.teamActionBtnSave:hover { background: #333; }
+.teamActionBtnSave:hover { background: var(--btn-primary-hover-bg); }
 
 .teamActionBtnDanger {
   composes: teamActionBtn;
@@ -540,8 +540,8 @@
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #fff;
-  background: #111;
+  color: var(--btn-primary-text);
+  background: var(--btn-primary-bg);
   border: none;
   border-radius: 100px;
   cursor: pointer;
@@ -549,7 +549,7 @@
   white-space: nowrap;
   transition: background 0.15s, transform 0.1s;
 }
-.addMemberBtn:hover    { background: #333; }
+.addMemberBtn:hover    { background: var(--btn-primary-hover-bg); }
 .addMemberBtn:active   { transform: scale(0.97); }
 .addMemberBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -691,8 +691,8 @@
 
 .exceptionConfirmBtn {
   padding: 8px 20px;
-  background: #1f1e1e;
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   border: none;
   border-radius: 100px;
   font-size: 13px;
@@ -701,21 +701,21 @@
   transition: background 0.15s;
 }
 .exceptionConfirmBtn:hover {
-  background: #2a2a2a;
+  background: var(--btn-primary-hover-bg);
 }
 
 .exceptionCancelBtn {
   padding: 8px 16px;
-  background: transparent;
-  color: #888;
-  border: 1px solid #e0e0e4;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border: 1px solid var(--btn-secondary-border-color);
   border-radius: 100px;
   font-size: 13px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 .exceptionCancelBtn:hover {
-  background: #ebebed;
+  background: var(--btn-secondary-hover-bg);
   color: #111;
 }
 

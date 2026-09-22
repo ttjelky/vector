@@ -55,8 +55,8 @@
   padding: 9px 20px;
   font-size: 13px;
   font-weight: 600;
-  color: #fff;
-  background: #111;
+  color: var(--btn-primary-text);
+  background: var(--btn-primary-bg);
   border: none;
   border-radius: 100px;
   cursor: pointer;
@@ -64,7 +64,7 @@
   font-family: inherit;
   transition: background 0.15s, box-shadow 0.15s;
 }
-.inviteBtn:hover:not(:disabled) { background: #2a2a2a; box-shadow: 0 4px 14px rgba(0,0,0,0.16); }
+.inviteBtn:hover:not(:disabled) { background: var(--btn-primary-hover-bg); box-shadow: 0 4px 14px rgba(0,0,0,0.16); }
 .inviteBtn:active:not(:disabled) { transform: scale(0.98); }
 .inviteBtn:disabled { background: #e4e4e7; color: #bbb; cursor: not-allowed; }
 
@@ -204,8 +204,8 @@
 .deleteBtn:hover { background: rgba(192,57,43,0.05); }
 .confirmDeleteBtn { background: #c0392b; color: #fff; border-color: #c0392b; }
 .confirmDeleteBtn:hover { background: #a93226; }
-.cancelBtn { background: none; color: #888; border-color: #ebebeb; }
-.cancelBtn:hover { background: #fafafa; }
+.cancelBtn { background: var(--btn-secondary-bg); color: var(--btn-secondary-text); border-color: var(--btn-secondary-border-color); }
+.cancelBtn:hover { background: var(--btn-secondary-hover-bg); }
 .confirmRow {
   display: flex; align-items: center; gap: 8px;
   font-size: 13px; color: #777; flex-wrap: wrap;
@@ -277,18 +277,18 @@
 .exceptionPanelActions { display: flex; gap: 8px; }
 .exceptionConfirmBtn {
   padding: 7px 18px; border-radius: 100px;
-  font-size: 12px; font-weight: 600; color: #fff;
-  background: #111; border: none; cursor: pointer; font-family: inherit;
+  font-size: 12px; font-weight: 600; color: var(--btn-primary-text);
+  background: var(--btn-primary-bg); border: none; cursor: pointer; font-family: inherit;
   transition: background 0.15s;
 }
-.exceptionConfirmBtn:hover:not(:disabled) { background: #2a2a2a; }
+.exceptionConfirmBtn:hover:not(:disabled) { background: var(--btn-primary-hover-bg); }
 .exceptionConfirmBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .exceptionCancelBtn {
   padding: 7px 18px; border-radius: 100px;
-  font-size: 12px; font-weight: 600; color: #888;
-  background: none; border: 1px solid #ebebeb; cursor: pointer; font-family: inherit;
+  font-size: 12px; font-weight: 600; color: var(--btn-secondary-text);
+  background: var(--btn-secondary-bg); border: 1px solid var(--btn-secondary-border-color); cursor: pointer; font-family: inherit;
 }
-.exceptionCancelBtn:hover { background: #f4f4f5; }
+.exceptionCancelBtn:hover { background: var(--btn-secondary-hover-bg); }
 
 .exceptionPanelHint { font-size: 11px; color: #aaa; }

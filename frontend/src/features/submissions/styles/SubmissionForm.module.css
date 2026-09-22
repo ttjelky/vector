@@ -80,30 +80,30 @@
   padding: 9px 18px;
   font-size: 13.5px;
   font-weight: 500;
-  color: #1d1d1f;
-  background: rgba(0,0,0,0.05);
+  color: var(--btn-secondary-text);
+  background: var(--btn-secondary-bg);
   border: none;
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s;
 }
-.cancelBtn:hover    { background: rgba(0,0,0,0.09); }
+.cancelBtn:hover    { background: var(--btn-secondary-hover-bg); }
 .cancelBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .submitBtn {
   padding: 10px 22px;
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
-  background: #1d1d1f;
+  color: var(--btn-primary-text);
+  background: var(--btn-primary-bg);
   border: none;
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s, transform 0.1s;
 }
-.submitBtn:hover    { background: #2d2d2f; }
+.submitBtn:hover    { background: var(--btn-primary-hover-bg); }
 .submitBtn:active   { transform: scale(0.97); }
 .submitBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -111,8 +111,8 @@
   padding: 9px 16px;
   font-size: 13px;
   font-weight: 500;
-  color: #fff;
-  background: #1d1d1f;
+  color: var(--btn-primary-text);
+  background: var(--btn-primary-bg);
   border: none;
   border-radius: 100px;
   cursor: pointer;
@@ -120,7 +120,7 @@
   font-family: inherit;
   transition: background 0.15s;
 }
-.addLinkBtn:hover { background: #2d2d2f; }
+.addLinkBtn:hover { background: var(--btn-primary-hover-bg); }
 
 .filePickBtn {
   align-self: flex-start;

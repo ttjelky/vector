@@ -4,14 +4,14 @@
     min-height: 48px;
     padding-inline: 22px;
     font-size: 16px;
-    background: linear-gradient(180deg, #3a3a3a, #1f1f1f);
+    background: var(--btn-primary-bg);
     box-shadow:
     inset 0 -2px 4px rgba(0,0,0,0.6),
     0 6px 12px rgba(0,0,0,0.15);
-    color: white;
+    color: var(--btn-primary-text);
     cursor: pointer;
     border-radius: 1000px;
-    border: 1px solid black;
+    border: 1px solid var(--btn-primary-border-color);
     transform-origin: 50% 50%;
     transition:
         transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -21,7 +21,7 @@
 }
 
 .blackbutton:hover {
-    background: linear-gradient(180deg, #444, #242424);
+    background: var(--btn-primary-hover-bg);
     transform: none;
     box-shadow:
     inset 0 1px 2px rgba(255,255,255,0.2),

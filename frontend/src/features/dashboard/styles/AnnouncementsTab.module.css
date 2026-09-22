@@ -101,8 +101,8 @@
   gap: 5px;
   padding: 6px 16px;
   border-radius: 20px;
-  background: #1c1c1e;
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   font-size: 12.5px;
   font-weight: 500;
   border: none;
@@ -114,7 +114,7 @@
   transition: opacity 0.15s, transform 0.1s;
 }
 
-.newAnnBtn:hover  { opacity: 0.76; }
+.newAnnBtn:hover  { background: var(--btn-primary-hover-bg); }
 .newAnnBtn:active { transform: scale(0.96); }
 
 /* ─── Create form ─────────────────────────────────────────────────────────── */
@@ -285,24 +285,24 @@
 .formCancelBtn {
   padding: 7px 15px;
   border-radius: 20px;
-  border: 0.5px solid rgba(0,0,0,0.1);
-  background: rgba(255,255,255,0.7);
+  border: 0.5px solid var(--btn-secondary-border-color);
+  background: var(--btn-secondary-bg);
   font-size: 12.5px;
   font-weight: 500;
-  color: #636366;
+  color: var(--btn-secondary-text);
   cursor: pointer;
   font-family: inherit;
   letter-spacing: -0.01em;
   transition: background 0.12s;
 }
 
-.formCancelBtn:hover { background: rgba(0,0,0,0.05); color: #1c1c1e; }
+.formCancelBtn:hover { background: var(--btn-secondary-hover-bg); color: #1c1c1e; }
 
 .formPublishBtn {
   padding: 7px 18px;
   border-radius: 20px;
-  background: #1c1c1e;
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   font-size: 12.5px;
   font-weight: 500;
   border: none;
@@ -314,7 +314,7 @@
 }
 
 .formPublishBtn:disabled { opacity: 0.28; cursor: not-allowed; }
-.formPublishBtn:not(:disabled):hover  { opacity: 0.75; }
+.formPublishBtn:not(:disabled):hover  { background: var(--btn-primary-hover-bg); }
 .formPublishBtn:not(:disabled):active { transform: scale(0.96); }
 
 /* ─── Feed ────────────────────────────────────────────────────────────────── */
@@ -653,8 +653,8 @@
   align-self: flex-end;
   padding: 5px 13px;
   border-radius: 16px;
-  background: #1c1c1e;
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   font-size: 11.5px;
   font-weight: 500;
   border: none;
@@ -665,7 +665,7 @@
 }
 
 .replySendBtn:disabled { opacity: 0.28; cursor: not-allowed; }
-.replySendBtn:not(:disabled):hover { opacity: 0.72; }
+.replySendBtn:not(:disabled):hover { background: var(--btn-primary-hover-bg); }
 
 .repliesList {
   display: flex;
@@ -714,8 +714,8 @@
   align-self: flex-end;
   padding: 6px 15px;
   border-radius: 16px;
-  background: #1c1c1e;
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   font-size: 12px;
   font-weight: 500;
   border: none;
@@ -728,7 +728,7 @@
 }
 
 .newCommentSend:disabled { opacity: 0.28; cursor: not-allowed; }
-.newCommentSend:not(:disabled):hover  { opacity: 0.72; }
+.newCommentSend:not(:disabled):hover  { background: var(--btn-primary-hover-bg); }
 .newCommentSend:not(:disabled):active { transform: scale(0.95); }
 
 /* ─── Reactions ───────────────────────────────────────────────────────────── */

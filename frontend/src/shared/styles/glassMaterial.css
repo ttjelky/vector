@@ -13,4 +13,14 @@
         0 2px 16px 0 rgba(31, 38, 135, 0.1),
         inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
         inset 0 -1px 0 0 rgba(255, 255, 255, 0.2);
+
+    /* ── Єдині кольори кнопок: головна (темна) / другорядна (світла) ── */
+    --btn-primary-bg: linear-gradient(180deg, #3a3a3a, #1f1f1f);
+    --btn-primary-hover-bg: linear-gradient(180deg, #444444, #242424);
+    --btn-primary-text: #ffffff;
+    --btn-primary-border-color: #000000;
+    --btn-secondary-bg: #ffffff;
+    --btn-secondary-hover-bg: #f0f0f0;
+    --btn-secondary-text: #222222;
+    --btn-secondary-border-color: #e5e5e5;
 }

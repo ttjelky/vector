@@ -214,12 +214,12 @@
 .inviteLinkLabel { font-size: 12px; color: #ccc; }
 
 .copyBtn {
-  font-size: 12px; font-weight: 600; color: #555;
-  background: #f4f4f5; border: 1px solid #ebebeb;
+  font-size: 12px; font-weight: 600; color: var(--btn-secondary-text);
+  background: var(--btn-secondary-bg); border: 1px solid var(--btn-secondary-border-color);
   border-radius: 100px; padding: 5px 13px; cursor: pointer;
   transition: background 0.15s;
 }
-.copyBtn:hover { background: #ebebeb; }
+.copyBtn:hover { background: var(--btn-secondary-hover-bg); }
 .copyBtnCopied { color: #1a7f4c; background: rgba(26,127,76,0.07); border-color: rgba(26,127,76,0.18); }
 
 /* ── PIN reveal ────────────────────────────────────────────────────────── */
@@ -252,14 +252,14 @@
 .btnRegister {
   width: 100%;
   padding: 13px 22px;
-  background: #111; color: #fff;
+  background: var(--btn-primary-bg); color: var(--btn-primary-text);
   border: none; border-radius: 100px;
   font-size: 14px; font-weight: 600;
   cursor: pointer; font-family: inherit;
   transition: background 0.15s, box-shadow 0.15s;
   letter-spacing: -0.01em;
 }
-.btnRegister:hover { background: #2a2a2a; box-shadow: 0 4px 16px rgba(0,0,0,0.14); }
+.btnRegister:hover { background: var(--btn-primary-hover-bg); box-shadow: 0 4px 16px rgba(0,0,0,0.14); }
 .btnRegisterDisabled {
   background: #f4f4f5 !important;
   color: #bbb !important;
@@ -277,13 +277,13 @@
 /* ── Buttons ───────────────────────────────────────────────────────────── */
 .btnPrimary {
   padding: 10px 20px;
-  background: #111; color: #fff;
+  background: var(--btn-primary-bg); color: var(--btn-primary-text);
   border: none; border-radius: 100px;
   font-size: 13px; font-weight: 600;
   cursor: pointer; white-space: nowrap; font-family: inherit;
   transition: background 0.15s, box-shadow 0.15s;
 }
-.btnPrimary:hover { background: #2a2a2a; box-shadow: 0 4px 14px rgba(0,0,0,0.16); }
+.btnPrimary:hover { background: var(--btn-primary-hover-bg); box-shadow: 0 4px 14px rgba(0,0,0,0.16); }
 .btnPrimary:disabled { background: #e4e4e7; color: #aaa; cursor: not-allowed; box-shadow: none; }
 
 /* input inside invite */
@@ -323,12 +323,12 @@
 
 .btnGhost {
   padding: 9px 18px;
-  background: none; color: #999;
-  border: 1px solid #e8e8e8; border-radius: 100px;
+  background: var(--btn-secondary-bg); color: var(--btn-secondary-text);
+  border: 1px solid var(--btn-secondary-border-color); border-radius: 100px;
   font-size: 13px; cursor: pointer; font-family: inherit;
   transition: background 0.15s;
 }
-.btnGhost:hover { background: #fafafa; color: #555; }
+.btnGhost:hover { background: var(--btn-secondary-hover-bg); color: #555; }
 
 /* ── Danger zone ───────────────────────────────────────────────────────── */
 .dangerZone {

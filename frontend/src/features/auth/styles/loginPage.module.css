@@ -183,23 +183,24 @@
 }
 
 .btnCancel {
-  background: rgb(232, 232, 232);
-  color: #333;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border: 1px solid var(--btn-secondary-border-color);
 }
 
 .btnCancel:hover {
+  background: var(--btn-secondary-hover-bg);
   transform: translateY(-1px);
 }
 
 .btnSubmit {
-  background: #1f1f1f;
-  color: white;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   box-shadow: 0 4px 12px rgba(52, 52, 52, 0.2);
 }
 
 .btnSubmit:hover:not(:disabled) {
-  background: #2a2a2a;
+  background: var(--btn-primary-hover-bg);
   transform: translateY(-1px);
 }
 

@@ -124,8 +124,8 @@
 }
 
 .btn {
-  background: #212122;
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   border: none;
   border-radius: 100px;
   padding: 12px 28px;
@@ -138,6 +138,7 @@
 }
 
 .btn:hover {
+    background: var(--btn-primary-hover-bg);
     transform: translateY(-2px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }

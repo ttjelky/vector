@@ -527,22 +527,22 @@
 }
 
 .btnCancel {
-  padding: 8px 18px; background: rgb(241,241,241);
+  padding: 8px 18px; background: var(--btn-secondary-bg);
   border-radius: 100px; font-size: 14px; font-weight: 500;
-  cursor: pointer; border: 1px solid lightgray; color: #999;
+  cursor: pointer; border: 1px solid var(--btn-secondary-border-color); color: var(--btn-secondary-text);
   transition: background 0.13s, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.13s;
 }
-.btnCancel:hover  { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.1); background: #ebebeb; }
+.btnCancel:hover  { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.1); background: var(--btn-secondary-hover-bg); }
 .btnCancel:active { transform: translateY(0) scale(0.97); }
 
 .btnCreate {
   display: flex; align-items: center; gap: 5px;
   padding: 8px 22px; border-radius: 100px; font-size: 14px; font-weight: 500;
-  cursor: pointer; border: none; background: #111; color: #fff;
+  cursor: pointer; border: none; background: var(--btn-primary-bg); color: var(--btn-primary-text);
   transition: background 0.13s, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.13s;
   box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 3px 10px rgba(0,0,0,0.1);
 }
-.btnCreate:hover  { background: #222; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.22); }
+.btnCreate:hover  { background: var(--btn-primary-hover-bg); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.22); }
 .btnCreate:active { transform: translateY(0) scale(0.97); }
 
 /* ══════════════════════════════════════════
@@ -690,12 +690,12 @@
 .linkBtn:hover { background: #f0f0f0; color: #111111; }
 
 .linkBtnPrimary {
-  background: #111111;
-  border-color: #111111;
-  color: #ffffff;
+  background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-border-color);
+  color: var(--btn-primary-text);
 }
 
-.linkBtnPrimary:hover:not(:disabled) { background: #333333; }
+.linkBtnPrimary:hover:not(:disabled) { background: var(--btn-primary-hover-bg); }
 .linkBtnPrimary:disabled { opacity: 0.35; cursor: default; }
 
 /* ── Editor area ── */

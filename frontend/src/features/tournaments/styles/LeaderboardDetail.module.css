@@ -46,17 +46,17 @@
   align-items: center;
   gap: 6px;
   padding: 6px 14px 6px 10px;
-  border: 1px solid #e4e4e7;
+  border: 1px solid var(--btn-secondary-border-color);
   border-radius: 100px;
-  background: #fff;
-  color: #555;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.13s, color 0.13s;
 }
-.backBtn:hover { background: #f4f4f6; color: #111; }
+.backBtn:hover { background: var(--btn-secondary-hover-bg); color: var(--btn-secondary-text); }
 
 .headerRight {
   display: flex;
