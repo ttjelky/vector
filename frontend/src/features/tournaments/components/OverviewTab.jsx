@@ -6,7 +6,7 @@ import { RichTextArea } from "@shared/components/RichTextArea";
 import { StatusBadge, InfoRow } from "./TournamentShared";
 import { formatDate, toInputDatetime } from "./tournamentHelpers";
 import { STOCK_IMAGES } from "./TournamentCard";
-import { API } from '@api';
+import { API, mediaUrl } from '@api';
 
 // ─── Константи ────────────────────────────────────────────────────────────────
 
@@ -54,7 +54,7 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
   const [stockImage,    setStockImage]    = useState(tournament.stock_image || STOCK_IMAGES[0].id);
   const [customFile,    setCustomFile]    = useState(null);
   const [customPreview, setCustomPreview] = useState(
-    tournament.image_mode === "custom" ? tournament.custom_image : null
+    tournament.image_mode === "custom" ? mediaUrl(tournament.custom_image) : null
   );
 
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
@@ -68,7 +68,7 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
     setForm(buildForm(tournament));
     setImageMode(tournament.image_mode  || "stock");
     setStockImage(tournament.stock_image || STOCK_IMAGES[0].id);
-    setCustomPreview(tournament.image_mode === "custom" ? tournament.custom_image : null);
+    setCustomPreview(tournament.image_mode === "custom" ? mediaUrl(tournament.custom_image) : null);
     setCustomFile(null);
   }, [tournament]);
 

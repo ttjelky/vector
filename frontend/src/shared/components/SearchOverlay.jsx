@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTabs } from "@shared/contexts/TabsContext";
 import { useSearch } from "@shared/contexts/SearchContext";
 import { computeStatus, STOCK_IMAGES, getDescriptionPreview, StatusBadge } from "@features/tournaments";
+import { mediaUrl } from "@api";
 import styles from "@shared/styles/SearchOverlay.module.css";
 
 // ─── Підсвічування збігу в тексті ────────────────────────────────────────────
@@ -37,7 +38,7 @@ function SearchCard({ tournament, onClick, query }) {
     if (tournament.image_mode === "custom" && tournament.custom_image) {
       return (
         <img
-          src={tournament.custom_image}
+          src={mediaUrl(tournament.custom_image)}
           alt={tournament.name}
           className={styles.cardImg}
           style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}

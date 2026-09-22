@@ -1,5 +1,6 @@
 import styles from "../styles/CreateTournamentModal.module.css";
 import "@shared/styles/richContent.css";
+import { mediaUrl } from "@api";
 
 export const STOCK_IMAGES = [
   { id: "blue",  gradient: "linear-gradient(135deg, #c0caf7 0%, #5fa3e3 100%)" },
@@ -70,11 +71,12 @@ export function TournamentCard({
 }) {
   const renderImage = () => {
     if (imageMode === "custom") {
-      if (customImage) {
+      const src = mediaUrl(customImage);
+      if (src) {
         return (
           <div className={styles.previewImage}>
             <img
-              src={customImage}
+              src={src}
               alt={name}
               className={styles.cardImg}
               style={{

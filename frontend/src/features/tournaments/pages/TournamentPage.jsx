@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import styles from "../styles/TournamentPage.module.css";
 import { NavBar } from "@shared/components/NavBar";
 import { useParams, useNavigate } from "react-router-dom";
-import { API } from '@api';
+import { API, mediaUrl } from '@api';
 import { STOCK_IMAGES } from "../components/TournamentCard";
 import { StatusBadge, ConfirmDeleteModal } from "../components/TournamentShared";
 import { computeStatus } from "../components/tournamentHelpers";
@@ -178,7 +178,7 @@ export function TournamentPage() {
       <div className={styles.page}>
         <div className={styles.cover} style={coverStyle}>
           {tournament.image_mode === "custom" && tournament.custom_image && (
-            <img src={tournament.custom_image} alt={tournament.name} className={styles.coverImg} />
+            <img src={mediaUrl(tournament.custom_image)} alt={tournament.name} className={styles.coverImg} />
           )}
         </div>
 

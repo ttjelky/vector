@@ -235,6 +235,7 @@ def _run_distribution(tournament_id, min_reviews: int, max_per_juror: int) -> li
 class TournamentCreateView(generics.ListCreateAPIView):
     serializer_class   = TournamentSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes     = [MultiPartParser, FormParser]
 
     def get_queryset(self):
         return Tournament.objects.filter(members__user=self.request.user)
@@ -1441,7 +1442,7 @@ class LeaderboardView(APIView):
                 data[pid].setdefault(rid, []).append(grade.total)
 
             profile_map = {
-                p.user_id: p.avatar.url if p.avatar else None
+                p.user_id: request.build_absolute_uri(p.avatar.url) if p.avatar else None
                 for p in UserProfile.objects.filter(user_id__in=data.keys()).select_related()
             }
 
@@ -1653,7 +1654,10 @@ class LeaderboardDetailView(APIView):
         # Аватарка учасника
         try:
             participant_profile = UserProfile.objects.get(user=participant)
-            participant_avatar = participant_profile.avatar.url if participant_profile.avatar else None
+            participant_avatar = (
+                request.build_absolute_uri(participant_profile.avatar.url)
+                if participant_profile.avatar else None
+            )
         except UserProfile.DoesNotExist:
             participant_avatar = None
 
@@ -1675,7 +1679,10 @@ class LeaderboardDetailView(APIView):
             # Аватарка журі
             try:
                 juror_profile = UserProfile.objects.get(user=juror)
-                juror_avatar = juror_profile.avatar.url if juror_profile.avatar else None
+                juror_avatar = (
+                    request.build_absolute_uri(juror_profile.avatar.url)
+                    if juror_profile.avatar else None
+                )
             except UserProfile.DoesNotExist:
                 juror_avatar = None
 

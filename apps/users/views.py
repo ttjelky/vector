@@ -38,6 +38,16 @@ def _clear_refresh_cookie(response):
     )
 
 
+def _avatar_url(request, prof):
+    """Повертає абсолютний URL аватарки (або None)."""
+    try:
+        if prof.avatar and hasattr(prof.avatar, "url"):
+            return request.build_absolute_uri(prof.avatar.url)
+    except Exception:
+        pass
+    return None
+
+
 def _user_payload(user):
     """Повертає dict з даними юзера що потрібні фронтенду."""
     role = getattr(user, "role", None)
@@ -178,7 +188,7 @@ def profile(request):
             "email":      user.email,
             "first_name": user.first_name,
             "last_name":  user.last_name,
-            "avatar":     prof.avatar.url if prof.avatar else None,
+            "avatar":     _avatar_url(request, prof),
         })
 
     user.first_name = request.data.get("first_name", user.first_name)
@@ -194,7 +204,7 @@ def profile(request):
         "email":      user.email,
         "first_name": user.first_name,
         "last_name":  user.last_name,
-        "avatar":     prof.avatar.url if prof.avatar else None,
+        "avatar":     _avatar_url(request, prof),
     })
 
 

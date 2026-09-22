@@ -3,10 +3,15 @@ import axios from "axios";
 export const MEDIA_URL = import.meta.env.VITE_MEDIA_URL ?? '';
 
 // Конвертує відносний /media/... URL в абсолютний.
-// Якщо вже абсолютний — повертає як є.
+// Якщо вже абсолютний (http/https), blob: або data: — повертає як є.
 export function mediaUrl(path) {
   if (!path) return null;
-  if (path.startsWith('http')) return path;
+  if (
+    path.startsWith('http://') ||
+    path.startsWith('https://') ||
+    path.startsWith('blob:') ||
+    path.startsWith('data:')
+  ) return path;
   return `${MEDIA_URL}${path}`;
 }
 

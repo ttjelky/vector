@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { API } from '@api';
+import { API, mediaUrl } from '@api';
 import styles from "../styles/TeamsTab.module.css";
 import { X } from "lucide-react";
 import { usePolling } from "@shared/hooks/usePolling";
@@ -25,10 +25,16 @@ function Avatar({ name, avatar, size = 28 }) {
   };
 
   if (avatar && !imgError) {
+    const src = mediaUrl(avatar);
+    if (!src) return (
+      <div style={{ ...baseStyle, background: "#f0f0f0", color: "#555" }}>
+        {initials}
+      </div>
+    );
     return (
       <div style={baseStyle}>
         <img
-          src={avatar}
+          src={src}
           alt={name}
           onError={() => setImgError(true)}
           style={{ width: "100%", height: "100%", objectFit: "cover" }}

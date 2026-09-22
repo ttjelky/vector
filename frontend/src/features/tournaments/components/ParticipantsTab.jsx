@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import styles from "../styles/ParticipantsTab.module.css";
-import { API } from '@api';
+import { API, mediaUrl } from '@api';
 import { X, Shield, Users, Crown, Upload, UserPlus } from "lucide-react";
 import { ConfirmDeleteModal } from "./TournamentShared";
 import { usePolling } from "@shared/hooks/usePolling";
@@ -81,9 +81,7 @@ function getDisplayName(member) {
 // ─── Аватарка учасника ────────────────────────────────────────────────────────
 
 function MemberAvatar({ member }) {
-  const src = member.avatar
-    ? (member.avatar.startsWith("http") ? member.avatar : mediaUrl(member.avatar))
-    : null;
+  const src = mediaUrl(member.avatar);
   const initials = (member.full_name || member.username || "?")
     .split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 

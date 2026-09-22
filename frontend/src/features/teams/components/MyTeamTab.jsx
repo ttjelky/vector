@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { API } from '@api';
+import { API, mediaUrl } from '@api';
 import { CreateTeamForm } from "./CreateTeamForm";
 import styles from "../styles/MyTeamTab.module.css";
 import { usePolling } from "@shared/hooks/usePolling";
@@ -29,11 +29,12 @@ function Avatar({ name, avatar, size = "md" }) {
   const [imgError, setImgError] = useState(false);
   const initials = (name ?? "?").charAt(0).toUpperCase();
 
-  if (avatar && !imgError) {
+  const src = mediaUrl(avatar);
+  if (src && !imgError) {
     return (
       <div className={`${styles.avatar} ${styles[`avatar_${size}`]}`} style={{ padding: 0, overflow: "hidden" }}>
         <img
-          src={avatar}
+          src={src}
           alt={name}
           onError={() => setImgError(true)}
           style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}

@@ -52,7 +52,7 @@ const Profile = () => {
 
         setProfile(updated);
         setEditMode(false);
-        setPreview(updated.avatar);
+        setPreview(mediaUrl(updated.avatar));
     };
 
     if (loading)
