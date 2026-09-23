@@ -46,6 +46,15 @@
   backdrop-filter: blur(16px);
 }
 
+/* Суцільний варіант (як підкладка під логотип): непрозорий, без блюру. */
+.glass-surface--solid.glass-surface {
+  background: #fff;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border: 1px solid #d1d1d1;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+}
+
 .glass-surface:focus-visible {
   outline: 2px solid #007aff;
   outline-offset: 2px;

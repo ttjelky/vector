@@ -12,6 +12,7 @@ const GlassSurface = (props) => {
     style = {},
     width,
     height,
+    ...rest
   } = props;
 
   const containerStyle = {
@@ -22,7 +23,7 @@ const GlassSurface = (props) => {
   };
 
   return (
-    <div className={`glass-surface ${className}`} style={containerStyle}>
+    <div className={`glass-surface ${className}`} style={containerStyle} {...rest}>
       <div className="glass-surface__content">{children}</div>
     </div>
   );

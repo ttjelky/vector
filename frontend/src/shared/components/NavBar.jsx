@@ -5,17 +5,9 @@ import { getTabsForRole, COMMON_TABS } from "@nav";
 import styles from "@shared/styles/NavBar.module.css";
 import nStyles from "@shared/styles/Notifications.module.css";
 
-import HomeIcon        from "@static/icons/Home.svg?react";
-import TournamentsIcon from "@static/icons/Tournaments.svg?react";
-import WorksIcon       from "@static/icons/Works.svg?react";
-import SettingsIcon    from "@static/icons/Settings.svg?react";
-import ProfileIcon     from "@static/icons/Profile.svg?react";
-import InfoIcon        from "@static/icons/Info.svg?react";
-import LogoutIcon      from "@static/icons/Logout.svg?react";
+import { House, Trophy, FileText, Settings, User, CircleHelp, LogOut, Newspaper, X } from "lucide-react";
 import BellIcon        from "@static/icons/Bell.svg?react";
 import Logo            from "@static/VectorLogo.png";
-import cross           from "@static/icons/cross.svg";
-import NewsIcon        from "@static/icons/News.svg?react";
 
 import { ComposeModal, NotificationDropdown } from './Notifications';
 import { mediaUrl, getAccessToken, getUserRole, clearAccessToken, logoutUser } from '@api';
@@ -28,18 +20,19 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
 const getToken = () => getAccessToken();
 
 const ICON_MAP = {
-  home:        HomeIcon,
-  tournaments: TournamentsIcon,
-  works:       WorksIcon,
-  settings:    SettingsIcon,
-  profile:     ProfileIcon,
-  help:        InfoIcon,
-  news:        NewsIcon,
+  home:        House,
+  tournaments: Trophy,
+  works:       FileText,
+  settings:    Settings,
+  profile:     User,
+  help:        CircleHelp,
+  news:        Newspaper,
+  logout:      LogOut,
 };
 
 const renderIcon = (key, isMobile = false) => {
-  const Icon = ICON_MAP[key] ?? HomeIcon;
-  return <Icon className={isMobile ? styles.mobileNavIcon : styles.sidebarIcon} />;
+  const Icon = ICON_MAP[key] ?? House;
+  return <Icon className={isMobile ? styles.mobileNavIcon : styles.sidebarIcon} strokeWidth={1.8} />;
 };
 
 /* ─── Nav item ─── */
@@ -95,7 +88,7 @@ const TournamentTab = ({ tab, onClose, animate, onNavClick }) => {
         <span className={styles.tabName}>└ {tab.name}</span>
         <button className={styles.closeIconWrapper} onClick={handleClose}
           aria-label={`Закрити ${tab.name}`} type="button">
-          <img src={cross} className={styles.closeIcon} alt="" />
+          <X className={styles.closeIcon} strokeWidth={2} />
         </button>
       </NavLink>
     </div>
@@ -156,17 +149,22 @@ const MobileSearch = ({ onSearch }) => {
     onSearch("");
   };
 
-  // Клік поза — звужуємо
+  // Клік поза або Escape — звужуємо
   useEffect(() => {
     if (!expanded) return;
     const handler = (e) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) collapse();
     };
+    const onKey = (e) => {
+      if (e.key === 'Escape') collapse();
+    };
     document.addEventListener('mousedown', handler);
     document.addEventListener('touchstart', handler);
+    document.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('mousedown', handler);
       document.removeEventListener('touchstart', handler);
+      document.removeEventListener('keydown', onKey);
     };
   }, [expanded]);
 
@@ -175,7 +173,12 @@ const MobileSearch = ({ onSearch }) => {
       ref={wrapRef}
       className={`${styles.search} ${expanded ? styles.searchExpanded : ''}`}
       onClick={!expanded ? expand : undefined}
+      onKeyDown={!expanded ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); expand(); } } : undefined}
       style={{ cursor: expanded ? 'text' : 'pointer' }}
+      role={!expanded ? 'button' : undefined}
+      tabIndex={!expanded ? 0 : undefined}
+      aria-label="Пошук турнірів"
+      aria-expanded={expanded}
     >
       <GlassSurface
         width="100%"
@@ -183,12 +186,12 @@ const MobileSearch = ({ onSearch }) => {
         borderRadius={100}
         backgroundOpacity={0.7}
         saturation={1.6}
-        className={`${styles.searchGlass} glass-surface--flat`}
+        className={`${styles.searchGlass} glass-surface--solid`}
       >
       <svg
-        width="15" height="15" viewBox="0 0 20 20"
-        fill="none" stroke="currentColor" strokeWidth="2"
-        style={{ opacity: 0.4, flexShrink: 0, transition: 'opacity 0.2s' }}
+        width="16" height="16" viewBox="0 0 20 20"
+        fill="none" stroke="#111" strokeWidth="2"
+        style={{ flexShrink: 0 }}
       >
         <circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/>
       </svg>
@@ -533,9 +536,14 @@ const NavBar = ({ children }) => {
             borderRadius={100}
             backgroundOpacity={0.7}
             saturation={1.6}
-            className={`${styles.userPill} glass-surface--flat`}
+            className={`${styles.userPill} glass-surface--solid ${styles.userPillClickable}`}
+            onClick={() => navigate("/profile")}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/profile"); } }}
+            role="link"
+            tabIndex={0}
+            aria-label="Мій профіль"
+            title="Мій профіль"
           >
-            <span className={styles.userName}>{fullUserName}</span>
             {avatar
               ? <img src={avatar} alt="avatar" className={styles.navbarAvatar} />
               : (
@@ -544,7 +552,15 @@ const NavBar = ({ children }) => {
                 </div>
               )
             }
-            <button className={nStyles.bellBtn} aria-label="Сповіщення" onClick={handleBellClick}>
+            <span className={styles.userName}>{fullUserName}</span>
+          </GlassSurface>
+          <GlassSurface
+            width={50}
+            height={50}
+            borderRadius={100}
+            className={`${styles.bellCircle} glass-surface--solid`}
+          >
+            <button className={`${nStyles.bellBtn} ${styles.bellCircleBtn}`} aria-label="Сповіщення" onClick={handleBellClick}>
               <BellIcon className={styles.notificationIcon} />
               {hasUnread && <span className={nStyles.badge} />}
             </button>
@@ -575,7 +591,7 @@ const NavBar = ({ children }) => {
           <div className={styles.logoutSection}>
             {showLogout && (
               <button onClick={handleLogout} className={styles.logoutBtn} type="button">
-                <LogoutIcon className={styles.logoutIcon} style={{ color: "rgb(215,125,126)", fill: "rgb(215,125,126)" }} />
+                <LogOut className={styles.logoutIcon} style={{ color: "rgb(215,125,126)" }} strokeWidth={1.8} />
                 <span className={styles.logoutText}>Вийти</span>
               </button>
             )}
@@ -612,7 +628,7 @@ const NavBar = ({ children }) => {
               {showLogout && (
                 <div className={styles.logoutSection}>
                   <button onClick={handleLogout} className={styles.logoutBtn} type="button">
-                    <LogoutIcon className={styles.logoutIcon} style={{ color: 'rgb(215,125,126)', fill: 'rgb(215,125,126)' }} />
+                    <LogOut className={styles.logoutIcon} style={{ color: 'rgb(215,125,126)' }} strokeWidth={1.8} />
                     <span className={styles.logoutText}>Вийти</span>
                   </button>
                 </div>
