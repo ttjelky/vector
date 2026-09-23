@@ -8,15 +8,19 @@
 }
 
 /* ─── Cover ─────────────────────────────────────────────────────────────────
-   Обкладинка — від краю до краю сторінки, без заокруглень, заведена
-   під навбар.
+   Обкладинка — від краю до краю сторінки, без заокруглень.
+   Верх заведено ВГОРУ за межі екрана: coverWrap піднято відносним
+   зсувом (top), а висота збільшена на ту ж величину — видима частина
+   та ж сама, а верх зображення ховається під навбар і обрізається
+   краєм екрана. Компенсація margin-bottom прибирає порожнечу в layout.
    Ліворуч (під сайдбаром) — дзеркальне відображення: сайдбар скляний,
    тому зображення крізь нього трохи просвічує. Вліво смуга згасає —
    ілюзія, що зображення тягнеться з-за меж екрана. */
 
 .coverWrap {
-  margin: 0 0 0 -232px;
+  margin: 0 0 -120px -232px;
   position: relative;
+  top: -120px;
   display: flex;
   align-items: stretch;
 }
@@ -29,7 +33,7 @@
 .coverReflectLeft {
   width: 232px;
   flex: 0 0 232px;
-  height: 300px;
+  height: 420px;
   overflow: hidden;
   position: relative;
   pointer-events: none;
@@ -41,7 +45,7 @@
   top: 0;
   right: 0;
   width: calc(100vw - 232px);
-  height: 300px;
+  height: 420px;
   object-fit: cover;
   display: block;
   transform: scaleX(-1);
@@ -51,7 +55,7 @@
   flex: 1;
   min-width: 0;
   margin: 0;
-  height: 300px;
+  height: 420px;
   background: #e8e8ec;
   overflow: hidden;
   border-radius: 0;
@@ -68,9 +72,9 @@
 }
 
 @media (max-width: 992px) {
-  .coverWrap { margin-left: 0; }
+  .coverWrap { margin: 0 0 -100px 0; top: -100px; }
   .coverReflectLeft { display: none; }
-  .cover { height: 220px; }
+  .cover { height: 320px; }
 }
 
 /* ─── Header ──────────────────────────────────────────────────────────────── */

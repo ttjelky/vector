@@ -446,7 +446,6 @@ const NavBar = ({ children }) => {
   const desktopNavContent = () => (
     <>
       <nav className={styles.primaryNav}>
-        <h3 className={styles.sidebarSectionTitle}>Меню</h3>
         <ul>
           {roleTabs.map(({ key, label, path }) => (
             <NavItem key={key} tabKey={key} label={label} path={path}>
@@ -465,7 +464,6 @@ const NavBar = ({ children }) => {
         </ul>
       </nav>
       <nav className={styles.secondaryNav}>
-        <h3 className={styles.sidebarSectionTitle}>Інше</h3>
         <ul>
           {COMMON_TABS.map(({ key, label, path }) => (
             <NavItem key={key} tabKey={key} label={label} path={path} />
@@ -478,12 +476,7 @@ const NavBar = ({ children }) => {
   // ── Mobile nav content ──────────────────────────────────────────────────
   const mobileNavContent = () => (
     <>
-      <div style={{ marginBottom: 20 }}>
-        <p style={{
-          fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
-          textTransform: 'uppercase', color: '#111',
-          margin: '0 0 8px 12px',
-        }}>Меню</p>
+      <div style={{ marginBottom: 0 }}>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {roleTabs.map(({ key, label, path }) => (
             <NavItem key={key} tabKey={key} label={label} path={path} onNavClick={handleNavClick} mobile>
@@ -503,11 +496,6 @@ const NavBar = ({ children }) => {
         </ul>
       </div>
       <div>
-        <p style={{
-          fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
-          textTransform: 'uppercase', color: '#111',
-          margin: '0 0 8px 12px',
-        }}>Інше</p>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {COMMON_TABS.map(({ key, label, path }) => (
             <NavItem key={key} tabKey={key} label={label} path={path} onNavClick={handleNavClick} mobile />
@@ -581,7 +569,7 @@ const NavBar = ({ children }) => {
           backgroundOpacity={isTournamentPage ? 0.82 : 0.7}
           saturation={1.6}
           displace={isTournamentPage ? 4 : 0}
-          className={`${styles.leftSidebar} ${styles.desktopSidebar} ${styles.sidebarGlass}`}
+          className={`${styles.leftSidebar} ${styles.desktopSidebar} ${styles.sidebarGlass} glass-surface--dense`}
         >
           {desktopNavContent()}
           <div className={styles.logoutSection}>
@@ -612,7 +600,7 @@ const NavBar = ({ children }) => {
             backgroundOpacity={0.65}
             saturation={1.6}
             displace={0}
-            className={`${styles.mobileSidebar} ${mobileClosing ? styles.mobileSidebarClosing : styles.mobileSidebarOpen} ${styles.mobileGlass}`}
+            className={`${styles.mobileSidebar} ${mobileClosing ? styles.mobileSidebarClosing : styles.mobileSidebarOpen} ${styles.mobileGlass} glass-surface--dense`}
           >
             <div className={styles.mobileSidebarHeader}>
               <img src={Logo} alt="Vector" className={styles.mobileSidebarLogo} />

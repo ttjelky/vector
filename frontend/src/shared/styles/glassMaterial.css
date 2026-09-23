@@ -1,12 +1,11 @@
 /* ── Єдиний скляний матеріал проєкту ────────────────────────────────────
-   Матеріал повторює GlassSurface (React Bits) у fallback-режимі:
-   молочний фрост + blur/saturate/brightness + світла рамка + м'які тіні.
+   Звичайний матовий блюр без saturate/brightness-ланцюжків.
    Імпортовано глобально в App.jsx. Усі скляні поверхні проєкту мають
    посилатися на ці токени, а не дублювати власні значення. */
 
 :root {
     --glass-bg: rgba(255, 255, 255, 0.55);
-    --glass-blur: blur(16px) saturate(1.8) brightness(1.1);
+    --glass-blur: blur(12px);
     --glass-border: 1px solid rgba(255, 255, 255, 0.3);
     --glass-shadow:
         0 8px 32px 0 rgba(31, 38, 135, 0.2),

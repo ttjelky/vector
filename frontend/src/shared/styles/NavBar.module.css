@@ -32,22 +32,25 @@ body, html {
    Лівий край вирівняно за написами «Меню» / «Інше» в сайдбарі
    (12px падінг топбару + 12px марджин = 24px, як 12px падінг сайдбару + 12px марджин заголовків). */
 .navbarLogo {
-  width: 212px;
+  width: 208px;
   flex-shrink: 0;
-  margin-left: 12px;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 8px 0 24px;
+  margin-left: 0;
+  background: #fff;
+  border: 1px solid #d1d1d1;
+  border-radius: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 8px 14px;
   display: flex;
   align-items: center;
+  justify-content: center;
   pointer-events: all;
   text-decoration: none;
   cursor: pointer;
+  box-sizing: border-box;
 }
 .navbarLogo:hover {
-  background: transparent;
-  box-shadow: none;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .logo { width: 160px; height: auto; display: block; }
@@ -230,13 +233,14 @@ input[type="search"]::-webkit-search-cancel-button {
   justify-content: flex-start;
 }
 
-.primaryNav, .secondaryNav { margin-bottom: 20px; }
+.primaryNav { margin-bottom: 0; }
+.secondaryNav { margin-bottom: 20px; }
 .leftSidebar ul { list-style: none; padding: 0; margin: 0; }
 .leftSidebar li { margin-bottom: 6px; }
 .leftSidebar a  { text-decoration: none; color: #333; display: flex; align-items: center; padding: 10px 13px; border-radius: 10px; }
 
-.sidebarText { font-size: 12px; font-weight: 500; color: rgba(39, 50, 64, 1); }
-.sidebarIcon { width: 17px; height: 17px; margin-right: 10px; opacity: 0.75; }
+.sidebarText { font-size: 14px; font-weight: 500; color: rgba(39, 50, 64, 1); }
+.sidebarIcon { width: 19px; height: 19px; margin-right: 10px; opacity: 0.9; }
 .sidebarSectionTitle {
   font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
   text-transform: uppercase; color: #111;
@@ -249,7 +253,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .inactiveLink:hover .sidebarIcon { opacity: 1; }
 
 .activeLink { background-color: rgba(0,0,0,0.07); border-radius: 16px !important; }
-.activeLink .sidebarText { color: rgba(39,50,64,1); font-weight: 700; }
+.activeLink .sidebarText { color: rgba(39,50,64,1); font-weight: 600; }
 .activeLink .sidebarIcon { opacity: 1; }
 
 /* ── Nested tournament tabs ── */
@@ -292,9 +296,9 @@ input[type="search"]::-webkit-search-cancel-button {
   box-sizing: border-box; transition: background-color 0.15s ease;
 }
 .mobileInactiveLink:hover { background-color: rgba(0,0,0,0.05); }
-.mobileSidebarText { font-size: 13px; font-weight: 500; color: rgba(39,50,64,1); }
-.mobileNavIcon { width: 17px; height: 17px; margin-right: 10px; opacity: 0.75; flex-shrink: 0; }
-.mobileActiveLink .mobileSidebarText { font-weight: 700; }
+.mobileSidebarText { font-size: 15px; font-weight: 500; color: rgba(39,50,64,1); }
+.mobileNavIcon { width: 19px; height: 19px; margin-right: 10px; opacity: 0.9; flex-shrink: 0; }
+.mobileActiveLink .mobileSidebarText { font-weight: 600; }
 .mobileActiveLink .mobileNavIcon     { opacity: 1; }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -410,6 +414,12 @@ input[type="search"]::-webkit-search-cancel-button {
   width: 120px;
   height: auto;
   display: block;
+  background: #fff;
+  border: 1px solid #d1d1d1;
+  border-radius: 18px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 6px 10px;
+  box-sizing: border-box;
 }
 
 .mobileSidebarBody {
