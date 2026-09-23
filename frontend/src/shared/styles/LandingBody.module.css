@@ -59,6 +59,12 @@ html, body {
     margin-bottom: 10px;
 }
 
+/* Маска для обертових слів hero — чистий вертикальний слайд без обрізання гліфів */
+span.heroRotatorWord {
+    overflow: hidden;
+    padding-bottom: 0.1em;
+}
+
 .LogoText {
     position: absolute;
     margin-top: 140px;

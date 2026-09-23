@@ -90,9 +90,9 @@ const LandingNavBar = () => {
                     activeColor="#18181b"
                     textColor="#18181b"
                     activeTextColor="#f5f5f5"
-                    size="md"
-                    gap={8}
-                    radius={22}
+                    size="lg"
+                    gap={10}
+                    radius={24}
                     ariaLabel="Навігація"
                 />
             </nav>

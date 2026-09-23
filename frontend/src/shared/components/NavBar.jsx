@@ -233,6 +233,9 @@ const NavBar = ({ children }) => {
   const TOURNAMENT_PATHS = ["/tournaments", "/admin/tournaments", "/participant/tournaments"];
   const isOnTournamentsPage = TOURNAMENT_PATHS.some(p => location.pathname.startsWith(p));
 
+  // Сторінка турніру — щільніше скло сайдбара: сильніший блюр і фрост
+  const isTournamentPage = location.pathname.startsWith("/tournament/");
+
   // Стан оверлею
   const [overlayOpen,    setOverlayOpen]    = useState(false);
   const [searchResults,  setSearchResults]  = useState([]);
@@ -575,9 +578,9 @@ const NavBar = ({ children }) => {
           width={232}
           height="100%"
           borderRadius={0}
-          backgroundOpacity={0.7}
+          backgroundOpacity={isTournamentPage ? 0.82 : 0.7}
           saturation={1.6}
-          displace={0}
+          displace={isTournamentPage ? 4 : 0}
           className={`${styles.leftSidebar} ${styles.desktopSidebar} ${styles.sidebarGlass}`}
         >
           {desktopNavContent()}

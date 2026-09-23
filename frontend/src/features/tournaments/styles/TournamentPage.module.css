@@ -29,7 +29,7 @@
 .coverReflectLeft {
   width: 232px;
   flex: 0 0 232px;
-  height: 200px;
+  height: 300px;
   overflow: hidden;
   position: relative;
   pointer-events: none;
@@ -41,7 +41,7 @@
   top: 0;
   right: 0;
   width: calc(100vw - 232px);
-  height: 200px;
+  height: 300px;
   object-fit: cover;
   display: block;
   transform: scaleX(-1);
@@ -51,7 +51,7 @@
   flex: 1;
   min-width: 0;
   margin: 0;
-  height: 200px;
+  height: 300px;
   background: #e8e8ec;
   overflow: hidden;
   border-radius: 0;
@@ -70,6 +70,7 @@
 @media (max-width: 992px) {
   .coverWrap { margin-left: 0; }
   .coverReflectLeft { display: none; }
+  .cover { height: 220px; }
 }
 
 /* ─── Header ──────────────────────────────────────────────────────────────── */

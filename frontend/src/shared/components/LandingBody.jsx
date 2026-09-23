@@ -11,6 +11,7 @@ import HelloS from "@static/stickers/HelloS.svg";
 import YouCanS from "@static/stickers/YouCanS.svg";
 import { BlackButton } from "./blackbutton";
 import { WhiteButton } from "./WhiteButton";
+import RotatingText from "./RotatingText";
 import iPad from "@static/Ipad.png";
 import { CopyPopup } from "./CopyPopup";
 import joinStyles from "@features/tournaments/styles/JoinTournamentPage.module.css";
@@ -89,7 +90,17 @@ const LandingBody = () => {
             <header className={styles.header} id="main">
                 <div className={styles.animate}>
                     <div className={styles.headerContent}>
-                        <h1 className={styles.title}>Змагайтеся із</h1>
+                        <h1 className={styles.title}>
+                            <RotatingText
+                                texts={["Змагайтеся", "Навчайтеся", "Перемагайте", "Досліджуйте", "Створюйте"]}
+                                splitLevelClassName={styles.heroRotatorWord}
+                                staggerDuration={0.03}
+                                rotationInterval={2500}
+                                transition={{ type: "spring", damping: 30, stiffness: 400 }}
+                                style={{ display: "inline-flex" }}
+                            />
+                            {" із"}
+                        </h1>
                         <span className={styles.LogoText}>Vector</span>
                         <img src={HelloS} className={styles.HelloS}/>
                         <img src={YouCanS} className={styles.YouCanS}/>
