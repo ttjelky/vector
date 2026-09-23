@@ -25,6 +25,12 @@ html {
 
 .logoGlass {
     flex-shrink: 0;
+    border: 1.5px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Чорна обводка скляних елементів лендінгу (тінь знята модифікатором flat) */
+.landingGlassBorder {
+    border: 1.5px solid rgba(0, 0, 0, 0.08);
 }
 
 .logo {

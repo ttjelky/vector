@@ -22,6 +22,7 @@ import { mediaUrl, getAccessToken, getUserRole, clearAccessToken, logoutUser } f
 import { useSearch } from '@shared/contexts/SearchContext';
 import { SearchOverlay } from './SearchOverlay';
 import { ConfirmDeleteModal } from "@features/tournaments";
+import GlassSurface from "./GlassSurface";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
 const getToken = () => getAccessToken();
@@ -176,6 +177,14 @@ const MobileSearch = ({ onSearch }) => {
       onClick={!expanded ? expand : undefined}
       style={{ cursor: expanded ? 'text' : 'pointer' }}
     >
+      <GlassSurface
+        width="100%"
+        height="100%"
+        borderRadius={100}
+        backgroundOpacity={0.7}
+        saturation={1.6}
+        className={`${styles.searchGlass} glass-surface--flat`}
+      >
       <svg
         width="15" height="15" viewBox="0 0 20 20"
         fill="none" stroke="currentColor" strokeWidth="2"
@@ -208,6 +217,7 @@ const MobileSearch = ({ onSearch }) => {
           ×
         </button>
       )}
+      </GlassSurface>
     </div>
   );
 };
@@ -525,36 +535,51 @@ const NavBar = ({ children }) => {
           />
         )}
 
-        <div className={styles.navbarUserActions}>
-          <span className={styles.userName}>{fullUserName}</span>
-          {avatar
-            ? <img src={avatar} alt="avatar" className={styles.navbarAvatar} />
-            : (
-              <div className={styles.navbarAvatarPlaceholder}>
-                {fullUserName?.[0]?.toUpperCase() || "?"}
-              </div>
-            )
-          }
-          <div className={nStyles.bellWrap} ref={bellRef}>
+        <div className={`${styles.navbarUserActions} ${styles.userShell}`} ref={bellRef}>
+          <GlassSurface
+            width="auto"
+            height="auto"
+            borderRadius={100}
+            backgroundOpacity={0.7}
+            saturation={1.6}
+            className={`${styles.userPill} glass-surface--flat`}
+          >
+            <span className={styles.userName}>{fullUserName}</span>
+            {avatar
+              ? <img src={avatar} alt="avatar" className={styles.navbarAvatar} />
+              : (
+                <div className={styles.navbarAvatarPlaceholder}>
+                  {fullUserName?.[0]?.toUpperCase() || "?"}
+                </div>
+              )
+            }
             <button className={nStyles.bellBtn} aria-label="Сповіщення" onClick={handleBellClick}>
               <BellIcon className={styles.notificationIcon} />
               {hasUnread && <span className={nStyles.badge} />}
             </button>
-            {bellOpen && (
-              <NotificationDropdown
-                notifs={notifs} loading={notifsLoading}
-                onClose={() => setBellOpen(false)}
-                onCompose={() => { setBellOpen(false); setCompose(true); }}
-                onMarkAllRead={markAllRead} onMarkOne={markOneRead}
-              />
-            )}
-          </div>
+          </GlassSurface>
+          {bellOpen && (
+            <NotificationDropdown
+              notifs={notifs} loading={notifsLoading}
+              onClose={() => setBellOpen(false)}
+              onCompose={() => { setBellOpen(false); setCompose(true); }}
+              onMarkAllRead={markAllRead} onMarkOne={markOneRead}
+            />
+          )}
         </div>
       </header>
 
       <div className={styles.mainWrapper}>
-        {/* ── Desktop sidebar ── */}
-        <aside className={`${styles.leftSidebar} ${styles.desktopSidebar}`}>
+        {/* ── Desktop sidebar — liquid glass ── */}
+        <GlassSurface
+          width={232}
+          height="100%"
+          borderRadius={0}
+          backgroundOpacity={0.7}
+          saturation={1.6}
+          displace={0}
+          className={`${styles.leftSidebar} ${styles.desktopSidebar} ${styles.sidebarGlass}`}
+        >
           {desktopNavContent()}
           <div className={styles.logoutSection}>
             {showLogout && (
@@ -564,7 +589,7 @@ const NavBar = ({ children }) => {
               </button>
             )}
           </div>
-        </aside>
+        </GlassSurface>
 
         {/* ── Mobile overlay ── */}
         {mobileOpen && (
@@ -575,9 +600,17 @@ const NavBar = ({ children }) => {
           />
         )}
 
-        {/* ── Mobile sidebar drawer ── */}
+        {/* ── Mobile sidebar drawer — liquid glass ── */}
         {mobileOpen && (
-          <aside className={`${styles.mobileSidebar} ${mobileClosing ? styles.mobileSidebarClosing : styles.mobileSidebarOpen}`}>
+          <GlassSurface
+            width={null}
+            height={null}
+            borderRadius={0}
+            backgroundOpacity={0.65}
+            saturation={1.6}
+            displace={0}
+            className={`${styles.mobileSidebar} ${mobileClosing ? styles.mobileSidebarClosing : styles.mobileSidebarOpen} ${styles.mobileGlass}`}
+          >
             <div className={styles.mobileSidebarHeader}>
               <img src={Logo} alt="Vector" className={styles.mobileSidebarLogo} />
             </div>
@@ -594,7 +627,7 @@ const NavBar = ({ children }) => {
                 </div>
               )}
             </div>
-          </aside>
+          </GlassSurface>
         )}
 
         {/* ── Main content ── */}

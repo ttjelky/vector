@@ -71,9 +71,9 @@ const LandingNavBar = () => {
                 width="auto"
                 height="auto"
                 borderRadius={35}
-                backgroundOpacity={0.3}
+                backgroundOpacity={0.65}
                 saturation={1.6}
-                className={styles.logoGlass}
+                className={`${styles.logoGlass} glass-surface--flat`}
             >
                 <a className="landingNavLogo" href="#main">
                     <img src={logo} className={styles.logo} />
@@ -109,8 +109,9 @@ const LandingNavBar = () => {
                     width={48}
                     height={48}
                     borderRadius={14}
-                    backgroundOpacity={0.35}
+                    backgroundOpacity={0.65}
                     saturation={1.6}
+                    className={`glass-surface--flat ${styles.landingGlassBorder}`}
                 >
                     <button
                         className={`${styles.burgerBtn} ${menuOpen ? styles.burgerOpen : ""}`}
@@ -128,8 +129,9 @@ const LandingNavBar = () => {
                         width="100%"
                         height="100%"
                         borderRadius={24}
-                        backgroundOpacity={0.35}
+                        backgroundOpacity={0.65}
                         saturation={1.6}
+                        className={`glass-surface--flat ${styles.landingGlassBorder}`}
                     >
                         <div style={{ width: "100%" }}>
                             <ul className={styles.mobileNavList}>
