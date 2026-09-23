@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { API, mediaUrl } from '@api';
 import { STOCK_IMAGES } from "../components/TournamentCard";
 import { StatusBadge, ConfirmDeleteModal } from "../components/TournamentShared";
+import JellyRadio from "@shared/components/JellyRadio";
 import { computeStatus } from "../components/tournamentHelpers";
 import { OverviewTab } from "../components/OverviewTab";
 import { ParticipantsTab } from "../components/ParticipantsTab";
@@ -222,15 +223,21 @@ export function TournamentPage() {
         </div>
 
         <div className={styles.tabBar}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={`${styles.tabBtn} ${activeTab === tab.id ? styles.tabBtnActive : ""}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
+          <JellyRadio
+            items={tabs.map((tab) => ({ value: tab.id, label: tab.label }))}
+            value={activeTab}
+            onChange={(value) => setActiveTab(value)}
+            chipColor="#ececee"
+            activeColor="#18181b"
+            textColor="#18181b"
+            activeTextColor="#f5f5f5"
+            size="md"
+            gap={8}
+            radius={18}
+            swell={0.1}
+            barge={2}
+            ariaLabel="Розділи турніру"
+          />
         </div>
 
         <div className={styles.content}>

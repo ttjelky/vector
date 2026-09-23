@@ -308,6 +308,7 @@ const NavBar = ({ children }) => {
   const [mobileClosing, setMobileClosing] = useState(false);
 
   const bellRef = useRef();
+  const notifPanelRef = useRef();
 
   const [showLogout, setShowLogout] = useState(
     () => JSON.parse(localStorage.getItem("setting_logout") ?? "true")
@@ -399,11 +400,23 @@ const NavBar = ({ children }) => {
     } catch {} finally { setNotifsLoading(false); }
   };
 
-  const handleBellClick = () => { const next = !bellOpen; setBellOpen(next); if (next) fetchNotifs(); };
+  const handleBellClick = () => {
+    if (bellOpen) {
+      // Закриваємо з анімацією через сам дропдаун
+      notifPanelRef.current?.close();
+      return;
+    }
+    setBellOpen(true);
+    fetchNotifs();
+  };
 
   useEffect(() => {
     if (!bellOpen) return;
-    const handler = (e) => { if (bellRef.current && !bellRef.current.contains(e.target)) setBellOpen(false); };
+    const handler = (e) => {
+      if (bellRef.current && !bellRef.current.contains(e.target)) {
+        notifPanelRef.current?.close();
+      }
+    };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [bellOpen]);
@@ -577,6 +590,7 @@ const NavBar = ({ children }) => {
           </GlassSurface>
           {bellOpen && (
             <NotificationDropdown
+              ref={notifPanelRef}
               notifs={notifs} loading={notifsLoading}
               onClose={() => setBellOpen(false)}
               onCompose={() => { setBellOpen(false); setCompose(true); }}

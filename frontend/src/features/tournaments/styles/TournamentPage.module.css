@@ -98,7 +98,7 @@
 }
 
 .title {
-  font-size: 21px;
+  font-size: 28px;
   font-weight: 700;
   color: #111;
   margin: 0 0 4px;
@@ -141,14 +141,13 @@
   }
 }
 
-/* ─── Tab bar ─────────────────────────────────────────────────────────────── */
+/* ─── Tab bar — желейний перемикач, як у навбарі лендінгу ─────────────── */
 
 .tabBar {
   display: flex;
+  justify-content: flex-start;
   margin: 20px 0 0;
-  padding: 0 28px;
-  gap: 0;
-  border-bottom: 1px solid #ebebeb;
+  padding: 0 28px 16px 14px;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -156,65 +155,6 @@
 
 .tabBar::-webkit-scrollbar {
   display: none;
-}
-
-.tabBtn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 10px 4px 11px;
-  margin-right: 28px;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: #999;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  cursor: pointer;
-  white-space: nowrap;
-  font-family: inherit;
-  transition: color 0.16s;
-  outline: none;
-}
-
-.tabBtn:last-child { margin-right: 0; }
-.tabBtn:hover { color: #444; }
-
-.tabBtn:focus-visible {
-  color: #111;
-  border-radius: 4px 4px 0 0;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.12);
-}
-
-.tabBtnActive {
-  color: #111;
-  font-weight: 600;
-  border-bottom-color: #111;
-}
-
-/* ─── Tab count ───────────────────────────────────────────────────────────── */
-
-.tabCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1;
-  color: #888;
-  background: #f0f0f3;
-  border-radius: 100px;
-  transition: background 0.16s, color 0.16s;
-}
-
-.tabBtnActive .tabCount {
-  color: #fff;
-  background: #111;
 }
 
 /* ─── Content ─────────────────────────────────────────────────────────────── */

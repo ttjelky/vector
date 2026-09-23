@@ -43,8 +43,8 @@
   position: fixed;
   top: 74px;
   right: 16px;
-  bottom: 16px;
   width: 400px;
+  max-height: calc(100dvh - 90px);
   background: #ffffff;
   border: none;
   border-radius: 22px;
@@ -61,6 +61,16 @@
 @keyframes panelExpand {
   from { opacity: 0; transform: scale(0.7) translateY(-10px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Закривання — зворотне стискання до кнопки */
+.dropdownClosing {
+  animation: panelShrink 0.12s ease-in both !important;
+}
+
+@keyframes panelShrink {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.7) translateY(-10px); }
 }
 
 .dropHeader {
@@ -123,6 +133,7 @@
 
 .dropBody {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
@@ -639,6 +650,15 @@
   @keyframes slideUp {
     from { opacity: 0; transform: translateY(32px); }
     to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .dropdownClosing {
+    animation: sheetDown 0.12s ease-in both !important;
+  }
+
+  @keyframes sheetDown {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(32px); }
   }
 
   .dropBody {

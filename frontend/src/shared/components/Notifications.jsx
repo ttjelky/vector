@@ -352,7 +352,7 @@ const renderNotifBody = (n) => (
 );
 
 // ── Dropdown content ──────────────────────────────────────────────────────────
-const DropdownContent = ({ notifs, loading, onCompose, onMarkAllRead, onMarkOne }) => {
+const DropdownContent = ({ notifs, loading, onCompose, onMarkAllRead, onMarkOne, closing }) => {
   // ── FIX: onPointerDown спрацьовує миттєво при торканні,
   // до того як backdrop встигає отримати будь-яку подію.
   // preventDefault() блокує наступний синтетичний click.
@@ -367,7 +367,7 @@ const DropdownContent = ({ notifs, loading, onCompose, onMarkAllRead, onMarkOne 
   const unreadCount = notifs.filter(n => !n.is_read).length;
 
   return (
-    <div className={nStyles.dropdown} role="dialog" aria-label="Сповіщення">
+    <div className={`${nStyles.dropdown} ${closing ? nStyles.dropdownClosing : ''}`} role="dialog" aria-label="Сповіщення">
       <div className={nStyles.dropHeader}>
         <span className={nStyles.dropTitle}>Сповіщення</span>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -404,8 +404,10 @@ const DropdownContent = ({ notifs, loading, onCompose, onMarkAllRead, onMarkOne 
 };
 
 // ── Notification Dropdown ─────────────────────────────────────────────────────
-export const NotificationDropdown = (props) => {
+export const NotificationDropdown = React.forwardRef((props, ref) => {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  const [closing, setClosing] = useState(false);
+  const closeTimer = useRef(null);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth <= 768);
@@ -413,15 +415,27 @@ export const NotificationDropdown = (props) => {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  // FIX: закриття панелі по Escape (раніше — лише кліком)
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
+
+  // Закривання з анімацією: спочатку клас, розмонтування через 200мс
   const { onClose } = props;
+  const handleClose = useCallback(() => {
+    setClosing(true);
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => onClose?.(), 120);
+  }, [onClose]);
+
+  // FIX: закриття панелі по Escape (раніше — лише кліком)
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose?.();
+      if (e.key === 'Escape') handleClose();
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [handleClose]);
+
+  // Даємо батькові закривати панель з анімацією (клік поза, повторний клік по дзвінку)
+  React.useImperativeHandle(ref, () => ({ close: handleClose }), [handleClose]);
 
   useScrollLock(isMobile);
 
@@ -431,13 +445,14 @@ export const NotificationDropdown = (props) => {
         {/* backdrop слухає onPointerDown — але кнопка зупиняє propagation раніше */}
         <div
           className={nStyles.mobileBackdrop}
-          onPointerDown={props.onClose}
+          onPointerDown={handleClose}
         />
-        <DropdownContent {...props} />
+        <DropdownContent {...props} closing={closing} />
       </>,
       document.body
     );
   }
 
-  return <DropdownContent {...props} />;
-};
+  return <DropdownContent {...props} closing={closing} />;
+});
+NotificationDropdown.displayName = 'NotificationDropdown';
