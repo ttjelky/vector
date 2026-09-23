@@ -449,6 +449,7 @@ const NavBar = ({ children }) => {
   const desktopNavContent = () => (
     <>
       <nav className={styles.primaryNav}>
+        <h3 className={styles.sidebarSectionTitle}>Меню</h3>
         <ul>
           {roleTabs.map(({ key, label, path }) => (
             <NavItem key={key} tabKey={key} label={label} path={path}>
@@ -467,6 +468,7 @@ const NavBar = ({ children }) => {
         </ul>
       </nav>
       <nav className={styles.secondaryNav}>
+        <h3 className={styles.sidebarSectionTitle}>Інше</h3>
         <ul>
           {COMMON_TABS.map(({ key, label, path }) => (
             <NavItem key={key} tabKey={key} label={label} path={path} />
@@ -479,7 +481,11 @@ const NavBar = ({ children }) => {
   // ── Mobile nav content ──────────────────────────────────────────────────
   const mobileNavContent = () => (
     <>
-      <div style={{ marginBottom: 0 }}>
+      <div style={{ marginBottom: 16 }}>
+        <p style={{
+          fontSize: 14, fontWeight: 500, color: '#111',
+          margin: '0 0 4px 12px',
+        }}>Меню</p>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {roleTabs.map(({ key, label, path }) => (
             <NavItem key={key} tabKey={key} label={label} path={path} onNavClick={handleNavClick} mobile>
@@ -499,6 +505,10 @@ const NavBar = ({ children }) => {
         </ul>
       </div>
       <div>
+        <p style={{
+          fontSize: 14, fontWeight: 500, color: '#111',
+          margin: '0 0 4px 12px',
+        }}>Інше</p>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {COMMON_TABS.map(({ key, label, path }) => (
             <NavItem key={key} tabKey={key} label={label} path={path} onNavClick={handleNavClick} mobile />

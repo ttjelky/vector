@@ -299,7 +299,7 @@ input[type="search"]::-webkit-search-cancel-button {
   justify-content: flex-start;
 }
 
-.primaryNav { margin-bottom: 0; }
+.primaryNav { margin-bottom: 16px; }
 .secondaryNav { margin-bottom: 20px; }
 .leftSidebar ul { list-style: none; padding: 0; margin: 0; }
 .leftSidebar li { margin-bottom: 6px; }
@@ -308,9 +308,9 @@ input[type="search"]::-webkit-search-cancel-button {
 .sidebarText { font-size: 14px; font-weight: 500; color: rgba(39, 50, 64, 1); }
 .sidebarIcon { width: 22px; height: 22px; margin-right: 10px; opacity: 0.9; }
 .sidebarSectionTitle {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
-  text-transform: uppercase; color: #111;
-  margin-bottom: 8px; margin-left: 12px; margin-top: 0;
+  font-size: 14px; font-weight: 500;
+  color: #111;
+  margin-bottom: 4px; margin-left: 12px; margin-top: 0;
 }
 
 .inactiveLink { transition: background-color 0.15s ease; }
