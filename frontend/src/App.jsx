@@ -14,6 +14,7 @@ import { AdminTournaments }     from "@features/tournaments";
 import { ParticipantTournaments } from "@features/tournaments";
 import { JuryDashboard }        from "@features/jury";
 import { Help }                from "@pages/Help";
+import { NotFound }            from "@pages/NotFound";
 import { Profile }              from "@features/profile";
 import { Settings }             from "@features/profile";
 import { Works }                from "@features/submissions";
@@ -94,6 +95,9 @@ function AppRoutes() {
         <Route path="/profile"        element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/settings"       element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/help"           element={<ProtectedRoute><Help /></ProtectedRoute>} />
+
+        {/* ── 404 ─────────────────────────────────────────────────── */}
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
     </>

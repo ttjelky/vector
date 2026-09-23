@@ -1,5 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import { PenLine, Trophy, Link2, Paperclip } from 'lucide-react';
+import { NotificationStack } from './NotificationStack';
 import { getAccessToken, mediaUrl } from '@api';
 import nStyles from '@shared/styles/Notifications.module.css';
 
@@ -53,7 +55,7 @@ const RecipientInput = ({ value, onChange, onSelect }) => {
         setResults(data);
         setOpen(data.length > 0);
       }
-    } catch {}
+    } catch { /* пошук юзерів — мовчазно ігноруємо */ }
   }, []);
 
   const handleChange = (e) => {
@@ -64,6 +66,9 @@ const RecipientInput = ({ value, onChange, onSelect }) => {
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => search(q), 300);
   };
+
+  // FIX: не лишаємо висячий таймер після розмонтування
+  useEffect(() => () => clearTimeout(debounceRef.current), []);
 
   const handleSelect = (user) => {
     setQuery(user.full_name || user.username);
@@ -116,14 +121,55 @@ const ComposeModalInner = ({ onClose, onSent }) => {
   const [files, setFiles]           = useState([]);
   const [sending, setSending]       = useState(false);
   const [error, setError]           = useState('');
-  const [closing, setClosing]       = useState(false);
+  const [closing, setClosing] = useState(false);
   const fileRef = useRef();
+  const sheetRef = useRef();
+  const touchStartY = useRef(null);
 
   useScrollLock(true);
 
   const handleClose = () => {
+    // Скидаємо інлайн-трансформ від свайпа, щоб зіграла анімація закриття
+    if (sheetRef.current) {
+      sheetRef.current.style.animation = '';
+      sheetRef.current.style.transform = '';
+    }
     setClosing(true);
-    setTimeout(() => onClose(), 320);
+    setTimeout(() => onClose(), 300);
+  };
+
+  // FIX: закриття по Escape (раніше модалку можна було закрити лише мишею)
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Свайп вниз для закриття (мобілка): тягнемо шторку за пальцем,
+  // відпускаємо далі 120px — закриваємо, інакше повертаємо назад
+  const onTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY;
+    // Вимикаємо entrance-анімацію, щоб інлайн-трансформ працював
+    if (sheetRef.current) sheetRef.current.style.animation = 'none';
+  };
+  const onTouchMove = (e) => {
+    if (touchStartY.current == null || !sheetRef.current) return;
+    const dy = e.touches[0].clientY - touchStartY.current;
+    if (dy > 0) sheetRef.current.style.transform = `translateY(${dy}px)`;
+  };
+  const onTouchEnd = (e) => {
+    if (touchStartY.current == null) return;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    touchStartY.current = null;
+    if (!sheetRef.current) return;
+    if (dy > 120) {
+      handleClose();
+    } else {
+      sheetRef.current.style.transform = '';
+      sheetRef.current.style.animation = '';
+    }
   };
 
   const handleOverlayClick = (e) => {
@@ -136,7 +182,11 @@ const ComposeModalInner = ({ onClose, onSent }) => {
     setUrl(''); setUrlLabel('');
   };
 
-  const handleFiles = (e) => setFiles(f => [...f, ...Array.from(e.target.files)]);
+  const handleFiles = (e) => {
+    setFiles(f => [...f, ...Array.from(e.target.files)]);
+    // FIX: скидаємо input, інакше повторний вибір того ж файла не спрацює
+    e.target.value = '';
+  };
   const removeLink  = (i) => setLinks(l => l.filter((_, idx) => idx !== i));
   const removeFile  = (i) => setFiles(f => f.filter((_, idx) => idx !== i));
 
@@ -175,11 +225,20 @@ const ComposeModalInner = ({ onClose, onSent }) => {
   };
 
   return (
-    <div
-      className={`${nStyles.composeOverlay} ${closing ? nStyles.composeOverlayOut : ''}`}
-      onClick={handleOverlayClick}
-    >
-      <div className={`${nStyles.composeModal} ${closing ? nStyles.composeModalOut : ''}`}>
+      <div
+        className={`${nStyles.composeOverlay} ${closing ? nStyles.composeOverlayOut : ''}`}
+        onClick={handleOverlayClick}
+      >
+        <div
+          ref={sheetRef}
+          className={`${nStyles.composeModal} ${closing ? nStyles.composeModalOut : ''}`}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Нове повідомлення"
+        >
 
         <div className={nStyles.composeHeader}>
           <span className={nStyles.composeTitle}>Нове повідомлення</span>
@@ -259,6 +318,39 @@ const ComposeModalInner = ({ onClose, onSent }) => {
 export const ComposeModal = (props) =>
   ReactDOM.createPortal(<ComposeModalInner {...props} />, document.body);
 
+// ── Тіло картки сповіщення для NotificationStack ─────────────────────────────
+const renderNotifBody = (n) => (
+  <>
+    {n.sender_full && <span className={nStyles.notifSender}>від {n.sender_full || n.sender}</span>}
+    {n.subject     && <p className={nStyles.notifSubject}>{n.subject}</p>}
+    <p className={nStyles.notifText}>{n.text}</p>
+    {n.tournament  && (
+      <span className={nStyles.notifMeta}>
+        <Trophy size={14} /><span>{n.tournament}</span>
+      </span>
+    )}
+    {n.links?.length > 0 && (
+      <div className={nStyles.notifLinks}>
+        {n.links.map((l, i) => (
+          <a key={i} href={l.url} target="_blank" rel="noreferrer" className={nStyles.notifLink}>
+            <Link2 size={14} /><span>{l.label || l.url}</span>
+          </a>
+        ))}
+      </div>
+    )}
+    {n.attachments?.length > 0 && (
+      <div className={nStyles.notifLinks}>
+        {n.attachments.map((a, i) => (
+          <a key={i} href={mediaUrl(a.url)} target="_blank" rel="noreferrer" className={nStyles.notifLink}>
+            <Paperclip size={14} /><span>{a.name}</span>
+          </a>
+        ))}
+      </div>
+    )}
+    <span className={nStyles.notifTime}>{n.created_at}</span>
+  </>
+);
+
 // ── Dropdown content ──────────────────────────────────────────────────────────
 const DropdownContent = ({ notifs, loading, onCompose, onMarkAllRead, onMarkOne }) => {
   // ── FIX: onPointerDown спрацьовує миттєво при торканні,
@@ -271,62 +363,40 @@ const DropdownContent = ({ notifs, loading, onCompose, onMarkAllRead, onMarkOne 
     onCompose();
   };
 
+  const hasUnread = notifs.some(n => !n.is_read);
+  const unreadCount = notifs.filter(n => !n.is_read).length;
+
   return (
-    <div className={nStyles.dropdown}>
+    <div className={nStyles.dropdown} role="dialog" aria-label="Сповіщення">
       <div className={nStyles.dropHeader}>
         <span className={nStyles.dropTitle}>Сповіщення</span>
         <div style={{ display: 'flex', gap: 8 }}>
-          {notifs.some(n => !n.is_read) && (
+          {hasUnread && (
             <button className={nStyles.markReadBtn} onClick={onMarkAllRead}>Прочитати всі</button>
           )}
           <button
             className={nStyles.composeBtn}
             onPointerDown={handleComposePointerDown}
           >
-            ✉ Написати
+            <PenLine size={14} /> Написати
           </button>
         </div>
       </div>
       <div className={nStyles.dropBody}>
         {loading ? (
           <div className={nStyles.empty}><p>Завантаження...</p></div>
-        ) : notifs.length === 0 ? (
-          <div className={nStyles.empty}>
-            <BellEmptyIco />
-            <p>Немає нових сповіщень</p>
-          </div>
         ) : (
-          notifs.map(n => (
-            <div
-              key={n.id}
-              className={`${nStyles.notifItem} ${n.is_read ? '' : nStyles.unread}`}
-              onClick={() => !n.is_read && onMarkOne(n.id)}
-            >
-              {n.sender_full && <span className={nStyles.notifSender}>від {n.sender_full || n.sender}</span>}
-              {n.subject     && <p className={nStyles.notifSubject}>{n.subject}</p>}
-              <p className={nStyles.notifText}>{n.text}</p>
-              {n.tournament  && <span className={nStyles.notifTournament}>🏆 {n.tournament}</span>}
-              {n.links?.length > 0 && (
-                <div className={nStyles.notifLinks}>
-                  {n.links.map((l, i) => (
-                    <a key={i} href={l.url} target="_blank" rel="noreferrer" className={nStyles.notifLink}>
-                      🔗 {l.label || l.url}
-                    </a>
-                  ))}
-                </div>
-              )}
-              {n.attachments?.length > 0 && (
-                <div className={nStyles.notifLinks}>
-                  {n.attachments.map((a, i) => (
-                    <a key={i} href={mediaUrl(a.url)} target="_blank" rel="noreferrer" className={nStyles.notifLink}>
-                      📎 {a.name}
-                    </a>
-                  ))}
-                </div>
-              )}
-              <span className={nStyles.notifTime}>{n.created_at}</span>
-            </div>
-          ))
+          <NotificationStack
+            items={notifs}
+            maxPreview={3}
+            renderItem={renderNotifBody}
+            onItemClick={(n) => { if (!n.is_read) onMarkOne(n.id); }}
+            getItemClassName={(n) => (!n.is_read ? nStyles.unread : '')}
+            onViewAll={hasUnread ? onMarkAllRead : undefined}
+            collapsedLabel={unreadCount > 0 ? `${unreadCount} нових` : 'Все прочитано'}
+            expandedLabel="Прочитати всі"
+            emptyLabel="Сповіщень поки немає"
+          />
         )}
       </div>
     </div>
@@ -342,6 +412,16 @@ export const NotificationDropdown = (props) => {
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
+
+  // FIX: закриття панелі по Escape (раніше — лише кліком)
+  const { onClose } = props;
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose?.();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
 
   useScrollLock(isMobile);
 

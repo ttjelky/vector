@@ -35,46 +35,55 @@
 }
 
 /* ═══════════════════════════════════════════
-   DROPDOWN — десктоп
-═══════════════════════════════════════════ */
+   PANEL — десктоп: велика панель від кнопки до низу екрана.
+   Відкривається желейним розгортанням від кнопки дзвінка
+   (transform-origin: top right, тільки transform/opacity).
+   ═══════════════════════════════════════════ */
 .dropdown {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  width: 300px;
-  min-height: 240px;
+  position: fixed;
+  top: 74px;
+  right: 16px;
+  bottom: 16px;
+  width: 400px;
   background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 24px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  border: none;
+  border-radius: 22px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
   z-index: 500;
   overflow: hidden;
-  animation: dropIn 0.2s cubic-bezier(.22,.68,0,1.2) both;
-  max-width: calc(100vw - 16px);
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100vw - 32px);
+  transform-origin: top right;
+  animation: panelExpand 0.28s cubic-bezier(0.34, 1.25, 0.64, 1) both;
 }
 
-@keyframes dropIn {
-  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes panelExpand {
+  from { opacity: 0; transform: scale(0.7) translateY(-10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .dropHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px 12px;
+  padding: 18px 20px 14px;
   gap: 8px;
   flex-wrap: nowrap;
   min-width: 0;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
+  flex-shrink: 0;
 }
 
 .dropTitle {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #aab0bc;
-  margin: 0 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #111;
+  margin: 0 0 0 2px;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -83,13 +92,13 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--btn-primary-text);
   background: var(--btn-primary-bg);
   border: none;
   border-radius: 100px;
-  padding: 7px 12px;
+  padding: 10px 18px;
   cursor: pointer;
   transition: background 0.15s;
   white-space: nowrap;
@@ -98,13 +107,13 @@
 .composeBtn:hover { background: var(--btn-primary-hover-bg); }
 
 .markReadBtn {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--btn-secondary-text);
   background: var(--btn-secondary-bg);
   border: none;
-  border-radius: 8px;
-  padding: 6px 10px;
+  border-radius: 100px;
+  padding: 10px 16px;
   cursor: pointer;
   transition: background 0.15s;
   white-space: nowrap;
@@ -113,45 +122,47 @@
 .markReadBtn:hover { background: var(--btn-secondary-hover-bg); }
 
 .dropBody {
-  max-height: 420px;
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: 12px;
 }
 
 .empty {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 52px 20px 32px;
-  color: #c8c8c8;
-  font-size: 12px;
+  gap: 10px;
+  padding: 64px 24px 40px;
+  color: #aeaeb2;
+  font-size: 15px;
   font-weight: 400;
 }
 .empty p { margin: 0; }
 
-/* ── Notification item ── */
+/* ── Notification item: повітряна картка без рамок ── */
 .notifItem {
-  padding: 11px 14px;
+  padding: 14px 16px;
   transition: background 0.15s;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  border-radius: 10px;
-  margin: 2px 6px;
+  gap: 5px;
+  border-radius: 14px;
+  margin: 2px 0;
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
   overflow: hidden;
 }
-.notifItem:hover { background: #f0f0f0; }
-.unread          { background: #f0fdf4; }
-.unread:hover    { background: #e6faf0; }
+.notifItem:hover { background: #f5f5f7; }
+.unread          { background: #f2f7ff; }
+.unread:hover    { background: #e9f1fd; }
 
 .notifSender {
-  font-size: 11px;
-  color: #bbb;
+  font-size: 12px;
+  color: #aeaeb2;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -160,8 +171,9 @@
 }
 
 .notifSubject {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   color: #1a1a1a;
   margin: 0;
   white-space: nowrap;
@@ -171,10 +183,10 @@
 }
 
 .notifText {
-  font-size: 12px;
-  color: #666;
+  font-size: 14px;
+  color: #555;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.45;
   word-break: break-word;
   overflow-wrap: anywhere;
   white-space: normal;
@@ -190,6 +202,26 @@
   display: block;
 }
 
+/* Мета-рядки з іконками (турнір, посилання, файли) — єдиний стиль */
+.notifMeta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #8e8e93;
+  min-width: 0;
+  max-width: 100%;
+}
+.notifMeta span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.notifMeta svg {
+  flex-shrink: 0;
+}
+
 .notifLinks {
   display: flex;
   flex-direction: column;
@@ -201,20 +233,29 @@
 }
 
 .notifLink {
-  font-size: 12px;
+  font-size: 14px;
   color: #3b82f6;
   text-decoration: none;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.notifLink span {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
-  display: block;
+  min-width: 0;
+}
+.notifLink svg {
+  flex-shrink: 0;
 }
 .notifLink:hover { text-decoration: underline; }
 
 .notifTime {
-  font-size: 11px;
-  color: #ccc;
+  font-size: 12px;
+  color: #aeaeb2;
   margin-top: 2px;
   white-space: nowrap;
 }
@@ -260,12 +301,12 @@
 .composeModalOut { animation: modalOut 0.32s cubic-bezier(0.4, 0, 1, 1) forwards !important; }
 
 @keyframes modalIn {
-  from { opacity: 0; transform: scale(0.92) translateY(20px); filter: blur(2px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+  from { opacity: 0; transform: scale(0.92) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 @keyframes modalOut {
-  from { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
-  to   { opacity: 0; transform: scale(0.94) translateY(12px); filter: blur(1px); }
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.94) translateY(12px); }
 }
 
 /* ── Header ── */
@@ -293,11 +334,9 @@
   font-size: 17px;
   font-weight: 700;
   color: #111;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255,255,255,0.2);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.05), 0 0 0 0.5px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
+  background: #fff;
+  border: 1px solid #d1d1d1;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   border-radius: 1000px;
   pointer-events: auto;
 }
@@ -309,11 +348,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255,255,255,0.2);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.05), 0 0 0 0.5px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
+  background: #fff;
+  border: 1px solid #d1d1d1;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   border-radius: 1000px;
   cursor: pointer;
   color: #555;
@@ -589,7 +626,7 @@
     width: 100%;
     max-width: 100%;
     border-radius: 20px 20px 0 0;
-    max-height: 70dvh;
+    max-height: 88dvh;
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
