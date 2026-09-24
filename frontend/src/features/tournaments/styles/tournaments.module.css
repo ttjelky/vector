@@ -1,34 +1,41 @@
-/* ─── Tournaments — macOS-style: airy, rounded, clean ───────────────────────── */
+/* ─── Tournaments — Apple-inspired: airy, big type, no borders ──────────────── */
 
 .page {
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* ─── Page header ────────────────────────────────────────────────────────────── */
 
 .pageHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  padding: 36px 40px 0;
+  padding: 44px 40px 0;
   gap: 16px;
   flex-wrap: wrap;
 }
 
 .pageTitle {
-  font-size: 36px;
+  font-size: 44px;
   font-weight: 700;
   color: #1d1d1f;
-  letter-spacing: -0.8px;
+  letter-spacing: -1.2px;
+  line-height: 1.05;
   margin: 0;
 }
 
-.pageActions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.pageSubtitle {
+  margin: 8px 0 0;
+  font-size: 17px;
+  font-weight: 400;
+  color: #6e6e73;
+  letter-spacing: -0.2px;
 }
 
 /* ─── Toolbar ────────────────────────────────────────────────────────────────── */
@@ -116,71 +123,155 @@
 .sortSelect {
   appearance: none;
   -webkit-appearance: none;
-  padding: 7px 30px 7px 13px;
-  border: 1px solid rgba(0,0,0,0.1);
+  padding: 8px 32px 8px 16px;
+  border: none;
   border-radius: 100px;
-  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 16 16'%3E%3Cpolyline points='4 6 8 10 12 6' fill='none' stroke='%23aeaeb2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center;
-  font-size: 13px;
+  background: #f5f5f7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 16 16'%3E%3Cpolyline points='4 6 8 10 12 6' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+  font-size: 14px;
   font-weight: 500;
   color: #1d1d1f;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: background-color 0.15s;
 }
 
-.sortSelect:hover { border-color: rgba(0,0,0,0.18); }
-.sortSelect:focus { border-color: rgba(0,0,0,0.22); box-shadow: 0 0 0 3px rgba(0,0,0,0.06); }
+.sortSelect:hover { background-color: #ececf0; }
+.sortSelect:focus-visible { box-shadow: 0 0 0 3px rgba(0,0,0,0.08); }
 
 .sortOrderBtn {
-  width: 34px;
-  height: 34px;
-  border: 1px solid rgba(0,0,0,0.1);
+  width: 36px;
+  height: 36px;
+  border: none;
   border-radius: 100px;
-  background: #fff;
+  background: #f5f5f7;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: #6e6e73;
-  font-size: 14px;
-  transition: all 0.15s;
+  font-size: 15px;
+  transition: background-color 0.15s, color 0.15s, transform 0.12s ease-in;
   flex-shrink: 0;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .sortOrderBtn:hover {
-  border-color: rgba(0,0,0,0.18);
+  background-color: #ececf0;
   color: #1d1d1f;
 }
 
-/* ─── Grid ───────────────────────────────────────────────────────────────────── */
+.sortOrderBtn:active { transform: scale(0.94); }
+
+/* ─── Grid: флекс-ряди — картки в неповному ряду розтягуються на весь ряд ─── */
 
 .gridWrapper {
-  padding: 24px 40px 40px;
+  padding: 28px 40px 48px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 32px;
 }
 
 .tournamentGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 /* ─── Tournament card ────────────────────────────────────────────────────────── */
 
 .tournamentCard {
+  flex: 1 1 440px;
+  min-width: 0;
   cursor: pointer;
-  border-radius: 18px;
-  overflow: hidden;                    /* ← назва не вилазить за межі */
-  transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s ease;
+  border-radius: 22px;
+  transform-origin: 50% 50%;
+  transition:
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    box-shadow 0.22s ease;
 }
 
-.tournamentCard:hover {
+@media (hover: hover) {
+  .tournamentCard:hover {
+    transform: none;
+    filter: brightness(0.96);
+  }
+}
+
+.tournamentCard:active {
+  transform: scale(0.96, 0.93);
+  filter: brightness(0.92);
+  transition:
+    transform 110ms ease-in,
+    filter 110ms ease-in;
+}
+
+.tournamentCard:focus-visible {
+  outline: 2px solid rgba(0,122,255,0.6);
+  outline-offset: 3px;
+}
+
+/* ─── Create / join card: кнопка-картка в ряду з турнірами ───────────────────── */
+
+.createCard {
+  flex: 1 1 440px;
+  min-width: 0;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 24px;
+  box-sizing: border-box;
+  background: #f5f5f7;
+  border: 1px solid rgba(16,24,40,0.08);
+  border-radius: 22px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.18s ease, transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s ease;
+}
+
+.createCard:hover {
+  background: #ececf0;
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.09);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+}
+
+.createCard:active { transform: translateY(0) scale(0.99); }
+
+.createCard:focus-visible {
+  outline: 2px solid rgba(0,122,255,0.6);
+  outline-offset: 3px;
+}
+
+.createCardPlus {
+  width: 60px;
+  height: 60px;
+  border-radius: 100px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1d1d1f;
+}
+
+.createCardTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  color: #6e6e73;
+  text-align: center;
+}
+
+.createCardHint {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6e6e73;
+  text-align: center;
+  max-width: 260px;
 }
 
 /* ─── Empty state ────────────────────────────────────────────────────────────── */
@@ -190,97 +281,146 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 72px 32px;
+  padding: 56px 32px 8px;
   text-align: center;
   gap: 10px;
 }
 
-.emptyIcon {
-  font-size: 44px;
-  line-height: 1;
-  margin-bottom: 6px;
-  opacity: 0.5;
-}
-
 .emptyTitle {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 700;
   color: #1d1d1f;
   margin: 0;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.4px;
 }
 
 .emptyText {
-  font-size: 13.5px;
-  color: #aeaeb2;
+  font-size: 15px;
+  color: #6e6e73;
   margin: 0;
-  max-width: 260px;
-  line-height: 1.5;
+  max-width: 320px;
+  line-height: 1.55;
+}
+
+/* ─── Archive ────────────────────────────────────────────────────────────────── */
+
+.archiveSection {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.archiveHeader {
+  display: flex;
+  align-items: center;
+}
+
+.archiveToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 8px 18px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 100px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: #1d1d1f;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.archiveToggleBtn:hover { background: #ececf0; }
+
+.archiveToggleCount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #6e6e73;
+  background: rgba(0,0,0,0.06);
+  border-radius: 100px;
+  padding: 2px 9px;
+}
+
+.archiveChevron {
+  display: inline-flex;
+  color: #6e6e73;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.archiveChevronOpen { transform: rotate(180deg); }
+
+.archiveGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 /* ─── Archive cards ──────────────────────────────────────────────────────────── */
 
 .archiveCard {
+  flex: 1 1 440px;
+  min-width: 0;
   cursor: pointer;
-  border-radius: 18px;
-  overflow: hidden;                    /* ← теж */
-  opacity: 0.65;
-  filter: grayscale(20%);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+  border-radius: 22px;
+  opacity: 0.7;
+  filter: grayscale(25%);
+  transform-origin: 50% 50%;
+  transition:
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
 
-.archiveCard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(0,0,0,0.07);
-  opacity: 1;
-  filter: grayscale(0%);
+@media (hover: hover) {
+  .archiveCard:hover {
+    transform: none;
+    opacity: 0.95;
+    filter: grayscale(0%) brightness(0.96);
+  }
 }
 
-/* ─── Action button ──────────────────────────────────────────────────────────── */
-
-.createBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 9px 22px;
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  border: none;
-  border-radius: 100px;
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
-  white-space: nowrap;
-  letter-spacing: -0.1px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+.archiveCard:active {
+  transform: scale(0.96, 0.93);
+  filter: grayscale(0%) brightness(0.92);
+  transition:
+    transform 110ms ease-in,
+    filter 110ms ease-in;
 }
 
-.createBtn:hover {
-  background: var(--btn-primary-hover-bg);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+.archiveCard:focus-visible {
+  outline: 2px solid rgba(0,122,255,0.6);
+  outline-offset: 3px;
 }
 
-.createBtn:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+@media (prefers-reduced-motion: reduce) {
+  .tournamentCard,
+  .archiveCard {
+    transition: filter 150ms ease;
+  }
+  .tournamentCard:active,
+  .archiveCard:active {
+    transform: none;
+  }
 }
 
 /* ─── Loading skeleton ───────────────────────────────────────────────────────── */
 
 .skeletonGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 16px;
-  padding: 24px 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 28px 40px 48px;
 }
 
 .skeletonCard {
-  height: 164px;
-  border-radius: 18px;
-  background: linear-gradient(90deg, #ebebeb 25%, #e2e2e2 50%, #ebebeb 75%);
+  flex: 1 1 440px;
+  min-width: 0;
+  height: 290px;
+  border-radius: 22px;
+  background: linear-gradient(90deg, #f5f5f7 25%, #ececf0 50%, #f5f5f7 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -305,25 +445,13 @@
     padding-right: 16px;
   }
 
-  .pageHeader { padding-top: 20px; }
-  .toolbar    { padding-top: 14px; }
-  .gridWrapper { padding-top: 16px; padding-bottom: 32px; }
+  .pageHeader { padding-top: 24px; }
+  .toolbar    { padding-top: 16px; }
+  .gridWrapper { padding-top: 20px; padding-bottom: 32px; }
 
   /* Заголовок сторінки */
-  .pageTitle { font-size: 20px; }
-
-  /* pageHeader — назва + кнопка в рядок, кнопка не стискає назву */
-  .pageHeader { flex-wrap: nowrap; align-items: center; }
-  .pageHeader > :first-child { flex: 1; min-width: 0; }
-  .pageActions { flex-shrink: 0; }
-
-  /* Кнопка — менша на мобільному */
-  .createBtn {
-    padding: 8px 14px;
-    font-size: 13px;
-    border-radius: 10px;
-    white-space: nowrap;
-  }
+  .pageTitle { font-size: 32px; letter-spacing: -0.8px; }
+  .pageSubtitle { font-size: 15px; }
 
   /* Toolbar — вертикально */
   .toolbar {
@@ -352,19 +480,31 @@
     min-width: 0;
   }
 
-  /* Grid — одна колонка */
+  /* Ряди — одна колонка, картки на весь ряд */
   .tournamentGrid,
+  .archiveGrid,
   .skeletonGrid {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 14px;
   }
 
+  .tournamentCard,
+  .archiveCard,
+  .createCard,
+  .skeletonCard {
+    flex-basis: 100%;
+  }
+
+  .createCard { min-height: 220px; }
+  .createCardPlus { width: 52px; height: 52px; }
+  .createCardTitle { font-size: 18px; }
+
   /* Skeleton менший */
-  .skeletonCard { height: 140px; }
+  .skeletonCard { height: 240px; }
+
+  .emptyTitle { font-size: 20px; }
 }
 
 @media (max-width: 360px) {
-  .pageTitle   { font-size: 17px; }
-  .createBtn   { padding: 7px 12px; font-size: 12.5px; }
+  .pageTitle   { font-size: 28px; }
   .segmentTab  { font-size: 12px; padding: 6px 8px; }
 }

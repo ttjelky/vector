@@ -97,6 +97,16 @@ export const fileIcon = (filename) => {
   return "📎";
 };
 
+// ─── Plural helper ────────────────────────────────────────────────────────────
+
+// Українська плюралізація: pluralize(1, "турнір", "турніри", "турнірів") → "1 турнір"
+export const pluralize = (n, one, few, many) => {
+  const mod10 = Math.abs(n) % 10;
+  const mod100 = Math.abs(n) % 100;
+  const form = mod10 === 1 && mod100 !== 11 ? one : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? few : many;
+  return `${n} ${form}`;
+};
+
 // ─── Escape key hook ──────────────────────────────────────────────────────────
 
 export function useEscape(handler) {

@@ -1,12 +1,13 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Plus, ChevronDown } from "lucide-react";
 import { useTabs } from "@shared/contexts/TabsContext";
 import { useSearch } from "@shared/contexts/SearchContext";
 import { API } from '@api';
 import { NavBar } from "@shared/components/NavBar";
 import { CreateTournamentModal } from "../components/CreateTournamentModal";
 import { TournamentCard } from "../components/TournamentCard";
-import { computeStatus } from "../components/tournamentHelpers";
+import { computeStatus, pluralize } from "../components/tournamentHelpers";
 import styles from "../styles/tournaments.module.css";
 
 // ─── Сортування ───────────────────────────────────────────────────────────────
@@ -121,11 +122,13 @@ const AdminTournaments = () => {
 
         {/* ── Шапка ── */}
         <div className={styles.pageHeader}>
-          <h1 className={styles.pageTitle}>Турніри</h1>
-          <div className={styles.pageActions}>
-            <button className={styles.createBtn} onClick={() => setOpen(true)}>
-              + Створити турнір
-            </button>
+          <div>
+            <h1 className={styles.pageTitle}>Турніри</h1>
+            <p className={styles.pageSubtitle}>
+              {pluralize(active.length, "активний турнір", "активні турніри", "активних турнірів")}
+              {" · "}
+              {pluralize(archive.length, "турнір в архіві", "турніри в архіві", "турнірів в архіві")}
+            </p>
           </div>
         </div>
 
@@ -180,25 +183,31 @@ const AdminTournaments = () => {
           <div className={styles.gridWrapper}>
 
             {/* ── Список ── */}
-            {displayList.length === 0 ? (
+            {tab === "archive" && displayList.length === 0 ? (
               <div className={styles.emptyState}>
-                <div className={styles.emptyIcon}>{tab === "archive" ? "🗄" : "🏆"}</div>
-                <p className={styles.emptyTitle}>
-                  {tab === "archive" ? "Архів порожній" : "Турнірів ще немає"}
-                </p>
+                <p className={styles.emptyTitle}>Архів порожній</p>
                 <p className={styles.emptyText}>
-                  {tab === "archive"
-                    ? "Завершені турніри автоматично потрапляють сюди"
-                    : "Натисніть «+ Створити турнір», щоб розпочати"}
+                  Завершені турніри автоматично потрапляють сюди
                 </p>
               </div>
             ) : (
               <div className={styles.tournamentGrid}>
+                {tab === "active" && (
+                  <button type="button" className={styles.createCard} onClick={() => setOpen(true)}>
+                    <span className={styles.createCardPlus}>
+                      <Plus size={28} strokeWidth={2.2} />
+                    </span>
+                    <span className={styles.createCardTitle}>Створити турнір</span>
+                  </button>
+                )}
                 {displayList.map((tournament) => (
                   <div
                     key={tournament.id}
                     className={tab === "archive" ? styles.archiveCard : styles.tournamentCard}
                     onClick={() => openTournament(tournament)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTournament(tournament); } }}
                   >
                     <TournamentCard
                       name={tournament.name}
@@ -219,15 +228,17 @@ const AdminTournaments = () => {
             {tab === "active" && filteredArchive.length > 0 && (
               <div className={styles.archiveSection}>
                 <div className={styles.archiveHeader}>
-                  <div className={styles.archiveHeaderLine} />
                   <button
                     className={styles.archiveToggleBtn}
                     onClick={() => setArchiveOpen((v) => !v)}
+                    aria-expanded={archiveOpen}
                   >
-                    🗄 Архів ({filteredArchive.length})
-                    <i className={`${styles.archiveChevron} ${archiveOpen ? styles.archiveChevronOpen : ""}`}>▼</i>
+                    Архів
+                    <span className={styles.archiveToggleCount}>{filteredArchive.length}</span>
+                    <span className={`${styles.archiveChevron} ${archiveOpen ? styles.archiveChevronOpen : ""}`}>
+                      <ChevronDown size={16} strokeWidth={2.5} />
+                    </span>
                   </button>
-                  <div className={styles.archiveHeaderLine} />
                 </div>
 
                 {archiveOpen && (
@@ -237,6 +248,9 @@ const AdminTournaments = () => {
                         key={tournament.id}
                         className={styles.archiveCard}
                         onClick={() => openTournament(tournament)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTournament(tournament); } }}
                       >
                         <TournamentCard
                           name={tournament.name}
