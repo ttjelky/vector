@@ -41,7 +41,7 @@ function getDescriptionPreview(html, maxLen = 80) {
 export function TournamentPage() {
   const { id }   = useParams();
   const navigate = useNavigate();
-  const { addTab, removeTabById } = useTabs();
+  const { addTab, removeTabById, updateTab } = useTabs();
 
   const [tournament,    setTournament]    = useState(null);
   const [rounds,        setRounds]        = useState([]);
@@ -99,6 +99,7 @@ export function TournamentPage() {
   const handleSave = async (formData) => {
     const r = await API.patch(`/tournaments/${id}/`, formData);
     setTournament(r.data);
+    if (r.data?.name) updateTab(id, { name: r.data.name });
   };
 
   const handleDelete = async () => {

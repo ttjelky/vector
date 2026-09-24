@@ -18,7 +18,7 @@
    ілюзія, що зображення тягнеться з-за меж екрана. */
 
 .coverWrap {
-  margin: 0 0 -120px -232px;
+  margin: 0 0 -120px -248px;
   position: relative;
   top: -120px;
   display: flex;
@@ -31,24 +31,33 @@
    шов безшовний. Зліва обрізається краєм екрана: зображення наче виходить
    за межі екрана. */
 .coverReflectLeft {
-  width: 232px;
-  flex: 0 0 232px;
+  width: 248px;
+  flex: 0 0 248px;
   height: 420px;
   overflow: hidden;
   position: relative;
   pointer-events: none;
   user-select: none;
+  /* Окремий композитний шар — інакше backdrop-blur сайдбара поверх
+     великої фотографії дає моргання (темна підкладка просвічує). */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  isolation: isolate;
 }
 
 .coverReflectLeftImg {
   position: absolute;
   top: 0;
   right: 0;
-  width: calc(100vw - 232px);
+  width: calc(100vw - 248px);
   height: 420px;
   object-fit: cover;
   display: block;
-  transform: scaleX(-1);
+  /* scaleX(-1) — дзеркало; translateZ(0) лишаємо поруч, щоб не злетіло дзеркало */
+  transform: scaleX(-1) translateZ(0);
+  -webkit-transform: scaleX(-1) translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .cover {
@@ -62,6 +71,10 @@
   box-shadow: none;
   position: relative;
   z-index: 2;
+  /* Окремий композитний шар — фото не перемальовується разом зі склом. */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  isolation: isolate;
 }
 
 .coverImg {
@@ -69,6 +82,10 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 @media (max-width: 992px) {

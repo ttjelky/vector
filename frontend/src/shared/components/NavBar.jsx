@@ -5,7 +5,7 @@ import { getTabsForRole, COMMON_TABS } from "@nav";
 import styles from "@shared/styles/NavBar.module.css";
 import nStyles from "@shared/styles/Notifications.module.css";
 
-import { House, Trophy, FileText, Settings, User, CircleHelp, LogOut, Newspaper, X } from "lucide-react";
+import { House, Trophy, FileText, Settings, User, CircleHelp, LogOut, Newspaper, X, ChevronDown, Pin, PinOff } from "lucide-react";
 import BellIcon        from "@static/icons/Bell.svg?react";
 import Logo            from "@static/VectorLogo.png";
 
@@ -53,44 +53,137 @@ const NavItem = ({ tabKey, label, path, children, onNavClick, mobile }) => (
   </li>
 );
 
-/* ─── Tournament tab ─── */
-const TournamentTab = ({ tab, onClose, animate, onNavClick }) => {
-  const [phase, setPhase] = useState(animate ? 'hidden' : 'open');
+/* ─── Tournaments group: NavLink + chevron + collapsible list ─── */
+const TournamentsNavItem = ({
+  tabKey, label, path, onNavClick, mobile,
+  collapsed, onToggleCollapse, children, openCount, hasActiveChild,
+}) => (
+  <li style={mobile ? { marginBottom: 4, listStyle: 'none' } : undefined}>
+    <div className={mobile ? styles.mobileTournamentsRow : styles.tournamentsRow}>
+      <NavLink
+        to={path}
+        className={({ isActive }) => [
+          isActive
+            ? (mobile ? styles.mobileActiveLink : styles.activeLink)
+            : hasActiveChild
+              ? (mobile ? styles.mobileSemiActiveLink : styles.semiActiveLink)
+              : (mobile ? styles.mobileInactiveLink : styles.inactiveLink),
+          mobile ? styles.mobileTournamentsLink : styles.tournamentsLink,
+        ].join(' ')}
+        onClick={onNavClick}
+      >
+        {renderIcon(tabKey, mobile)}
+        <span className={mobile ? styles.mobileSidebarText : styles.sidebarText}>{label}</span>
+        {collapsed && openCount > 0 && (
+          <span className={styles.tournamentsCount} aria-label={`Відкрито турнірів: ${openCount}`}>
+            {openCount}
+          </span>
+        )}
+      </NavLink>
+      {openCount > 0 && (
+        <button
+          type="button"
+          className={`${mobile ? styles.mobileCollapseToggle : styles.collapseToggle} ${collapsed ? styles.collapseToggleCollapsed : ''}`}
+          onClick={onToggleCollapse}
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? 'Розгорнути відкриті турніри' : 'Згорнути відкриті турніри'}
+          title={collapsed ? 'Розгорнути' : 'Згорнути'}
+        >
+          <ChevronDown
+            className={mobile ? styles.mobileCollapseIcon : styles.collapseIcon}
+            strokeWidth={2.2}
+          />
+        </button>
+      )}
+    </div>
+    {children}
+  </li>
+);
+
+/* ─── Tournament tab ───
+   Enter-анімація — лише для справді нових вкладок (isFreshTab):
+   NavBar перемонтовується при кожній навігації, тому анімація
+   на кожен маунт програвалася б при кожному кліку по сайдбару.
+   Exit-анімація — локальний стан closing + таймер з cleanup.
+   Кнопки pin/close — сиблінги NavLink, а не вкладені в <a>. */
+const TournamentTab = ({ tab, onClose, onNavClick, pinned, onTogglePin, isFreshTab, markTabSeen }) => {
+  const [closing, setClosing] = useState(false);
+  // Читаємо без споживання — щоб одночасні маунти (десктоп+мобайл)
+  // і StrictMode не з'їдали прапорець; гасимо ефектом після показу.
+  const [fresh] = useState(() => isFreshTab(tab.id));
+  const timer = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    if (!animate) return;
-    const raf = requestAnimationFrame(() => setPhase('opening'));
-    return () => cancelAnimationFrame(raf);
-  }, []); // eslint-disable-line
+    markTabSeen(tab.id);
+  }, [tab.id, markTabSeen]);
+
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
 
   const handleClose = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setPhase("closing");
-    setTimeout(() => onClose(tab.id), 250);
+    if (closing || pinned) return;
+    setClosing(true);
+    timer.current = setTimeout(() => {
+      const wasActive =
+        location.pathname === `/tournament/${tab.id}` ||
+        location.pathname.startsWith(`/tournament/${tab.id}/`);
+      const closed = onClose(tab.id);
+      if (closed === false) {
+        setClosing(false);
+        return;
+      }
+      if (wasActive) navigate('/tournaments');
+    }, 220);
   };
 
-  const cls = [
-    styles.nestedTournament,
-    phase === "hidden"  ? styles.tabHidden  : "",
-    phase === "opening" ? styles.tabOpening : "",
-    phase === "closing" ? styles.tabClosing : "",
-  ].filter(Boolean).join(" ");
+  const handleTogglePin = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onTogglePin(tab.id);
+  };
 
   return (
-    <div className={cls}>
+    <div className={`${styles.nestedRow} ${closing ? styles.nestedClosing : fresh ? styles.nestedEnter : ''}`}>
       <NavLink
         to={`/tournament/${tab.id}`}
         className={({ isActive }) => isActive ? styles.activeNestedLink : styles.nestedLink}
         title={tab.name}
         onClick={onNavClick}
+        tabIndex={closing ? -1 : undefined}
+        aria-hidden={closing || undefined}
       >
-        <span className={styles.tabName}>└ {tab.name}</span>
-        <button className={styles.closeIconWrapper} onClick={handleClose}
-          aria-label={`Закрити ${tab.name}`} type="button">
-          <X className={styles.closeIcon} strokeWidth={2} />
-        </button>
+        {pinned && <Pin className={styles.pinnedDot} strokeWidth={2.2} aria-label="Закріплено" />}
+        <span className={styles.tabName}>{tab.name}</span>
       </NavLink>
+      <div className={styles.nestedActions}>
+        <button
+          type="button"
+          className={`${styles.pinBtn} ${pinned ? styles.pinBtnActive : ''}`}
+          onClick={handleTogglePin}
+          aria-pressed={!!pinned}
+          aria-label={pinned ? `Відкріпити ${tab.name}` : `Закріпити ${tab.name}`}
+          title={pinned ? 'Відкріпити' : 'Закріпити'}
+        >
+          {pinned
+            ? <PinOff className={styles.pinIcon} strokeWidth={2} />
+            : <Pin className={styles.pinIcon} strokeWidth={2} />}
+        </button>
+        {!pinned && (
+          <button
+            type="button"
+            className={styles.closeIconWrapper}
+            onClick={handleClose}
+            aria-label={`Закрити ${tab.name}`}
+          >
+            <X className={styles.closeIcon} strokeWidth={2} />
+          </button>
+        )}
+      </div>
     </div>
   );
 };
@@ -227,7 +320,7 @@ const MobileSearch = ({ onSearch }) => {
 
 /* ─── Main NavBar ─── */
 const NavBar = ({ children }) => {
-  const { openTabs, closeTab, removeTabById } = useTabs();
+  const { openTabs, closeTab, removeTabById, togglePin, isPinned, isFreshTab, markTabSeen } = useTabs();
   const { searchQuery, setSearchQuery, clearSearch } = useSearch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -342,7 +435,36 @@ const NavBar = ({ children }) => {
   const roleTabs = getTabsForRole(role);
   const homePath = role === "admin" ? "/admindashboard" : role === "jury" ? "/jury" : "/dashboard";
 
-  const initialTabIds = useRef(new Set(openTabs.map((t) => String(t.id))));
+  // ── Згортання групи "Турніри" (per-user, персист) ──
+  const collapseKey = `vector_tournaments_collapsed_${localStorage.getItem("userId") ?? "guest"}`;
+  const [tournamentsCollapsed, setTournamentsCollapsed] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(collapseKey) ?? "false");
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleTournamentsCollapsed = useCallback(() => {
+    setTournamentsCollapsed((prev) => {
+      try {
+        localStorage.setItem(collapseKey, JSON.stringify(!prev));
+      } catch {}
+      return !prev;
+    });
+  }, [collapseKey]);
+
+  // Якщо відкрили сторінку турніру, а група згорнута — авто-розгортаємо,
+  // інакше активну вкладку не видно.
+  useEffect(() => {
+    if (location.pathname.startsWith("/tournament/") && tournamentsCollapsed) {
+      setTournamentsCollapsed(false);
+      try {
+        localStorage.setItem(collapseKey, JSON.stringify(false));
+      } catch {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   // Профіль
   useEffect(() => {
@@ -465,18 +587,41 @@ const NavBar = ({ children }) => {
         <h3 className={styles.sidebarSectionTitle}>Меню</h3>
         <ul>
           {roleTabs.map(({ key, label, path }) => (
-            <NavItem key={key} tabKey={key} label={label} path={path}>
-              {key === 'tournaments' && openTabs.length > 0 && (
-                <div className={styles.openedList}>
-                  {openTabs.map((tab) => (
-                    <TournamentTab
-                      key={tab.id} tab={tab} onClose={closeTab}
-                      animate={!initialTabIds.current.has(String(tab.id))}
-                    />
-                  ))}
-                </div>
-              )}
-            </NavItem>
+            key === 'tournaments' ? (
+              <TournamentsNavItem
+                key={key}
+                tabKey={key}
+                label={label}
+                path={path}
+                collapsed={tournamentsCollapsed}
+                onToggleCollapse={toggleTournamentsCollapsed}
+                openCount={openTabs.length}
+                hasActiveChild={isTournamentPage}
+              >
+                {openTabs.length > 0 && (
+                  <div
+                    className={`${styles.openedList} ${tournamentsCollapsed ? styles.openedListCollapsed : styles.openedListOpen}`}
+                    aria-hidden={tournamentsCollapsed}
+                  >
+                    <div className={styles.openedListInner}>
+                      {openTabs.map((tab) => (
+                        <TournamentTab
+                          key={tab.id}
+                          tab={tab}
+                          onClose={closeTab}
+                          pinned={isPinned(tab.id)}
+                          onTogglePin={togglePin}
+                          isFreshTab={isFreshTab}
+                          markTabSeen={markTabSeen}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </TournamentsNavItem>
+            ) : (
+              <NavItem key={key} tabKey={key} label={label} path={path} />
+            )
           ))}
         </ul>
       </nav>
@@ -501,19 +646,44 @@ const NavBar = ({ children }) => {
         }}>Меню</p>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {roleTabs.map(({ key, label, path }) => (
-            <NavItem key={key} tabKey={key} label={label} path={path} onNavClick={handleNavClick} mobile>
-              {key === 'tournaments' && openTabs.length > 0 && (
-                <div className={styles.openedList}>
-                  {openTabs.map((tab) => (
-                    <TournamentTab
-                      key={tab.id} tab={tab} onClose={closeTab}
-                      animate={!initialTabIds.current.has(String(tab.id))}
-                      onNavClick={handleNavClick}
-                    />
-                  ))}
-                </div>
-              )}
-            </NavItem>
+            key === 'tournaments' ? (
+              <TournamentsNavItem
+                key={key}
+                tabKey={key}
+                label={label}
+                path={path}
+                onNavClick={handleNavClick}
+                mobile
+                collapsed={tournamentsCollapsed}
+                onToggleCollapse={toggleTournamentsCollapsed}
+                openCount={openTabs.length}
+                hasActiveChild={isTournamentPage}
+              >
+                {openTabs.length > 0 && (
+                  <div
+                    className={`${styles.openedList} ${tournamentsCollapsed ? styles.openedListCollapsed : styles.openedListOpen}`}
+                    aria-hidden={tournamentsCollapsed}
+                  >
+                    <div className={styles.openedListInner}>
+                      {openTabs.map((tab) => (
+                        <TournamentTab
+                          key={tab.id}
+                          tab={tab}
+                          onClose={closeTab}
+                          onNavClick={handleNavClick}
+                          pinned={isPinned(tab.id)}
+                          onTogglePin={togglePin}
+                          isFreshTab={isFreshTab}
+                          markTabSeen={markTabSeen}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </TournamentsNavItem>
+            ) : (
+              <NavItem key={key} tabKey={key} label={label} path={path} onNavClick={handleNavClick} mobile />
+            )
           ))}
         </ul>
       </div>
@@ -603,7 +773,7 @@ const NavBar = ({ children }) => {
       <div className={styles.mainWrapper}>
         {/* ── Desktop sidebar — liquid glass ── */}
         <GlassSurface
-          width={232}
+          width={248}
           height="100%"
           borderRadius={0}
           backgroundOpacity={isTournamentPage ? 0.82 : 0.7}
