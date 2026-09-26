@@ -147,7 +147,7 @@ const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
               onBack={() => setStep(2)}
             />
             <div className={styles.footer}>
-              <button type="button" className={styles.btnCancel} onClick={() => setStep(2)}>← Назад</button>
+              <button type="button" className="btn-secondary" onClick={() => setStep(2)}>← Назад</button>
             </div>
           </div>
         ) : (
@@ -253,14 +253,14 @@ const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
           <div className={styles.footer}>
             {step === 1 ? (
               <>
-                <button type="button" className={styles.btnCancel} onClick={handleClose}>Скасувати</button>
-                <button type="button" className={styles.btnSubmit} disabled={!step1Valid}
+                <button type="button" className="btn-secondary" onClick={handleClose}>Скасувати</button>
+                <button type="button" className="btn-primary" disabled={!step1Valid}
                   onClick={() => setStep(2)}>Далі →</button>
               </>
             ) : (
               <>
-                <button type="button" className={styles.btnCancel} onClick={() => setStep(1)}>← Назад</button>
-                <button type="submit" className={styles.btnSubmit} disabled={!role || isLoading}>
+                <button type="button" className="btn-secondary" onClick={() => setStep(1)}>← Назад</button>
+                <button type="submit" className="btn-primary" disabled={!role || isLoading}>
                   {isLoading ? "Надсилання коду..." : "Отримати код →"}
                 </button>
               </>

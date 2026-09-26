@@ -122,7 +122,7 @@ export function SubmissionForm({ taskId, roundId, tournamentId, existingSubmissi
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
-            <button className={styles.addLinkBtn} onClick={addLink}>Додати</button>
+            <button className="btn-primary btn-sm" onClick={addLink}>Додати</button>
           </div>
         </div>
 
@@ -154,8 +154,8 @@ export function SubmissionForm({ taskId, roundId, tournamentId, existingSubmissi
       {error && <p className={styles.formError}>{error}</p>}
 
       <div className={styles.editActions}>
-        <button className={styles.cancelBtn} onClick={onCancel} disabled={saving}>Скасувати</button>
-        <button className={styles.submitBtn} onClick={handleSubmit} disabled={saving}>
+        <button className="btn-secondary btn-sm" onClick={onCancel} disabled={saving}>Скасувати</button>
+        <button className="btn-primary btn-sm" onClick={handleSubmit} disabled={saving}>
           {saving ? "Збереження…" : isEdit ? "Зберегти зміни" : "Здати роботу"}
         </button>
       </div>

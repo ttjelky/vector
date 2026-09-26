@@ -223,7 +223,7 @@ const PublicTournaments = () => {
                       borderRadius: 100, padding: "2px 8px", fontWeight: 700,
                     }}>✅ Реєстрація відкрита</span>
                   )}
-                  <button className={styles.sortOrderBtn} style={{ marginLeft: "auto" }}
+                  <button className="btn-primary btn-sm" style={{ marginLeft: "auto" }}
                     onClick={() => openJoin(t)}>Приєднатися →</button>
                 </div>
               </div>
@@ -268,8 +268,8 @@ const PublicTournaments = () => {
               <p style={{ color: "#15803d", fontSize: 13, fontWeight: 700 }}>✅ Ви приєдналися! Переходимо…</p>
             )}
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 16 }}>
-              <button className={styles.sortOrderBtn} onClick={() => setSelected(null)}>Скасувати</button>
-              <button className={styles.sortOrderBtn}
+              <button className="btn-secondary" onClick={() => setSelected(null)}>Скасувати</button>
+              <button className="btn-primary"
                 style={{ background: "#18181b", color: "#fff" }}
                 onClick={handleJoin} disabled={joining || selected.registration_open === false}>
                 {selected.registration_open === false ? "Реєстрація закрита" : joining ? "Приєднання…" : "Приєднатися"}

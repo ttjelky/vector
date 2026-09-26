@@ -100,7 +100,7 @@ export function JoinTournamentPage() {
         <div className={styles.icon}>❌</div>
         <h2 className={styles.title}>Помилка</h2>
         <p className={styles.hint}>{pageError}</p>
-        <button className={styles.btn} onClick={() => navigate("/tournaments")}>
+        <button className="btn-secondary" onClick={() => navigate("/tournaments")}>
           До турнірів
         </button>
       </div>
@@ -163,7 +163,7 @@ export function JoinTournamentPage() {
 
           {pageError && <p className={styles.error}>{pageError}</p>}
 
-          <button className={styles.btn} onClick={handleJoinClick} disabled={regClosed}>
+          <button className="btn-primary" onClick={handleJoinClick} disabled={regClosed}>
             {regClosed ? "Реєстрація закрита" : "Приєднатися до турніру"}
           </button>
         </div>

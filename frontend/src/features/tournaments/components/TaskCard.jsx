@@ -346,7 +346,7 @@ function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed, canS
             ⏰ Дедлайн минув — здача недоступна
           </p>
         ) : (
-          <button className={styles.submitWorkBtn} onClick={() => setShowForm(true)}>
+          <button className="btn-primary" onClick={() => setShowForm(true)}>
             Здати роботу
           </button>
         )}
@@ -387,7 +387,7 @@ function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed, canS
             </span>
             <div className={styles.mySubmissionActions}>
               {!deadlinePassed && canSubmit && isTeamCaptain && (
-                <button className={styles.editSubmissionBtn} onClick={() => setShowForm(true)}>
+                <button className="btn-primary btn-sm" onClick={() => setShowForm(true)}>
                   Редагувати
                 </button>
               )}
@@ -745,7 +745,7 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
               </div>
             ))}
           </div>
-          <button className={styles.editAddBtn} onClick={addTechReq} type="button">
+          <button className="btn-primary btn-sm" onClick={addTechReq} type="button">
             + Додати категорію
           </button>
         </div>
@@ -777,7 +777,7 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
               </div>
             ))}
           </div>
-          <button className={styles.editAddBtn} onClick={addMustHave} type="button">
+          <button className="btn-primary btn-sm" onClick={addMustHave} type="button">
             + Додати критерій
           </button>
         </div>
@@ -816,7 +816,7 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
-            <button className={styles.editLinkAddBtn} onClick={addLink} type="button">
+            <button className="btn-primary btn-sm" onClick={addLink} type="button">
               Додати
             </button>
           </div>
@@ -864,10 +864,10 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
 
       {/* ── Кнопки дій ── */}
       <div className={styles.editFormActions}>
-        <button className={styles.editCancelBtn} onClick={onCancel} disabled={saving}>
+        <button className="btn-secondary" onClick={onCancel} disabled={saving}>
           Скасувати
         </button>
-        <button className={styles.editSaveBtn} onClick={handleSave} disabled={saving}>
+        <button className="btn-primary" onClick={handleSave} disabled={saving}>
           {saving ? "Збереження…" : "Зберегти зміни"}
         </button>
       </div>
@@ -934,7 +934,7 @@ function TaskDrawer({ task: taskProp, roundId, tournamentId, readOnly, myRole, r
           <div className={styles.drawerHeaderActions}>
             {isOwnerOrAdmin && !isEditing && (
               <button
-                className={styles.drawerEditBtn}
+                className="btn-primary btn-sm"
                 onClick={() => setIsEditing(true)}
                 title="Редагувати завдання"
                 aria-label="Редагувати завдання"

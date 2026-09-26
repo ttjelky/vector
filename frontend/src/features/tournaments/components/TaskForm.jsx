@@ -161,7 +161,7 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
-            <button className={styles.addLinkBtn} onClick={addLink} type="button">
+            <button className="btn-primary btn-sm" onClick={addLink} type="button">
               Додати
             </button>
           </div>
@@ -231,7 +231,7 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
               </div>
             ))}
           </div>
-          <button className={styles.addRowBtn} onClick={addTechReq} type="button">
+          <button className="btn-primary btn-sm" onClick={addTechReq} type="button">
             + Додати категорію
           </button>
         </div>
@@ -263,7 +263,7 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
               </div>
             ))}
           </div>
-          <button className={styles.addRowBtn} onClick={addMustHave} type="button">
+          <button className="btn-primary btn-sm" onClick={addMustHave} type="button">
             + Додати критерій
           </button>
         </div>
@@ -272,10 +272,10 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
       </div>
 
       <div className={styles.editActions}>
-        <button className={styles.cancelBtn} onClick={onCancel} disabled={saving} type="button">
+        <button className="btn-secondary" onClick={onCancel} disabled={saving} type="button">
           Скасувати
         </button>
-        <button className={styles.saveBtn} onClick={handleCreate} disabled={saving} type="button">
+        <button className="btn-primary" onClick={handleCreate} disabled={saving} type="button">
           {saving ? "Створення…" : "Додати завдання"}
         </button>
       </div>

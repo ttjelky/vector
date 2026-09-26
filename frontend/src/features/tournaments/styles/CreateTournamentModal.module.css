@@ -219,7 +219,7 @@
 }
 
 .previewCard {
-  background: white; width: 100%; position: relative; border-radius: 20px;
+  background: white; width: 100%; position: relative; border-radius: 28px;
   overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.06);
   border: none;
   transition: box-shadow 0.3s ease;

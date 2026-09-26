@@ -4,6 +4,7 @@ import { TabsProvider }   from '@shared/contexts/TabsContext'
 import { SearchProvider } from '@shared/contexts/SearchContext'
 import { restoreSession, clearAccessToken, setUserRole } from "./api";
 import "@shared/styles/jellyButtons.css";
+import "@shared/styles/buttons.css";
 import "@shared/styles/glassMaterial.css";
 
 // Pages

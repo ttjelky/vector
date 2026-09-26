@@ -145,10 +145,10 @@ const ParticipantDashboard = () => {
               : `У вас ${tournaments.length} турнірів і ${grades.length} оцінок${grades.length ? `, середній бал — ${avgScore}%` : ""}.`}
           </p>
           <div className={home.heroActions}>
-            <button className={home.heroBtnPrimary} onClick={() => setShowJoin(true)}>
+            <button className="btn-primary" onClick={() => setShowJoin(true)}>
               Приєднатися за посиланням
             </button>
-            <button className={home.heroBtnGhost} onClick={() => navigate("/public")}>
+            <button className="btn-secondary" onClick={() => navigate("/public")}>
               Публічні турніри{publicCount > 0 ? ` · ${publicCount}` : ""}
             </button>
           </div>
@@ -175,7 +175,7 @@ const ParticipantDashboard = () => {
             <div className={home.emptyState}>
               <p>Поки порожньо. Приєднайтеся до першого турніру.</p>
               <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                <button className={home.heroBtnPrimary}
+                <button className="btn-primary"
                   onClick={() => navigate("/public")}>До каталогу</button>
               </div>
             </div>

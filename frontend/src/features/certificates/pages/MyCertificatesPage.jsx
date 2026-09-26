@@ -50,7 +50,7 @@ export function MyCertificatesPage() {
               </p>
               {c.pdf_file ? (
                 <button
-                  className="btn btn--primary btn--small"
+                  className="btn-primary btn-sm"
                   onClick={() => handleDownload(c)}
                 >
                   Завантажити PDF

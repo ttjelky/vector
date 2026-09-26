@@ -139,7 +139,7 @@ function ParticipantCertificates({ tournamentId }) {
                 {new Date(c.issued_at).toLocaleDateString("uk-UA", { day: "numeric", month: "long", year: "numeric" })}
               </p>
               {c.pdf_file ? (
-                <button className="btn btn--primary btn--small" onClick={() => handleDownload(c.id, c.recipient_name)}>
+                <button className="btn-primary btn-sm" onClick={() => handleDownload(c.id, c.recipient_name)}>
                   Завантажити PDF
                 </button>
               ) : (
@@ -523,7 +523,7 @@ function StockTab({ isAdmin, isTeamTournament, participants, teams, generating, 
       {/* Кнопка */}
       {isAdmin && (
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-          <button className="btn btn--primary"
+          <button className="btn-primary"
             disabled={!canGenerate || isGenerating}
             onClick={handleGenerate}>
             {generating === genKey
@@ -593,16 +593,16 @@ function TemplateCard({ certType, template, isAdmin, loading, onUpload, onDelete
       {isAdmin && (
         <div className="template-card__actions">
           <input ref={fileRef} type="file" accept="image/png,image/jpeg" style={{ display: "none" }} onChange={handleFileChange} />
-          <button className="btn btn--secondary" onClick={() => fileRef.current?.click()}>
+          <button className="btn-secondary" onClick={() => fileRef.current?.click()}>
             {template ? "Замінити макет" : "Завантажити макет"}
           </button>
           {template && (
-            <button className="btn btn--secondary" onClick={() => setShowSettings(s => !s)}>
+            <button className="btn-secondary" onClick={() => setShowSettings(s => !s)}>
               {showSettings ? "Сховати" : "Позиції тексту"}
             </button>
           )}
           {(pendingFile || showSettings) && (
-            <button className="btn btn--primary" onClick={handleSave} disabled={loading}>
+            <button className="btn-primary" onClick={handleSave} disabled={loading}>
               {loading ? "Збереження…" : "Зберегти"}
             </button>
           )}
@@ -688,7 +688,7 @@ function CertificateTable({ certificates, onDownload, isTeamTournament }) {
                       <td style={{ color: "#888" }}>{new Date(c.issued_at).toLocaleDateString("uk-UA")}</td>
                       <td>
                         {c.pdf_file
-                          ? <button className="btn btn--small btn--primary" onClick={() => onDownload(c.id, c.recipient_name)}>Завантажити</button>
+                          ? <button className="btn-primary btn-sm" onClick={() => onDownload(c.id, c.recipient_name)}>Завантажити</button>
                           : <span className="text-muted">—</span>}
                       </td>
                     </tr>
@@ -714,7 +714,7 @@ function CertificateTable({ certificates, onDownload, isTeamTournament }) {
                   <td style={{ color: "#888" }}>{new Date(c.issued_at).toLocaleDateString("uk-UA")}</td>
                   <td>
                     {c.pdf_file
-                      ? <button className="btn btn--small btn--primary" onClick={() => onDownload(c.id, c.recipient_name)}>Завантажити</button>
+                      ? <button className="btn-primary btn-sm" onClick={() => onDownload(c.id, c.recipient_name)}>Завантажити</button>
                       : <span className="text-muted">—</span>}
                   </td>
                 </tr>

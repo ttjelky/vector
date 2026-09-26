@@ -294,7 +294,7 @@ function TeamDetail({ tournamentId, teamId, isPrivileged, onClose }) {
   if (loading) return (
     <div className={detailStyles.panel}>
       <div className={detailStyles.panelHeader}>
-        <button className={detailStyles.backBtn} onClick={onClose}><BackIcon /> Назад</button>
+        <button className="btn-secondary btn-sm" onClick={onClose}><BackIcon /> Назад</button>
       </div>
       <div className={detailStyles.stateBox}>
         <div className={detailStyles.spinner} /><span>Завантаження…</span>
@@ -305,7 +305,7 @@ function TeamDetail({ tournamentId, teamId, isPrivileged, onClose }) {
   if (error) return (
     <div className={detailStyles.panel}>
       <div className={detailStyles.panelHeader}>
-        <button className={detailStyles.backBtn} onClick={onClose}><BackIcon /> Назад</button>
+        <button className="btn-secondary btn-sm" onClick={onClose}><BackIcon /> Назад</button>
       </div>
       <div className={detailStyles.stateBox}>
         <span className={detailStyles.errorText}>{error}</span>
@@ -322,7 +322,7 @@ function TeamDetail({ tournamentId, teamId, isPrivileged, onClose }) {
   return (
     <div className={detailStyles.panel}>
       <div className={detailStyles.panelHeader}>
-        <button className={detailStyles.backBtn} onClick={onClose}>
+        <button className="btn-secondary btn-sm" onClick={onClose}>
           <BackIcon /> Назад до таблиці
         </button>
         <div className={detailStyles.headerRight} />
@@ -436,7 +436,7 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
   if (loading) return (
     <div className={detailStyles.panel}>
       <div className={detailStyles.panelHeader}>
-        <button className={detailStyles.backBtn} onClick={onClose}>
+        <button className="btn-secondary btn-sm" onClick={onClose}>
           <BackIcon /> Назад
         </button>
       </div>
@@ -450,7 +450,7 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
   if (error) return (
     <div className={detailStyles.panel}>
       <div className={detailStyles.panelHeader}>
-        <button className={detailStyles.backBtn} onClick={onClose}>
+        <button className="btn-secondary btn-sm" onClick={onClose}>
           <BackIcon /> Назад
         </button>
       </div>
@@ -469,7 +469,7 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
   return (
     <div className={detailStyles.panel}>
       <div className={detailStyles.panelHeader}>
-        <button className={detailStyles.backBtn} onClick={onClose}>
+        <button className="btn-secondary btn-sm" onClick={onClose}>
           <BackIcon /> Назад до таблиці
         </button>
         <div className={detailStyles.headerRight}>
@@ -813,7 +813,7 @@ export function LeaderboardTab({ tournamentId, tournamentType, rounds = [], roun
             </div>
           </div>
           <button
-            className={`${styles.publishBtn} ${published ? styles.publishBtnHide : styles.publishBtnShow}`}
+            className={published ? "btn-secondary btn-sm" : "btn-primary btn-sm"}
             onClick={handleTogglePublish}
             disabled={publishing}
           >

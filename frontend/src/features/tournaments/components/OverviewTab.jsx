@@ -196,10 +196,10 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
             {error && <p className={styles.formError}>{error}</p>}
           </div>
           <div className={styles.editActions}>
-            <button className={styles.cancelBtn} onClick={() => { setError(""); setEditing(false); }} disabled={saving}>
+            <button className="btn-secondary" onClick={() => { setError(""); setEditing(false); }} disabled={saving}>
               Скасувати
             </button>
-            <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
+            <button className="btn-primary" onClick={handleSave} disabled={saving}>
               {saving ? "Збереження…" : "Зберегти зміни"}
             </button>
           </div>
@@ -224,7 +224,7 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
               }}>🌍 Публічний</span>
             )}
             {!readOnly && (
-              <button className={styles.editBtn} onClick={() => setEditing(true)}>Редагувати</button>
+              <button className="btn-primary btn-sm" onClick={() => setEditing(true)}>Редагувати</button>
             )}
           </div>
         </div>
@@ -346,7 +346,7 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
                 <button className={styles.leaveBtn} onClick={handleLeave} disabled={leaving}>
                   {leaving ? "Виходжу…" : "Так, покинути"}
                 </button>
-                <button className={styles.leaveCancelBtn} onClick={() => setShowLeaveConfirm(false)}>
+                <button className="btn-secondary btn-sm" onClick={() => setShowLeaveConfirm(false)}>
                   Скасувати
                 </button>
               </div>

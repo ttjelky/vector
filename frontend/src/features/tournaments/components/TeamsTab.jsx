@@ -176,7 +176,7 @@ function TeamCard({ team, tournamentId, isPrivileged, onLockToggled, onDeleted }
                   <button className={`${styles.adminBtn} ${styles.confirmDeleteBtn}`} onClick={handleDelete} disabled={deleting}>
                     {deleting ? "…" : "Так"}
                   </button>
-                  <button className={`${styles.adminBtn} ${styles.cancelBtn}`} onClick={() => setConfirmDelete(false)}>
+                  <button className="btn-secondary btn-sm" onClick={() => setConfirmDelete(false)}>
                     Ні
                   </button>
                 </div>
@@ -434,7 +434,7 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
 
           {isOwner && (
             <button
-              className={styles.inviteBtn}
+              className="btn-primary btn-sm"
               onClick={canInvite ? handleInvite : undefined}
               disabled={inviteLoading || !invite.url || !canInvite}
               title={!canInvite
@@ -465,13 +465,13 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
           </div>
           <div className={styles.exceptionPanelActions}>
             <button
-              className={styles.exceptionConfirmBtn}
+              className="btn-primary btn-sm"
               onClick={handleActivateException}
               disabled={exceptionLoading}
             >
               {exceptionLoading ? "Збереження…" : "Активувати"}
             </button>
-            <button className={styles.exceptionCancelBtn} onClick={() => setShowException(false)}>
+            <button className="btn-secondary btn-sm" onClick={() => setShowException(false)}>
               Скасувати
             </button>
           </div>

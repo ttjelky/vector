@@ -136,7 +136,7 @@ export function JoinByCodeModal({ onClose }) {
               />
               {error && <p className={styles.error}>{error}</p>}
               <button
-                className={styles.btn}
+                className="btn-primary btn-block"
                 onClick={handleTokenSubmit}
                 disabled={loading}
               >
@@ -175,13 +175,13 @@ export function JoinByCodeModal({ onClose }) {
               {error && <p className={styles.error}>{error}</p>}
               <div className={styles.btnRow}>
                 <button
-                  className={styles.btnSecondary}
+                  className="btn-secondary"
                   onClick={() => { setStep("token"); setError(""); setFormErrors({}); }}
                 >
                   ← Назад
                 </button>
                 <button
-                  className={styles.btn}
+                  className="btn-primary"
                   onClick={handleConfirm}
                   disabled={loading || preview.registration_open === false}
                 >

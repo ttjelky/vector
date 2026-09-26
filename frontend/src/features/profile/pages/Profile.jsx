@@ -216,10 +216,10 @@ const Profile = () => {
                                         className={`${styles.fieldInput} ${styles.fieldInputReadonly}`} />
                                 </div>
                                 <div className={styles.cardFooter}>
-                                    <button type="button" onClick={handleCancel} className={styles.btnSecondary}>
+                                    <button type="button" onClick={handleCancel} className="btn-secondary">
                                         Скасувати
                                     </button>
-                                    <button type="submit" className={styles.btnPrimary}>Зберегти</button>
+                                    <button type="submit" className="btn-primary">Зберегти</button>
                                 </div>
                             </form>
                         ) : (
@@ -235,7 +235,7 @@ const Profile = () => {
                                     </div>
                                 </div>
                                 <div className={styles.cardFooter}>
-                                    <button onClick={() => setEditMode(true)} className={styles.btnPrimary}>
+                                    <button onClick={() => setEditMode(true)} className="btn-primary">
                                         Редагувати
                                     </button>
                                     <button

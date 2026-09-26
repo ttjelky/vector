@@ -72,7 +72,7 @@ export function ConfirmDeleteModal({
         <h2 className={styles.modalTitle}>{title}</h2>
         <p className={styles.modalText}>{description}</p>
         <div className={styles.modalActions}>
-          <button className={styles.modalCancel} onClick={onCancel} disabled={loading}>
+          <button className="btn-secondary" onClick={onCancel} disabled={loading}>
             Ні, скасувати
           </button>
           <button className={styles.modalConfirm} onClick={onConfirm} disabled={loading}>

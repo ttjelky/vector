@@ -114,12 +114,12 @@ const JuryDashboard = () => {
               : `На вас чекають ${totalPending} робіт у ${pending.length} турнірах. Почніть з найтерміновіших.`}
           </p>
           <div className={home.heroActions}>
-            <button className={home.heroBtnPrimary}
+            <button className="btn-primary"
               onClick={() => sortedPending[0] && openTournament(sortedPending[0].tournament_id, sortedPending[0].tournament_name)}
               disabled={!sortedPending[0]}>
               Оцінити роботи{totalPending > 0 ? ` · ${totalPending}` : ""}
             </button>
-            <button className={home.heroBtnGhost} onClick={() => navigate("/public")}>Публічні</button>
+            <button className="btn-secondary" onClick={() => navigate("/public")}>Публічні</button>
           </div>
         </div>
 

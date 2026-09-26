@@ -100,14 +100,14 @@ const Profile = () => {
                             className={styles.input}
                         />
 
-                        <button type="submit" className={styles.saveButton}>Зберегти</button>
-                        <button type="button" onClick={() => setEditMode(false)} className={styles.cancelButton}>Скасувати</button>
+                        <button type="submit" className="btn-primary">Зберегти</button>
+                        <button type="button" onClick={() => setEditMode(false)} className="btn-secondary">Скасувати</button>
                     </form>
                 ) : (
                     <>
                         <p><strong>Ім'я:</strong> {profile.first_name} {profile.last_name}</p>
                         <p><strong>Email:</strong> {profile.email}</p>
-                        <button onClick={() => setEditMode(true)} className={styles.editButton}>Редагувати</button>
+                        <button onClick={() => setEditMode(true)} className="btn-primary">Редагувати</button>
                     </>
                 )}
             </div>

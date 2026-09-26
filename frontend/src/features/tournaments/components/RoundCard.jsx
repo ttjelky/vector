@@ -193,7 +193,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
               </div>
             ))}
           </div>
-          <button className={styles.addRowBtn} onClick={addTechReq} type="button">
+          <button className="btn-primary btn-sm" onClick={addTechReq} type="button">
             + Додати категорію
           </button>
         </div>
@@ -225,7 +225,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
               </div>
             ))}
           </div>
-          <button className={styles.addRowBtn} onClick={addMustHave} type="button">
+          <button className="btn-primary btn-sm" onClick={addMustHave} type="button">
             + Додати критерій
           </button>
         </div>
@@ -258,7 +258,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
-            <button className={styles.addLinkBtn} onClick={addLink}>Додати</button>
+            <button className="btn-primary btn-sm" onClick={addLink}>Додати</button>
           </div>
         </div>
 
@@ -297,8 +297,8 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
       </div>
 
       <div className={styles.editActions}>
-        <button className={styles.cancelBtn} onClick={onCancel} disabled={saving}>Скасувати</button>
-        <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
+        <button className="btn-secondary" onClick={onCancel} disabled={saving}>Скасувати</button>
+        <button className="btn-primary" onClick={handleSave} disabled={saving}>
           {saving ? "Збереження…" : "Зберегти зміни"}
         </button>
       </div>

@@ -744,17 +744,17 @@ export function CreateTournamentModal({ onClose, onCreate }) {
           <div className={styles.footer}>
             <div className={styles.footerActions}>
               <button
-                type="button" className={styles.btnCancel}
+                type="button" className="btn-secondary"
                 onClick={step === 1 ? handleClose : handleBack}
               >
                 {step === 1 ? "Скасувати" : "← Назад"}
               </button>
               {step < TOTAL_STEPS
-                ? <button type="button" className={styles.btnCreate} onClick={handleNext}>Далі →</button>
+                ? <button type="button" className="btn-primary" onClick={handleNext}>Далі →</button>
                 : (
                   <button
                     type="submit"
-                    className={styles.btnCreate}
+                    className="btn-primary"
                     disabled={imageConverting || convertError || !createArmed}
                     title={
                       imageConverting ? "Зачекайте, конвертація зображення…" :

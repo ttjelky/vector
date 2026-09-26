@@ -164,7 +164,7 @@ function DistributePanel({ tournamentId }) {
           )}
 
           <button
-            className={styles.distributeBtn}
+            className="btn-primary"
             onClick={handleDistribute}
             disabled={loading}
           >
@@ -587,7 +587,7 @@ function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, 
 
   return (
     <div className={styles.detailWrap}>
-      <button className={styles.backBtn} onClick={onClose}>
+      <button className="btn-secondary btn-sm" onClick={onClose}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <path d="m15 18-6-6 6-6"/>
         </svg>
@@ -764,7 +764,7 @@ function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, 
               </div>
 
               <div className={styles.gradePanelFooter}>
-                <button className={styles.gradeBtn} onClick={onSave} disabled={saving}>
+                <button className="btn-primary btn-block" onClick={onSave} disabled={saving}>
                   {saving ? "Збереження…" : isGraded ? "Оновити оцінку" : "Зберегти оцінку"}
                 </button>
                 {isGraded && sub.my_grade?.updated_at && (

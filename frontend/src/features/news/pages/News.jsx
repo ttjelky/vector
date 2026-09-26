@@ -265,7 +265,7 @@ const News = () => {
           {!loading && hasMore && (
             <div className={styles.loadMoreWrap}>
               <button
-                className={styles.loadMoreBtn}
+                className="btn-secondary"
                 onClick={handleLoadMore}
                 disabled={loadingMore}
               >

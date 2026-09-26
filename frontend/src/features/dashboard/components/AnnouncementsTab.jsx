@@ -200,7 +200,7 @@ function CommentItem({ comment, canManage, onReply, onDelete, onReact, depth = 0
               rows={2}
             />
             <button
-              className={styles.replySendBtn}
+              className="btn-primary btn-sm"
               onClick={submitReply}
               disabled={sending || !replyText.trim()}
             >
@@ -371,7 +371,7 @@ function AnnouncementCard({
                 rows={2}
               />
               <button
-                className={styles.newCommentSend}
+                className="btn-primary btn-sm"
                 onClick={submitComment}
                 disabled={sending || !commentText.trim()}
               >
@@ -422,7 +422,7 @@ function CreateAnnouncementForm({ tournamentId, onCreated }) {
 
   if (!open) {
     return (
-      <button className={styles.newAnnBtn} onClick={() => setOpen(true)}>
+      <button className="btn-primary btn-sm" onClick={() => setOpen(true)}>
         <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <line x1="7" y1="1" x2="7" y2="13"/>
           <line x1="1" y1="7" x2="13" y2="7"/>
@@ -479,9 +479,9 @@ function CreateAnnouncementForm({ tournamentId, onCreated }) {
       {error && <p className={styles.formError}>{error}</p>}
 
       <div className={styles.formFooter}>
-        <button className={styles.formCancelBtn} onClick={reset}>Скасувати</button>
+        <button className="btn-secondary btn-sm" onClick={reset}>Скасувати</button>
         <button
-          className={styles.formPublishBtn}
+          className="btn-primary btn-sm"
           onClick={handleSubmit}
           disabled={saving || !title.trim()}
         >

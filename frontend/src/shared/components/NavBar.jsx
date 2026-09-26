@@ -5,7 +5,7 @@ import { getTabsForRole, COMMON_TABS } from "@nav";
 import styles from "@shared/styles/NavBar.module.css";
 import nStyles from "@shared/styles/Notifications.module.css";
 
-import { House, Trophy, FileText, Settings, User, CircleHelp, LogOut, Newspaper, X, ChevronDown } from "lucide-react";
+import { House, Trophy, Globe, FileText, Settings, User, CircleHelp, LogOut, Newspaper, X, ChevronDown } from "lucide-react";
 import BellIcon        from "@static/icons/Bell.svg?react";
 import Logo            from "@static/VectorLogo.png";
 
@@ -22,6 +22,7 @@ const getToken = () => getAccessToken();
 const ICON_MAP = {
   home:        House,
   tournaments: Trophy,
+  public:      Globe,
   works:       FileText,
   settings:    Settings,
   profile:     User,
@@ -74,11 +75,6 @@ const TournamentsNavItem = ({
       >
         {renderIcon(tabKey, mobile)}
         <span className={mobile ? styles.mobileSidebarText : styles.sidebarText}>{label}</span>
-        {collapsed && openCount > 0 && (
-          <span className={styles.tournamentsCount} aria-label={`Відкрито турнірів: ${openCount}`}>
-            {openCount}
-          </span>
-        )}
       </NavLink>
       {openCount > 0 && (
         <button
@@ -561,7 +557,7 @@ const NavBar = ({ children }) => {
 
   // ── Desktop nav content ──────────────────────────────────────────────────
   const desktopNavContent = () => (
-    <>
+    <div className={styles.sidebarScroll}>
       <nav className={styles.primaryNav}>
         <h3 className={styles.sidebarSectionTitle}>Меню</h3>
         <ul>
@@ -610,7 +606,7 @@ const NavBar = ({ children }) => {
           ))}
         </ul>
       </nav>
-    </>
+    </div>
   );
 
   // ── Mobile nav content ──────────────────────────────────────────────────
@@ -683,7 +679,12 @@ const NavBar = ({ children }) => {
       <header className={styles.topNavbar}>
         <BurgerButton isOpen={mobileOpen} onClick={mobileOpen ? closeMobile : openMobile} />
 
-        <NavLink to={homePath} className={styles.navbarLogo} aria-label="На головну">
+        <NavLink
+          to={homePath}
+          className={styles.navbarLogo}
+          aria-label="Оновити сторінку"
+          onClick={(e) => { e.preventDefault(); window.location.reload(); }}
+        >
           <img src={Logo} alt="Vector" className={styles.logo} />
         </NavLink>
 

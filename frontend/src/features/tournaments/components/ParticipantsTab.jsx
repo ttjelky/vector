@@ -306,7 +306,7 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
               )}
 
               <button
-                className={styles.addMemberBtn}
+                className="btn-primary btn-sm"
                 onClick={handleAddMember}
                 disabled={!addUserId || adding}
               >
@@ -392,14 +392,14 @@ function TeamsSubTab({ tournamentId, myRole, members, myUserId }) {
                 autoFocus
               />
               <button
-                className={styles.createTeamBtn}
+                className="btn-primary btn-sm"
                 onClick={handleCreate}
                 disabled={creating || !newTeamName.trim()}
               >
                 {creating ? "Створення…" : "Створити"}
               </button>
               <button
-                className={styles.cancelCreateBtn}
+                className="btn-secondary btn-sm"
                 onClick={() => { setShowCreate(false); setCreateError(""); }}
               >
                 Скасувати
@@ -407,7 +407,7 @@ function TeamsSubTab({ tournamentId, myRole, members, myUserId }) {
               {createError && <span className={styles.addError}>{createError}</span>}
             </div>
           ) : (
-            <button className={styles.inviteBtn} onClick={() => setShowCreate(true)}>
+            <button className="btn-primary btn-sm" onClick={() => setShowCreate(true)}>
               + Зареєструвати команду
             </button>
           )}
@@ -800,13 +800,13 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
               </div>
               <div className={styles.exceptionPanelActions}>
                 <button
-                  className={styles.exceptionConfirmBtn}
+                  className="btn-primary btn-sm"
                   onClick={handleActivateException}
                   disabled={exceptionLoading}
                 >
                   {exceptionLoading ? "Збереження…" : "Активувати"}
                 </button>
-                <button className={styles.exceptionCancelBtn} onClick={() => setShowException(false)}>
+                <button className="btn-secondary btn-sm" onClick={() => setShowException(false)}>
                   Скасувати
                 </button>
               </div>
@@ -860,7 +860,7 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
                       padding: "8px 10px", fontSize: 12,
                     }}
                   />
-                  <button className={styles.inviteBtn}
+                  <button className="btn-primary btn-sm"
                     disabled={linkCreating}
                     onClick={() => handleCreateLink(activeTab)}>
                     {linkCreating ? "…" : "+ Створити"}

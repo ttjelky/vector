@@ -254,7 +254,7 @@ export function RoundsTab({
           )}
         </span>
         {!readOnly && !showForm && (
-          <button className={styles.createRoundBtn} onClick={() => setShowForm(true)}>
+          <button className="btn-primary btn-sm" onClick={() => setShowForm(true)}>
             + Новий раунд
           </button>
         )}
@@ -266,7 +266,7 @@ export function RoundsTab({
           <div className={styles.roundFormHeader}>
             <h3 className={styles.roundFormTitle}>Новий раунд</h3>
             <button
-              className={styles.cancelBtn}
+              className="btn-secondary btn-sm"
               onClick={() => { setForm(EMPTY_FORM); setFormError(""); setShowForm(false); }}
               disabled={saving}
             >
@@ -320,7 +320,7 @@ export function RoundsTab({
             {formError && <p className={styles.formError}>{formError}</p>}
           </div>
           <div className={styles.editActions}>
-            <button className={styles.saveBtn} onClick={handleCreate} disabled={saving}>
+            <button className="btn-primary" onClick={handleCreate} disabled={saving}>
               {saving ? "Створення…" : "Створити раунд"}
             </button>
           </div>
@@ -499,7 +499,7 @@ export function RoundsTab({
                         {(activeRound.tasks?.length ?? 0) > 0 && ` (${activeRound.tasks.length})`}
                       </span>
                       {!readOnly && !taskForms.has(activeRound.id) && (
-                        <button className={styles.addTaskInlineBtn} onClick={openTaskForm}>
+                        <button className="btn-primary btn-sm" onClick={openTaskForm}>
                           + Завдання
                         </button>
                       )}

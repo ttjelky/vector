@@ -287,7 +287,7 @@ export function CreateTeamForm({ tournamentId, tournament, onCreated, onCancel }
               </div>
               <button
                 type="button"
-                className={styles.copyLinkBtn}
+                className="btn-secondary btn-sm"
                 onClick={handleCopyLink}
                 style={copied
                   ? { color: "#1a7f4c", background: "rgba(26,127,76,0.07)", borderColor: "rgba(26,127,76,0.18)" }
@@ -305,10 +305,10 @@ export function CreateTeamForm({ tournamentId, tournament, onCreated, onCancel }
         {!created ? (
           // Кроку ще немає — показуємо кнопку Скасувати + Створити
           <>
-            <button type="button" className={styles.btnSecondary} onClick={onCancel}>
+            <button type="button" className="btn-secondary" onClick={onCancel}>
               Скасувати
             </button>
-            <button type="button" className={styles.btnPrimary} onClick={handleCreate} disabled={loading}>
+            <button type="button" className="btn-primary" onClick={handleCreate} disabled={loading}>
               {loading ? "Створення…" : "Створити команду →"}
             </button>
           </>
@@ -316,7 +316,7 @@ export function CreateTeamForm({ tournamentId, tournament, onCreated, onCancel }
           // Команда створена, але ще не зареєстрована
           <button
             type="button"
-            className={`${styles.btnPrimary} ${!canRegister ? styles.btnDisabledHint : ""}`}
+            className={`btn-primary btn-block ${!canRegister ? styles.btnDisabledHint : ""}`}
             onClick={handleRegister}
             disabled={loading || !canRegister}
             title={!canRegister ? `Потрібно ще ${shortage} учасник(ів)` : undefined}

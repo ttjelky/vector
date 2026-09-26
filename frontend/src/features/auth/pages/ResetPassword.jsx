@@ -78,7 +78,7 @@ const ResetPassword = () => {
                 </form>
 
                 <div className={styles.footer}>
-                    <button type="submit" form="reset-form" className={styles.btnSubmit} onClick={handleSubmit}>
+                    <button type="submit" form="reset-form" className="btn-primary" onClick={handleSubmit}>
                         Оновити пароль
                     </button>
                 </div>

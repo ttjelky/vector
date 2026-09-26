@@ -97,7 +97,7 @@ export function TeamInvitePage() {
             {error && <p className={styles.error}>{error}</p>}
 
             <button
-              className={styles.btn}
+              className="btn-primary btn-block"
               onClick={() => handle("accept")}
               disabled={acting}
             >
@@ -113,7 +113,7 @@ export function TeamInvitePage() {
             <div className={styles.icon}>⚠️</div>
             <h2 className={styles.title}>Посилання недійсне</h2>
             <p className={styles.description}>{error}</p>
-            <button className={styles.btn} onClick={() => navigate("/")}>
+            <button className="btn-primary btn-block" onClick={() => navigate("/")}>
               На головну
             </button>
           </div>

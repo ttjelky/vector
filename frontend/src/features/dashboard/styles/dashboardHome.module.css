@@ -1,5 +1,5 @@
 .contentArea {
-  padding: 20px 48px 64px;
+  padding: 12px 48px 64px;
   max-width: 1200px;
   margin: 0 auto;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
@@ -29,7 +29,7 @@
   box-shadow: none;
 }
 .heroTitle {
-  font-size: 40px;
+  font-size: 48px;
   font-weight: 700;
   margin: 0 0 8px;
   letter-spacing: -0.03em;
@@ -48,31 +48,6 @@
   gap: 12px;
   flex-wrap: wrap;
 }
-.heroBtnPrimary {
-  background: #0071e3;
-  color: #fff;
-  border: none;
-  border-radius: 980px;
-  padding: 12px 28px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.heroBtnPrimary:hover { background: #0077ed; }
-.heroBtnPrimary:disabled { background: #c7c7cc; cursor: default; }
-.heroBtnGhost {
-  background: #f5f5f7;
-  color: #1d1d1f;
-  border: none;
-  border-radius: 980px;
-  padding: 12px 28px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.heroBtnGhost:hover { background: #e8e8ed; }
 .roleBadge {
   display: none;
 }
@@ -119,8 +94,8 @@
 }
 @media (max-width: 1000px) {
   .mainGrid { grid-template-columns: 1fr; gap: 32px; }
-  .contentArea { padding: 12px 20px 48px; }
-  .heroTitle { font-size: 32px; }
+  .contentArea { padding: 8px 20px 48px; }
+  .heroTitle { font-size: 36px; }
   .heroSub { font-size: 17px; }
 }
 .section {
@@ -312,7 +287,7 @@
   cursor: pointer;
   background: #f5f5f7;
   border: none;
-  border-radius: 18px;
+  border-radius: 28px;
   padding: 18px;
   display: flex;
   gap: 14px;
@@ -368,7 +343,7 @@
   cursor: pointer;
   background: #f5f5f7;
   border: none;
-  border-radius: 18px;
+  border-radius: 28px;
   padding: 18px;
   display: flex;
   flex-direction: column;
@@ -483,8 +458,8 @@
 .notifChip svg { flex-shrink: 0; }
 .notifDismiss {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: -4px;
+  right: -4px;
   width: 26px;
   height: 26px;
   border-radius: 50%;

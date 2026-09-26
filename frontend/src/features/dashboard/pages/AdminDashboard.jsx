@@ -148,10 +148,10 @@ const AdminDashboard = () => {
               : `У вас ${stats.total} турнірів, з них ${stats.active} активних. Непрочитаних сповіщень: ${stats.unread}.`}
           </p>
           <div className={home.heroActions}>
-            <button className={home.heroBtnPrimary} onClick={() => navigate("/tournaments")}>
+            <button className="btn-primary" onClick={() => navigate("/tournaments")}>
               Керувати турнірами
             </button>
-            <button className={home.heroBtnGhost} onClick={() => navigate("/public")}>
+            <button className="btn-secondary" onClick={() => navigate("/public")}>
               Публічний каталог
             </button>
           </div>
@@ -179,7 +179,7 @@ const AdminDashboard = () => {
           ) : recent.length === 0 ? (
             <div className={home.emptyState}>
               <p>Турнірів ще немає. Створіть перший — це займе хвилину.</p>
-              <button className={home.heroBtnPrimary}
+              <button className="btn-primary"
                 onClick={() => navigate("/tournaments")}>Створити турнір</button>
             </div>
           ) : (

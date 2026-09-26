@@ -75,10 +75,10 @@ const Forgot = ({ isOpen, onClose, onBackToLogin }) => {
 
           {/* Floating footer */}
           <div className={styles.footer}>
-            <button type="button" className={styles.btnCancel} onClick={onClose}>
+            <button type="button" className="btn-secondary" onClick={onClose}>
               Скасувати
             </button>
-            <button type="submit" className={styles.btnSubmit} disabled={!email}>
+            <button type="submit" className="btn-primary" disabled={!email}>
               Скинути пароль
             </button>
           </div>

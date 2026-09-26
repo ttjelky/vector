@@ -1,0 +1,44 @@
+/* ── Єдині кнопки проєкту ───────────────────────────────────────────────
+   Скопійовано з Головної: primary — «Керувати турнірами» (основна дія),
+   secondary — «Публічний каталог» (другорядна).
+   Поведінка (hover-затемнення, желе-натискання) — з jellyButtons.css.
+   Модифікатори: .btn-sm — компактна, .btn-block — на всю ширину. */
+
+.btn-primary {
+  background: #0071e3;
+  color: #fff;
+  border: none;
+  border-radius: 980px;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-primary:hover { background: #0077ed; }
+.btn-primary:disabled { background: #c7c7cc; cursor: default; }
+
+.btn-secondary {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: none;
+  border-radius: 980px;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-secondary:hover { background: #e8e8ed; }
+.btn-secondary:disabled { opacity: 0.5; cursor: default; }
+
+.btn-sm {
+  padding: 8px 18px;
+  font-size: 14px;
+}
+
+.btn-block {
+  width: 100%;
+}

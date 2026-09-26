@@ -152,7 +152,7 @@ export function RegistrationFormBuilder({ fields = [], onChange }) {
                     >✕</button>
                   </div>
                 ))}
-                <button type="button" className={styles.btnCancel}
+                <button type="button" className="btn-primary btn-sm"
                   style={{ alignSelf: "flex-start", padding: "6px 12px" }}
                   onClick={() => addOption(idx)}>+ Варіант</button>
               </div>
@@ -161,7 +161,7 @@ export function RegistrationFormBuilder({ fields = [], onChange }) {
         );
       })}
 
-      <button type="button" className={styles.btnCancel}
+      <button type="button" className="btn-primary btn-sm"
         style={{ padding: "8px 14px" }} onClick={addField}>
         + Додати поле
       </button>

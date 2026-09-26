@@ -130,7 +130,7 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
           <div className={styles.form}>
             <VerifyEmail email={needVerifyEmail} onVerified={handleVerified} onBack={() => setNeedVerifyEmail(null)} />
             <div className={styles.footer}>
-              <button type="button" className={styles.btnCancel} onClick={() => setNeedVerifyEmail(null)}>← Назад</button>
+              <button type="button" className="btn-secondary" onClick={() => setNeedVerifyEmail(null)}>← Назад</button>
             </div>
           </div>
         </div>
@@ -207,11 +207,11 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
           </div>
 
           <div className={styles.footer}>
-            <button type="button" className={styles.btnCancel} onClick={onClose}>
+            <button type="button" className="btn-secondary" onClick={onClose}>
               Скасувати
             </button>
             <button
-              type="submit" className={styles.btnSubmit}
+              type="submit" className="btn-primary"
               disabled={!loginData.email || !loginData.password}
             >
               Увійти

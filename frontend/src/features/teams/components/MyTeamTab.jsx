@@ -143,7 +143,7 @@ function InviteLink({ token }) {
       <div className={styles.inviteLinkRow}>
         <span className={styles.inviteLinkLabel}>Посилання для запрошення:</span>
         <button
-          className={`${styles.copyBtn} ${copied ? styles.copyBtnCopied : ""}`}
+          className={`btn-secondary btn-sm ${copied ? styles.copyBtnCopied : ""}`}
           onClick={handleCopy}
         >
           {copied ? "✓ Скопійовано!" : "Копіювати посилання"}
@@ -185,10 +185,10 @@ function RegisterBlock({ team, tournamentId, onRegistered }) {
           Після реєстрації склад зафіксується і ви не зможете змінювати учасників. Продовжити?
         </p>
         <div className={styles.confirmActions}>
-          <button className={styles.btnDestructive} onClick={handleRegister} disabled={loading}>
+          <button className="btn-primary btn-sm" onClick={handleRegister} disabled={loading}>
             {loading ? "Реєстрація…" : "Так, зареєструвати"}
           </button>
-          <button className={styles.btnGhost} onClick={() => setShowConfirm(false)}>
+          <button className="btn-secondary btn-sm" onClick={() => setShowConfirm(false)}>
             Скасувати
           </button>
         </div>
@@ -199,7 +199,7 @@ function RegisterBlock({ team, tournamentId, onRegistered }) {
   return (
     <div>
       <button
-        className={`${styles.btnRegister} ${!can_register ? styles.btnRegisterDisabled : ""}`}
+        className={`btn-primary btn-block ${!can_register ? styles.btnRegisterDisabled : ""}`}
         onClick={() => can_register && setShowConfirm(true)}
         disabled={!can_register}
       >
@@ -426,7 +426,7 @@ function TeamDashboard({ team, tournamentId, myRole, onUpdated, onDeleted }) {
                 <button className={styles.btnDestructive} onClick={handleDelete} disabled={deleting}>
                   {deleting ? "Видалення…" : "Так, розпустити"}
                 </button>
-                <button className={styles.btnGhost} onClick={() => setShowConfirmDelete(false)}>
+                <button className="btn-secondary btn-sm" onClick={() => setShowConfirmDelete(false)}>
                   Скасувати
                 </button>
               </div>
@@ -451,7 +451,7 @@ function TeamDashboard({ team, tournamentId, myRole, onUpdated, onDeleted }) {
                 <button className={styles.btnDestructive} onClick={handleLeave} disabled={leaving}>
                   {leaving ? "Виходимо…" : "Так, покинути"}
                 </button>
-                <button className={styles.btnGhost} onClick={() => setShowConfirmLeave(false)}>
+                <button className="btn-secondary btn-sm" onClick={() => setShowConfirmLeave(false)}>
                   Скасувати
                 </button>
               </div>
@@ -476,7 +476,7 @@ function EmptyState({ registrationOpen, onCreate }) {
           : "Реєстрація команд наразі закрита."}
       </p>
       {registrationOpen && (
-        <button className={styles.btnPrimary} onClick={onCreate} style={{ marginTop: 8 }}>
+        <button className="btn-primary" onClick={onCreate} style={{ marginTop: 8 }}>
           + Створити команду
         </button>
       )}

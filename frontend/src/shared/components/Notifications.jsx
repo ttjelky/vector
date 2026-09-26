@@ -267,7 +267,7 @@ const ComposeModalInner = ({ onClose, onSent }) => {
             <div className={nStyles.linkRow}>
               <input value={url} onChange={e => setUrl(e.target.value)} placeholder="URL" />
               <input value={urlLabel} onChange={e => setUrlLabel(e.target.value)} placeholder="Підпис" />
-              <button className={nStyles.addBtn} onClick={addLink}>Додати</button>
+              <button className="btn-primary btn-sm" onClick={addLink}>Додати</button>
             </div>
             {links.length > 0 && (
               <div className={nStyles.chipList}>
@@ -302,8 +302,8 @@ const ComposeModalInner = ({ onClose, onSent }) => {
 
         <div className={nStyles.composeFooter}>
           <div className={nStyles.footerActions}>
-            <button className={nStyles.cancelBtn} onClick={handleClose}>Скасувати</button>
-            <button className={nStyles.sendBtn} onClick={handleSend} disabled={sending}>
+            <button className="btn-secondary" onClick={handleClose}>Скасувати</button>
+            <button className="btn-primary" onClick={handleSend} disabled={sending}>
               <SendIco /> {sending ? 'Надсилається...' : 'Надіслати'}
             </button>
           </div>
@@ -372,10 +372,10 @@ const DropdownContent = ({ notifs, loading, onCompose, onMarkAllRead, onMarkOne,
         <span className={nStyles.dropTitle}>Сповіщення</span>
         <div style={{ display: 'flex', gap: 8 }}>
           {hasUnread && (
-            <button className={nStyles.markReadBtn} onClick={onMarkAllRead}>Прочитати всі</button>
+            <button className="btn-secondary btn-sm" onClick={onMarkAllRead}>Прочитати всі</button>
           )}
           <button
-            className={nStyles.composeBtn}
+            className="btn-primary btn-sm"
             onPointerDown={handleComposePointerDown}
           >
             <PenLine size={14} /> Написати
