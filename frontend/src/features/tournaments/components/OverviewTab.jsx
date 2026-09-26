@@ -4,6 +4,7 @@ import "@shared/styles/richContent.css";           // ← глобальні с�
 import { ImagePicker } from "./CreateTournamentModal";
 import { RichTextArea } from "@shared/components/RichTextArea";
 import { StatusBadge, InfoRow } from "./TournamentShared";
+import { ScrollRow } from "@features/dashboard";
 import { formatDate, toInputDatetime } from "./tournamentHelpers";
 import { STOCK_IMAGES } from "./TournamentCard";
 import { API, mediaUrl } from '@api';
@@ -217,11 +218,7 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
           <h2 className={styles.sectionTitle}>Про турнір</h2>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             {tournament.is_public && (
-              <span style={{
-                fontSize: 11.5, fontWeight: 700, color: "#15803d",
-                background: "#f0fdf4", border: "1px solid #bbf7d0",
-                borderRadius: 100, padding: "3px 10px",
-              }}>🌍 Публічний</span>
+              <span className={styles.publicNote}>Публічний</span>
             )}
             {!readOnly && (
               <button className="btn-primary btn-sm" onClick={() => setEditing(true)}>Редагувати</button>
@@ -235,9 +232,9 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
         />
       </section>
 
-      <section className={styles.section}>
+      <section className={styles.section} style={{ "--accent": tournament.accent_color || "#0071e3" }}>
         <h2 className={styles.sectionTitle}>Деталі</h2>
-        <div className={styles.detailGrid} {...(tournament.format === "team" ? {"data-team": true} : {})}>
+        <ScrollRow classes={styles}>
 
           <div className={`${styles.dc} ${styles.dcBlue}`}>
             <span className={styles.dcIcon}>
@@ -316,7 +313,7 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
             </>
           )}
 
-        </div>
+        </ScrollRow>
       </section>
 
       {tournament.rules && (

@@ -3,7 +3,9 @@
 .tabContent {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 40px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ─── Section ─────────────────────────────────────────────────────────────── */
@@ -11,58 +13,51 @@
 .section {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .sectionHeader {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8ed;
 }
 
 .sectionTitle {
-  font-size: 13px;
-  font-weight: 600;
-  color: #aaa;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1d1d1f;
   margin: 0;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+}
+
+/* Окремий заголовок секції (Деталі, Правила) — з тим же розділювачем */
+.section > .sectionTitle {
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8ed;
+}
+
+.publicNote {
+  font-size: 15px;
+  color: #6e6e73;
+  white-space: nowrap;
 }
 
 /* ─── Description ─────────────────────────────────────────────────────────── */
 
 .description {
-  font-size: 14.5px;
-  color: #333;
-  line-height: 1.7;
+  font-size: 16px;
+  color: #515154;
+  line-height: 1.6;
   margin: 0;
   overflow-wrap: break-word;
 }
 
-/* ─── Edit button ─────────────────────────────────────────────────────────── */
-
-.editBtn {
-  padding: 6px 14px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #666;
-  background: #f4f4f6;
-  border: 1px solid #e8e8ec;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s, color 0.15s;
-}
-
-.editBtn:hover { background: #eaeaed; color: #111; }
-
 /* ─── Edit form ───────────────────────────────────────────────────────────── */
 
 .editForm {
-  background: #fafafa;
-  border: 1px solid #ebebed;
-  border-radius: 16px;
-  padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -72,28 +67,9 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 600;
-  color: #aaa;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.editInput {
-  padding: 10px 13px;
-  font-size: 14px;
-  color: #111;
-  background: #fff;
-  border: 1px solid #e4e4e8;
-  border-radius: 10px;
-  outline: none;
-  font-family: inherit;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.editInput:focus {
-  border-color: #ccc;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+  color: #6e6e73;
 }
 
 .editActions {
@@ -101,39 +77,6 @@
   gap: 8px;
   justify-content: flex-end;
 }
-
-.cancelBtn {
-  padding: 9px 18px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--btn-secondary-text);
-  background: var(--btn-secondary-bg);
-  border: 1px solid var(--btn-secondary-border-color);
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-}
-
-.cancelBtn:hover    { background: var(--btn-secondary-hover-bg); }
-.cancelBtn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.saveBtn {
-  padding: 9px 22px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--btn-primary-text);
-  background: var(--btn-primary-bg);
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s, transform 0.1s;
-}
-
-.saveBtn:hover    { background: var(--btn-primary-hover-bg); }
-.saveBtn:active   { transform: scale(0.97); }
-.saveBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .formError {
   font-size: 12.5px;
@@ -145,85 +88,27 @@
   border-radius: 9px;
 }
 
-/* ─── Info grid ───────────────────────────────────────────────────────────── */
-
-.infoGrid {
-  border: 1px solid #ebebed;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
-}
-
 /* ─── Rules ───────────────────────────────────────────────────────────────── */
 
 .rulesBox {
-  background: #fafafa;
-  border: 1px solid #ebebed;
-  border-radius: 12px;
-  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .ruleLine {
-  font-size: 14px;
-  color: #444;
-  line-height: 1.65;
+  font-size: 16px;
+  color: #515154;
+  line-height: 1.6;
   margin: 0;
   overflow-wrap: break-word;
 }
 
-/* ─── Danger zone ─────────────────────────────────────────────────────────── */
-
-.dangerZone {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 48px;
-  padding: 16px 20px;
-  background: #fff8f8;
-  border: 1px solid #fde8e8;
-  border-radius: 16px;
-  gap: 16px;
-}
-
-.dangerInfo { display: flex; flex-direction: column; gap: 3px; }
-
-.dangerTitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: #e76b6b;
-}
-
-.dangerHint {
-  font-size: 12.5px;
-  color: #ccc;
-}
-
-.deleteBtn {
-  padding: 8px 18px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #ea5c5c;
-  background: #fff;
-  border: 1px solid #fcd7d7;
-  border-radius: 100px;
-  cursor: pointer;
-  white-space: nowrap;
-  font-family: inherit;
-  transition: background 0.15s, border-color 0.15s, transform 0.1s;
-}
-
-.deleteBtn:hover  { background: #fee2e2; border-color: #f89595; }
-.deleteBtn:active { transform: scale(0.97); }
-
 /* ─── Empty / Rich content ────────────────────────────────────────────────── */
 
 .emptyText {
-  color: #aaaaaa;
-  font-size: 14px;
-  font-style: italic;
+  color: #6e6e73;
+  font-size: 16px;
   margin: 0;
 }
 
@@ -302,115 +187,169 @@
    DETAIL GRID CARDS — macOS Liquid Glass
    ══════════════════════════════════════════════════ */
 
-.detailGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+/* ─── Leave section ───────────────────────────────────────────────────────── */
+
+/* ── Details horizontal bleed-row (як стрічки на Головній) ──
+   Класи ті ж, що чекає ScrollRow (rowWrap, tournRow, rowArrow…),
+   цифри — під геометрію сторінки турніру (контент 960px, падінг 28px). */
+.rowWrap {
+  position: relative;
+  --bleed-left: 276px;
+  --bleed-right: 28px;
+  --bleed-extra: max(0px, (100vw - 1504px) / 2);
+  --bleed-total: calc(var(--bleed-left) + var(--bleed-extra));
+  --arrow-left: 260px;
+  --arrow-right: 12px;
 }
+@media (max-width: 992px) {
+  .rowWrap {
+    --bleed-left: 28px;
+    --bleed-right: 28px;
+    --bleed-extra: max(0px, (100vw - 1016px) / 2);
+    --arrow-left: 12px;
+  }
+}
+.tournRow {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  margin-left: calc(-1 * var(--bleed-total));
+  margin-right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)));
+  padding: 4px 0 28px 0;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--bleed-total);
+  scroll-padding-right: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tournRow::-webkit-scrollbar {
+  display: none;
+}
+.tournRow::before {
+  content: "";
+  flex: 0 0 calc(var(--bleed-total) - 20px);
+}
+.tournRow .dc {
+  flex: 0 0 240px;
+  max-width: 240px;
+  scroll-snap-align: start;
+}
+@media (max-width: 600px) {
+  .tournRow .dc {
+    flex-basis: 220px;
+    max-width: 220px;
+  }
+}
+.rowArrow {
+  position: absolute;
+  top: calc(50% - 12px - 36px);
+  width: 28px;
+  height: 72px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1d1d1f;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  transition:
+    opacity 0.35s cubic-bezier(0.33, 1, 0.68, 1),
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease !important;
+}
+.rowWrap:hover .rowArrow,
+.rowWrap:focus-within .rowArrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+.rowArrowHidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.rowArrowLeft { left: calc(-1 * var(--bleed-total) + var(--arrow-left)); }
+.rowArrowRight { right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)) + var(--arrow-right)); }
 
 .dc {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 14px 15px 16px;
-  border-radius: 18px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 8px;
+  padding: 16px;
+  border-radius: 24px;
   overflow: hidden;
-  transition: box-shadow 0.22s ease, transform 0.18s ease, background 0.2s ease;
-
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.10),
-    0 1px 4px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  background: #f5f5f7;
+  border: none;
+  box-shadow: none;
 }
 
 .dc:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.13),
-    0 3px 8px rgba(0, 0, 0, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  background: rgba(255, 255, 255, 0.78);
+  transform: none;
+  box-shadow: none;
+  background: #f5f5f7;
 }
 
 .dc::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 44%;
-  border-radius: 18px 18px 60% 60% / 18px 18px 30px 30px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.0) 100%
-  );
-  pointer-events: none;
+  display: none;
 }
 
 .dc::after { display: none; }
 
 .dcIcon {
   display: flex;
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   align-items: center;
   justify-content: center;
-  border-radius: 9px;
-  margin-bottom: 7px;
+  border-radius: 12px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+  color: var(--accent, #0071e3);
+  background: #e5f1fd;
+  background: color-mix(in srgb, var(--accent, #0071e3) 12%, #ffffff);
+  border: none;
+  box-shadow: none;
 }
 
-.dcBlue    .dcIcon { color: #2563eb; }
-.dcGreen   .dcIcon { color: #059669; }
-.dcOrange  .dcIcon { color: #d97706; }
-.dcOpenReg .dcIcon { color: #0891b2; }
-
 .dcIcon svg {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
 .dcLabel {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.38);
-  line-height: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6e6e73;
+  line-height: 1.3;
+  min-width: 0;
 }
 
 .dcValue {
-  font-size: 14.5px;
+  grid-column: 1 / -1;
+  font-size: 17px;
   font-weight: 700;
-  color: rgba(0, 0, 0, 0.82);
-  line-height: 1.3;
-  margin-top: 2px;
+  letter-spacing: -0.01em;
+  color: #1d1d1f;
+  line-height: 1.35;
+  margin-top: 8px;
 }
 
 .dcOpenRegHint {
-  font-size: 11px;
-  color: rgba(0, 0, 0, 0.38);
+  grid-column: 1 / -1;
+  font-size: 13px;
+  color: #6e6e73;
   margin-top: 1px;
-  line-height: 1.3;
-}
-
-/* ─── Last-row span rules (desktop only) ─────────────────────────────────── */
-
-.detailGrid:not([data-team]) .dc:nth-child(5),
-.detailGrid:not([data-team]) .dc:nth-child(6) {
-  grid-column: span 2;
-}
-
-.detailGrid[data-team] .dc:nth-child(5) {
-  grid-column: span 2;
+  line-height: 1.4;
 }
 
 /* ─── Leave section ───────────────────────────────────────────────────────── */
@@ -464,24 +403,6 @@
   gap: 8px;
 }
 
-.leaveCancelBtn {
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--btn-secondary-text);
-  background: var(--btn-secondary-bg);
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: color 0.15s, background 0.15s;
-}
-
-.leaveCancelBtn:hover {
-  color: #333;
-  background: var(--btn-secondary-hover-bg);
-}
-
 /* ══════════════════════════════════════════════════════════════
    MOBILE — тільки адаптація карток, ПК не чіпаємо
 ══════════════════════════════════════════════════════════════ */
@@ -489,86 +410,39 @@
 @media (max-width: 640px) {
 
   /* ── Загальні відступи ──────────────────────────────────────── */
-  .tabContent { gap: 24px; }
-  .section    { gap: 10px; }
-
-  /* ── Detail grid: 2 колонки ─────────────────────────────────── */
-  .detailGrid {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  /* Скидаємо всі desktop span-правила */
-  .detailGrid .dc,
-  .detailGrid:not([data-team]) .dc:nth-child(5),
-  .detailGrid:not([data-team]) .dc:nth-child(6),
-  .detailGrid[data-team] .dc:nth-child(5) {
-    grid-column: span 1 !important;
-  }
-
-  /* Картки реєстрації (останні 2) — повна ширина,
-     бо підписи "ПОЧАТОК / КІНЕЦЬ РЕЄСТРАЦІЇ" довгі */
-  .detailGrid .dc:nth-last-child(-n+2) {
-    grid-column: span 2 !important;
-  }
+  .tabContent { gap: 32px; }
+  .section    { gap: 12px; }
+  .sectionTitle { font-size: 20px; }
 
   /* ── Картка ─────────────────────────────────────────────────── */
   .dc {
-    padding: 11px 12px 13px;
-    border-radius: 14px;
+    padding: 16px;
+    border-radius: 20px;
   }
 
   .dcIcon {
-    width: 24px;
-    height: 24px;
-    border-radius: 7px;
-    margin-bottom: 5px;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 6px;
   }
 
   .dcIcon svg {
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
   }
 
-  /* Label — дозволяємо перенос щоб не обрізалось */
   .dcLabel {
-    font-size: 9px;
-    letter-spacing: 0.04em;
-    white-space: normal;
-    line-height: 1.25;
+    font-size: 12px;
   }
 
-  /* Value — нормальний перенос */
   .dcValue {
-    font-size: 13px;
-    white-space: normal;
-    word-break: break-word;
+    font-size: 15px;
   }
 
-  .dcOpenRegHint { font-size: 10px; }
-
-  /* ── Danger zone — вертикально ──────────────────────────────── */
-  .dangerZone {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 16px;
-    margin-top: 32px;
-  }
-
-  .deleteBtn { align-self: flex-start; }
+  .dcOpenRegHint { font-size: 12px; }
 }
 
 /* ── Дуже вузький (≤360px, старі iPhone SE) ─────────────────── */
 @media (max-width: 360px) {
-  .detailGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .detailGrid .dc,
-  .detailGrid .dc:nth-last-child(-n+2) {
-    grid-column: span 1 !important;
-  }
-
   .dcValue { font-size: 14px; }
 }
