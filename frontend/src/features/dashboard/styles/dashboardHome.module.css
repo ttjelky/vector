@@ -1,294 +1,522 @@
 .contentArea {
-  padding: 32px 40px 48px;
-  max-width: 1400px;
+  padding: 20px 48px 64px;
+  max-width: 1200px;
   margin: 0 auto;
-  animation: fadeIn 0.4s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .reveal {
   opacity: 0;
-  transform: translateY(18px);
-  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.4s ease;
 }
 .revealVisible {
   opacity: 1;
-  transform: translateY(0);
 }
 
 /* ── Hero ── */
 .hero {
-  position: relative;
-  overflow: hidden;
-  border-radius: 22px;
-  padding: 30px 32px;
-  color: #fff;
-  background: linear-gradient(120deg, #18181b 0%, #3b3b46 55%, #5b5bd6 130%);
-  box-shadow: 0 12px 40px rgba(24, 24, 27, 0.25);
-  margin-bottom: 22px;
-}
-.hero::after {
-  content: "";
-  position: absolute;
-  right: -80px;
-  top: -80px;
-  width: 280px;
-  height: 280px;
-  background: radial-gradient(circle, rgba(255,255,255,0.22), transparent 65%);
-  pointer-events: none;
-}
-.hero::before {
-  content: "◈";
-  position: absolute;
-  right: 28px;
-  bottom: 12px;
-  font-size: 90px;
-  opacity: 0.12;
-  transform: rotate(-12deg);
-}
-.heroKicker {
-  font-size: 12px;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  opacity: 0.7;
-  font-weight: 700;
+  padding: 40px 8px 32px;
+  margin-bottom: 32px;
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 .heroTitle {
-  font-size: 30px;
-  font-weight: 800;
-  margin: 6px 0 4px;
-  letter-spacing: -0.02em;
+  font-size: 40px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: #1d1d1f;
 }
 .heroSub {
-  font-size: 14px;
-  opacity: 0.85;
-  margin: 0 0 18px;
-  max-width: 640px;
+  font-size: 19px;
+  line-height: 1.5;
+  color: #6e6e73;
+  margin: 0 0 24px;
+  max-width: 680px;
 }
 .heroActions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
-  position: relative;
-  z-index: 1;
 }
 .heroBtnPrimary {
-  background: #fff;
-  color: #18181b;
-  border: none;
-  border-radius: 100px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-}
-.heroBtnPrimary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-.heroBtnGhost {
-  background: rgba(255,255,255,0.14);
+  background: #0071e3;
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 100px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 600;
+  border: none;
+  border-radius: 980px;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: background 0.15s, transform 0.15s;
+  transition: background 0.2s;
 }
-.heroBtnGhost:hover { background: rgba(255,255,255,0.24); transform: translateY(-2px); }
+.heroBtnPrimary:hover { background: #0077ed; }
+.heroBtnPrimary:disabled { background: #c7c7cc; cursor: default; }
+.heroBtnGhost {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: none;
+  border-radius: 980px;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.heroBtnGhost:hover { background: #e8e8ed; }
 .roleBadge {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  background: rgba(255,255,255,0.18);
-  border: 1px solid rgba(255,255,255,0.3);
-  padding: 4px 12px;
-  border-radius: 100px;
-  margin-bottom: 8px;
+  display: none;
 }
 
 /* ── Stats ── */
 .statGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 12px;
-  margin-bottom: 22px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
 }
 .statCard {
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 18px;
-  padding: 16px 18px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 20px;
+  padding: 24px;
   display: flex;
-  gap: 12px;
-  align-items: center;
-  transition: transform 0.18s, box-shadow 0.18s;
+  flex-direction: column;
+  gap: 4px;
   cursor: default;
 }
-.statCard:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.08); }
 .statIcon {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  flex-shrink: 0;
+  display: none;
 }
 .statNum {
-  font-size: 24px;
-  font-weight: 800;
-  line-height: 1;
-  color: #111;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #1d1d1f;
   font-variant-numeric: tabular-nums;
 }
 .statLbl {
-  font-size: 12px;
-  color: #888;
-  margin-top: 3px;
+  font-size: 15px;
+  color: #6e6e73;
 }
 
 /* ── Layout ── */
 .mainGrid {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 40px;
+  margin-bottom: 40px;
 }
 @media (max-width: 1000px) {
-  .mainGrid { grid-template-columns: 1fr; }
-  .contentArea { padding: 20px 16px 40px; }
-  .heroTitle { font-size: 24px; }
+  .mainGrid { grid-template-columns: 1fr; gap: 32px; }
+  .contentArea { padding: 12px 20px 48px; }
+  .heroTitle { font-size: 32px; }
+  .heroSub { font-size: 17px; }
 }
 .section {
-  background: #fff;
-  border: 1px solid #ebebeb;
-  border-radius: 18px;
-  padding: 18px 20px;
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   min-width: 0;
+}
+.section + .section {
+  margin-top: 40px;
 }
 .sectionHeader {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8ed;
 }
 .sectionTitle {
-  font-size: 16px;
+  font-size: 24px;
   font-weight: 700;
+  letter-spacing: -0.02em;
   margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  color: #1d1d1f;
+}
+.countText {
+  font-size: 17px;
+  font-weight: 400;
+  color: #6e6e73;
 }
 .countBadge {
-  background: #18181b;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 800;
-  border-radius: 100px;
-  padding: 2px 9px;
+  display: none;
 }
 .linkBtn {
   background: none;
   border: none;
-  color: #555;
-  font-size: 13px;
-  font-weight: 600;
+  color: #0066cc;
+  font-size: 16px;
+  font-weight: 400;
   cursor: pointer;
+  white-space: nowrap;
 }
-.linkBtn:hover { color: #111; text-decoration: underline; }
+.linkBtn:hover { text-decoration: underline; }
 
-/* ── Tournament grid ── */
-.tournGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 12px;
+/* ── Tournament row: full-bleed стрічка від краю до краю екрана.
+   Ліворуч заходить під сайдбар, праворуч виходить за межі контенту.
+   Змінні --bleed-* успадковуються від .rowWrap. */
+.tournRow {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  margin-left: calc(-1 * var(--bleed-total));
+  margin-right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)));
+  padding: 4px var(--bleed-right) 28px 0;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--bleed-total);
+  scroll-padding-right: var(--bleed-right);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tournRow::-webkit-scrollbar {
+  display: none;
+}
+/* Невидимий спейсер: тримає першу картку на рівні тексту секції.
+   20px — компенсація gap між спейсером і карткою. */
+.tournRow::before {
+  content: "";
+  flex: 0 0 calc(var(--bleed-total) - 20px);
 }
 .tournCell {
+  flex: 0 0 360px;
+  max-width: 360px;
+  scroll-snap-align: start;
   cursor: pointer;
-  border-radius: 14px;
-  transition: transform 0.16s, box-shadow 0.16s;
+  border-radius: 18px;
+  transform-origin: 50% 50%;
+  transition:
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    box-shadow 0.22s ease;
 }
-.tournCell:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+@media (hover: hover) {
+  .tournCell:hover {
+    transform: none;
+    filter: brightness(0.96);
+  }
+}
+.tournCell:active {
+  transform: scale(0.96, 0.93);
+  filter: brightness(0.92);
+  transition:
+    transform 110ms ease-in,
+    filter 110ms ease-in;
+}
+.tournCell:focus-visible {
+  outline: 2px solid rgba(0,122,255,0.6);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tournCell {
+    transition: filter 150ms ease;
+  }
+  .tournCell:active {
+    transform: none;
+  }
+}
+.tournRow > .skeleton { flex: 0 0 360px; }
+@media (max-width: 600px) {
+  .tournCell { flex-basis: 280px; }
+  .tournRow > .skeleton { flex-basis: 280px; }
+}
+
+/* ── Row arrows ── */
+.rowWrap {
+  position: relative;
+  --bleed-left: 296px;
+  --bleed-right: 48px;
+  --bleed-extra: max(0px, (100vw - 1544px) / 2);
+  --bleed-total: calc(var(--bleed-left) + var(--bleed-extra));
+  --arrow-left: 264px;
+  --arrow-right: 16px;
+}
+@media (max-width: 1000px) {
+  .rowWrap {
+    --bleed-left: 268px;
+    --bleed-right: 20px;
+    --bleed-extra: max(0px, (100vw - 1488px) / 2);
+  }
+}
+@media (max-width: 992px) {
+  .rowWrap {
+    --bleed-left: 20px;
+    --bleed-right: 20px;
+    --bleed-extra: max(0px, (100vw - 1240px) / 2);
+    --arrow-left: 12px;
+  }
+}
+.rowArrow {
+  position: absolute;
+  /* Витягнутий прямокутник по висоті карток:
+     50% мінус поправка на нижній падінг стрічки, мінус половина висоти (36px) */
+  top: calc(50% - 12px - 36px);
+  width: 28px;
+  height: 72px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1d1d1f;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  /* !important: глобальний jellyButtons задає свій transition всім button
+     з вищою специфічністю і викидає opacity зі списку — без цього fade немає */
+  transition:
+    opacity 0.35s cubic-bezier(0.33, 1, 0.68, 1),
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease !important;
+}
+.rowWrap:hover .rowArrow,
+.rowWrap:focus-within .rowArrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+.rowArrowHidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.rowArrowLeft { left: calc(-1 * var(--bleed-total) + var(--arrow-left)); }
+.rowArrowRight { right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)) + var(--arrow-right)); }
+
+/* ── Event cards ── */
+.eventCard {
+  flex: 0 0 280px;
+  max-width: 280px;
+  scroll-snap-align: start;
+  cursor: pointer;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  transform-origin: 50% 50%;
+  transition:
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease;
+}
+@media (hover: hover) {
+  .eventCard:hover,
+  .notifCard:hover {
+    transform: none;
+    filter: brightness(0.96);
+  }
+}
+.eventCard:active,
+.notifCard:active {
+  transform: scale(0.96, 0.93);
+  filter: brightness(0.92);
+  transition:
+    transform 110ms ease-in,
+    filter 110ms ease-in;
+}
+@media (prefers-reduced-motion: reduce) {
+  .eventCard {
+    transition: filter 150ms ease;
+  }
+  .notifCard {
+    transition: filter 150ms ease;
+  }
+  .eventCard:active,
+  .notifCard:active {
+    transform: none;
+  }
+}
+@media (max-width: 600px) {
+  .eventCard {
+    flex-basis: 240px;
+    max-width: 240px;
+  }
+  .notifCard {
+    flex-basis: 260px;
+    max-width: 260px;
+  }
+}
+
+/* ── Notification cards ── */
+.notifCard {
+  flex: 0 0 320px;
+  max-width: 320px;
+  scroll-snap-align: start;
+  cursor: pointer;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transform-origin: 50% 50%;
+  transition:
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease;
+}
 
 /* ── Calendar / events ── */
-.eventList { display: flex; flex-direction: column; gap: 8px; }
-.eventRow {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: #f8f8fa;
-  border: 1px solid #f0f0f3;
-  transition: background 0.15s, transform 0.15s;
-  cursor: pointer;
-}
-.eventRow:hover { background: #f0f0f5; transform: translateX(3px); }
 .eventDate {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  background: #18181b;
-  color: #fff;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  color: #1d1d1f;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
-.eventDay { font-size: 17px; font-weight: 800; line-height: 1; }
-.eventMonth { font-size: 10px; text-transform: uppercase; opacity: 0.7; }
-.eventName { font-size: 13px; font-weight: 700; color: #222; }
-.eventMeta { font-size: 12px; color: #888; }
+.eventDay { font-size: 20px; font-weight: 700; line-height: 1; letter-spacing: -0.01em; }
+.eventMonth { font-size: 12px; color: #6e6e73; margin-top: 2px; }
+.eventName {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1f;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.eventMeta {
+  font-size: 15px;
+  color: #6e6e73;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eventCard > div,
+.notifCard > div {
+  min-width: 0;
+}
 
 /* ── Notifications ── */
-.notifList { display: flex; flex-direction: column; gap: 8px; max-height: 380px; overflow-y: auto; }
-.notifTile {
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: #fafafa;
-  border: 1px solid #f0f0f0;
-  font-size: 13px;
-  cursor: pointer;
-  position: relative;
-  transition: background 0.15s;
-}
-.notifTile:hover { background: #f3f3f6; }
-.notifUnread { background: #eef2ff; border-color: #dfe4ff; }
 .notifDot {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  display: inline-block;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #5b5bd6;
+  background: #0071e3;
+  margin-right: 8px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.notifTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.notifText {
+  font-size: 16px;
+  line-height: 1.45;
+  color: #515154;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.notifMeta { font-size: 14px; color: #6e6e73; margin-top: 2px; }
+.notifTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.notifIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.notifChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  width: fit-content;
+  background: #fff;
+  border-radius: 100px;
+  padding: 5px 12px;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #515154;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.notifChip svg { flex-shrink: 0; }
+.notifDismiss {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.85);
+  color: #6e6e73;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 2;
+}
+.notifCard {
+  position: relative;
+}
+.notifCard:hover .notifDismiss,
+.notifCard:focus-within .notifDismiss {
+  opacity: 1;
+  pointer-events: auto;
 }
 .emptyState {
-  text-align: center;
-  color: #aaa;
-  font-size: 13px;
-  padding: 24px 0;
+  color: #6e6e73;
+  font-size: 16px;
+  padding: 32px 0;
+  line-height: 1.5;
 }
+.emptyState p { margin: 0 0 16px; }
 .skeleton {
-  height: 16px;
-  border-radius: 8px;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e6e6e6 50%, #f0f0f0 75%);
-  background-size: 400px 100%;
-  animation: shimmer 1.3s infinite linear;
-}
-@keyframes shimmer {
-  from { background-position: -400px 0; }
-  to { background-position: 400px 0; }
+  height: 20px;
+  border-radius: 10px;
+  background: #f5f5f7;
 }

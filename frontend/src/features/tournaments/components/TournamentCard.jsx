@@ -67,14 +67,16 @@ const formatDate = (value) => {
 
 export function TournamentCard({
   name, info, date, accentColor, status,
-  imageMode = "none", stockImage, customImage,
+  imageMode = "none", stockImage, customImage, compact = false,
 }) {
+  const imgStyle = compact ? { height: 112 } : undefined;
+  const contentStyle = compact ? { padding: "14px 16px 16px" } : undefined;
   const renderImage = () => {
     if (imageMode === "custom") {
       const src = mediaUrl(customImage);
       if (src) {
         return (
-          <div className={styles.previewImage}>
+          <div className={styles.previewImage} style={imgStyle}>
             <img
               src={src}
               alt={name}
@@ -95,14 +97,14 @@ export function TournamentCard({
       return (
         <div
           className={styles.previewImage}
-          style={{ background: "linear-gradient(135deg, #e0e0e4 0%, #f0f0f3 100%)" }}
+          style={{ background: "linear-gradient(135deg, #e0e0e4 0%, #f0f0f3 100%)", ...imgStyle }}
         />
       );
     }
     if (imageMode === "stock") {
       const gradient = STOCK_IMAGES.find(i => i.id === stockImage)?.gradient
         ?? "linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%)";
-      return <div className={styles.previewImage} style={{ background: gradient }} />;
+      return <div className={styles.previewImage} style={{ background: gradient, ...imgStyle }} />;
     }
     return null;
   };
@@ -110,7 +112,7 @@ export function TournamentCard({
   return (
     <div className={styles.previewCard} style={{ "--accent": accentColor }}>
       {renderImage()}
-      <div className={styles.previewContent}>
+      <div className={styles.previewContent} style={contentStyle}>
         <div className={styles.previewHeader}>
           <h3 className={styles.previewName}>{name || "Назва вашого турніру"}</h3>
           <StatusBadge status={status ?? "upcoming"} />

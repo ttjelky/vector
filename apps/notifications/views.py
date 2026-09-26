@@ -85,6 +85,19 @@ def mark_one_read(request, pk):
         return Response({'error': 'not found'}, status=404)
 
 
+# ── Видалити одне сповіщення ──────────────────────────────────────────────────
+# DELETE /api/notifications/<pk>/
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_notification(request, pk):
+    try:
+        n = Notification.objects.get(pk=pk, recipient=request.user)
+        n.delete()
+        return Response({'status': 'deleted'})
+    except Notification.DoesNotExist:
+        return Response({'error': 'not found'}, status=404)
+
+
 # ── Відправити сповіщення ─────────────────────────────────────────────────────
 # POST /api/notifications/send/
 # Поля форми:

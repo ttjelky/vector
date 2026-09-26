@@ -4,6 +4,8 @@ import { useTabs } from "@shared/contexts/TabsContext";
 import { API, mediaUrl } from '@api';
 import { NavBar } from "@shared/components/NavBar";
 import { TournamentCard } from "@features/tournaments";
+import { ScrollRow } from "../components/ScrollRow";
+import { NotifCard } from "../components/NotifCard";
 import { JoinByCodeModal } from "@features/teams";
 import { computeStatus } from "@features/tournaments/components/tournamentHelpers";
 import home from "../styles/dashboardHome.module.css";
@@ -40,17 +42,14 @@ function useCountUp(target, duration = 800) {
   return val;
 }
 
-function Stat({ icon, bg, value, label, delay, suffix = "" }) {
+function Stat({ value, label, delay, suffix = "" }) {
   const [ref, vis] = useReveal();
   const animated = useCountUp(vis ? value : 0);
   return (
     <div ref={ref} className={`${home.statCard} ${home.reveal} ${vis ? home.revealVisible : ""}`}
       style={{ transitionDelay: `${delay}ms` }}>
-      <div className={home.statIcon} style={{ background: bg }}>{icon}</div>
-      <div>
-        <div className={home.statNum}>{animated}{suffix}</div>
-        <div className={home.statLbl}>{label}</div>
-      </div>
+      <div className={home.statNum}>{animated}{suffix}</div>
+      <div className={home.statLbl}>{label}</div>
     </div>
   );
 }
@@ -61,6 +60,18 @@ function greeting() {
   if (h < 12) return "Доброго ранку";
   if (h < 18) return "Доброго дня";
   return "Доброго вечора";
+}
+
+// Дата вже показана на бейджі картки — сюди додаємо лише час (якщо він заданий)
+function toEvent(date, title, meta, id) {
+  const d = new Date(date);
+  const hasTime = !isNaN(d) && (d.getHours() !== 0 || d.getMinutes() !== 0);
+  return {
+    date: d, title, id,
+    meta: hasTime
+      ? `${meta} · ${d.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit" })}`
+      : meta,
+  };
 }
 
 const ParticipantDashboard = () => {
@@ -92,6 +103,10 @@ const ParticipantDashboard = () => {
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
     await API.post("/notifications/mark-read/").catch(() => {});
   };
+  const dismiss = async (id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    await API.delete(`/notifications/${id}/`).catch(() => {});
+  };
 
   const avgScore = grades.length > 0
     ? Math.round(grades.reduce((s, g) => s + (g.max_total > 0 ? (g.total / g.max_total) * 100 : 0), 0) / grades.length)
@@ -104,8 +119,8 @@ const ParticipantDashboard = () => {
   const events = useMemo(() => {
     const evs = [];
     for (const t of tournaments) {
-      if (t.end_date) evs.push({ date: new Date(t.end_date), title: t.name, meta: "Дедлайн", id: t.id });
-      if (t.registration_end) evs.push({ date: new Date(t.registration_end), title: t.name, meta: "Кінець реєстрації", id: t.id });
+      if (t.end_date) evs.push(toEvent(t.end_date, t.name, "Дедлайн", t.id));
+      if (t.registration_end) evs.push(toEvent(t.registration_end, t.name, "Кінець реєстрації", t.id));
     }
     return evs.filter(e => !isNaN(e.date)).sort((a, b) => a.date - b.date)
       .filter(e => e.date >= new Date(Date.now() - 86400000)).slice(0, 5);
@@ -123,142 +138,131 @@ const ParticipantDashboard = () => {
     <NavBar>
       <div className={home.contentArea}>
         <div ref={heroRef} className={`${home.hero} ${home.reveal} ${heroVis ? home.revealVisible : ""}`}>
-          <span className={home.roleBadge}>Учасник</span>
-          <h1 className={home.heroTitle}>{greeting()}, {userName}! 🚀</h1>
+          <h1 className={home.heroTitle}>{greeting()}, {userName}</h1>
           <p className={home.heroSub}>
             {tournaments.length === 0
               ? "Ви ще не в жодному турнірі — загляньте в публічний каталог або вставте посилання від організатора."
-              : `У вас ${tournaments.length} турнірів · ${grades.length} оцінок${grades.length ? ` · середній бал ${avgScore}%` : ""}. Так тримати!`}
+              : `У вас ${tournaments.length} турнірів і ${grades.length} оцінок${grades.length ? `, середній бал — ${avgScore}%` : ""}.`}
           </p>
           <div className={home.heroActions}>
             <button className={home.heroBtnPrimary} onClick={() => setShowJoin(true)}>
-              🔗 Приєднатися за посиланням
+              Приєднатися за посиланням
             </button>
             <button className={home.heroBtnGhost} onClick={() => navigate("/public")}>
-              🌍 Публічні турніри{publicCount > 0 ? ` (${publicCount})` : ""}
-            </button>
-            <button className={home.heroBtnGhost} onClick={() => navigate("/tournaments")}>
-              🏆 Мої турніри
+              Публічні турніри{publicCount > 0 ? ` · ${publicCount}` : ""}
             </button>
           </div>
         </div>
 
         <div className={home.statGrid}>
-          <Stat icon="🏆" bg="#fef3c7" value={tournaments.length} label="мої турніри" delay={0} />
-          <Stat icon="🔥" bg="#dcfce7" value={active} label="активних" delay={80} />
-          <Stat icon="📝" bg="#e0e7ff" value={grades.length} label="оцінок" delay={160} />
-          <Stat icon="⭐" bg="#fef9c3" value={avgScore} suffix="%" label="середній бал" delay={240} />
-          <Stat icon="🔔" bg="#fce7f3" value={unread} label="непрочитаних" delay={320} />
+          <Stat value={tournaments.length} label="Мої турніри" delay={0} />
+          <Stat value={active} label="Активних" delay={80} />
+          <Stat value={grades.length} label="Оцінок" delay={160} />
+          <Stat value={avgScore} suffix="%" label="Середній бал" delay={240} />
+          <Stat value={unread} label="Непрочитаних" delay={320} />
         </div>
 
-        <div className={home.mainGrid}>
+        <section className={home.section}>
+          <div className={home.sectionHeader}>
+            <h3 className={home.sectionTitle}>
+              Мої турніри{tournaments.length > 0 && <span className={home.countText}>&nbsp;· {tournaments.length}</span>}
+            </h3>
+            <button className={home.linkBtn} onClick={() => navigate("/tournaments")}>Всі</button>
+          </div>
+          {loadingT ? (
+              <div className={home.tournRow}>{[0,1,2].map(i => <div key={i} className={home.skeleton} style={{ height: 200 }} />)}</div>
+          ) : recent.length === 0 ? (
+            <div className={home.emptyState}>
+              <p>Поки порожньо. Приєднайтеся до першого турніру.</p>
+              <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                <button className={home.heroBtnPrimary}
+                  onClick={() => navigate("/public")}>До каталогу</button>
+              </div>
+            </div>
+          ) : (
+              <ScrollRow>
+              {recent.map((t) => (
+                <div key={t.id} className={home.tournCell} onClick={() => openTournament(t)}>
+                  <TournamentCard
+                    name={t.name} info={t.description} date={t.start_date}
+                    accentColor={t.accent_color} imageMode={t.image_mode}
+                    stockImage={t.stock_image}
+                    customImage={t.custom_image ? (t.custom_image.startsWith("http") ? t.custom_image : mediaUrl(t.custom_image)) : null}
+                    status={computeStatus(t)}
+                    compact
+                  />
+                </div>
+              ))}
+              </ScrollRow>
+          )}
+        </section>
+
+        {!loadingG && topGrades.length > 0 && (
           <section className={home.section}>
             <div className={home.sectionHeader}>
-              <h3 className={home.sectionTitle}>Мої турніри <span className={home.countBadge}>{tournaments.length}</span></h3>
-              <button className={home.linkBtn} onClick={() => navigate("/tournaments")}>Всі →</button>
+              <h3 className={home.sectionTitle}>Останні оцінки</h3>
+              <button className={home.linkBtn} onClick={() => navigate("/works")}>Всі роботи</button>
             </div>
-            {loadingT ? (
-              <div className={home.tournGrid}>{[0,1,2].map(i => <div key={i} className={home.skeleton} style={{ height: 120 }} />)}</div>
-            ) : recent.length === 0 ? (
-              <div className={home.emptyState}>
-                <div style={{ fontSize: 32 }}>🎯</div>
-                <p>Поки порожньо. Приєднайтеся до першого турніру!</p>
-                <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
-                  <button className={home.heroBtnPrimary} style={{ background: "#18181b", color: "#fff" }}
-                    onClick={() => navigate("/public")}>До каталогу</button>
-                </div>
-              </div>
-            ) : (
-              <div className={home.tournGrid}>
-                {recent.map((t) => (
-                  <div key={t.id} className={home.tournCell} onClick={() => openTournament(t)}>
-                    <TournamentCard
-                      name={t.name} info={t.description} date={t.start_date}
-                      accentColor={t.accent_color} imageMode={t.image_mode}
-                      stockImage={t.stock_image}
-                      customImage={t.custom_image ? (t.custom_image.startsWith("http") ? t.custom_image : mediaUrl(t.custom_image)) : null}
-                      status={computeStatus(t)}
-                    />
+            <ScrollRow>
+              {topGrades.map((g) => (
+                <div key={g.id} className={home.eventCard}>
+                  <div className={home.eventDate}>
+                    <span className={home.eventDay}>{g.total}</span>
+                    <span className={home.eventMonth}>/{g.max_total}</span>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {topGrades.length > 0 && (
-              <>
-                <div className={home.sectionHeader} style={{ marginTop: 18 }}>
-                  <h3 className={home.sectionTitle}>⭐ Останні оцінки</h3>
-                  <button className={home.linkBtn} onClick={() => navigate("/works")}>Всі роботи →</button>
+                  <div>
+                    <div className={home.eventName}>{g.task_title}</div>
+                    <div className={home.eventMeta}>{g.tournament} · {g.round_title}</div>
+                  </div>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {topGrades.map((g) => (
-                    <div key={g.id} className={home.eventRow}>
-                      <div className={home.eventDate} style={{
-                        background: (g.total / (g.max_total || 1)) >= 0.8 ? "#16a34a" : (g.total / (g.max_total || 1)) >= 0.5 ? "#f59e0b" : "#ef4444",
-                      }}>
-                        <span className={home.eventDay}>{g.total}</span>
-                        <span className={home.eventMonth}>/{g.max_total}</span>
-                      </div>
-                      <div>
-                        <div className={home.eventName}>{g.task_title}</div>
-                        <div className={home.eventMeta}>{g.tournament} · {g.round_title}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
+              ))}
+            </ScrollRow>
           </section>
+        )}
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <section className={home.section}>
-              <div className={home.sectionHeader}>
-                <h3 className={home.sectionTitle}>📅 Дедлайни</h3>
-              </div>
-              {events.length === 0 ? (
-                <div className={home.emptyState}>Немає наближених дедлайнів</div>
-              ) : (
-                <div className={home.eventList}>
-                  {events.map((e, i) => (
-                    <div key={i} className={home.eventRow} onClick={() => navigate(`/tournament/${e.id}`)}>
-                      <div className={home.eventDate}>
-                        <span className={home.eventDay}>{e.date.getDate()}</span>
-                        <span className={home.eventMonth}>{UA_MONTHS[e.date.getMonth()]}</span>
-                      </div>
-                      <div>
-                        <div className={home.eventName}>{e.title}</div>
-                        <div className={home.eventMeta}>{e.meta} · {e.date.toLocaleDateString("uk-UA")}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-
-            <section className={home.section}>
-              <div className={home.sectionHeader}>
-                <h3 className={home.sectionTitle}>🔔 Сповіщення {unread > 0 && <span className={home.countBadge}>{unread}</span>}</h3>
-                {unread > 0 && <button className={home.linkBtn} onClick={markAllRead}>Всі прочитано</button>}
-              </div>
-              <div className={home.notifList}>
-                {loadingN ? (
-                  [0,1,2].map(i => <div key={i} className={home.skeleton} style={{ height: 48 }} />)
-                ) : notifications.length === 0 ? (
-                  <div className={home.emptyState}>Немає сповіщень</div>
-                ) : (
-                  notifications.slice(0, 6).map((n) => (
-                    <div key={n.id} className={`${home.notifTile} ${!n.is_read ? home.notifUnread : ""}`}
-                      onClick={() => !n.is_read && markOneRead(n.id)}>
-                      {!n.is_read && <span className={home.notifDot} />}
-                      <div style={{ fontWeight: 700 }}>{n.subject || "Сповіщення"}</div>
-                      <div style={{ color: "#555" }}>{n.text}</div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
+        <section className={home.section}>
+          <div className={home.sectionHeader}>
+            <h3 className={home.sectionTitle}>Дедлайни</h3>
           </div>
-        </div>
+          {events.length === 0 ? (
+            <div className={home.emptyState}>Немає наближених дедлайнів</div>
+          ) : (
+            <ScrollRow>
+              {events.map((e, i) => (
+                <div key={i} className={home.eventCard} onClick={() => navigate(`/tournament/${e.id}`)}>
+                  <div className={home.eventDate}>
+                    <span className={home.eventDay}>{e.date.getDate()}</span>
+                    <span className={home.eventMonth}>{UA_MONTHS[e.date.getMonth()]}</span>
+                  </div>
+                  <div>
+                      <div className={home.eventName}>{e.title}</div>
+                      <div className={home.eventMeta}>{e.meta}</div>
+                  </div>
+                </div>
+              ))}
+            </ScrollRow>
+          )}
+        </section>
+
+        <section className={home.section}>
+          <div className={home.sectionHeader}>
+            <h3 className={home.sectionTitle}>
+              Сповіщення{unread > 0 && <span className={home.countText}>&nbsp;· {unread} нових</span>}
+            </h3>
+            {unread > 0 && <button className={home.linkBtn} onClick={markAllRead}>Всі прочитано</button>}
+          </div>
+          {loadingN ? (
+            <div className={home.tournRow}>{[0,1,2].map(i => <div key={i} className={home.skeleton} style={{ height: 120, flex: "0 0 320px" }} />)}</div>
+          ) : notifications.length === 0 ? (
+            <div className={home.emptyState}>Немає сповіщень</div>
+          ) : (
+            <ScrollRow>
+              {notifications.slice(0, 6).map((n) => (
+                <NotifCard key={n.id} n={n} onRead={markOneRead} onDismiss={dismiss} />
+              ))}
+            </ScrollRow>
+          )}
+        </section>
       </div>
       {showJoin && <JoinByCodeModal onClose={() => setShowJoin(false)} />}
     </NavBar>

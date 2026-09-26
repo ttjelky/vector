@@ -259,6 +259,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .contentArea {
   flex: 1;
   overflow-y: auto;
+  overflow-x: clip;
   background: transparent;
   padding-left: 248px;
   padding-top: 86px;

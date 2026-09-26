@@ -42,8 +42,8 @@
 /* Щільний варіант для сайдбарів: трохи сильніший блюр і менша прозорість. */
 .glass-surface--dense.glass-surface {
   background: rgba(255, 255, 255, 0.78);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 /* Суцільний варіант (як підкладка під логотип): непрозорий, без блюру. */

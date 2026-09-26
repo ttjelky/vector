@@ -7,4 +7,5 @@ urlpatterns = [
     path('mark-read/',            views.mark_all_read,      name='notification_mark_all_read'),
     path('mark-read/<int:pk>/',   views.mark_one_read,      name='notification_mark_one_read'),
     path('search-users/',         views.search_users,       name='notification_search_users'),
+    path('<int:pk>/',             views.delete_notification,  name='notification_delete'),
 ]
