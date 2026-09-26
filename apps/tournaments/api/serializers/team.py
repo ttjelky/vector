@@ -77,13 +77,8 @@ class TeamSerializer(serializers.ModelSerializer):
 
     def get_registration_status(self, obj):
         t = obj.tournament
-        if t.registration_open():
-            return 'open'
-        from django.utils import timezone
-        now = timezone.now()
-        if t.registration_start and now < t.registration_start:
-            return 'not_started'
-        return 'closed'
+        _, reason, _ = t.registration_status()
+        return reason if reason != 'exception' else 'open'
 
 
 class TeamCreateSerializer(serializers.Serializer):
@@ -99,7 +94,8 @@ class TeamCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError("Це не командний турнір.")
 
         if not tournament.registration_open():
-            raise serializers.ValidationError("Реєстрація команд наразі закрита.")
+            _, _, message = tournament.registration_status()
+            raise serializers.ValidationError(message or "Реєстрація команд наразі закрита.")
 
         if Team.objects.filter(tournament=tournament, captain=captain).exists():
             raise serializers.ValidationError("Ви вже є капітаном команди у цьому турнірі.")

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import styles from "../styles/loginPage.module.css";
 import cross from "@static/icons/cross.svg";
-import { loginUser, setAccessToken, setUserRole } from "@api";
+import { loginUser, setAccessToken, setUserRole, resendCode } from "@api";
 import { useNavigate } from "react-router-dom";
 import { ROLE_HOME } from "@nav";
+import { VerifyEmail } from "./VerifyEmail";
 
 /**
  * Props:
@@ -18,6 +19,7 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
 
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [errors,    setErrors]    = useState({});
+  const [needVerifyEmail, setNeedVerifyEmail] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,6 +68,21 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
     } catch (error) {
       const data = error.response?.data;
 
+      // Непідтверджена пошта — показуємо крок з кодом
+      const code = data?.code || data?.non_field_errors?.code;
+      const detailObj = Array.isArray(data?.non_field_errors) ? data.non_field_errors[0] : null;
+      const isNotVerified =
+        code === "email_not_verified" ||
+        (detailObj && typeof detailObj === "object" && detailObj.code === "email_not_verified") ||
+        data?.detail === "Підтвердіть пошту 6-значним кодом." ||
+        (typeof data?.non_field_errors?.[0] === "string" && data.non_field_errors[0].includes("Підтвердіть пошту"));
+      if (isNotVerified) {
+        const em = data?.email || detailObj?.email || loginData.email;
+        try { await resendCode(em).catch(() => {}); } catch {}
+        setNeedVerifyEmail(em);
+        return;
+      }
+
       // DRF повертає або { detail: "..." } або { non_field_errors: ["..."] }
       const serverMessage =
         data?.detail ||
@@ -89,7 +106,37 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
     }
   };
 
+  const handleVerified = (data) => {
+    const role = data.role || "participant";
+    setAccessToken(data.access);
+    setUserRole(role);
+    localStorage.setItem("userRole", role);
+    window.dispatchEvent(new Event("auth-changed"));
+    onClose();
+    if (onLoginSuccess) { onLoginSuccess(); return; }
+    navigate(ROLE_HOME[role] ?? ROLE_HOME.participant);
+  };
+
   if (!isOpen) return null;
+
+  if (needVerifyEmail) {
+    return (
+      <div className={styles.overlay} onClick={onClose}>
+        <div className={styles.login} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+          <div className={styles.header}>
+            <h2 className={styles.logintitle}>Підтвердження пошти</h2>
+            <img src={cross} alt="Закрити" className={styles.cross} onClick={onClose} />
+          </div>
+          <div className={styles.form}>
+            <VerifyEmail email={needVerifyEmail} onVerified={handleVerified} onBack={() => setNeedVerifyEmail(null)} />
+            <div className={styles.footer}>
+              <button type="button" className={styles.btnCancel} onClick={() => setNeedVerifyEmail(null)}>← Назад</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.overlay} onClick={onClose}>

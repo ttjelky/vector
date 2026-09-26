@@ -193,11 +193,10 @@ const AdminTournaments = () => {
             ) : (
               <div className={styles.tournamentGrid}>
                 {tab === "active" && (
-                  <button type="button" className={styles.createCard} onClick={() => setOpen(true)}>
+                  <button type="button" className={styles.createCard} onClick={() => setOpen(true)} aria-label="Створити турнір" title="Створити турнір">
                     <span className={styles.createCardPlus}>
                       <Plus size={28} strokeWidth={2.2} />
                     </span>
-                    <span className={styles.createCardTitle}>Створити турнір</span>
                   </button>
                 )}
                 {displayList.map((tournament) => (

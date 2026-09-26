@@ -5,7 +5,7 @@ import { getTabsForRole, COMMON_TABS } from "@nav";
 import styles from "@shared/styles/NavBar.module.css";
 import nStyles from "@shared/styles/Notifications.module.css";
 
-import { House, Trophy, FileText, Settings, User, CircleHelp, LogOut, Newspaper, X, ChevronDown, Pin, PinOff } from "lucide-react";
+import { House, Trophy, FileText, Settings, User, CircleHelp, LogOut, Newspaper, X, ChevronDown } from "lucide-react";
 import BellIcon        from "@static/icons/Bell.svg?react";
 import Logo            from "@static/VectorLogo.png";
 
@@ -105,8 +105,8 @@ const TournamentsNavItem = ({
    NavBar перемонтовується при кожній навігації, тому анімація
    на кожен маунт програвалася б при кожному кліку по сайдбару.
    Exit-анімація — локальний стан closing + таймер з cleanup.
-   Кнопки pin/close — сиблінги NavLink, а не вкладені в <a>. */
-const TournamentTab = ({ tab, onClose, onNavClick, pinned, onTogglePin, isFreshTab, markTabSeen }) => {
+   Кнопка close — сиблінг NavLink, а не вкладена в <a>. */
+const TournamentTab = ({ tab, onClose, onNavClick, isFreshTab, markTabSeen }) => {
   const [closing, setClosing] = useState(false);
   // Читаємо без споживання — щоб одночасні маунти (десктоп+мобайл)
   // і StrictMode не з'їдали прапорець; гасимо ефектом після показу.
@@ -126,7 +126,7 @@ const TournamentTab = ({ tab, onClose, onNavClick, pinned, onTogglePin, isFreshT
   const handleClose = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (closing || pinned) return;
+    if (closing) return;
     setClosing(true);
     timer.current = setTimeout(() => {
       const wasActive =
@@ -141,12 +141,6 @@ const TournamentTab = ({ tab, onClose, onNavClick, pinned, onTogglePin, isFreshT
     }, 220);
   };
 
-  const handleTogglePin = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onTogglePin(tab.id);
-  };
-
   return (
     <div className={`${styles.nestedRow} ${closing ? styles.nestedClosing : fresh ? styles.nestedEnter : ''}`}>
       <NavLink
@@ -157,32 +151,17 @@ const TournamentTab = ({ tab, onClose, onNavClick, pinned, onTogglePin, isFreshT
         tabIndex={closing ? -1 : undefined}
         aria-hidden={closing || undefined}
       >
-        {pinned && <Pin className={styles.pinnedDot} strokeWidth={2.2} aria-label="Закріплено" />}
         <span className={styles.tabName}>{tab.name}</span>
       </NavLink>
       <div className={styles.nestedActions}>
         <button
           type="button"
-          className={`${styles.pinBtn} ${pinned ? styles.pinBtnActive : ''}`}
-          onClick={handleTogglePin}
-          aria-pressed={!!pinned}
-          aria-label={pinned ? `Відкріпити ${tab.name}` : `Закріпити ${tab.name}`}
-          title={pinned ? 'Відкріпити' : 'Закріпити'}
+          className={styles.closeIconWrapper}
+          onClick={handleClose}
+          aria-label={`Закрити ${tab.name}`}
         >
-          {pinned
-            ? <PinOff className={styles.pinIcon} strokeWidth={2} />
-            : <Pin className={styles.pinIcon} strokeWidth={2} />}
+          <X className={styles.closeIcon} strokeWidth={2} />
         </button>
-        {!pinned && (
-          <button
-            type="button"
-            className={styles.closeIconWrapper}
-            onClick={handleClose}
-            aria-label={`Закрити ${tab.name}`}
-          >
-            <X className={styles.closeIcon} strokeWidth={2} />
-          </button>
-        )}
       </div>
     </div>
   );
@@ -320,7 +299,7 @@ const MobileSearch = ({ onSearch }) => {
 
 /* ─── Main NavBar ─── */
 const NavBar = ({ children }) => {
-  const { openTabs, closeTab, removeTabById, togglePin, isPinned, isFreshTab, markTabSeen } = useTabs();
+  const { openTabs, closeTab, removeTabById, isFreshTab, markTabSeen } = useTabs();
   const { searchQuery, setSearchQuery, clearSearch } = useSearch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -609,8 +588,6 @@ const NavBar = ({ children }) => {
                           key={tab.id}
                           tab={tab}
                           onClose={closeTab}
-                          pinned={isPinned(tab.id)}
-                          onTogglePin={togglePin}
                           isFreshTab={isFreshTab}
                           markTabSeen={markTabSeen}
                         />
@@ -671,8 +648,6 @@ const NavBar = ({ children }) => {
                           tab={tab}
                           onClose={closeTab}
                           onNavClick={handleNavClick}
-                          pinned={isPinned(tab.id)}
-                          onTogglePin={togglePin}
                           isFreshTab={isFreshTab}
                           markTabSeen={markTabSeen}
                         />

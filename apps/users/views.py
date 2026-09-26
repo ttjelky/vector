@@ -148,31 +148,192 @@ class LogoutView(APIView):
 
 # ── Register ──────────────────────────────────────────────────────────────────
 
+def _send_verification_email(email: str, code: str):
+    """Надсилає 6-значний код. Не кидає виняток назовні — логує помилку."""
+    from django.core.mail import send_mail
+    from django.conf import settings as dj_settings
+    subject = "Vector — код підтвердження пошти"
+    message = (
+        f"Ваш код підтвердження Vector: {code}\n\n"
+        f"Код дійсний 15 хвилин. Нікому його не повідомляйте."
+    )
+    try:
+        send_mail(
+            subject,
+            message,
+            getattr(dj_settings, "DEFAULT_FROM_EMAIL", "noreply@vector.com"),
+            [email],
+            fail_silently=False,
+        )
+        return True
+    except Exception as exc:
+        print(f"[EmailVerification] не вдалось надіслати лист на {email}: {exc} | код: {code}")
+        return False
+
+
 class RegisterView(generics.CreateAPIView):
     """
     POST /api/users/register/
-    Реєструє юзера і одразу повертає access + cookie.
+    Створює НЕактивного юзера і надсилає 6-значний код на пошту.
+    Відповідь 201: { detail, email } — далі виклич verify.
+    Якщо юзер вже існує але неактивний — оновлюємо дані і шлемо новий код.
     """
     queryset           = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class   = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
+        from .models import EmailVerificationCode
+        from django.utils import timezone
+        from datetime import timedelta
 
-        if response.status_code == 201:
-            try:
-                user    = User.objects.get(email=request.data.get("email"))
-                refresh = RefreshToken.for_user(user)
+        serializer = self.get_serializer(data=request.data)
+        email_raw = (request.data.get("email") or "").strip().lower()
 
-                response.data["access"] = str(refresh.access_token)
-                response.data.update(_user_payload(user))
+        # Повторна реєстрація неактивного акаунта — ресенд коду з оновленням даних
+        existing = User.objects.filter(email__iexact=email_raw).first() if email_raw else None
+        if existing is not None and not existing.is_active:
+            # Оновлюємо поля з запиту
+            existing.first_name = request.data.get("first_name", existing.first_name)
+            existing.last_name = request.data.get("last_name", existing.last_name)
+            role = request.data.get("role", existing.role or "participant")
+            if role in ("admin", "participant", "jury"):
+                existing.role = role
+            pwd = request.data.get("password")
+            if pwd:
+                existing.set_password(pwd)
+            existing.username = existing.email
+            existing.save()
 
-                _set_refresh_cookie(response, str(refresh))
-            except Exception:
-                pass
+            code_obj = EmailVerificationCode.generate(email=existing.email, user=existing)
+            sent = _send_verification_email(existing.email, code_obj.code)
 
+            data = {"detail": "Код підтвердження надіслано на пошту.", "email": existing.email}
+            if settings.DEBUG:
+                data["debug_code"] = code_obj.code
+                data["email_sent"] = sent
+            return Response(data, status=201)
+
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        # Деактивуємо до підтвердження
+        user.is_active = False
+        user.save(update_fields=["is_active"])
+
+        code_obj = EmailVerificationCode.generate(email=user.email, user=user)
+        sent = _send_verification_email(user.email, code_obj.code)
+
+        data = {"detail": "Код підтвердження надіслано на пошту.", "email": user.email}
+        if settings.DEBUG:
+            data["debug_code"] = code_obj.code
+            data["email_sent"] = sent
+        return Response(data, status=201)
+
+
+class VerifyEmailView(APIView):
+    """
+    POST /api/users/register/verify/
+    Body: { email, code }
+    Активує юзера і повертає access + cookie (як при реєстрації раніше).
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        from .models import EmailVerificationCode
+        email = (request.data.get("email") or "").strip().lower()
+        code = (request.data.get("code") or "").strip()
+        if not email or not code:
+            return Response({"detail": "Вкажіть email і код."}, status=400)
+
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return Response({"detail": "Користувача не знайдено."}, status=404)
+
+        if user.is_active:
+            return Response({"detail": "Пошта вже підтверджена. Увійдіть."}, status=400)
+
+        code_obj = (
+            EmailVerificationCode.objects
+            .filter(email__iexact=email, is_used=False)
+            .order_by("-created_at")
+            .first()
+        )
+        if not code_obj:
+            return Response({"detail": "Код не знайдено. Запросіть новий."}, status=400)
+
+        if code_obj.is_expired:
+            return Response({"detail": "Код прострочено. Запросіть новий.", "code": "expired"}, status=400)
+
+        if code_obj.attempts >= 5:
+            return Response({"detail": "Забагато спроб. Запросіть новий код."}, status=400)
+
+        if code_obj.code != code:
+            code_obj.attempts += 1
+            code_obj.save(update_fields=["attempts"])
+            left = max(0, 5 - code_obj.attempts)
+            return Response(
+                {"detail": f"Невірний код. Залишилось спроб: {left}."},
+                status=400,
+            )
+
+        code_obj.is_used = True
+        code_obj.save(update_fields=["is_used"])
+
+        user.is_active = True
+        user.save(update_fields=["is_active"])
+
+        refresh = RefreshToken.for_user(user)
+        response = Response({
+            "access": str(refresh.access_token),
+            **_user_payload(user),
+            "email": user.email,
+        })
+        _set_refresh_cookie(response, str(refresh))
         return response
+
+
+class ResendCodeView(APIView):
+    """
+    POST /api/users/register/resend/
+    Body: { email } — новий код (тротлінг 60 сек).
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        from .models import EmailVerificationCode
+        from django.utils import timezone
+        from datetime import timedelta
+        email = (request.data.get("email") or "").strip().lower()
+        if not email:
+            return Response({"detail": "Вкажіть email."}, status=400)
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            return Response({"detail": "Користувача не знайдено."}, status=404)
+        if user.is_active:
+            return Response({"detail": "Пошта вже підтверджена. Увійдіть."}, status=400)
+
+        last = (
+            EmailVerificationCode.objects
+            .filter(email__iexact=email)
+            .order_by("-created_at")
+            .first()
+        )
+        if last and (timezone.now() - last.created_at) < timedelta(seconds=60):
+            wait = 60 - int((timezone.now() - last.created_at).total_seconds())
+            return Response(
+                {"detail": f"Зачекайте {wait} сек перед повторною відправкою."},
+                status=429,
+            )
+
+        code_obj = EmailVerificationCode.generate(email=user.email, user=user)
+        sent = _send_verification_email(user.email, code_obj.code)
+        data = {"detail": "Новий код надіслано на пошту.", "email": user.email}
+        if settings.DEBUG:
+            data["debug_code"] = code_obj.code
+            data["email_sent"] = sent
+        return Response(data)
 
 
 # ── Profile ───────────────────────────────────────────────────────────────────

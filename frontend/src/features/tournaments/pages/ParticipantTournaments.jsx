@@ -170,7 +170,7 @@ const ParticipantTournaments = () => {
                       <Ticket size={26} strokeWidth={2} />
                     </span>
                     <span className={styles.createCardTitle}>Приєднатися до турніру</span>
-                    <span className={styles.createCardHint}>Введіть код запрошення від організатора</span>
+                    <span className={styles.createCardHint}>Вставте посилання-запрошення від організатора</span>
                   </button>
                 )}
                 {displayList.map((tournament) => (

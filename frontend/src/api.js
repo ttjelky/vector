@@ -123,6 +123,12 @@ export const loginUser    = (credentials) =>
 export const registerUser = (userData)    =>
   axios.post(`${BASE}/users/register/`, userData,    { withCredentials: true });
 
+export const verifyEmail = ({ email, code }) =>
+  axios.post(`${BASE}/users/register/verify/`, { email, code }, { withCredentials: true });
+
+export const resendCode = (email) =>
+  axios.post(`${BASE}/users/register/resend/`, { email }, { withCredentials: true });
+
 export const logoutUser   = ()            =>
   axios.post(`${BASE}/users/logout/`,   {},          { withCredentials: true });
 

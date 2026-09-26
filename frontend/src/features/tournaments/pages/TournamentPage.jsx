@@ -318,6 +318,9 @@ export function TournamentPage() {
                 tournament?.open_registration ||
                 (!tournament?.registration_start && !tournament?.registration_end)
               }
+              registrationOpen={tournament?.registration_open}
+              registrationReason={tournament?.registration_reason}
+              registrationMessage={tournament?.registration_message}
             />
           )}
 

@@ -27,6 +27,16 @@ from .api.views.team import (
     MyTeamView,
     TeamInviteInfoView, TeamInviteAcceptView, TeamInviteDeclineView,
 )
+from .api.views.invite import (
+    InviteLinkListCreateView, InviteLinkDeleteView,
+)
+from .api.views.registration import (
+    RegistrationFieldListCreateView, RegistrationFieldDetailView,
+    RegistrationResponseListView, MyRegistrationResponseView,
+)
+from .api.views.public import (
+    PublicTournamentListView, PublicTournamentJoinView,
+)
 from .api.views.jury import JuryPendingSubmissionsView, JurySubmissionsView, JuryGradeView
 from .api.views.criteria import (
     TournamentCriteriaView,
@@ -50,12 +60,24 @@ urlpatterns = [
     path('', TournamentCreateView.as_view(), name='tournament-list-create'),
     path('<int:pk>/', TournamentDetailView.as_view(), name='tournament-detail'),
 
-    # ── Invite & Join ──────────────────────────────────────────────────────────
-    path('<int:tournament_pk>/invite-link/', TournamentInviteLinkView.as_view(), name='tournament-invite-link'),
-    path('<int:tournament_pk>/regenerate-pin/', RegeneratePinView.as_view(), name='tournament-regenerate-pin'),
+    # ── Invite & Join (без PIN — тільки унікальні посилання) ──────────────────
+    path('<int:tournament_pk>/invite-link/', TournamentInviteLinkView.as_view(), name='tournament-invite-link'),  # legacy
+    path('<int:tournament_pk>/regenerate-pin/', RegeneratePinView.as_view(), name='tournament-regenerate-pin'),  # legacy
+    path('<int:tournament_pk>/invite-links/', InviteLinkListCreateView.as_view(), name='invite-link-list-create'),
+    path('<int:tournament_pk>/invite-links/<int:link_id>/', InviteLinkDeleteView.as_view(), name='invite-link-delete'),
     path('join/', JoinByTokenView.as_view(), name='tournament-join'),
     path('join/<uuid:token>/preview/', TournamentPreviewByTokenView.as_view(), name='tournament-join-preview'),
-    path('join/<uuid:token>/verify-pin/', VerifyInvitePinView.as_view(), name='tournament-verify-pin'),
+    path('join/<uuid:token>/verify-pin/', VerifyInvitePinView.as_view(), name='tournament-verify-pin'),  # legacy, deprecated
+
+    # ── Public ─────────────────────────────────────────────────────────────────
+    path('public/', PublicTournamentListView.as_view(), name='public-tournament-list'),
+    path('<int:tournament_pk>/join-public/', PublicTournamentJoinView.as_view(), name='public-tournament-join'),
+
+    # ── Registration form (Google Forms) ───────────────────────────────────────
+    path('<int:tournament_pk>/registration-form/', RegistrationFieldListCreateView.as_view(), name='registration-form'),
+    path('<int:tournament_pk>/registration-form/<int:pk>/', RegistrationFieldDetailView.as_view(), name='registration-form-detail'),
+    path('<int:tournament_pk>/registration-responses/', RegistrationResponseListView.as_view(), name='registration-responses'),
+    path('<int:tournament_pk>/registration-responses/me/', MyRegistrationResponseView.as_view(), name='my-registration-response'),
 
     # ── My role ────────────────────────────────────────────────────────────────
     path('<int:tournament_pk>/my-role/', MyTournamentRoleView.as_view(), name='my-tournament-role'),

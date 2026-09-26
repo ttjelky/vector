@@ -9,6 +9,7 @@ import { RichTextArea } from "@shared/components/RichTextArea";
 import heic2any from "heic2any";
 import { computeStatus } from "../components/tournamentHelpers";
 import { CriteriaEditor, DEFAULT_CRITERIA } from "@features/submissions";
+import { RegistrationFormBuilder } from "./RegistrationFormBuilder";
 
 const ACCENT_COLORS = ["#82b3e4", "#4ad44c", "#ca7979", "#c76db0", "#8e5edf", "#eccb5c"];
 
@@ -153,7 +154,7 @@ export function CreateTournamentModal({ onClose, onCreate }) {
   const [step, setStep]         = useState(1);
   const [closing, setClosing]   = useState(false);
   const [prevStep, setPrevStep] = useState(null);
-  const TOTAL_STEPS = 2;
+  const TOTAL_STEPS = 3;
 
   const [name,           setName]           = useState("");
   const [description,    setDescription]    = useState("");
@@ -164,6 +165,9 @@ export function CreateTournamentModal({ onClose, onCreate }) {
   const [regStart,       setRegStart]       = useState("");
   const [regEnd,         setRegEnd]         = useState("");
   const [criteria,       setCriteria]       = useState(DEFAULT_CRITERIA);
+  const [isPublic,       setIsPublic]       = useState(false);
+  const [regFields,      setRegFields]      = useState([]);
+  const [regFormError,   setRegFormError]   = useState("");
 
   const [openRegistration, setOpenRegistration] = useState(false);
 
@@ -276,6 +280,10 @@ export function CreateTournamentModal({ onClose, onCreate }) {
       }
     }
 
+    // Крок 2: перевіряємо дати реєстрації та розмір команди перед переходом на крок 3
+    if (step === 2 && !openRegistration && (!regStart || !regEnd)) { setRegDateError(true); return; }
+    if (step === 2 && tournamentType === "team" && !maxTeamSize) { setMaxTeamSizeError(true); return; }
+
     setNameError(false);
     setTypeError(false);
     setEndDateError(false);
@@ -299,12 +307,49 @@ export function CreateTournamentModal({ onClose, onCreate }) {
     ? "Таблиця"
     : descPlainText.split("\n").map(l => l.trim()).find(l => l.length > 0) || "";
 
+  // Захист від подвійного кліку: кнопка «Створити» активується
+  // із затримкою після переходу на останній крок, щоб другий клік
+  // по кнопці «Далі» не влучив у «Створити» на тому ж місці.
+  const [createArmed, setCreateArmed] = useState(false);
+  useEffect(() => {
+    if (step === TOTAL_STEPS) {
+      setCreateArmed(false);
+      const t = setTimeout(() => setCreateArmed(true), 600);
+      return () => clearTimeout(t);
+    }
+    setCreateArmed(false);
+  }, [step]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Enter на проміжних кроках або будь-який сабміт до останнього кроку —
+    // це «Далі», а не створення. Турнір створюється тільки на кроці 3.
+    if (step < TOTAL_STEPS) { handleNext(); return; }
+    if (!createArmed) return;
     if (!tournamentType) { setTypeError(true); return; }
-    if (!openRegistration && (!regStart || !regEnd)) { setRegDateError(true); return; }
-    if (tournamentType === "team" && !maxTeamSize) { setMaxTeamSizeError(true); return; }
+    if (!openRegistration && (!regStart || !regEnd)) {
+      setRegDateError(true);
+      setPrevStep(step);
+      setStep(2);
+      return;
+    }
+    if (tournamentType === "team" && !maxTeamSize) {
+      setMaxTeamSizeError(true);
+      setPrevStep(step);
+      setStep(2);
+      return;
+    }
     if (imageConverting) return;
+
+    // Валідація конструктора форми реєстрації
+    for (const f of regFields) {
+      if (!f.label.trim()) { setRegFormError("Усі поля форми повинні мати назву."); return; }
+      if (["select", "radio", "checkbox"].includes(f.field_type)) {
+        const opts = (f.options || []).map((o) => String(o).trim()).filter(Boolean);
+        if (opts.length < 2) { setRegFormError(`Поле «${f.label}» потребує мінімум 2 варіанти.`); return; }
+      }
+    }
+    setRegFormError("");
 
     if (serverTimeReady && !serverTimeError && !openRegistration) {
       const now = getServerNow();
@@ -332,6 +377,7 @@ export function CreateTournamentModal({ onClose, onCreate }) {
     body.append("tournament_type",    tournamentType);
     body.append("format",             tournamentType);
     body.append("open_registration",  openRegistration);
+    body.append("is_public",          isPublic ? "true" : "false");
     body.append("client_utc_ms",    String(getServerNow()));
     body.append("server_drift_ms",  String(Math.round(serverDriftMs)));
     if (!openRegistration) {
@@ -344,6 +390,12 @@ export function CreateTournamentModal({ onClose, onCreate }) {
     }
     if (imageMode === "stock")                body.append("stock_image",  stockImage);
     if (imageMode === "custom" && customFile) body.append("custom_image", customFile);
+    const cleanFields = regFields.map(({ _key, ...rest }) => ({
+      ...rest,
+      label: rest.label.trim(),
+      options: (rest.options || []).map((o) => String(o).trim()).filter(Boolean),
+    }));
+    body.append("registration_fields", JSON.stringify(cleanFields));
     try {
       const { status, data } = await API.post("/tournaments/", body);
       if (status === 201) {
@@ -359,8 +411,9 @@ export function CreateTournamentModal({ onClose, onCreate }) {
   };
 
   const STEP_META = [
-    { num: "КРОК 1 З 2", title: "Основне", sub: "Заповніть назву, дату та тип турніру" },
-    { num: "КРОК 2 З 2", title: "Деталі",  sub: "Додайте правила, опис та умови реєстрації" },
+    { num: "КРОК 1 З 3", title: "Основне", sub: "Заповніть назву, дату та тип турніру" },
+    { num: "КРОК 2 З 3", title: "Деталі",  sub: "Додайте правила, опис та умови реєстрації" },
+    { num: "КРОК 3 З 3", title: "Реєстрація", sub: "Публічність і кастомна форма реєстрації" },
   ];
 
   const goingForward = prevStep === null || step > prevStep;
@@ -647,6 +700,43 @@ export function CreateTournamentModal({ onClose, onCreate }) {
                   )}
                 </div>
               )}
+
+              {/* STEP 3 — публічність + кастомна форма */}
+              {step === 3 && (
+                <div key="step3" className={`${styles.stepContent} ${stepAnimClass}`}>
+                  <div>
+                    <label className={styles.toggleRow}>
+                      <div
+                        className={`${styles.toggleTrack} ${isPublic ? styles.toggleTrackOn : ""}`}
+                        onClick={() => setIsPublic((v) => !v)}
+                        role="switch"
+                        aria-checked={isPublic}
+                      >
+                        <span className={styles.toggleThumb} />
+                      </div>
+                      <div className={styles.toggleText}>
+                        <span className={styles.toggleLabel}>Публічний турнір</span>
+                        <span className={styles.toggleHint}>
+                          {isPublic
+                            ? "Турнір видно в каталозі публічних, приєднатись можна в 1 клік без посилання"
+                            : "Турнір прихований — вхід тільки за унікальним посиланням"}
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div className={styles.sectionDivider}>
+                    <span className={styles.sectionTitle}>Кастомна форма реєстрації</span>
+                    <span className={styles.sectionLine} />
+                  </div>
+                  <p style={{ fontSize: 13, color: "#666", margin: "0 0 8px" }}>
+                    Як Google Forms: додайте поля, оберіть тип і варіанти. Учасники заповнять
+                    їх при приєднанні, а відповіді будуть видні на вкладці «Учасники».
+                  </p>
+                  <RegistrationFormBuilder fields={regFields} onChange={setRegFields} />
+                  {regFormError && <p className={styles.fieldError}>{regFormError}</p>}
+                </div>
+              )}
             </div>
           </div>
 
@@ -665,7 +755,7 @@ export function CreateTournamentModal({ onClose, onCreate }) {
                   <button
                     type="submit"
                     className={styles.btnCreate}
-                    disabled={imageConverting || convertError}
+                    disabled={imageConverting || convertError || !createArmed}
                     title={
                       imageConverting ? "Зачекайте, конвертація зображення…" :
                       convertError    ? "Не вдалось конвертувати HEIC. Оберіть інше зображення." :

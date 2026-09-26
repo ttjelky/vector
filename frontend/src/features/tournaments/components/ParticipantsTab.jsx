@@ -438,7 +438,7 @@ function TeamsSubTab({ tournamentId, myRole, members, myUserId }) {
 
 // ─── Головний компонент ───────────────────────────────────────────────────────
 
-export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType, tournamentStatus, maxParticipants, openRegistration = false }) {
+export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType, tournamentStatus, maxParticipants, openRegistration = false, registrationOpen, registrationReason, registrationMessage }) {
   const isTeamTourn = tournamentType === "team";
 
   const [members,        setMembers]        = useState([]);
@@ -446,11 +446,13 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
   const [activeTab,      setActiveTab]      = useState(isTeamTourn ? "jury" : "participant");
   const [myUserId,       setMyUserId]       = useState(null);
 
-  const [invites,      setInvites]      = useState({ participant: {}, jury: {}, admin: {} });
-  const [showPin,      setShowPin]      = useState(null);
-  const [copied,       setCopied]       = useState(null);
-  const [regenRole,    setRegenRole]    = useState(null);
-  const [regenLoading, setRegenLoading] = useState(false);
+  const [invites,      setInvites]      = useState({ participant: [], jury: [], admin: [] });
+  const [invitesLoading, setInvitesLoading] = useState(false);
+  const [copiedId,     setCopiedId]       = useState(null);
+  const [linkName,     setLinkName]       = useState("");
+  const [linkCreating, setLinkCreating]   = useState(false);
+  const [linkError,    setLinkError]      = useState("");
+  const [showLinks,    setShowLinks]      = useState(false);
 
   const [memberToDelete, setMemberToDelete] = useState(null);
   const [deletingMember, setDeletingMember] = useState(false);
@@ -476,7 +478,12 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
   }, [tournamentId, isOwner]);
 
   const exceptionActive = exceptionUntil && new Date() < new Date(exceptionUntil);
-  const canRegisterNow  = canRegister || exceptionActive || isOpenAndActive;
+  // Джерело правди про реєстрацію — бекенд (registration_open з деталей турніру).
+  // Fallback на локальний розрахунок, якщо поле відсутнє.
+  const backendOpen = typeof registrationOpen === "boolean" ? registrationOpen : null;
+  const fallbackOpen = canRegister || isOpenAndActive;
+  const baseOpen = backendOpen ?? fallbackOpen;
+  const canRegisterNow  = baseOpen || exceptionActive;
 
   // Автоматично очищаємо виняток після закінчення часу
   useEffect(() => {
@@ -535,63 +542,73 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
   // Автооновлення кожні 5 секунд (без спінера)
   usePolling(fetchMembers, 5000, !!tournamentId);
 
-  // ── Завантаження посилань-запрошень ───────────────────────────────────────
-  useEffect(() => {
+  // ── Завантаження посилань-запрошень (без PIN, max 3 на роль) ──────────────
+  const fetchInvites = useCallback(async () => {
     if (!tournamentId || !isPrivilegedUser) return;
-    ["participant", "jury", "admin"].forEach(role => {
-      API.get(`/tournaments/${tournamentId}/invite-link/?role=${role}`)
-        .then(r => setInvites(prev => ({
-          ...prev,
-          [role]: { url: r.data.invite_url, pin: r.data.invite_pin },
-        })))
-        .catch(() => {});
-    });
+    setInvitesLoading(true);
+    try {
+      const res = await API.get(`/tournaments/${tournamentId}/invite-links/`);
+      const grouped = { participant: [], jury: [], admin: [] };
+      for (const l of res.data || []) {
+        if (grouped[l.role]) grouped[l.role].push(l);
+      }
+      setInvites(grouped);
+    } catch {
+      // ігнор
+    } finally {
+      setInvitesLoading(false);
+    }
   }, [tournamentId, isPrivilegedUser]);
 
-  const handleInvite = useCallback((role) => {
-    const url = invites[role]?.url;
-    if (!url) return;
+  useEffect(() => { fetchInvites(); }, [fetchInvites]);
 
+  const copyText = useCallback((text, id) => {
     const fallbackCopy = () => {
       const el = document.createElement("textarea");
-      el.value = url;
+      el.value = text;
       el.style.cssText = "position:fixed;opacity:0";
       document.body.appendChild(el);
       el.focus();
       el.select();
-      try { document.execCommand("copy"); } catch { window.prompt("Скопіюйте вручну:", url); }
+      try { document.execCommand("copy"); } catch { window.prompt("Скопіюйте вручну:", text); }
       document.body.removeChild(el);
     };
-
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(url).catch(fallbackCopy);
+      navigator.clipboard.writeText(text).catch(fallbackCopy);
     } else {
       fallbackCopy();
     }
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  }, []);
 
-    setCopied(role);
-    setShowPin(role);
-    setTimeout(() => setCopied(null), 2500);
-  }, [invites]);
+  const fullInviteUrl = (token) => `${window.location.origin}/join/${token}`;
 
-  const handleRegenerate = useCallback(async (role) => {
-    if (regenRole !== role) {
-      setRegenRole(role);
-      setTimeout(() => setRegenRole(r => r === role ? null : r), 4000);
-      return;
-    }
-    setRegenLoading(true);
-    setRegenRole(null);
+  const handleCreateLink = useCallback(async (role) => {
+    setLinkCreating(true);
+    setLinkError("");
     try {
-      const res = await API.post(`/tournaments/${tournamentId}/regenerate-pin/?role=${role}`);
-      setInvites(prev => ({ ...prev, [role]: { ...prev[role], pin: res.data.invite_pin } }));
-      setShowPin(role);
-    } catch {
-      // помилка регенерації
+      const res = await API.post(`/tournaments/${tournamentId}/invite-links/`, {
+        role, name: linkName.trim(),
+      });
+      setInvites((prev) => ({ ...prev, [role]: [...(prev[role] || []), res.data] }));
+      setLinkName("");
+    } catch (err) {
+      setLinkError(err.response?.data?.detail || "Не вдалось створити посилання.");
     } finally {
-      setRegenLoading(false);
+      setLinkCreating(false);
     }
-  }, [regenRole, tournamentId]);
+  }, [tournamentId, linkName]);
+
+  const handleDeleteLink = useCallback(async (role, id) => {
+    if (!window.confirm("Видалити це посилання? Старі запрошення за ним перестануть працювати.")) return;
+    try {
+      await API.delete(`/tournaments/${tournamentId}/invite-links/${id}/`);
+      setInvites((prev) => ({ ...prev, [role]: prev[role].filter((l) => l.id !== id) }));
+    } catch {
+      // ігнор
+    }
+  }, [tournamentId]);
 
   const confirmRemoveMember = async () => {
     if (!memberToDelete) return;
@@ -613,10 +630,8 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
     m.role === activeTab || (activeTab === "participant" && m.role === "owner")
   );
 
-  const invite     = invites[activeTab];
-  const pinVisible = showPin === activeTab;
-  const isCopied   = copied  === activeTab;
-  const isRegen    = regenRole === activeTab;
+  const activeLinks = invites[activeTab] || [];
+  const canCreateLink = activeLinks.length < 3;
 
   const subTabs = isTeamTourn
     ? TABS.filter(t => t.key === "jury" || t.key === "admin")
@@ -624,11 +639,25 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
 
   const statusBanner = isPrivilegedUser && activeTab === "participant"
     ? (() => {
-        if (openRegistration && tournamentStatus !== "finished") {
-          return REGISTRATION_STATUS_BANNERS[`${tournamentStatus}_open`]
-            ?? REGISTRATION_STATUS_BANNERS.upcoming_open;
+        if (exceptionActive) return null; // активний виняток видно окремою кнопкою
+        if (baseOpen) {
+          return {
+            icon: "✅",
+            color: "#15803d",
+            bg: "#f0fdf4",
+            border: "#bbf7d0",
+            text: "Реєстрація відкрита. Учасники можуть приєднуватися за посиланням або через публічний каталог.",
+          };
         }
-        return REGISTRATION_STATUS_BANNERS[tournamentStatus] ?? null;
+        // Закрита — показуємо конкретну причину з бекенду
+        return {
+          icon: "🔒",
+          color: "#b45309",
+          bg: "#fffbeb",
+          border: "#fde68a",
+          text: registrationMessage || REGISTRATION_STATUS_BANNERS[tournamentStatus]?.text
+            || "Реєстрація зараз закрита.",
+        };
       })()
     : null;
 
@@ -659,7 +688,7 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
             <button
               key={tab.key}
               className={`${styles.subTab} ${activeTab === tab.key ? styles.subTabActive : ""}`}
-              onClick={() => { setActiveTab(tab.key); setShowPin(null); setRegenRole(null); }}
+              onClick={() => { setActiveTab(tab.key); setShowLinks(false); setLinkError(""); }}
             >
               {tab.label}
               {count !== undefined && <span className={styles.subTabCount}>{count}</span>}
@@ -729,32 +758,22 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
                 )
               )}
 
-              {/* Кнопка запрошення (активна) */}
+              {/* Кнопка посилань (без PIN, до 3 на роль) */}
               {showInviteBtn && (
                 <button
                   className={styles.inviteBtn}
-                  onClick={() => handleInvite(activeTab)}
-                  disabled={!invite?.url}
+                  onClick={() => setShowLinks((v) => !v)}
                 >
-                  {!invite?.url
-                    ? "Завантаження…"
-                    : isCopied
-                    ? "✓ Скопійовано!"
-                    : `+ ${INVITE_LABELS[activeTab]}`}
+                  {showLinks ? "Сховати посилання" : `🔗 Посилання (${activeLinks.length}/3)`}
                 </button>
               )}
 
-              {/* Заблокована кнопка запрошення */}
+              {/* Заблокована кнопка запрошення з конкретною причиною */}
               {isPrivilegedUser && activeTab === "participant" && !canRegisterNow && (
                 <button
                   className={styles.inviteBtn}
                   disabled
-                  title={
-                    tournamentStatus === "upcoming"  ? "Реєстрація ще не відкрита" :
-                    tournamentStatus === "ongoing"   ? "Турнір розпочато — реєстрація закрита" :
-                    tournamentStatus === "finished"  ? "Турнір завершено" :
-                    "Реєстрація закрита"
-                  }
+                  title={registrationMessage || "Реєстрація закрита"}
                   style={{ opacity: 0.45, cursor: "not-allowed" }}
                 >
                   + {INVITE_LABELS[activeTab]}
@@ -797,54 +816,117 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
             </div>
           )}
 
-          {/* PIN-секція */}
-          {isPrivilegedUser && pinVisible && invite?.pin && (
-            <div className={styles.pinSection}>
-              <div className={styles.pinInfo}>
-                <span className={styles.pinText}>Надайте <strong>PIN-код:</strong></span>
-                <div className={styles.pinCode}>{invite.pin}</div>
+          {/* Панель посилань-запрошень: тільки унікальні посилання, без PIN */}
+          {isPrivilegedUser && showLinks && showInviteBtn && (
+            <div style={{
+              border: "1px solid #e5e7eb", borderRadius: 12, padding: 12,
+              marginBottom: 14, background: "#fafafa",
+            }}>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
+                {INVITE_LABELS[activeTab]} — {activeLinks.length}/3
               </div>
-              <button
-                onClick={() => handleRegenerate(activeTab)}
-                disabled={regenLoading}
-                className={`${styles.regenBtn} ${isRegen ? styles.regenConfirm : ""}`}
-              >
-                {regenLoading ? "Оновлення…" : isRegen ? "Підтвердити?" : "Змінити PIN"}
-              </button>
-              <div className={styles.crossIcon} onClick={() => setShowPin(null)}>
-                <X size={20} />
-              </div>
+              {invitesLoading && <p style={{ fontSize: 12, color: "#888" }}>Завантаження…</p>}
+              {activeLinks.map((l) => {
+                const url = l.invite_url?.includes("http") ? l.invite_url : fullInviteUrl(l.token);
+                return (
+                  <div key={l.id} style={{
+                    display: "flex", gap: 8, alignItems: "center",
+                    background: "#fff", border: "1px solid #eee", borderRadius: 10,
+                    padding: "8px 10px", marginBottom: 6, fontSize: 12,
+                  }}>
+                    <span style={{ fontWeight: 700, minWidth: 90 }}>{l.name || "Посилання"}</span>
+                    <span style={{
+                      flex: 1, overflow: "hidden", textOverflow: "ellipsis",
+                      whiteSpace: "nowrap", color: "#555",
+                    }} title={url}>{url}</span>
+                    <button className={styles.inviteBtn}
+                      style={{ padding: "6px 10px", fontSize: 12 }}
+                      onClick={() => copyText(url, l.id)}>
+                      {copiedId === l.id ? "✓ Скопійовано" : "Копіювати"}
+                    </button>
+                    <button className={styles.removeBtn}
+                      onClick={() => handleDeleteLink(activeTab, l.id)} title="Видалити">✕</button>
+                  </div>
+                );
+              })}
+              {canCreateLink ? (
+                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                  <input
+                    placeholder="Назва посилання (необов'язково)"
+                    value={linkName}
+                    onChange={(e) => setLinkName(e.target.value)}
+                    style={{
+                      flex: 1, border: "1px solid #ddd", borderRadius: 10,
+                      padding: "8px 10px", fontSize: 12,
+                    }}
+                  />
+                  <button className={styles.inviteBtn}
+                    disabled={linkCreating}
+                    onClick={() => handleCreateLink(activeTab)}>
+                    {linkCreating ? "…" : "+ Створити"}
+                  </button>
+                </div>
+              ) : (
+                <p style={{ fontSize: 12, color: "#b45309" }}>
+                  Досягнуто максимум (3 посилання). Видаліть старе щоб створити нове.
+                </p>
+              )}
+              {linkError && <p style={{ fontSize: 12, color: "#d04d3e" }}>{linkError}</p>}
+              <p style={{ fontSize: 11.5, color: "#888", marginTop: 6 }}>
+                PIN-код більше не потрібен — достатньо перейти за унікальним посиланням.
+              </p>
+              {!canRegisterNow && activeTab === "participant" && (
+                <p style={{ fontSize: 12, color: "#b45309", marginTop: 4 }}>
+                  ⚠️ {registrationMessage || "Реєстрація зараз закрита — посилання спрацюють, коли вона відкриється."}
+                </p>
+              )}
             </div>
           )}
 
-          {/* Список учасників */}
+          {/* Список учасників з відповідями форми реєстрації */}
           <div className={styles.teamList}>
             {visibleMembers.length === 0 ? (
               <p className={styles.empty}>Список порожній.</p>
             ) : (
               visibleMembers.map(member => (
-                <div key={member.id} className={styles.teamCard}>
-                  <MemberAvatar member={member} />
-                  <div className={styles.teamInfo}>
-                    <span className={styles.teamName}>{getDisplayName(member)}</span>
-                    {(() => {
-                      const email = member.email || member.fullusername;
-                      const displayName = getDisplayName(member);
-                      return email && email !== displayName ? (
-                        <span className={styles.teamEmail}>{email}</span>
-                      ) : null;
-                    })()}
-                    <span className={styles.teamMeta}>
-                      {ROLE_LABELS[member.role] ?? member.role}
-                      {member.user_role && ` · ${member.user_role}`}
-                    </span>
+                <div key={member.id} className={styles.teamCard} style={{ flexDirection: "column", alignItems: "stretch" }}>
+                  <div style={{ display: "flex", gap: 10, alignItems: "center", width: "100%" }}>
+                    <MemberAvatar member={member} />
+                    <div className={styles.teamInfo}>
+                      <span className={styles.teamName}>{getDisplayName(member)}</span>
+                      {(() => {
+                        const email = member.email || member.fullusername;
+                        const displayName = getDisplayName(member);
+                        return email && email !== displayName ? (
+                          <span className={styles.teamEmail}>{email}</span>
+                        ) : null;
+                      })()}
+                      <span className={styles.teamMeta}>
+                        {ROLE_LABELS[member.role] ?? member.role}
+                        {member.user_role && ` · ${member.user_role}`}
+                      </span>
+                    </div>
+                    {isPrivilegedUser && member.role !== "owner" && (
+                      <button className={styles.removeBtn} onClick={() => setMemberToDelete(member)}>✕</button>
+                    )}
+                    {member.joined_at && (
+                      <div className={styles.teamDate}>
+                        {new Date(member.joined_at).toLocaleDateString("uk-UA")}
+                      </div>
+                    )}
                   </div>
-                  {isPrivilegedUser && member.role !== "owner" && (
-                    <button className={styles.removeBtn} onClick={() => setMemberToDelete(member)}>✕</button>
-                  )}
-                  {member.joined_at && (
-                    <div className={styles.teamDate}>
-                      {new Date(member.joined_at).toLocaleDateString("uk-UA")}
+                  {member.registration_display?.length > 0 && (
+                    <div style={{
+                      marginTop: 8, background: "#f8fafc", border: "1px solid #eef2f7",
+                      borderRadius: 10, padding: "8px 10px", fontSize: 12, color: "#334155",
+                    }}>
+                      <div style={{ fontWeight: 700, marginBottom: 4 }}>📝 Відповіді при реєстрації:</div>
+                      {member.registration_display.map((a) => (
+                        <div key={a.field_id} style={{ marginBottom: 2 }}>
+                          <span style={{ color: "#64748b" }}>{a.label}: </span>
+                          <strong>{a.value || "—"}</strong>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

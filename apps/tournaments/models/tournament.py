@@ -67,26 +67,78 @@ class Tournament(models.Model):
 
     leaderboard_published = models.BooleanField(default=False)
 
+    is_public = models.BooleanField(
+        default=False,
+        verbose_name="Публічний турнір",
+        help_text="Публічні турніри видно в каталозі, до них можна приєднатись в 1 клік без посилання.",
+    )
+
     registration_exception_until = models.DateTimeField(
         null=True, blank=True,
         verbose_name="Реєстрація відкрита до (виняток)",
     )
 
-    def registration_open(self):
+    open_registration = models.BooleanField(
+        default=False,
+        verbose_name="Вільна реєстрація",
+        help_text="Якщо увімкнено — учасники можуть приєднуватись будь-коли до завершення турніру.",
+    )
+
+    # ── Реєстрація: відкрита чи ні + причина ────────────────────────────────
+    #
+    # Семантика (порядок перевірок):
+    #   1. Виняток (registration_exception_until) — завжди відкрито.
+    #   2. Турнір завершено (end_date в минулому) — закрито (finished).
+    #   3. Вільна реєстрація (open_registration) — відкрито.
+    #   4. Явне вікно (registration_start / registration_end):
+    #        now < start → закрито (not_started, з датою початку)
+    #        now > end   → закрито (ended, з датою кінця)
+    #        інакше      → відкрито.
+    #   5. Дат немає взагалі — відкрито до завершення турніру (open).
+
+    def registration_status(self):
+        """Повертає (is_open: bool, reason: str, message: str|None).
+
+        reason — одне з: open, exception, finished, not_started, ended.
+        """
         now = timezone.now()
-        start = self.start_date
-        reg_end = self.registration_end
-        if start and now >= start and (not reg_end or now <= reg_end):
-            return True
+
         if self.registration_exception_until and now < self.registration_exception_until:
-            return True
-        return False
+            return True, 'exception', None
+
+        if self.end_date and now > self.end_date:
+            return (
+                False, 'finished',
+                f"Турнір завершено {self.end_date.strftime('%d.%m.%Y, %H:%M')}. Реєстрація закрита."
+            )
+
+        if self.open_registration:
+            return True, 'open', None
+
+        if self.registration_start or self.registration_end:
+            if self.registration_start and now < self.registration_start:
+                return (
+                    False, 'not_started',
+                    f"Реєстрація ще не відкрилась. Початок: "
+                    f"{self.registration_start.strftime('%d.%m.%Y, %H:%M')}."
+                )
+            if self.registration_end and now > self.registration_end:
+                return (
+                    False, 'ended',
+                    f"Реєстрація завершилась "
+                    f"{self.registration_end.strftime('%d.%m.%Y, %H:%M')}."
+                )
+            return True, 'open', None
+
+        return True, 'open', None
+
+    def registration_open(self):
+        is_open, _, _ = self.registration_status()
+        return is_open
 
     def is_registration_open(self):
-        now = timezone.now()
-        if self.registration_start and self.registration_end:
-            return self.registration_start <= now <= self.registration_end
-        return False
+        # Аліас для сумісності — та сама логіка, що й registration_open().
+        return self.registration_open()
 
     def get_invite_token_for_role(self, role):
         return {

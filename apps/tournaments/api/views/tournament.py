@@ -247,6 +247,42 @@ class TournamentCreateView(generics.ListCreateAPIView):
             user=self.request.user,
             role='owner',
         )
+        # Дефолтні посилання: по 1 на кожну роль (без PIN)
+        from ...models import TournamentInviteLink
+        for r in ('participant', 'jury', 'admin'):
+            TournamentInviteLink.objects.create(
+                tournament=tournament, role=r, created_by=self.request.user,
+            )
+        # Кастомні поля форми реєстрації (JSON [{label, field_type, required, options, placeholder}])
+        import json
+        raw_fields = self.request.data.get('registration_fields')
+        if raw_fields:
+            try:
+                fields_data = json.loads(raw_fields) if isinstance(raw_fields, str) else raw_fields
+            except Exception:
+                fields_data = []
+            from ...models import RegistrationField
+            for i, f in enumerate(fields_data or []):
+                label = (f.get('label') or '').strip()
+                if not label:
+                    continue
+                ftype = f.get('field_type', 'text')
+                if ftype not in ('text', 'textarea', 'number', 'date', 'select', 'radio', 'checkbox'):
+                    ftype = 'text'
+                options = f.get('options') or []
+                if isinstance(options, str):
+                    try:
+                        options = json.loads(options)
+                    except Exception:
+                        options = [o.strip() for o in options.split('\n') if o.strip()]
+                options = [str(o).strip() for o in (options or []) if str(o).strip()]
+                RegistrationField.objects.create(
+                    tournament=tournament, label=label, field_type=ftype,
+                    required=bool(f.get('required', False)),
+                    options=options,
+                    placeholder=(f.get('placeholder') or '')[:255],
+                    order=i,
+                )
 
 
 class TournamentDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -363,15 +399,19 @@ class VerifyInvitePinView(APIView):
                         tournament=tournament, user=request.user
                     ).exists()
                 )
-                registration_closed = not already and not tournament.registration_open()
+                is_open, reason, message = tournament.registration_status()
+                registration_closed = not already and not is_open
             else:
                 registration_closed = False
+                reason, message = 'open', None
 
             return Response({
                 'valid':                True,
                 'tournament_name':      tournament.name,
                 'role':                 role,
                 'registration_closed':  registration_closed,
+                'registration_reason':  reason,
+                'registration_message': message,
             })
 
         return Response(
@@ -398,12 +438,13 @@ class JoinByTokenView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        from .invite import find_tournament_and_role
         serializer = JoinByTokenSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         token = serializer.validated_data['token']
-        tournament, role = VerifyInvitePinView._find_tournament_and_role(str(token))
+        tournament, role = find_tournament_and_role(str(token))
 
         if not tournament:
             return Response({'detail': 'Невірний або недійсний інвайт-токен.'}, status=status.HTTP_404_NOT_FOUND)
@@ -421,22 +462,48 @@ class JoinByTokenView(APIView):
                 'user_role':     request.user.role,
             }, status=status.HTTP_403_FORBIDDEN)
 
-        # Перевірка реєстрації для учасників
+        # Перевірка реєстрації для учасників — з конкретною причиною
         if role == 'participant':
             already = TournamentMember.objects.filter(
                 tournament=tournament, user=request.user
             ).exists()
-            if not already and not tournament.registration_open():
-                return Response(
-                    {'detail': 'Реєстрація учасників зараз закрита.'},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
+            if not already:
+                is_open, reason, message = tournament.registration_status()
+                if not is_open:
+                    return Response(
+                        {
+                            'detail': message or 'Реєстрація учасників зараз закрита.',
+                            'reason': reason,
+                            'registration_open': False,
+                        },
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+
+        # Валідація кастомної форми реєстрації (для учасників)
+        answers = request.data.get('answers', {}) or {}
+        if role == 'participant':
+            from ..serializers.registration import validate_answers
+            try:
+                norm = validate_answers(tournament, answers)
+            except Exception as exc:
+                detail = getattr(exc, 'detail', str(exc))
+                return Response({'detail': detail, 'errors': detail},
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            norm = {}
 
         member, created = TournamentMember.objects.get_or_create(
             tournament=tournament,
             user=request.user,
             defaults={'role': role},
         )
+
+        if role == 'participant' and (norm or not created):
+            from ...models import RegistrationResponse
+            RegistrationResponse.objects.update_or_create(
+                tournament=tournament, user=request.user,
+                defaults={'answers': norm},
+            )
 
         return Response({
             'tournament_id':   tournament.id,
@@ -450,14 +517,29 @@ class TournamentPreviewByTokenView(APIView):
     permission_classes = []
 
     def get(self, request, token):
-        tournament, role = VerifyInvitePinView._find_tournament_and_role(str(token))
+        from .invite import find_tournament_and_role
+        tournament, role = find_tournament_and_role(str(token))
         if not tournament:
             return Response({'detail': 'Невірний або недійсний інвайт-токен.'}, status=status.HTTP_404_NOT_FOUND)
+        from ...models import RegistrationField
+        from ..serializers import RegistrationFieldSerializer
+        fields = RegistrationField.objects.filter(tournament=tournament)
+        is_open, reason, message = tournament.registration_status()
         return Response({
             'id':          tournament.id,
             'name':        tournament.name,
             'description': tournament.description,
             'role':        role,
+            'is_public':   tournament.is_public,
+            'tournament_type': tournament.tournament_type,
+            'registration_fields': RegistrationFieldSerializer(fields, many=True).data,
+            'registration_open': is_open,
+            'registration_reason': reason,
+            'registration_message': message,
+            'registration_start': tournament.registration_start,
+            'registration_end': tournament.registration_end,
+            'start_date': tournament.start_date,
+            'end_date': tournament.end_date,
         })
 
 

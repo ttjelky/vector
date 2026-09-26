@@ -42,6 +42,11 @@ from .announcement import (
     AnnouncementCommentSerializer,
     AnnouncementSerializer,
 )
+from .invite import TournamentInviteLinkSerializer
+from .registration import (
+    RegistrationFieldSerializer,
+    RegistrationResponseSerializer,
+)
 
 __all__ = [
     # mixins / helpers
@@ -63,4 +68,8 @@ __all__ = [
     'JuryAssignmentSerializer', 'JurySubmissionSerializer',
     # announcement
     'AnnouncementCommentSerializer', 'AnnouncementSerializer',
+    # invite
+    'TournamentInviteLinkSerializer',
+    # registration
+    'RegistrationFieldSerializer', 'RegistrationResponseSerializer',
 ]

@@ -98,6 +98,7 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
       payload.append("registration_end",   form.registration_end   || "");
       payload.append("max_teams",          form.max_teams !== "" ? Number(form.max_teams) : "");
       payload.append("rules",              form.rules              || "");
+      payload.append("is_public",          form.is_public ? "true" : "false");
       payload.append("image_mode",         imageMode);
       if (imageMode === "stock")                payload.append("stock_image",  stockImage);
       if (imageMode === "custom" && customFile) payload.append("custom_image", customFile);
@@ -174,6 +175,14 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
               Макс. команд/учасників
               <input className={styles.editInput} type="number" name="max_teams" value={form.max_teams} onChange={handleChange} min={1} />
             </label>
+            <label className={styles.editLabel} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <input
+                type="checkbox"
+                checked={!!form.is_public}
+                onChange={(e) => setForm((f) => ({ ...f, is_public: e.target.checked }))}
+              />
+              Публічний турнір (видно в каталозі, вхід в 1 клік без посилання)
+            </label>
             <div className={styles.editLabel}>
               Правила
               <RichTextArea
@@ -206,9 +215,18 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Про турнір</h2>
-          {!readOnly && (
-            <button className={styles.editBtn} onClick={() => setEditing(true)}>Редагувати</button>
-          )}
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {tournament.is_public && (
+              <span style={{
+                fontSize: 11.5, fontWeight: 700, color: "#15803d",
+                background: "#f0fdf4", border: "1px solid #bbf7d0",
+                borderRadius: 100, padding: "3px 10px",
+              }}>🌍 Публічний</span>
+            )}
+            {!readOnly && (
+              <button className={styles.editBtn} onClick={() => setEditing(true)}>Редагувати</button>
+            )}
+          </div>
         </div>
         <RichContent
           html={tournament.description}
@@ -269,7 +287,7 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
             <span className={styles.dcValue}>{formatDate(tournament.end_date) || "—"}</span>
           </div>
 
-          {tournament.open_registration ? (
+          {(tournament.open_registration || (!tournament.registration_start && !tournament.registration_end)) ? (
             <div className={`${styles.dc} ${styles.dcOpenReg}`}>
               <span className={styles.dcIcon}>
                 <svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.515 1.5 3.5 3.515 3.5 6v1H2.5A1.5 1.5 0 0 0 1 8.5v5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-5A1.5 1.5 0 0 0 13.5 7H12.5V6c0-2.485-2.015-4.5-4.5-4.5Z" stroke="currentColor" strokeWidth="1.5"/><circle cx="8" cy="11" r="1.25" fill="currentColor"/><path d="M5.5 7h5V6a2.5 2.5 0 0 0-5 0v1Z" fill="currentColor" opacity=".18"/></svg>
@@ -353,5 +371,6 @@ function buildForm(tournament) {
     registration_end:   toInputDatetime(tournament.registration_end),
     max_teams:          tournament.max_teams          || "",
     rules:              tournament.rules              || "",
+    is_public:          !!tournament.is_public,
   };
 }

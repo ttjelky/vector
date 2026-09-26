@@ -12,6 +12,7 @@ import { AdminDashboard }       from "@features/dashboard";
 import { ParticipantDashboard } from "@features/dashboard";
 import { AdminTournaments }     from "@features/tournaments";
 import { ParticipantTournaments } from "@features/tournaments";
+import { PublicTournaments } from "@features/tournaments";
 import { JuryDashboard }        from "@features/jury";
 import { Help }                from "@pages/Help";
 import { NotFound }            from "@pages/NotFound";
@@ -90,6 +91,7 @@ function AppRoutes() {
 
         {/* ── Спільні ───────────────────────────────────────────── */}
         <Route path="/tournaments"    element={<ProtectedRoute><Tournaments /></ProtectedRoute>} />
+        <Route path="/public"         element={<ProtectedRoute><PublicTournaments /></ProtectedRoute>} />
         <Route path="/tournament/:id" element={<ProtectedRoute><TournamentPage /></ProtectedRoute>} />
         <Route path="/works"          element={<ProtectedRoute><Works /></ProtectedRoute>} />
         <Route path="/profile"        element={<ProtectedRoute><Profile /></ProtectedRoute>} />

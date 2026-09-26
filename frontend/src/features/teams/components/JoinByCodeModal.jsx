@@ -4,6 +4,7 @@ import { API, getAccessToken } from '@api';
 import { Login } from "@features/auth";
 import { Register } from "@features/auth";
 import { Forgot } from "@features/auth";
+import { RegistrationFormRenderer } from "@features/tournaments/components/RegistrationFormBuilder";
 import styles from "../styles/JoinByCodeModal.module.css";
 
 function extractToken(input) {
@@ -23,8 +24,9 @@ export function JoinByCodeModal({ onClose }) {
 
   const [step, setStep] = useState("token");
   const [tokenInput, setTokenInput] = useState("");
-  const [pin, setPin] = useState("");
   const [preview, setPreview] = useState(null);
+  const [answers, setAnswers] = useState({});
+  const [formErrors, setFormErrors] = useState({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -46,7 +48,9 @@ export function JoinByCodeModal({ onClose }) {
     try {
       const r = await API.get(`/tournaments/join/${token}/preview/`);
       setPreview({ ...r.data, token });
-      setStep("pin");
+      setAnswers({});
+      setFormErrors({});
+      setStep("confirm");
     } catch {
       setError("Посилання недійсне або турнір не існує.");
     } finally {
@@ -56,39 +60,34 @@ export function JoinByCodeModal({ onClose }) {
 
   const joinTournament = async () => {
     setStep("joining");
+    setFormErrors({});
     try {
-      const res = await API.post("/tournaments/join/", { token: preview.token });
+      const payload = { token: preview.token };
+      if (preview.registration_fields?.length) payload.answers = answers;
+      const res = await API.post("/tournaments/join/", payload);
       setStep("done");
       setTimeout(() => {
         onClose();
         navigate(`/tournament/${res.data.tournament_id}`);
       }, 1200);
     } catch (err) {
-      setError(err.response?.data?.detail || "Помилка при приєднанні.");
-      setStep("pin");
+      const data = err.response?.data;
+      if (data?.errors && typeof data.errors === "object") {
+        setFormErrors(data.errors);
+        setStep("confirm");
+      } else {
+        // role_mismatch / reason (not_started/ended/finished) / invalid token
+        setError(data?.detail || "Помилка при приєднанні.");
+        setStep("confirm");
+      }
     }
   };
 
-  const handlePinSubmit = async () => {
-    if (!pin.trim()) {
-      setError("Введіть PIN-код");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    try {
-      await API.post(`/tournaments/join/${preview.token}/verify-pin/`, { pin: pin.trim() });
-
-      if (isLoggedIn()) {
-        await joinTournament();
-      } else {
-        setShowLogin(true);
-      }
-    } catch (err) {
-      setError(err.response?.data?.detail || "Невірний PIN-код. Спробуйте ще раз.");
-      setStep("pin");
-    } finally {
-      setLoading(false);
+  const handleConfirm = async () => {
+    if (isLoggedIn()) {
+      await joinTournament();
+    } else {
+      setShowLogin(true);
     }
   };
 
@@ -109,7 +108,7 @@ export function JoinByCodeModal({ onClose }) {
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       if (step === "token") handleTokenSubmit();
-      if (step === "pin") handlePinSubmit();
+      else if (step === "confirm") handleConfirm();
     }
     if (e.key === "Escape") onClose();
   };
@@ -125,12 +124,12 @@ export function JoinByCodeModal({ onClose }) {
               <div className={styles.icon}>🔗</div>
               <h2 className={styles.title}>Приєднатися до турніру</h2>
               <p className={styles.hint}>
-                Вставте посилання-запрошення, яке вам надав організатор.
+                Вставте унікальне посилання-запрошення, яке вам надав організатор. PIN-код не потрібен.
               </p>
               <input
                 className={`${styles.input} ${error ? styles.inputError : ""}`}
                 type="text"
-                placeholder="https://… "
+                placeholder="https://…/join/… "
                 value={tokenInput}
                 onChange={(e) => { setTokenInput(e.target.value); setError(""); }}
                 autoFocus
@@ -146,7 +145,7 @@ export function JoinByCodeModal({ onClose }) {
             </>
           )}
 
-          {step === "pin" && preview && (
+          {step === "confirm" && preview && (
             <>
               <div className={styles.icon}>🏆</div>
               <h2 className={styles.title}>{preview.name}</h2>
@@ -157,31 +156,36 @@ export function JoinByCodeModal({ onClose }) {
                     : preview.description}
                 </p>
               )}
-              <p className={styles.hint}>Введіть PIN-код для підтвердження.</p>
-              <input
-                className={`${styles.input} ${error ? styles.inputError : ""}`}
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                placeholder="000000"
-                value={pin}
-                onChange={(e) => { setPin(e.target.value.replace(/\D/g, "")); setError(""); }}
-                autoFocus
-              />
+              {preview.registration_open === false && (
+                <p className={styles.error} style={{ fontWeight: 600 }}>
+                  🔒 {preview.registration_message || "Реєстрація в цей турнір зараз закрита."}
+                </p>
+              )}
+              {preview.registration_open !== false && (preview.registration_fields?.length > 0) && (
+                <div style={{ textAlign: "left", width: "100%" }}>
+                  <p className={styles.hint} style={{ fontWeight: 700 }}>Заповніть форму реєстрації:</p>
+                  <RegistrationFormRenderer
+                    fields={preview.registration_fields}
+                    values={answers}
+                    onChange={setAnswers}
+                    errors={formErrors}
+                  />
+                </div>
+              )}
               {error && <p className={styles.error}>{error}</p>}
               <div className={styles.btnRow}>
                 <button
                   className={styles.btnSecondary}
-                  onClick={() => { setStep("token"); setError(""); setPin(""); }}
+                  onClick={() => { setStep("token"); setError(""); setFormErrors({}); }}
                 >
                   ← Назад
                 </button>
                 <button
                   className={styles.btn}
-                  onClick={handlePinSubmit}
-                  disabled={loading}
+                  onClick={handleConfirm}
+                  disabled={loading || preview.registration_open === false}
                 >
-                  {loading ? "Перевірка…" : "Приєднатися"}
+                  {preview.registration_open === false ? "Реєстрація закрита" : "Приєднатися"}
                 </button>
               </div>
             </>

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import styles from "../styles/registerPage.module.css";
 import cross from "@static/icons/cross.svg";
-import { registerUser, setAccessToken, setUserRole } from "@api";
+import { registerUser } from "@api";
 import { useNavigate } from "react-router-dom";
 import { ROLE_HOME } from "@nav";
+import { VerifyEmail } from "./VerifyEmail";
 
 const ROLES = [
   {
@@ -58,6 +59,7 @@ const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
   const [step,     setStep]     = useState(1);
   const [role,     setRole]     = useState("");
   const [formData, setFormData] = useState({ first_name: "", last_name: "", email: "", password: "" });
+  const [registeredEmail, setRegisteredEmail] = useState("");
   const [errors,   setErrors]   = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -71,27 +73,10 @@ const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
 
     try {
       const response = await registerUser({ ...formData, role });
-      const { access, first_name, last_name, role: returnedRole = "participant" } = response.data;
-
-      // ── Access token і роль — тільки в пам'яті (захищено) ─────────────────
-      if (access) setAccessToken(access);
-      setUserRole(returnedRole);
-
-      // ── Не-чутливі UI-дані — можна в localStorage ─────────────────────────
-      localStorage.setItem("userRole",     returnedRole);
-      localStorage.setItem("fullUserName", `${first_name || formData.first_name} ${last_name || formData.last_name}`.trim());
-
-      // Refresh token вже записаний бекендом у httpOnly cookie
-
-      window.dispatchEvent(new Event("auth-changed"));
-      onClose();
-
-      if (onRegisterSuccess) {
-        onRegisterSuccess();
-      } else {
-        navigate(ROLE_HOME[returnedRole] ?? ROLE_HOME.participant);
-      }
-
+      // Новий флоу: бекенд повертає { email } і шле 6-значний код
+      const registeredEmail = response.data?.email || formData.email;
+      setRegisteredEmail(registeredEmail);
+      setStep(3);
     } catch (error) {
       const serverErrors = error.response?.data;
 
@@ -120,8 +105,19 @@ const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
     setStep(1);
     setRole("");
     setFormData({ first_name: "", last_name: "", email: "", password: "" });
+    setRegisteredEmail("");
     setErrors({});
     onClose();
+  };
+
+  const handleVerified = (data) => {
+    const returnedRole = data.role || "participant";
+    handleClose();
+    if (onRegisterSuccess) {
+      onRegisterSuccess();
+    } else {
+      navigate(ROLE_HOME[returnedRole] ?? ROLE_HOME.participant);
+    }
   };
 
   const step1Valid = formData.first_name && formData.last_name && formData.email && formData.password;
@@ -137,17 +133,31 @@ const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
             <div className={`${styles.stepDot} ${step >= 1 ? styles.stepDotActive : ""}`} />
             <div className={`${styles.stepLine} ${step >= 2 ? styles.stepLineActive : ""}`} />
             <div className={`${styles.stepDot} ${step >= 2 ? styles.stepDotActive : ""}`} />
+            <div className={`${styles.stepLine} ${step >= 3 ? styles.stepLineActive : ""}`} />
+            <div className={`${styles.stepDot} ${step >= 3 ? styles.stepDotActive : ""}`} />
           </div>
           <img src={cross} alt="Закрити" className={styles.cross} onClick={handleClose} />
         </div>
 
+        {step === 3 ? (
+          <div className={styles.form}>
+            <VerifyEmail
+              email={registeredEmail}
+              onVerified={handleVerified}
+              onBack={() => setStep(2)}
+            />
+            <div className={styles.footer}>
+              <button type="button" className={styles.btnCancel} onClick={() => setStep(2)}>← Назад</button>
+            </div>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} noValidate className={styles.form}>
 
           {/* ── STEP 1 ── */}
           {step === 1 && (
             <div className={styles.stepContent}>
               <div className={styles.stepMeta}>
-                <span className={styles.stepNum}>Крок 1 з 2</span>
+                <span className={styles.stepNum}>Крок 1 з 3</span>
                 <h2 className={styles.stepTitle}>Ваші дані</h2>
                 <p className={styles.stepSub}>Введіть основну інформацію для створення акаунту</p>
               </div>
@@ -208,7 +218,7 @@ const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
           {step === 2 && (
             <div className={styles.stepContent}>
               <div className={styles.stepMeta}>
-                <span className={styles.stepNum}>Крок 2 з 2</span>
+                <span className={styles.stepNum}>Крок 2 з 3</span>
                 <h2 className={styles.stepTitle}>Ваша роль</h2>
                 <p className={styles.stepSub}>Оберіть як ви плануєте використовувати платформу</p>
               </div>
@@ -251,13 +261,14 @@ const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
               <>
                 <button type="button" className={styles.btnCancel} onClick={() => setStep(1)}>← Назад</button>
                 <button type="submit" className={styles.btnSubmit} disabled={!role || isLoading}>
-                  {isLoading ? "Завантаження..." : "Зареєструватися"}
+                  {isLoading ? "Надсилання коду..." : "Отримати код →"}
                 </button>
               </>
             )}
           </div>
 
         </form>
+        )}
       </div>
     </div>
   );

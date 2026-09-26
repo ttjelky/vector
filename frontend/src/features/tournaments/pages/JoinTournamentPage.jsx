@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { API, getAccessToken } from '@api';
 import { Login, Register, Forgot } from "@features/auth";
+import { RegistrationFormRenderer } from "../components/RegistrationFormBuilder";
 import styles from "../styles/JoinTournamentPage.module.css";
 import Logo from "@static/VectorFavicon.png";
 import { getDescriptionPreview } from "../components/TournamentCard";
@@ -16,11 +17,9 @@ export function JoinTournamentPage() {
   const [done, setDone] = useState(false);
   const [joining, setJoining] = useState(false);
 
-  // PIN modal
-  const [showPin, setShowPin] = useState(false);
-  const [pin, setPin] = useState("");
-  const [pinError, setPinError] = useState("");
-  const [pinLoading, setPinLoading] = useState(false);
+  // Форма реєстрації
+  const [answers, setAnswers] = useState({});
+  const [formErrors, setFormErrors] = useState({});
 
   // Login modal
   const [showLogin,    setShowLogin]    = useState(false);
@@ -31,51 +30,49 @@ export function JoinTournamentPage() {
 
   useEffect(() => {
     API.get(`/tournaments/join/${token}/preview/`)
-      .then((r) => setPreview(r.data))
+      .then((r) => {
+        setPreview(r.data);
+        setAnswers({});
+      })
       .catch(() => setPageError("Посилання недійсне або турнір не існує."))
       .finally(() => setPageLoading(false));
   }, [token]);
 
-  const handleJoinClick = () => {
-    setPin("");
-    setPinError("");
-    setShowPin(true);
-  };
-
-  const handlePinSubmit = async () => {
-    const trimmed = pin.trim();
-    if (!trimmed) {
-      setPinError("Введіть PIN-код");
-      return;
-    }
-    setPinLoading(true);
-    setPinError("");
-    try {
-      await API.post(`/tournaments/join/${token}/verify-pin/`, { pin: trimmed });
-      setShowPin(false);
-
-      if (isLoggedIn()) {
-        await joinTournament();
-      } else {
-        setShowLogin(true);
-      }
-    } catch (err) {
-      setPinError(err.response?.data?.detail || "Невірний PIN-код. Спробуйте ще раз.");
-    } finally {
-      setPinLoading(false);
-    }
-  };
-
   const joinTournament = async () => {
     setJoining(true);
+    setFormErrors({});
     try {
-      const res = await API.post("/tournaments/join/", { token });
+      // Відповіді: ключі як строки
+      const payload = { token };
+      if (preview?.registration_fields?.length) {
+        payload.answers = answers;
+      }
+      const res = await API.post("/tournaments/join/", payload);
       setDone(true);
       setTimeout(() => navigate(`/tournament/${res.data.tournament_id}`), 1500);
     } catch (err) {
-      setPageError(err.response?.data?.detail || "Помилка при приєднанні.");
+      const data = err.response?.data;
+      if (data?.errors && typeof data.errors === "object") {
+        setFormErrors(data.errors);
+        setPageError(null);
+      } else if (data?.role_mismatch) {
+        setPageError(data?.detail || "Це посилання не для вашої ролі.");
+      } else if (data?.reason) {
+        // Закрита реєстрація з конкретною причиною (not_started/ended/finished)
+        setPageError(data?.detail || "Реєстрація зараз закрита.");
+      } else {
+        setPageError(data?.detail || "Помилка при приєднанні.");
+      }
     } finally {
       setJoining(false);
+    }
+  };
+
+  const handleJoinClick = async () => {
+    if (isLoggedIn()) {
+      await joinTournament();
+    } else {
+      setShowLogin(true);
     }
   };
 
@@ -89,10 +86,6 @@ export function JoinTournamentPage() {
     await joinTournament();
   };
 
-  const handlePinKeyDown = (e) => {
-    if (e.key === "Enter") handlePinSubmit();
-  };
-
   if (pageLoading) return (
     <div className={styles.page}>
       <div className={styles.card}>
@@ -101,7 +94,7 @@ export function JoinTournamentPage() {
     </div>
   );
 
-  if (pageError) return (
+  if (pageError && !preview) return (
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.icon}>❌</div>
@@ -132,6 +125,9 @@ export function JoinTournamentPage() {
     </div>
   );
 
+  const fields = preview?.registration_fields || [];
+  const regClosed = preview && preview.registration_open === false;
+
   return (
     <>
       <div className={styles.page}>
@@ -143,52 +139,35 @@ export function JoinTournamentPage() {
               {getDescriptionPreview(preview.description, 120)}
             </p>
           )}
-          <p className={styles.hint}>Вас запрошено як учасника цього турніру.</p>
-          <button className={styles.btn} onClick={handleJoinClick}>
-            Приєднатися до турніру
+          {regClosed ? (
+            <p className={styles.error} style={{ fontWeight: 600 }}>
+              🔒 {preview.registration_message || "Реєстрація в цей турнір зараз закрита."}
+            </p>
+          ) : (
+            <p className={styles.hint}>Вас запрошено як учасника цього турніру. PIN-код не потрібен.</p>
+          )}
+
+          {fields.length > 0 && (
+            <div style={{ textAlign: "left", width: "100%", marginTop: 8 }}>
+              <p className={styles.hint} style={{ fontWeight: 700 }}>
+                Заповніть форму реєстрації:
+              </p>
+              <RegistrationFormRenderer
+                fields={fields}
+                values={answers}
+                onChange={setAnswers}
+                errors={formErrors}
+              />
+            </div>
+          )}
+
+          {pageError && <p className={styles.error}>{pageError}</p>}
+
+          <button className={styles.btn} onClick={handleJoinClick} disabled={regClosed}>
+            {regClosed ? "Реєстрація закрита" : "Приєднатися до турніру"}
           </button>
         </div>
       </div>
-
-      {showPin && (
-        <div className={styles.overlay} onClick={() => setShowPin(false)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.closeBtn} onClick={() => setShowPin(false)}>✕</button>
-
-            <div className={styles.icon}><img src={Logo} alt="Logo" /></div>
-            <h2 className={styles.title}>Введіть PIN-код</h2>
-            <p className={styles.hint}>
-              Власник турніру надав вам окремий PIN-код разом із посиланням.
-              Введіть його нижче для підтвердження.
-            </p>
-
-            <input
-              className={`${styles.input} ${pinError ? styles.inputError : ""}`}
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              placeholder="000000"
-              value={pin}
-              onChange={(e) => {
-                setPin(e.target.value.replace(/\D/g, ""));
-                setPinError("");
-              }}
-              onKeyDown={handlePinKeyDown}
-              autoFocus
-            />
-
-            {pinError && <p className={styles.error}>{pinError}</p>}
-
-            <button
-              className={styles.btn}
-              onClick={handlePinSubmit}
-              disabled={pinLoading}
-            >
-              {pinLoading ? "Перевірка…" : "Підтвердити"}
-            </button>
-          </div>
-        </div>
-      )}
 
       {showLogin && (
         <Login

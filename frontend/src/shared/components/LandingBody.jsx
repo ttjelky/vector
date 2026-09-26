@@ -178,7 +178,7 @@ const LandingBody = () => {
                         <section ref={step2Ref} className={`${styles.step} ${styles.revealUp} ${step2Visible ? styles.revealVisible : ""}`} style={{ transitionDelay: "0.15s" }}>
                             <p className={styles.stepNumber}>02</p>
                             <p className={styles.stepTitle}>Приєднайтеся до турніру</p>
-                            <p className={styles.stepText}>Організатор створює турнір і додає раунди. Команди приєднуються за запрошенням або кодом.</p>
+                            <p className={styles.stepText}>Організатор створює турнір і додає раунди. Команди приєднуються за унікальним посиланням або в 1 клік з каталогу публічних турнірів.</p>
                         </section>
 
                         <section ref={step3Ref} className={`${styles.step} ${styles.revealUp} ${step3Visible ? styles.revealVisible : ""}`} style={{ transitionDelay: "0.3s" }}>

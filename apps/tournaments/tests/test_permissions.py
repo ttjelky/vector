@@ -20,7 +20,16 @@ class RegistrationExceptionTests(BaseTest):
             tournament=self.t, user=self.owner, role="owner"
         )
 
-    def test_registration_closed_by_default(self):
+    def test_registration_open_by_default_no_dates(self):
+        # Без дат реєстрації турнір відкритий для вступу
+        # (навіть якщо старт ще попереду).
+        self.assertTrue(self.t.registration_open())
+
+    def test_registration_closed_when_window_passed(self):
+        now = timezone.now()
+        self.t.registration_start = now - timedelta(days=10)
+        self.t.registration_end = now - timedelta(days=1)
+        self.t.save()
         self.assertFalse(self.t.registration_open())
 
     def test_activate_exception(self):

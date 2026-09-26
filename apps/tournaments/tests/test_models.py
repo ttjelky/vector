@@ -16,14 +16,55 @@ class ModelTests(BaseTest):
         )
         self.assertTrue(t.registration_open())
 
-    def test_tournament_registration_closed_before_start(self):
+    def test_tournament_registration_open_before_start_no_dates(self):
+        # Без явних дат реєстрації — відкрито до завершення турніру,
+        # навіть якщо старт ще попереду.
         now = timezone.now()
         t = Tournament.objects.create(
-            name="Closed", description="x",
+            name="OpenEarly", description="x",
             start_date=now + timedelta(days=3),
             end_date=now + timedelta(days=7),
         )
+        self.assertTrue(t.registration_open())
+
+    def test_tournament_registration_closed_when_window_ended(self):
+        now = timezone.now()
+        t = Tournament.objects.create(
+            name="Ended", description="x",
+            start_date=now - timedelta(days=10),
+            end_date=now + timedelta(days=7),
+            registration_start=now - timedelta(days=9),
+            registration_end=now - timedelta(days=1),
+        )
         self.assertFalse(t.registration_open())
+        is_open, reason, message = t.registration_status()
+        self.assertEqual(reason, 'ended')
+        self.assertIn('завершилась', message)
+
+    def test_tournament_registration_not_started_yet(self):
+        now = timezone.now()
+        t = Tournament.objects.create(
+            name="Future", description="x",
+            start_date=now + timedelta(days=10),
+            end_date=now + timedelta(days=30),
+            registration_start=now + timedelta(days=5),
+            registration_end=now + timedelta(days=8),
+        )
+        self.assertFalse(t.registration_open())
+        is_open, reason, message = t.registration_status()
+        self.assertEqual(reason, 'not_started')
+        self.assertIn('Початок', message)
+
+    def test_tournament_registration_closed_when_finished(self):
+        now = timezone.now()
+        t = Tournament.objects.create(
+            name="Finished", description="x",
+            start_date=now - timedelta(days=10),
+            end_date=now - timedelta(days=1),
+        )
+        self.assertFalse(t.registration_open())
+        _, reason, message = t.registration_status()
+        self.assertEqual(reason, 'finished')
 
     def test_tournament_registration_open_via_exception(self):
         now = timezone.now()

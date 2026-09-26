@@ -271,7 +271,14 @@ class TeamRegisterView(APIView):
                     },
                     status=400,
                 )
-            return Response({'detail': 'Реєстрація у турнірі закрита.'}, status=400)
+            is_open, reason, message = t.registration_status()
+            return Response(
+                {
+                    'detail': message or 'Реєстрація у турнірі закрита.',
+                    'reason': reason,
+                },
+                status=400,
+            )
 
         # Ліміт зареєстрованих команд
         t = team.tournament

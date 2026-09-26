@@ -15,16 +15,19 @@ export const ROLE_TABS = {
   admin: [
     { key: "home",        label: "Головна",    path: "/admindashboard" },
     { key: "tournaments", label: "Турніри",    path: "/tournaments"    },
+    { key: "public",      label: "Публічні",   path: "/public"         },
   ],
 
   jury: [
     { key: "home",        label: "Головна", path: "/jury"        },
     { key: "tournaments", label: "Турніри", path: "/tournaments" },
+    { key: "public",      label: "Публічні", path: "/public"     },
   ],
 
   participant: [
     { key: "home",        label: "Головна", path: "/dashboard"   },
     { key: "tournaments", label: "Турніри", path: "/tournaments" },
+    { key: "public",      label: "Публічні", path: "/public"     },
     { key: "news",        label: "Новини",  path: "/news"        },
   ],
 };

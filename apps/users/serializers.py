@@ -57,6 +57,13 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "No active account found with the given credentials"
             )
 
+        if not user.is_active:
+            raise serializers.ValidationError({
+                "code": "email_not_verified",
+                "detail": "Підтвердіть пошту 6-значним кодом.",
+                "email": user.email,
+            })
+
         # Фіксуємо legacy-акаунти де username != email
         if user.username != user.email:
             user.username = user.email

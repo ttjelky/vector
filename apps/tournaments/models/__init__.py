@@ -50,6 +50,15 @@ from .announcement import (
 from .jury import (
     JuryGradingCriterion,
 )
+from .invite import (
+    TournamentInviteLink,
+    MAX_LINKS_PER_ROLE,
+)
+from .registration import (
+    RegistrationField,
+    RegistrationResponse,
+    FIELD_TYPE_CHOICES,
+)
 
 __all__ = [
     # tournament
@@ -88,4 +97,11 @@ __all__ = [
     "ANNOUNCEMENT_TARGET_CHOICES",
     # jury
     "JuryGradingCriterion",
+    # invite
+    "TournamentInviteLink",
+    "MAX_LINKS_PER_ROLE",
+    # registration
+    "RegistrationField",
+    "RegistrationResponse",
+    "FIELD_TYPE_CHOICES",
 ]

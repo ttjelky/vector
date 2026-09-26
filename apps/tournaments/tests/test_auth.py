@@ -12,7 +12,21 @@ class AuthTests(BaseTest):
             "last_name":  "User",
         })
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        self.assertIn("access", resp.data)
+        self.assertIn("email", resp.data)
+        # Новий флоу: код на пошту, юзер неактивний
+        from django.contrib.auth import get_user_model
+        from apps.users.models import EmailVerificationCode
+        User = get_user_model()
+        user = User.objects.get(email="newuser@test.com")
+        self.assertFalse(user.is_active)
+        code_obj = EmailVerificationCode.objects.filter(email="newuser@test.com").first()
+        self.assertIsNotNone(code_obj)
+        # Верифікація активує і повертає access
+        verify = self.client.post("/api/users/register/verify/", {
+            "email": "newuser@test.com", "code": code_obj.code,
+        })
+        self.assertEqual(verify.status_code, status.HTTP_200_OK)
+        self.assertIn("access", verify.data)
 
     def test_register_duplicate_email(self):
         """Реєстрація з вже існуючим email повертає 400."""

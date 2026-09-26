@@ -1,360 +1,266 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTabs } from "@shared/contexts/TabsContext";
 import { API, mediaUrl } from '@api';
 import { NavBar } from "@shared/components/NavBar";
 import { TournamentCard } from "@features/tournaments";
-import styles from "../styles/participantdashboard.module.css";
+import { JoinByCodeModal } from "@features/teams";
+import { computeStatus } from "@features/tournaments/components/tournamentHelpers";
+import home from "../styles/dashboardHome.module.css";
 
-// ── Grade card ────────────────────────────────────────────────────────────────
-function GradeCard({ grade }) {
-  const pct = grade.max_total > 0
-    ? Math.round((grade.total / grade.max_total) * 100)
-    : 0;
+function useReveal() {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold: 0.1 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return [ref, visible];
+}
 
-  const color = pct >= 80 ? "#22c55e"
-              : pct >= 50 ? "#f59e0b"
-              : "#ef4444";
+function useCountUp(target, duration = 800) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if (!target) { setVal(0); return; }
+    let raf;
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min(1, (now - start) / duration);
+      setVal(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return val;
+}
 
-  const getLabel = (key) => {
-    const found = grade.criteria?.find?.(c => c.key === key);
-    if (found?.label) return found.label;
-    if (grade.scores_meta?.[key]?.label) return grade.scores_meta[key].label;
-    return key;
-  };
-
-  const getMax = (key) => {
-    const found = grade.criteria?.find?.(c => c.key === key);
-    if (found?.max_score != null) return found.max_score;
-    if (found?.max != null) return found.max;
-    if (grade.scores_meta?.[key]?.max_score) return grade.scores_meta[key].max_score;
-    const criteriaCount = grade.criteria?.length || Object.keys(grade.scores || {}).length || 1;
-    return Math.round((grade.max_total || 10) / criteriaCount);
-  };
-
+function Stat({ icon, bg, value, label, delay, suffix = "" }) {
+  const [ref, vis] = useReveal();
+  const animated = useCountUp(vis ? value : 0);
   return (
-    <div className={styles.gradeCard}>
-      <div className={styles.gradeRing} style={{ "--clr": color, "--pct": pct }}>
-        <svg viewBox="0 0 44 44" className={styles.ringSvg}>
-          <circle cx="22" cy="22" r="18" className={styles.ringBg} />
-          <circle
-            cx="22" cy="22" r="18"
-            className={styles.ringFill}
-            style={{
-              stroke: color,
-              strokeDasharray: `${pct * 1.131} 113.1`,
-            }}
-          />
-        </svg>
-        <span className={styles.ringNum} style={{ color }}>
-          {grade.total}
-        </span>
-      </div>
-
-      <div className={styles.gradeBody}>
-        <p className={styles.gradeTask} title={grade.task_title}>
-          {grade.task_title}
-        </p>
-        <p className={styles.gradeRound} title={`${grade.round_title} · ${grade.tournament}`}>
-          {grade.round_title} · {grade.tournament}
-        </p>
-
-        <div className={styles.gradeCriteria}>
-          {Object.entries(grade.scores).map(([key, val]) => {
-            const max   = getMax(key);
-            const label = getLabel(key);
-            return (
-              <div key={key} className={styles.criterionRow}>
-                <span className={styles.criterionLabel} title={label}>{label}</span>
-                <div className={styles.criterionBar}>
-                  <div
-                    className={styles.criterionFill}
-                    style={{ width: `${(val / max) * 100}%`, background: color }}
-                  />
-                </div>
-                <span className={styles.criterionVal}>{val}/{max}</span>
-              </div>
-            );
-          })}
-        </div>
-
-        {grade.comment && (
-          <p className={styles.gradeComment}>💬 {grade.comment}</p>
-        )}
-
-        <div className={styles.gradeMeta}>
-          <span className={styles.gradeJury} title={`від ${grade.jury_name}`}>
-            від {grade.jury_name}
-          </span>
-          <span className={styles.gradeMax}>{grade.total} / {grade.max_total}</span>
-        </div>
+    <div ref={ref} className={`${home.statCard} ${home.reveal} ${vis ? home.revealVisible : ""}`}
+      style={{ transitionDelay: `${delay}ms` }}>
+      <div className={home.statIcon} style={{ background: bg }}>{icon}</div>
+      <div>
+        <div className={home.statNum}>{animated}{suffix}</div>
+        <div className={home.statLbl}>{label}</div>
       </div>
     </div>
   );
 }
 
-// ── Notification tile ─────────────────────────────────────────────────────────
-function NotifTile({ n, onRead }) {
-  return (
-    <div
-      className={`${styles.notifTile} ${n.is_read ? styles.notif_read : styles.notif_unread}`}
-      onClick={() => !n.is_read && onRead(n.id)}
-    >
-      {!n.is_read && <span className={styles.notifDot} />}
-      <div className={styles.notifContent}>
-        {n.subject && <span className={styles.notifTitle}>{n.subject}</span>}
-        <span className={styles.notifMsg}>{n.text}</span>
-        {n.tournament && <span className={styles.notifTag}>🏆 {n.tournament}</span>}
-      </div>
-      <span className={styles.notifTime}>{n.created_at}</span>
-    </div>
-  );
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 5) return "Доброї ночі";
+  if (h < 12) return "Доброго ранку";
+  if (h < 18) return "Доброго дня";
+  return "Доброго вечора";
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
 const ParticipantDashboard = () => {
-  const navigate   = useNavigate();
+  const navigate = useNavigate();
   const { addTab } = useTabs();
+  const userName = localStorage.getItem("fullUserName") || "Учаснику";
 
-  const [tournaments,   setTournaments]   = useState([]);
-  const [grades,        setGrades]        = useState([]);
+  const [tournaments, setTournaments] = useState([]);
+  const [grades, setGrades] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [loadingT,      setLoadingT]      = useState(true);
-  const [loadingG,      setLoadingG]      = useState(true);
-  const [loadingN,      setLoadingN]      = useState(true);
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAnimating,  setIsAnimating]  = useState(false);
-  const [animDir,      setAnimDir]      = useState("next");
-  const timerRef = useRef(null);
+  const [publicCount, setPublicCount] = useState(0);
+  const [loadingT, setLoadingT] = useState(true);
+  const [loadingG, setLoadingG] = useState(true);
+  const [loadingN, setLoadingN] = useState(true);
+  const [showJoin, setShowJoin] = useState(false);
 
   useEffect(() => {
-    API.get("/tournaments/")
-      .then(r => setTournaments(r.data))
-      .catch(() => {})
-      .finally(() => setLoadingT(false));
-
-    API.get("/tournaments/my-grades/")
-      .then(r => setGrades(r.data))
-      .catch(() => {})
-      .finally(() => setLoadingG(false));
-
-    API.get("/notifications/")
-      .then(r => setNotifications(r.data))
-      .catch(() => {})
-      .finally(() => setLoadingN(false));
+    API.get("/tournaments/").then(r => setTournaments(r.data)).catch(() => {}).finally(() => setLoadingT(false));
+    API.get("/tournaments/my-grades/").then(r => setGrades(r.data)).catch(() => {}).finally(() => setLoadingG(false));
+    API.get("/notifications/").then(r => setNotifications(r.data)).catch(() => {}).finally(() => setLoadingN(false));
+    API.get("/tournaments/public/").then(r => setPublicCount((r.data || []).length)).catch(() => {});
   }, []);
 
   const markOneRead = async (id) => {
-    await API.post(`/notifications/mark-read/${id}/`);
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+    await API.post(`/notifications/mark-read/${id}/`).catch(() => {});
   };
-
   const markAllRead = async () => {
-    await API.post("/notifications/mark-read/");
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    await API.post("/notifications/mark-read/").catch(() => {});
   };
-
-  const goTo = useCallback((dir) => {
-    if (isAnimating || tournaments.length === 0) return;
-    setAnimDir(dir);
-    setIsAnimating(true);
-    setTimeout(() => {
-      setCurrentIndex(prev =>
-        dir === "next"
-          ? (prev + 1) % tournaments.length
-          : (prev - 1 + tournaments.length) % tournaments.length
-      );
-      setIsAnimating(false);
-    }, 320);
-  }, [isAnimating, tournaments.length]);
-
-  useEffect(() => {
-    if (tournaments.length < 2) return;
-    timerRef.current = setInterval(() => goTo("next"), 30000);
-    return () => clearInterval(timerRef.current);
-  }, [goTo, tournaments.length]);
-
-  const resetTimer = (dir) => {
-    clearInterval(timerRef.current);
-    goTo(dir);
-    timerRef.current = setInterval(() => goTo("next"), 30000);
-  };
-
-  const current     = tournaments[currentIndex];
-  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   const avgScore = grades.length > 0
     ? Math.round(grades.reduce((s, g) => s + (g.max_total > 0 ? (g.total / g.max_total) * 100 : 0), 0) / grades.length)
-    : null;
+    : 0;
+  const unread = notifications.filter(n => !n.is_read).length;
+  const active = tournaments.filter(t => computeStatus(t) !== "finished").length;
+  const recent = useMemo(() => [...tournaments].slice(-6).reverse(), [tournaments]);
+  const topGrades = useMemo(() => [...grades].slice(0, 3), [grades]);
+
+  const events = useMemo(() => {
+    const evs = [];
+    for (const t of tournaments) {
+      if (t.end_date) evs.push({ date: new Date(t.end_date), title: t.name, meta: "Дедлайн", id: t.id });
+      if (t.registration_end) evs.push({ date: new Date(t.registration_end), title: t.name, meta: "Кінець реєстрації", id: t.id });
+    }
+    return evs.filter(e => !isNaN(e.date)).sort((a, b) => a.date - b.date)
+      .filter(e => e.date >= new Date(Date.now() - 86400000)).slice(0, 5);
+  }, [tournaments]);
+
+  const openTournament = (t) => {
+    addTab({ id: t.id, name: t.name });
+    navigate(`/tournament/${t.id}`);
+  };
+
+  const [heroRef, heroVis] = useReveal();
+  const UA_MONTHS = ["січ", "лют", "бер", "кві", "тра", "чер", "лип", "сер", "вер", "жов", "лис", "гру"];
 
   return (
     <NavBar>
-      <div className={styles.contentArea}>
-
-        <div className={styles.pageHeader}>
-          <h2 className={styles.pageTitle}>Особистий кабінет</h2>
-          <p className={styles.pageSubtitle}>Ваші турніри, оцінки та сповіщення</p>
+      <div className={home.contentArea}>
+        <div ref={heroRef} className={`${home.hero} ${home.reveal} ${heroVis ? home.revealVisible : ""}`}>
+          <span className={home.roleBadge}>Учасник</span>
+          <h1 className={home.heroTitle}>{greeting()}, {userName}! 🚀</h1>
+          <p className={home.heroSub}>
+            {tournaments.length === 0
+              ? "Ви ще не в жодному турнірі — загляньте в публічний каталог або вставте посилання від організатора."
+              : `У вас ${tournaments.length} турнірів · ${grades.length} оцінок${grades.length ? ` · середній бал ${avgScore}%` : ""}. Так тримати!`}
+          </p>
+          <div className={home.heroActions}>
+            <button className={home.heroBtnPrimary} onClick={() => setShowJoin(true)}>
+              🔗 Приєднатися за посиланням
+            </button>
+            <button className={home.heroBtnGhost} onClick={() => navigate("/public")}>
+              🌍 Публічні турніри{publicCount > 0 ? ` (${publicCount})` : ""}
+            </button>
+            <button className={home.heroBtnGhost} onClick={() => navigate("/tournaments")}>
+              🏆 Мої турніри
+            </button>
+          </div>
         </div>
 
-        {!loadingG && grades.length > 0 && (
-          <div className={styles.statStrip}>
-            <div className={styles.statChip}>
-              <span className={styles.statNum}>{grades.length}</span>
-              <span className={styles.statLbl}>оцінених робіт</span>
+        <div className={home.statGrid}>
+          <Stat icon="🏆" bg="#fef3c7" value={tournaments.length} label="мої турніри" delay={0} />
+          <Stat icon="🔥" bg="#dcfce7" value={active} label="активних" delay={80} />
+          <Stat icon="📝" bg="#e0e7ff" value={grades.length} label="оцінок" delay={160} />
+          <Stat icon="⭐" bg="#fef9c3" value={avgScore} suffix="%" label="середній бал" delay={240} />
+          <Stat icon="🔔" bg="#fce7f3" value={unread} label="непрочитаних" delay={320} />
+        </div>
+
+        <div className={home.mainGrid}>
+          <section className={home.section}>
+            <div className={home.sectionHeader}>
+              <h3 className={home.sectionTitle}>Мої турніри <span className={home.countBadge}>{tournaments.length}</span></h3>
+              <button className={home.linkBtn} onClick={() => navigate("/tournaments")}>Всі →</button>
             </div>
-            {avgScore !== null && (
-              <div className={styles.statChip}>
-                <span className={styles.statNum} style={{
-                  color: avgScore >= 80 ? "#22c55e" : avgScore >= 50 ? "#f59e0b" : "#ef4444"
-                }}>
-                  {avgScore}%
-                </span>
-                <span className={styles.statLbl}>середній результат</span>
+            {loadingT ? (
+              <div className={home.tournGrid}>{[0,1,2].map(i => <div key={i} className={home.skeleton} style={{ height: 120 }} />)}</div>
+            ) : recent.length === 0 ? (
+              <div className={home.emptyState}>
+                <div style={{ fontSize: 32 }}>🎯</div>
+                <p>Поки порожньо. Приєднайтеся до першого турніру!</p>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 8 }}>
+                  <button className={home.heroBtnPrimary} style={{ background: "#18181b", color: "#fff" }}
+                    onClick={() => navigate("/public")}>До каталогу</button>
+                </div>
               </div>
-            )}
-            {!loadingT && tournaments.length > 0 && (
-              <div className={styles.statChip}>
-                <span className={styles.statNum}>{tournaments.length}</span>
-                <span className={styles.statLbl}>турнірів</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className={styles.mainGrid}>
-
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitle}>Мої турніри</h3>
-              {tournaments.length > 1 && (
-                <div className={styles.carouselControls}>
-                  <button className={styles.arrowBtn} onClick={() => resetTimer("prev")}>‹</button>
-                  <span className={styles.carouselDots}>
-                    {tournaments.map((_, i) => (
-                      <span key={i} className={`${styles.dot} ${i === currentIndex ? styles.dotActive : ""}`} />
-                    ))}
-                  </span>
-                  <button className={styles.arrowBtn} onClick={() => resetTimer("next")}>›</button>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.carouselWrapper}>
-              {loadingT ? (
-                <div className={styles.skeletonCard}>
-                  <div className={styles.skeletonImg} />
-                  <div className={styles.skeletonBody}>
-                    <div className={styles.skeletonLine} style={{ width: "55%" }} />
-                    <div className={styles.skeletonLine} style={{ width: "35%" }} />
-                  </div>
-                </div>
-              ) : current ? (
-                <div
-                  className={`${styles.carouselSlide} ${
-                    isAnimating
-                      ? animDir === "next" ? styles.slideExitLeft : styles.slideExitRight
-                      : styles.slideEnter
-                  }`}
-                  onClick={() => {
-                    addTab({ id: current.id, name: current.name });
-                    navigate(`/tournament/${current.id}`);
-                  }}
-                  style={{ cursor: "pointer" }}
-                >
-                  <TournamentCard
-                    name={current.name}
-                    info={current.description}
-                    date={current.start_date}
-                    accentColor={current.accent_color}
-                    imageMode={current.image_mode}
-                    stockImage={current.stock_image}
-                    customImage={
-                      current.custom_image
-                        ? (current.custom_image.startsWith("http")
-                            ? current.custom_image
-                            : mediaUrl(current.custom_image))
-                        : null
-                    }
-                  />
-                </div>
-              ) : (
-                <div className={styles.emptyState}>
-                  <span className={styles.emptyIcon}>🏆</span>
-                  <span>Турнірів ще немає</span>
-                </div>
-              )}
-            </div>
-          </section>
-
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitle}>
-                Мої оцінки
-                {grades.length > 0 && (
-                  <span className={styles.gradesBadge}>{grades.length}</span>
-                )}
-              </h3>
-            </div>
-
-            {loadingG ? (
-              <div className={styles.gradesScroll}>
-                {[0,1,2].map(i => (
-                  <div key={i} className={styles.skeletonGrade}>
-                    <div className={styles.skeletonRing} />
-                    <div className={styles.skeletonBody}>
-                      <div className={styles.skeletonLine} style={{ width: "70%" }} />
-                      <div className={styles.skeletonLine} style={{ width: "50%" }} />
-                      <div className={styles.skeletonLine} style={{ width: "90%" }} />
-                    </div>
+            ) : (
+              <div className={home.tournGrid}>
+                {recent.map((t) => (
+                  <div key={t.id} className={home.tournCell} onClick={() => openTournament(t)}>
+                    <TournamentCard
+                      name={t.name} info={t.description} date={t.start_date}
+                      accentColor={t.accent_color} imageMode={t.image_mode}
+                      stockImage={t.stock_image}
+                      customImage={t.custom_image ? (t.custom_image.startsWith("http") ? t.custom_image : mediaUrl(t.custom_image)) : null}
+                      status={computeStatus(t)}
+                    />
                   </div>
                 ))}
               </div>
-            ) : grades.length === 0 ? (
-              <div className={styles.emptyState}>
-                <span className={styles.emptyIcon}>📋</span>
-                <span>Оцінок ще немає</span>
-              </div>
-            ) : (
-              <div className={styles.gradesScroll}>
-                {grades.map(g => <GradeCard key={g.id} grade={g} />)}
-              </div>
+            )}
+
+            {topGrades.length > 0 && (
+              <>
+                <div className={home.sectionHeader} style={{ marginTop: 18 }}>
+                  <h3 className={home.sectionTitle}>⭐ Останні оцінки</h3>
+                  <button className={home.linkBtn} onClick={() => navigate("/works")}>Всі роботи →</button>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {topGrades.map((g) => (
+                    <div key={g.id} className={home.eventRow}>
+                      <div className={home.eventDate} style={{
+                        background: (g.total / (g.max_total || 1)) >= 0.8 ? "#16a34a" : (g.total / (g.max_total || 1)) >= 0.5 ? "#f59e0b" : "#ef4444",
+                      }}>
+                        <span className={home.eventDay}>{g.total}</span>
+                        <span className={home.eventMonth}>/{g.max_total}</span>
+                      </div>
+                      <div>
+                        <div className={home.eventName}>{g.task_title}</div>
+                        <div className={home.eventMeta}>{g.tournament} · {g.round_title}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </section>
-        </div>
 
-        <section className={styles.notifSection}>
-          <div className={styles.sectionHeader}>
-            <h3 className={styles.sectionTitle}>
-              Сповіщення
-              {unreadCount > 0 && <span className={styles.notifCount}>{unreadCount}</span>}
-            </h3>
-            {unreadCount > 0 && (
-              <button className={styles.markAllBtn} onClick={markAllRead}>
-                Прочитати всі
-              </button>
-            )}
-          </div>
-
-          <div className={styles.notifList}>
-            {loadingN ? (
-              [0,1,2].map(i => (
-                <div key={i} className={styles.skeletonTile}>
-                  <div className={styles.skeletonLine} style={{ width: "40%" }} />
-                  <div className={styles.skeletonLine} style={{ width: "75%" }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <section className={home.section}>
+              <div className={home.sectionHeader}>
+                <h3 className={home.sectionTitle}>📅 Дедлайни</h3>
+              </div>
+              {events.length === 0 ? (
+                <div className={home.emptyState}>Немає наближених дедлайнів</div>
+              ) : (
+                <div className={home.eventList}>
+                  {events.map((e, i) => (
+                    <div key={i} className={home.eventRow} onClick={() => navigate(`/tournament/${e.id}`)}>
+                      <div className={home.eventDate}>
+                        <span className={home.eventDay}>{e.date.getDate()}</span>
+                        <span className={home.eventMonth}>{UA_MONTHS[e.date.getMonth()]}</span>
+                      </div>
+                      <div>
+                        <div className={home.eventName}>{e.title}</div>
+                        <div className={home.eventMeta}>{e.meta} · {e.date.toLocaleDateString("uk-UA")}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))
-            ) : notifications.length === 0 ? (
-              <p className={styles.emptyInline}>Немає сповіщень</p>
-            ) : (
-              notifications.map(n => (
-                <NotifTile key={n.id} n={n} onRead={markOneRead} />
-              ))
-            )}
-          </div>
-        </section>
+              )}
+            </section>
 
+            <section className={home.section}>
+              <div className={home.sectionHeader}>
+                <h3 className={home.sectionTitle}>🔔 Сповіщення {unread > 0 && <span className={home.countBadge}>{unread}</span>}</h3>
+                {unread > 0 && <button className={home.linkBtn} onClick={markAllRead}>Всі прочитано</button>}
+              </div>
+              <div className={home.notifList}>
+                {loadingN ? (
+                  [0,1,2].map(i => <div key={i} className={home.skeleton} style={{ height: 48 }} />)
+                ) : notifications.length === 0 ? (
+                  <div className={home.emptyState}>Немає сповіщень</div>
+                ) : (
+                  notifications.slice(0, 6).map((n) => (
+                    <div key={n.id} className={`${home.notifTile} ${!n.is_read ? home.notifUnread : ""}`}
+                      onClick={() => !n.is_read && markOneRead(n.id)}>
+                      {!n.is_read && <span className={home.notifDot} />}
+                      <div style={{ fontWeight: 700 }}>{n.subject || "Сповіщення"}</div>
+                      <div style={{ color: "#555" }}>{n.text}</div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          </div>
+        </div>
       </div>
+      {showJoin && <JoinByCodeModal onClose={() => setShowJoin(false)} />}
     </NavBar>
   );
 };
