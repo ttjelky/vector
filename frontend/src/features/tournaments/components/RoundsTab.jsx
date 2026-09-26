@@ -277,7 +277,7 @@ export function RoundsTab({
             <label className={styles.editLabel}>
               Назва
               <input
-                className={styles.editInput}
+                className="input"
                 name="title"
                 value={form.title}
                 onChange={(e) => { setForm((f) => ({ ...f, title: e.target.value })); setFormError(""); }}
@@ -299,7 +299,7 @@ export function RoundsTab({
               <label className={styles.editLabel}>
                 Початок
                 <input
-                  className={styles.editInput}
+                  className="input"
                   type="datetime-local"
                   name="start_date"
                   value={form.start_date}
@@ -309,7 +309,7 @@ export function RoundsTab({
               <label className={styles.editLabel}>
                 Кінець
                 <input
-                  className={styles.editInput}
+                  className="input"
                   type="datetime-local"
                   name="end_date"
                   value={form.end_date}

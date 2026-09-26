@@ -503,7 +503,7 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
 
       {teams.length > 4 && (
         <input
-          className={styles.searchInput}
+          className="input"
           placeholder="Пошук команди або капітана…"
           value={search}
           onChange={e => setSearch(e.target.value)}

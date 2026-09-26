@@ -88,7 +88,7 @@ const Profile = () => {
                             value={formData.first_name}
                             onChange={handleChange}
                             placeholder="Ім'я"
-                            className={styles.input}
+                            className="input"
                         />
 
                         <input
@@ -97,7 +97,7 @@ const Profile = () => {
                             value={formData.email}
                             onChange={handleChange}
                             placeholder="Email"
-                            className={styles.input}
+                            className="input"
                         />
 
                         <button type="submit" className="btn-primary">Зберегти</button>

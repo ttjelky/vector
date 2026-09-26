@@ -136,7 +136,7 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
           <div className={styles.editForm}>
             <label className={styles.editLabel}>
               Назва
-              <input className={styles.editInput} name="name" value={form.name} onChange={handleChange} />
+              <input className="input" name="name" value={form.name} onChange={handleChange} />
             </label>
             <div className={styles.editLabel}>
               Опис
@@ -157,23 +157,23 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
 
             <label className={styles.editLabel}>
               Початок турніру
-              <input className={styles.editInput} type="datetime-local" name="start_date" value={form.start_date} onChange={handleChange} />
+              <input className="input" type="datetime-local" name="start_date" value={form.start_date} onChange={handleChange} />
             </label>
             <label className={styles.editLabel}>
               Кінець турніру
-              <input className={styles.editInput} type="datetime-local" name="end_date" value={form.end_date} onChange={handleChange} min={form.start_date || undefined} />
+              <input className="input" type="datetime-local" name="end_date" value={form.end_date} onChange={handleChange} min={form.start_date || undefined} />
             </label>
             <label className={styles.editLabel}>
               Початок реєстрації
-              <input className={styles.editInput} type="datetime-local" name="registration_start" value={form.registration_start} onChange={handleChange} />
+              <input className="input" type="datetime-local" name="registration_start" value={form.registration_start} onChange={handleChange} />
             </label>
             <label className={styles.editLabel}>
               Кінець реєстрації
-              <input className={styles.editInput} type="datetime-local" name="registration_end" value={form.registration_end} onChange={handleChange} />
+              <input className="input" type="datetime-local" name="registration_end" value={form.registration_end} onChange={handleChange} />
             </label>
             <label className={styles.editLabel}>
               Макс. команд/учасників
-              <input className={styles.editInput} type="number" name="max_teams" value={form.max_teams} onChange={handleChange} min={1} />
+              <input className="input" type="number" name="max_teams" value={form.max_teams} onChange={handleChange} min={1} />
             </label>
             <label className={styles.editLabel} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
               <input

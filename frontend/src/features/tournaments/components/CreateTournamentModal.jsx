@@ -489,7 +489,7 @@ export function CreateTournamentModal({ onClose, onCreate }) {
                   <div className={`${styles.field} ${styles.stagger1}`}>
                     <label htmlFor="name" className={styles.label}>Назва турніру <span className={styles.editRequired}>*</span></label>
                     <input
-                      id="name" type="text" className={`${styles.input} ${nameError ? styles.inputError : ""}`}
+                      id="name" type="text" className={`input ${nameError ? styles.inputError : ""}`}
                       placeholder="Наприклад: Літній кубок 2025"
                       value={name} onChange={(e) => { setName(e.target.value); setNameError(false); }} required
                     />
@@ -502,7 +502,7 @@ export function CreateTournamentModal({ onClose, onCreate }) {
                         Дата старту <span className={styles.optional}>необов'язково</span>
                       </label>
                       <input
-                        id="startDate" type="date" className={styles.input}
+                        id="startDate" type="date" className="input"
                         value={startDate} onChange={(e) => { setStartDate(e.target.value); setPastDateError(""); }}
                         min={serverMinDate}
                       />
@@ -512,7 +512,7 @@ export function CreateTournamentModal({ onClose, onCreate }) {
                         Дата кінця <span className={styles.editRequired}>*</span>
                       </label>
                       <input
-                        id="endDate" type="date" className={`${styles.input} ${endDateError ? styles.inputError : ""}`}
+                        id="endDate" type="date" className={`input ${endDateError ? styles.inputError : ""}`}
                         value={endDate} onChange={(e) => { setEndDate(e.target.value); setEndDateError(false); setPastDateError(""); }}
                         min={startDate || serverMinDate}
                         required
@@ -573,7 +573,7 @@ export function CreateTournamentModal({ onClose, onCreate }) {
                     </label>
                     <input
                       id="maxTeams" type="number" placeholder="Без обмежень"
-                      min={2} className={styles.input}
+                      min={2} className="input"
                       value={maxTeams} onChange={(e) => setMaxTeams(e.target.value)}
                     />
                   </div>
@@ -641,7 +641,7 @@ export function CreateTournamentModal({ onClose, onCreate }) {
                           <label htmlFor="registrationStart" className={styles.label}>Початок</label>
                           <input
                             id="registrationStart" type="datetime-local"
-                            className={`${styles.input} ${regDateError && !regStart ? styles.inputError : ""}`}
+                            className={`input ${regDateError && !regStart ? styles.inputError : ""}`}
                             value={regStart} onChange={(e) => { setRegStart(e.target.value); setRegDateError(false); setPastDateError(""); }}
                             min={serverMinDt}
                           />
@@ -650,7 +650,7 @@ export function CreateTournamentModal({ onClose, onCreate }) {
                           <label htmlFor="registrationEnd" className={styles.label}>Кінець</label>
                           <input
                             id="registrationEnd" type="datetime-local"
-                            className={`${styles.input} ${regDateError && !regEnd ? styles.inputError : ""}`}
+                            className={`input ${regDateError && !regEnd ? styles.inputError : ""}`}
                             value={regEnd} onChange={(e) => { setRegEnd(e.target.value); setRegDateError(false); setPastDateError(""); }}
                             min={regStart || serverMinDt}
                           />
@@ -676,7 +676,7 @@ export function CreateTournamentModal({ onClose, onCreate }) {
                             <input
                               id="minTeamSize" type="number" min={3}
                               placeholder="За замовч.: 3"
-                              className={styles.input}
+                              className="input"
                               value={minTeamSize} onChange={(e) => setMinTeamSize(e.target.value)}
                             />
                           </div>
@@ -687,7 +687,7 @@ export function CreateTournamentModal({ onClose, onCreate }) {
                             <input
                               id="maxTeamSize" type="number" min={minTeamSize || 3}
                               placeholder="Вкажіть ліміт"
-                              className={`${styles.input} ${maxTeamSizeError ? styles.inputError : ""}`}
+                              className={`input ${maxTeamSizeError ? styles.inputError : ""}`}
                               value={maxTeamSize}
                               onChange={(e) => { setMaxTeamSize(e.target.value); setMaxTeamSizeError(false); }}
                               required

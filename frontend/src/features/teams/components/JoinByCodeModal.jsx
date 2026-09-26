@@ -127,7 +127,7 @@ export function JoinByCodeModal({ onClose }) {
                 Вставте унікальне посилання-запрошення, яке вам надав організатор. PIN-код не потрібен.
               </p>
               <input
-                className={`${styles.input} ${error ? styles.inputError : ""}`}
+                className={`input ${error ? styles.inputError : ""}`}
                 type="text"
                 placeholder="https://…/join/… "
                 value={tokenInput}

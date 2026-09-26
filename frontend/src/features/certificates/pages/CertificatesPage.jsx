@@ -656,7 +656,7 @@ function CertificateTable({ certificates, onDownload, isTeamTournament }) {
 
   return (
     <div className="cert-table-wrap">
-      <input className="search-input" type="text"
+      <input className="input" type="text"
         placeholder={isTeamTournament ? "Пошук за ім'ям, email або командою…" : "Пошук за ім'ям або email…"}
         value={search} onChange={e => setSearch(e.target.value)} />
       {filtered.length === 0 && search === "" ? (
@@ -739,7 +739,7 @@ function NumberInput({ label, val, onChange }) {
   return (
     <label className="field-label">
       <span>{label}</span>
-      <input type="number" value={val} onChange={e => onChange(Number(e.target.value))} className="field-input" />
+      <input type="number" value={val} onChange={e => onChange(Number(e.target.value))} className="input" />
     </label>
   );
 }

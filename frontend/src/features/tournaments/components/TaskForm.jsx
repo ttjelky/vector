@@ -101,7 +101,7 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
         <label className={styles.editLabel}>
           Назва <span className={styles.editRequired}>*</span>
           <input
-            className={styles.editInput}
+            className="input"
             name="title"
             value={form.title}
             onChange={handleChange}
@@ -148,14 +148,14 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
 
           <div className={styles.linkInputRow}>
             <input
-              className={styles.editInput}
+              className="input"
               placeholder="https://..."
               value={linkForm.url}
               onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
             <input
-              className={styles.editInput}
+              className="input"
               placeholder="Підпис (необов'язково)"
               value={linkForm.label}
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
@@ -206,13 +206,13 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
             {techReqs.map((req, i) => (
               <div key={i} className={styles.techReqRow}>
                 <input
-                  className={styles.editInput}
+                  className="input"
                   placeholder="Категорія (напр. Backend)"
                   value={req.category}
                   onChange={(e) => updateTechReq(i, "category", e.target.value)}
                 />
                 <input
-                  className={styles.editInput}
+                  className="input"
                   placeholder="Вимога (напр. Node.js ≥ 18)"
                   value={req.value}
                   onChange={(e) => updateTechReq(i, "value", e.target.value)}
@@ -244,7 +244,7 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
               <div key={i} className={styles.mustHaveRow}>
                 <span className={styles.mustHaveIdx}>{i + 1}</span>
                 <input
-                  className={styles.editInput}
+                  className="input"
                   placeholder="Обов'язкова вимога…"
                   value={item}
                   onChange={(e) => updateMustHave(i, e.target.value)}

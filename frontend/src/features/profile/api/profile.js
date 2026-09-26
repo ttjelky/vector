@@ -10,9 +10,14 @@ export const updateProfile = async (data) => {
 
   formData.append("first_name", data.first_name);
   formData.append("last_name", data.last_name);
+  formData.append("bio", data.bio ?? "");
+  formData.append("phone", data.phone ?? "");
 
   if (data.avatar) {
     formData.append("avatar", data.avatar);
+  }
+  if (data.banner) {
+    formData.append("banner", data.banner);
   }
 
   const res = await API.put("/users/profile/", formData, {

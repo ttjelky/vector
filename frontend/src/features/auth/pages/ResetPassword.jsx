@@ -52,7 +52,7 @@ const ResetPassword = () => {
                         <p className={styles.fieldLabel}>Новий пароль</p>
                         <input
                             type="password"
-                            className={styles.input}
+                            className="input"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
@@ -63,7 +63,7 @@ const ResetPassword = () => {
                         <p className={styles.fieldLabel}>Підтвердіть пароль</p>
                         <input
                             type="password"
-                            className={styles.input}
+                            className="input"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required

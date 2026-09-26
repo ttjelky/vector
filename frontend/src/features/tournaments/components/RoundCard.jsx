@@ -138,7 +138,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
       <div className={styles.editForm}>
         <label className={styles.editLabel}>
           Назва <span className={styles.editRequired}>*</span>
-          <input className={styles.editInput} name="title" value={form.title} onChange={handleChange} />
+          <input className="input" name="title" value={form.title} onChange={handleChange} />
         </label>
         <div className={styles.editLabel}>
           Опис
@@ -153,11 +153,11 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
         <div className={styles.editRow}>
           <label className={styles.editLabel}>
             Початок
-            <input className={styles.editInput} type="datetime-local" name="start_date" value={form.start_date} onChange={handleChange} />
+            <input className="input" type="datetime-local" name="start_date" value={form.start_date} onChange={handleChange} />
           </label>
           <label className={styles.editLabel}>
             Кінець
-            <input className={styles.editInput} type="datetime-local" name="end_date" value={form.end_date} onChange={handleChange} />
+            <input className="input" type="datetime-local" name="end_date" value={form.end_date} onChange={handleChange} />
           </label>
         </div>
 
@@ -168,13 +168,13 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
             {techReqs.map((req, i) => (
               <div key={i} className={styles.techReqRow}>
                 <input
-                  className={styles.editInput}
+                  className="input"
                   placeholder="Категорія (напр. Backend)"
                   value={req.category}
                   onChange={(e) => updateTechReq(i, "category", e.target.value)}
                 />
                 <input
-                  className={styles.editInput}
+                  className="input"
                   placeholder="Вимога (напр. Node.js ≥ 18)"
                   value={req.value}
                   onChange={(e) => updateTechReq(i, "value", e.target.value)}
@@ -206,7 +206,7 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
               <div key={i} className={styles.mustHaveRow}>
                 <span className={styles.mustHaveIdx}>{i + 1}</span>
                 <input
-                  className={styles.editInput}
+                  className="input"
                   placeholder="Обов'язкова вимога…"
                   value={item}
                   onChange={(e) => updateMustHave(i, e.target.value)}
@@ -245,14 +245,14 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
           ))}
           <div className={styles.linkInputRow}>
             <input
-              className={styles.editInput}
+              className="input"
               placeholder="https://..."
               value={linkForm.url}
               onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
             <input
-              className={styles.editInput}
+              className="input"
               placeholder="Підпис (необов'язково)"
               value={linkForm.label}
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}

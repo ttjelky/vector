@@ -214,7 +214,7 @@ const LandingBody = () => {
                         <h2 className={joinStyles.title}>Приєднатися до турніру</h2>
                         <p className={joinStyles.hint}>Вставте посилання-запрошення або токен, який вам надіслав організатор.</p>
                         <input
-                            className={`${joinStyles.input} ${joinError ? joinStyles.inputError : ""}`}
+                            className={`input ${joinError ? joinStyles.inputError : ""}`}
                             type="text"
                             placeholder="https://... або токен"
                             value={joinInput}

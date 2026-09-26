@@ -166,13 +166,13 @@ const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
                 <div className={styles.field}>
                   <label className={styles.fieldLabel}>Ім'я</label>
                   <input type="text" name="first_name" value={formData.first_name}
-                    onChange={handleChange} className={styles.input} placeholder="Іван" required />
+                    onChange={handleChange} className="input" placeholder="Іван" required />
                   {errors.first_name && <span className={styles.errorText}>{errors.first_name[0]}</span>}
                 </div>
                 <div className={styles.field}>
                   <label className={styles.fieldLabel}>Прізвище</label>
                   <input type="text" name="last_name" value={formData.last_name}
-                    onChange={handleChange} className={styles.input} placeholder="Шевченко" required />
+                    onChange={handleChange} className="input" placeholder="Шевченко" required />
                   {errors.last_name && <span className={styles.errorText}>{errors.last_name[0]}</span>}
                 </div>
               </div>
@@ -180,7 +180,7 @@ const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
               <div className={styles.field}>
                 <label className={styles.fieldLabel}>Email</label>
                 <input type="email" name="email" value={formData.email}
-                  onChange={handleChange} className={styles.input} placeholder="ivan@example.com" required />
+                  onChange={handleChange} className="input" placeholder="ivan@example.com" required />
                 {errors.email && (
                   <span className={styles.errorText}>
                     {errors.email[0]}
@@ -200,7 +200,7 @@ const Register = ({ isOpen, onClose, onSwitchToLogin, onRegisterSuccess }) => {
               <div className={styles.field}>
                 <label className={styles.fieldLabel}>Пароль</label>
                 <input type="password" name="password" value={formData.password}
-                  onChange={handleChange} className={styles.input} placeholder="Мінімум 8 символів" required />
+                  onChange={handleChange} className="input" placeholder="Мінімум 8 символів" required />
                 {errors.password && <span className={styles.errorText}>{errors.password[0]}</span>}
               </div>
 

@@ -157,7 +157,7 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
           <div>
             <p className={styles.fieldLabel}>Email</p>
             <input
-              type="email" className={styles.input}
+              type="email" className="input"
               name="email" value={loginData.email}
               onChange={handleChange} required
             />
@@ -167,7 +167,7 @@ const Login = ({ isOpen, onClose, onSwitchToRegister, onSwitchToForgot, onLoginS
           <div style={{ marginTop: "16px" }}>
             <p className={styles.fieldLabel}>Пароль</p>
             <input
-              type="password" className={styles.input}
+              type="password" className="input"
               name="password" value={loginData.password}
               onChange={handleChange} required
             />

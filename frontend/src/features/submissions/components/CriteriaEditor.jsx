@@ -139,7 +139,7 @@ export function CriteriaEditor({ criteria, onChange, styles }) {
                       </label>
                       <input
                         type="text"
-                        className={styles.input}
+                        className="input"
                         placeholder="Напр.: Оригінальність"
                         value={c.label}
                         maxLength={200}
@@ -152,7 +152,7 @@ export function CriteriaEditor({ criteria, onChange, styles }) {
                       <label className={styles.criterionFieldLabel}>Макс. бал</label>
                       <input
                         type="number"
-                        className={styles.input}
+                        className="input"
                         min={1} max={1000}
                         value={c.max_score}
                         onChange={(e) => update(idx, "max_score", Math.max(1, Number(e.target.value)))}
@@ -168,7 +168,7 @@ export function CriteriaEditor({ criteria, onChange, styles }) {
                       </label>
                       <input
                         type="text"
-                        className={styles.input}
+                        className="input"
                         placeholder="Напр.: Технічна частина"
                         value={c.group}
                         maxLength={100}
@@ -184,7 +184,7 @@ export function CriteriaEditor({ criteria, onChange, styles }) {
                     </label>
                     <input
                       type="text"
-                      className={styles.input}
+                      className="input"
                       placeholder="Напр.: Наскільки ідея є унікальною"
                       value={c.hint}
                       maxLength={300}

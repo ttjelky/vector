@@ -199,7 +199,7 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
           <span className={styles.teamCardIcon}><Users size={15} /></span>
           {renaming ? (
             <input
-              className={styles.renameInput}
+              className="input"
               value={newName}
               onChange={e => setNewName(e.target.value)}
               onClick={e => e.stopPropagation()}
@@ -384,7 +384,7 @@ function TeamsSubTab({ tournamentId, myRole, members, myUserId }) {
           {showCreate ? (
             <div className={styles.createTeamForm}>
               <input
-                className={styles.createTeamInput}
+                className="input"
                 placeholder="Назва команди"
                 value={newTeamName}
                 onChange={e => { setNewTeamName(e.target.value); setCreateError(""); }}
@@ -852,6 +852,7 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
               {canCreateLink ? (
                 <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                   <input
+                    className="input"
                     placeholder="Назва посилання (необов'язково)"
                     value={linkName}
                     onChange={(e) => setLinkName(e.target.value)}

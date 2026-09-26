@@ -681,7 +681,7 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
         <label className={styles.editLabel}>
           Назва <span className={styles.editRequired}>*</span>
           <input
-            className={styles.editInput}
+            className="input"
             name="title"
             value={form.title}
             onChange={handleChange}
@@ -705,7 +705,7 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
         <label className={styles.editLabel}>
           Дедлайн
           <input
-            className={styles.editInput}
+            className="input"
             type="datetime-local"
             name="end_date"
             value={form.end_date}
@@ -720,13 +720,13 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
             {techReqs.map((req, i) => (
               <div key={i} className={styles.editRow}>
                 <input
-                  className={`${styles.editInput} ${styles.editRowFlex1}`}
+                  className={`input ${styles.editRowFlex1}`}
                   placeholder="Категорія (напр. Backend)"
                   value={req.category}
                   onChange={(e) => updateTechReq(i, "category", e.target.value)}
                 />
                 <input
-                  className={`${styles.editInput} ${styles.editRowFlex15}`}
+                  className={`input ${styles.editRowFlex15}`}
                   placeholder="Вимога (напр. Node.js ≥ 18)"
                   value={req.value}
                   onChange={(e) => updateTechReq(i, "value", e.target.value)}
@@ -758,7 +758,7 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
               <div key={i} className={styles.editRow}>
                 <span className={styles.editMustHaveIdx}>{i + 1}</span>
                 <input
-                  className={`${styles.editInput} ${styles.editRowFlex1}`}
+                  className={`input ${styles.editRowFlex1}`}
                   placeholder="Обов'язкова вимога…"
                   value={item}
                   onChange={(e) => updateMustHave(i, e.target.value)}
@@ -803,14 +803,14 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
           </div>
           <div className={styles.editLinkRow} style={{ marginTop: 8 }}>
             <input
-              className={`${styles.editInput} ${styles.editRowFlex15}`}
+              className={`input ${styles.editRowFlex15}`}
               placeholder="https://..."
               value={linkForm.url}
               onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
             <input
-              className={`${styles.editInput} ${styles.editRowFlex1}`}
+              className={`input ${styles.editRowFlex1}`}
               placeholder="Підпис (необов'язково)"
               value={linkForm.label}
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}

@@ -109,14 +109,14 @@ export function SubmissionForm({ taskId, roundId, tournamentId, existingSubmissi
           ))}
           <div className={styles.linkInputRow}>
             <input
-              className={styles.editInput}
+              className="input"
               placeholder="URL посилання"
               value={linkForm.url}
               onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
             <input
-              className={styles.editInput}
+              className="input"
               placeholder="Підпис (необов'язково)"
               value={linkForm.label}
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}

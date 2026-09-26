@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { Phone } from "lucide-react";
 import { fetchProfile, updateProfile } from "../api/profile";
 import styles from "../styles/profile.module.css";
 import { NavBar } from "@shared/components/NavBar";
@@ -21,6 +22,13 @@ function calcTotal(scores) {
     return vals.length === 0 ? null : vals.reduce((a, b) => a + b, 0);
 }
 
+const BIO_PLACEHOLDERS = [
+    "Хм, біографії ще немає...",
+    "Користувач не розказав про себе",
+    "Біографії ще немає",
+    "Тут поки порожньо — розкажіть про себе",
+];
+
 // ── Profile ───────────────────────────────────────────────────────────────────
 
 const Profile = () => {
@@ -29,21 +37,23 @@ const Profile = () => {
 
     const [profile,  setProfile]  = useState(null);
     const [editMode, setEditMode] = useState(false);
-    const [formData, setFormData] = useState({ first_name: "", last_name: "", email: "", avatar: null });
+    const [formData, setFormData] = useState({ first_name: "", last_name: "", email: "", avatar: null, bio: "", phone: "", banner: null });
     const [preview,  setPreview]  = useState(null);
+    const [bannerPreview, setBannerPreview] = useState(null);
     const [loading,  setLoading]  = useState(true);
     const [toast,    setToast]    = useState(false);
 
     const [logoutConfirm, setLogoutConfirm] = useState(false);
     const [logoutLoading, setLogoutLoading] = useState(false);
 
+    const bioPlaceholder = useMemo(
+        () => BIO_PLACEHOLDERS[Math.floor(Math.random() * BIO_PLACEHOLDERS.length)],
+        []
+    );
+
     // jury
     const [submissions,   setSubmissions]   = useState([]);
     const [subsLoading,   setSubsLoading]   = useState(false);
-
-    // admin
-    const [tournaments,   setTournaments]   = useState([]);
-    const [tournsLoading, setTournsLoading] = useState(false);
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -55,8 +65,12 @@ const Profile = () => {
                     last_name:  data.last_name  || "",
                     email:      data.email      || "",
                     avatar:     null,
+                    bio:        data.bio        || "",
+                    phone:      data.phone      || "",
+                    banner:     null,
                 });
                 setPreview(mediaUrl(data.avatar));
+                setBannerPreview(mediaUrl(data.banner));
             }
             setLoading(false);
         };
@@ -72,21 +86,18 @@ const Profile = () => {
             .finally(() => setSubsLoading(false));
     }, [role]);
 
-    useEffect(() => {
-        if (role !== "admin") return;
-        setTournsLoading(true);
-        API.get("/tournaments/")
-            .then(r => setTournaments(r.data ?? []))
-            .catch(() => {})
-            .finally(() => setTournsLoading(false));
-    }, [role]);
-
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         if (name === "avatar") {
             const file = files[0];
+            if (!file) return;
             setFormData(prev => ({ ...prev, avatar: file }));
             setPreview(URL.createObjectURL(file));
+        } else if (name === "banner") {
+            const file = files[0];
+            if (!file) return;
+            setFormData(prev => ({ ...prev, banner: file }));
+            setBannerPreview(URL.createObjectURL(file));
         } else {
             setFormData(prev => ({ ...prev, [name]: value }));
         }
@@ -102,6 +113,7 @@ const Profile = () => {
 
         const avatarAbsolute = mediaUrl(updated.avatar);
         setPreview(avatarAbsolute);
+        setBannerPreview(mediaUrl(updated.banner));
 
         const fullName = `${updated.first_name} ${updated.last_name}`.trim();
         localStorage.setItem("fullUserName", fullName);
@@ -125,8 +137,12 @@ const Profile = () => {
             last_name:  profile.last_name  || "",
             email:      profile.email      || "",
             avatar:     null,
+            bio:        profile.bio        || "",
+            phone:      profile.phone      || "",
+            banner:     null,
         });
         setPreview(mediaUrl(profile.avatar));
+        setBannerPreview(mediaUrl(profile.banner));
     };
 
     const doLogout = async () => {
@@ -161,9 +177,29 @@ const Profile = () => {
 
                     {/* ── Ліва колонка: картка профілю ── */}
                     <div className={styles.profileCard}>
-                        <h2 className={styles.cardTitle}>Профіль користувача</h2>
-
-                        <div className={styles.avatarSection}>
+                        <div className={styles.banner}>
+                            {bannerPreview ? (
+                                <img src={bannerPreview} alt="" className={styles.bannerImg} />
+                            ) : (
+                                <div className={styles.bannerPlaceholder} />
+                            )}
+                            {editMode && (
+                                <label className={styles.bannerOverlay} htmlFor="bannerInput">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                        <circle cx="12" cy="13" r="4"/>
+                                    </svg>
+                                    Змінити обкладинку
+                                </label>
+                            )}
+                        </div>
+                        {editMode && (
+                            <input id="bannerInput" type="file" name="banner"
+                                accept="image/*" onChange={handleChange} className={styles.fileInput} />
+                        )}
+                        <div className={styles.profileBody}>
+                        <div className={`${styles.avatarSection} ${styles.avatarPull}`}>
                             <label
                                 className={styles.avatarWrapper}
                                 htmlFor={editMode ? "avatarInput" : undefined}
@@ -195,6 +231,19 @@ const Profile = () => {
                             )}
                             {editMode && <span className={styles.avatarHint}>Натисніть, щоб змінити фото</span>}
                         </div>
+                        {!editMode && (
+                            <>
+                                <div className={styles.profileName}>{profile.first_name} {profile.last_name}</div>
+                                <div className={styles.profileEmail}>{profile.email}</div>
+                                <div className={styles.profileBio}>
+                                    {profile.bio || <span className={styles.placeholder}>{bioPlaceholder}</span>}
+                                </div>
+                                <div className={styles.phoneRow}>
+                                    <Phone size={15} strokeWidth={2} />
+                                    {profile.phone || <span className={styles.placeholder}>Додати телефон</span>}
+                                </div>
+                            </>
+                        )}
 
                         {editMode ? (
                             <form onSubmit={handleSubmit} className={styles.form}>
@@ -202,18 +251,29 @@ const Profile = () => {
                                     <div className={styles.fieldGroup}>
                                         <label className={styles.fieldLabel}>Ім'я</label>
                                         <input type="text" name="first_name" value={formData.first_name}
-                                            onChange={handleChange} placeholder="Ім'я" className={styles.fieldInput} />
+                                            onChange={handleChange} placeholder="Ім'я" className="input" />
                                     </div>
                                     <div className={styles.fieldGroup}>
                                         <label className={styles.fieldLabel}>Прізвище</label>
                                         <input type="text" name="last_name" value={formData.last_name}
-                                            onChange={handleChange} placeholder="Прізвище" className={styles.fieldInput} />
+                                            onChange={handleChange} placeholder="Прізвище" className="input" />
                                     </div>
+                                </div>
+                                <div className={styles.fieldGroup}>
+                                    <label className={styles.fieldLabel}>Про себе</label>
+                                    <textarea name="bio" value={formData.bio} rows={3} maxLength={300}
+                                        onChange={handleChange} placeholder="Кілька слів про себе"
+                                        className="input input-area" />
+                                </div>
+                                <div className={styles.fieldGroup}>
+                                    <label className={styles.fieldLabel}>Телефон</label>
+                                    <input type="tel" name="phone" value={formData.phone}
+                                        onChange={handleChange} placeholder="+380 …" className="input" />
                                 </div>
                                 <div className={styles.fieldGroup}>
                                     <label className={styles.fieldLabel}>Email</label>
                                     <input type="email" value={formData.email} readOnly
-                                        className={`${styles.fieldInput} ${styles.fieldInputReadonly}`} />
+                                        className="input" />
                                 </div>
                                 <div className={styles.cardFooter}>
                                     <button type="button" onClick={handleCancel} className="btn-secondary">
@@ -224,30 +284,20 @@ const Profile = () => {
                             </form>
                         ) : (
                             <>
-                                <div className={styles.infoSection}>
-                                    <div className={styles.infoRow}>
-                                        <span className={styles.infoLabel}>Ім'я</span>
-                                        <span className={styles.infoValue}>{profile.first_name} {profile.last_name}</span>
-                                    </div>
-                                    <div className={styles.infoRow} style={{ borderBottom: "none" }}>
-                                        <span className={styles.infoLabel}>Email</span>
-                                        <span className={styles.infoValue}>{profile.email}</span>
-                                    </div>
-                                </div>
                                 <div className={styles.cardFooter}>
                                     <button onClick={() => setEditMode(true)} className="btn-primary">
                                         Редагувати
                                     </button>
                                     <button
                                         onClick={() => setLogoutConfirm(true)}
-                                        className={styles.btnSecondary}
-                                        style={{ color: "#dc2626", borderColor: "#fecaca" }}
+                                        className={styles.btnDanger}
                                     >
                                         Вийти
                                     </button>
                                 </div>
                             </>
                         )}
+                        </div>
                     </div>
 
                     {/* ── Права колонка: деталі по ролі ── */}
@@ -255,13 +305,6 @@ const Profile = () => {
                         <div className={styles.detailsCard}>
                             <h2 className={styles.cardTitle}>Мої оцінені роботи</h2>
                             <JurySubmissions submissions={submissions} loading={subsLoading} />
-                        </div>
-                    )}
-
-                    {role === "admin" && (
-                        <div className={styles.detailsCard}>
-                            <h2 className={styles.cardTitle}>Мої турніри</h2>
-                            <AdminTournamentsList tournaments={tournaments} loading={tournsLoading} />
                         </div>
                     )}
                 </div>
@@ -278,7 +321,7 @@ const Profile = () => {
 
             {logoutConfirm && (
                 <ConfirmDeleteModal
-                    icon="🚪"
+                    icon={null}
                     title="Вийти з акаунту?"
                     description="Ви впевнені, що хочете вийти? Всі незбережені дані буде втрачено."
                     confirmLabel="Так, вийти"
@@ -366,53 +409,6 @@ function JurySubmissions({ submissions, loading }) {
                     <p className={styles.detailsEmpty}>Немає робіт у цій категорії</p>
                 )}
             </div>
-        </div>
-    );
-}
-
-// ── AdminTournamentsList ──────────────────────────────────────────────────────
-
-function AdminTournamentsList({ tournaments, loading }) {
-    if (loading) return <p className={styles.detailsLoading}>Завантаження...</p>;
-    if (!tournaments.length) return <p className={styles.detailsEmpty}>Турнірів ще немає</p>;
-
-    return (
-        <div className={styles.tournamentList}>
-            {tournaments.map(t => {
-                const now      = new Date();
-                const start    = t.start_date          ? new Date(t.start_date)          : null;
-                const regEnd   = t.registration_end    ? new Date(t.registration_end)    : null;
-
-                let status = "Активний";
-                let statusClass = styles.statusActive;
-                if (start && now < start) {
-                    status = "Очікує";
-                    statusClass = styles.statusPending;
-                }
-                if (regEnd && now > regEnd) {
-                    status = "Реєстрація закрита";
-                    statusClass = styles.statusClosed;
-                }
-
-                return (
-                    <div key={t.id} className={styles.tournamentItem}>
-                        <div className={styles.tournamentItemMain}>
-                            <span className={styles.tournamentItemName}>{t.name}</span>
-                            {t.description && (
-                                <span className={styles.tournamentItemDesc}>
-                                    {t.description.length > 60 ? t.description.slice(0, 60) + "…" : t.description}
-                                </span>
-                            )}
-                        </div>
-                        <div className={styles.tournamentItemMeta}>
-                            {start && (
-                                <span className={styles.tournamentItemDate}>{formatDate(t.start_date)}</span>
-                            )}
-                            <span className={`${styles.statusPill} ${statusClass}`}>{status}</span>
-                        </div>
-                    </div>
-                );
-            })}
         </div>
     );
 }

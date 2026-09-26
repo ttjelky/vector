@@ -54,7 +54,7 @@ const Forgot = ({ isOpen, onClose, onBackToLogin }) => {
             <p className={styles.fieldLabel}>Email</p>
             <input
               type="email"
-              className={styles.input}
+              className="input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

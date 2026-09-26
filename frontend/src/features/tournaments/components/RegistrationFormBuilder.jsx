@@ -78,7 +78,7 @@ export function RegistrationFormBuilder({ fields = [], onChange }) {
             <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: "#888" }}>#{idx + 1}</span>
               <input
-                className={styles.input}
+                className="input"
                 placeholder="Питання, напр. Нікнейм / Вік / Команда…"
                 value={f.label}
                 onChange={(e) => update(idx, { label: e.target.value })}
@@ -121,7 +121,7 @@ export function RegistrationFormBuilder({ fields = [], onChange }) {
 
               {!isChoice && (
                 <input
-                  className={styles.input}
+                  className="input"
                   placeholder="Підказка (placeholder)"
                   value={f.placeholder || ""}
                   onChange={(e) => update(idx, { placeholder: e.target.value })}
@@ -138,7 +138,7 @@ export function RegistrationFormBuilder({ fields = [], onChange }) {
                       {f.field_type === "checkbox" ? "☐" : f.field_type === "radio" ? "○" : "–"}
                     </span>
                     <input
-                      className={styles.input}
+                      className="input"
                       placeholder={`Варіант ${oi + 1}`}
                       value={opt}
                       onChange={(e) => setOption(idx, oi, e.target.value)}
@@ -191,7 +191,7 @@ export function RegistrationFormRenderer({ fields = [], values = {}, onChange, e
 
             {f.field_type === "textarea" && (
               <textarea
-                className={styles.input}
+                className="input input-area"
                 style={{ minHeight: 80, paddingTop: 10 }}
                 placeholder={f.placeholder || ""}
                 value={val}
@@ -199,16 +199,16 @@ export function RegistrationFormRenderer({ fields = [], values = {}, onChange, e
               />
             )}
             {f.field_type === "number" && (
-              <input type="number" className={styles.input}
+              <input type="number" className="input"
                 placeholder={f.placeholder || ""} value={val}
                 onChange={(e) => setVal(f.id, e.target.value)} />
             )}
             {f.field_type === "date" && (
-              <input type="date" className={styles.input} value={val}
+              <input type="date" className="input" value={val}
                 onChange={(e) => setVal(f.id, e.target.value)} />
             )}
             {(f.field_type === "text") && (
-              <input type="text" className={styles.input}
+              <input type="text" className="input"
                 placeholder={f.placeholder || ""} value={val}
                 onChange={(e) => setVal(f.id, e.target.value)} />
             )}

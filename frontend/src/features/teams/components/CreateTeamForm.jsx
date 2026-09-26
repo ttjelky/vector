@@ -204,7 +204,7 @@ export function CreateTeamForm({ tournamentId, tournament, onCreated, onCancel }
             </label>
             <input
               ref={nameRef}
-              className={`${styles.input} ${errors.name ? styles.inputError : ""}`}
+              className={`input ${errors.name ? styles.inputError : ""}`}
               placeholder="Наприклад: Phoenix Squad"
               value={name}
               onChange={e => { setName(e.target.value); setErrors({}); }}
@@ -220,7 +220,7 @@ export function CreateTeamForm({ tournamentId, tournament, onCreated, onCancel }
                 Місто <span className={styles.optional}>необов'язково</span>
               </label>
               <input
-                className={styles.input}
+                className="input"
                 placeholder="Київ"
                 value={city}
                 onChange={e => setCity(e.target.value)}
@@ -232,7 +232,7 @@ export function CreateTeamForm({ tournamentId, tournament, onCreated, onCancel }
                 Telegram / телефон <span className={styles.optional}>необов'язково</span>
               </label>
               <input
-                className={styles.input}
+                className="input"
                 placeholder="@handle або +380…"
                 value={contact}
                 onChange={e => setContact(e.target.value)}

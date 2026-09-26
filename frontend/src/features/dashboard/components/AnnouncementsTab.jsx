@@ -192,7 +192,7 @@ function CommentItem({ comment, canManage, onReply, onDelete, onReact, depth = 0
           <div className={styles.replyForm}>
             <textarea
               ref={textareaRef}
-              className={styles.replyTextarea}
+              className="input input-area"
               placeholder="Ваша відповідь… (Ctrl+Enter для надсилання)"
               value={replyText}
               onChange={e => setReplyText(e.target.value)}
@@ -363,7 +363,7 @@ function AnnouncementCard({
             <div className={styles.newCommentField}>
               <textarea
                 ref={textareaRef}
-                className={styles.newCommentTextarea}
+                className="input input-area"
                 placeholder="Написати коментар… (Ctrl+Enter для надсилання)"
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
@@ -445,7 +445,7 @@ function CreateAnnouncementForm({ tournamentId, onCreated }) {
       </div>
 
       <input
-        className={`${styles.formInput} ${error && !title.trim() ? styles.formInputError : ""}`}
+        className={`input ${error && !title.trim() ? styles.formInputError : ""}`}
         placeholder="Заголовок *"
         value={title}
         onChange={e => { setTitle(e.target.value); setError(""); }}
@@ -454,7 +454,7 @@ function CreateAnnouncementForm({ tournamentId, onCreated }) {
       />
 
       <textarea
-        className={styles.formTextarea}
+        className="input input-area"
         placeholder="Текст оголошення (необов'язково)…"
         value={body}
         onChange={e => setBody(e.target.value)}

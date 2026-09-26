@@ -86,7 +86,7 @@ const VerifyEmail = ({ email, onVerified, onBack }) => {
           inputMode="numeric"
           maxLength={6}
           placeholder="000000"
-          className={styles.input}
+          className="input"
           value={code}
           onChange={(e) => {
             setCode(e.target.value.replace(/\D/g, "").slice(0, 6));

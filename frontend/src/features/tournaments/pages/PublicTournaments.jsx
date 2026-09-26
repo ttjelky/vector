@@ -143,7 +143,7 @@ const PublicTournaments = () => {
           <div style={{ display: "flex", gap: 8, alignItems: "center", flex: 1, minWidth: 220 }}>
             <Search size={16} style={{ color: "#888" }} />
             <input
-              className={styles.sortSelect}
+              className="input"
               style={{ flex: 1 }}
               placeholder="Пошук за назвою або описом…"
               value={search}

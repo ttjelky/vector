@@ -412,7 +412,7 @@ export function JuryTab({ tournamentId, rounds = [], loading, myRole }) {
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           <input
-            className={styles.searchInput}
+            className="input input-icon"
             placeholder="Пошук за назвою завдання або раунду..."
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -751,7 +751,7 @@ function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, 
                 <label className={styles.commentLabel}>
                   Коментар / Фідбек
                   <textarea
-                    className={styles.commentArea}
+                    className="input input-area"
                     rows={4}
                     value={gradeForm.comment}
                     onChange={e => setGradeForm(f => ({ ...f, comment: e.target.value }))}

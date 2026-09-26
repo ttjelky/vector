@@ -48,6 +48,16 @@ def _avatar_url(request, prof):
     return None
 
 
+def _banner_url(request, prof):
+    """Повертає абсолютний URL банера (або None)."""
+    try:
+        if prof.banner and hasattr(prof.banner, "url"):
+            return request.build_absolute_uri(prof.banner.url)
+    except Exception:
+        pass
+    return None
+
+
 def _user_payload(user):
     """Повертає dict з даними юзера що потрібні фронтенду."""
     role = getattr(user, "role", None)
@@ -350,6 +360,9 @@ def profile(request):
             "first_name": user.first_name,
             "last_name":  user.last_name,
             "avatar":     _avatar_url(request, prof),
+            "banner":     _banner_url(request, prof),
+            "bio":        prof.bio,
+            "phone":      prof.phone,
         })
 
     user.first_name = request.data.get("first_name", user.first_name)
@@ -357,15 +370,23 @@ def profile(request):
     user.email      = request.data.get("email",      user.email)
     user.save()
 
+    prof.bio = request.data.get("bio", prof.bio)
+    prof.phone = request.data.get("phone", prof.phone)
+
     if "avatar" in request.FILES:
         prof.avatar = request.FILES["avatar"]
-        prof.save()
+    if "banner" in request.FILES:
+        prof.banner = request.FILES["banner"]
+    prof.save()
 
     return Response({
         "email":      user.email,
         "first_name": user.first_name,
         "last_name":  user.last_name,
         "avatar":     _avatar_url(request, prof),
+        "banner":     _banner_url(request, prof),
+        "bio":        prof.bio,
+        "phone":      prof.phone,
     })
 
 
