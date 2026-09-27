@@ -2,87 +2,14 @@ import { useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTabs } from "@shared/contexts/TabsContext";
 import { useSearch } from "@shared/contexts/SearchContext";
-import { computeStatus, STOCK_IMAGES, getDescriptionPreview, StatusBadge } from "@features/tournaments";
-import { mediaUrl } from "@api";
+import { computeStatus, TournamentCard } from "@features/tournaments";
 import styles from "@shared/styles/SearchOverlay.module.css";
-
-// ─── Підсвічування збігу в тексті ────────────────────────────────────────────
-function HighlightMatch({ text, query }) {
-  if (!query || !text) return <>{text}</>;
-  const idx = text.toLowerCase().indexOf(query.toLowerCase());
-  if (idx === -1) return <>{text}</>;
-  return (
-    <>
-      {text.slice(0, idx)}
-      <mark style={{ background: "rgba(99,102,241,0.18)", color: "inherit", borderRadius: 2, padding: "0 1px" }}>
-        {text.slice(idx, idx + query.length)}
-      </mark>
-      {text.slice(idx + query.length)}
-    </>
-  );
-}
-
-// ─── Компактна картка турніру для оверлею ────────────────────────────────────
-function SearchCard({ tournament, onClick, query }) {
-  const status  = computeStatus(tournament);
-  const accent  = tournament.accent_color ?? "#6366f1";
-  const preview = getDescriptionPreview(tournament.description, 70);
-
-  const formatDate = (value) => {
-    const d = value ? new Date(value) : null;
-    if (!d || isNaN(d)) return null;
-    return d.toLocaleDateString("uk-UA", { day: "numeric", month: "long" });
-  };
-
-  const renderBg = () => {
-    if (tournament.image_mode === "custom" && tournament.custom_image) {
-      return (
-        <img
-          src={mediaUrl(tournament.custom_image)}
-          alt={tournament.name}
-          className={styles.cardImg}
-          style={{ transform: "translateZ(0)", backfaceVisibility: "hidden" }}
-        />
-      );
-    }
-    if (tournament.image_mode === "custom") {
-      return <div className={styles.cardGradient} style={{ background: "linear-gradient(135deg,#e0e0e4,#f0f0f3)" }} />;
-    }
-    if (tournament.image_mode === "stock") {
-      const g = STOCK_IMAGES.find(i => i.id === tournament.stock_image)?.gradient
-        ?? "linear-gradient(135deg,#e0e0e0,#f5f5f5)";
-      return <div className={styles.cardGradient} style={{ background: g }} />;
-    }
-    return null;
-  };
-
-  const hasBg = tournament.image_mode === "custom" || tournament.image_mode === "stock";
-
-  return (
-    <button className={styles.card} onClick={onClick} type="button">
-      <div className={styles.cardAccent} style={{ background: accent }} />
-      {hasBg && <div className={styles.cardImageWrap}>{renderBg()}</div>}
-      <div className={styles.cardBody}>
-        <div className={styles.cardTop}>
-          <span className={styles.cardName}>
-            <HighlightMatch text={tournament.name || "—"} query={query} />
-          </span>
-          <StatusBadge status={status} />
-        </div>
-        {preview && <p className={styles.cardDesc}>{preview}</p>}
-        {formatDate(tournament.start_date) && (
-          <span className={styles.cardDate}>{formatDate(tournament.start_date)}</span>
-        )}
-      </div>
-    </button>
-  );
-}
 
 // ─── SearchOverlay ────────────────────────────────────────────────────────────
 export function SearchOverlay({ results, loading, onClose }) {
   const navigate        = useNavigate();
   const { addTab }      = useTabs();
-  const { clearSearch, searchQuery } = useSearch();
+  const { clearSearch } = useSearch();
   const overlayRef      = useRef();
 
   useEffect(() => {
@@ -100,20 +27,19 @@ export function SearchOverlay({ results, loading, onClose }) {
   }, [onClose]);
 
   const openTournament = useCallback((t) => {
-    addTab({ id: t.id, name: t.name });
+    if (t?.id == null) return;
+    const id = t.id;
+    // Спочатку навігація, потім очищення — щоб закриття оверлею
+    // гарантовано не випереджало перехід
+    navigate(`/tournament/${id}`);
+    addTab({ id, name: t.name });
     clearSearch();
     onClose();
-    navigate(`/tournament/${t.id}`);
   }, [addTab, clearSearch, onClose, navigate]);
 
   return (
     <div className={styles.backdrop}>
-      <div className={styles.panel} ref={overlayRef}>
-        <div className={styles.header}>
-          <span className={styles.title}>Результати пошуку</span>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Закрити">✕</button>
-        </div>
-
+      <div className={styles.panel} ref={overlayRef} data-search-overlay>
         <div className={styles.body}>
           {loading ? (
             <div className={styles.skeletonList}>
@@ -135,7 +61,26 @@ export function SearchOverlay({ results, loading, onClose }) {
           ) : (
             <div className={styles.list}>
               {results.map((t) => (
-                <SearchCard key={t.id} tournament={t} onClick={() => openTournament(t)} query={searchQuery} />
+                <div
+                  key={t.id}
+                  className={styles.resultCard}
+                  onClick={() => openTournament(t)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openTournament(t); } }}
+                >
+                  <TournamentCard
+                    name={t.name}
+                    info={t.description}
+                    date={t.start_date}
+                    accentColor={t.accent_color}
+                    imageMode={t.image_mode}
+                    stockImage={t.stock_image}
+                    customImage={t.custom_image ?? null}
+                    status={computeStatus(t)}
+                    compact
+                  />
+                </div>
               ))}
             </div>
           )}

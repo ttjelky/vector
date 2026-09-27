@@ -214,13 +214,17 @@ const MobileSearch = ({ onSearch }) => {
   const collapse = () => {
     setExpanded(false);
     inputRef.current?.blur();
+    if (inputRef.current) inputRef.current.value = "";
     onSearch("");
   };
 
-  // Клік поза або Escape — звужуємо
+  // Клік поза або Escape — звужуємо.
+  // Кліки всередині вікна результатів пошуку ігноруємо, інакше оверлей
+  // розмонтується до події click і перехід на турнір не спрацьовує.
   useEffect(() => {
     if (!expanded) return;
     const handler = (e) => {
+      if (e.target?.closest?.('[data-search-overlay]')) return;
       if (wrapRef.current && !wrapRef.current.contains(e.target)) collapse();
     };
     const onKey = (e) => {
@@ -279,8 +283,8 @@ const MobileSearch = ({ onSearch }) => {
           onClick={(e) => { e.stopPropagation(); collapse(); }}
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
-            padding: '0 2px', display: 'flex', alignItems: 'center',
-            flexShrink: 0, color: '#aaa', fontSize: 18, lineHeight: 1,
+            padding: '4px 10px', display: 'flex', alignItems: 'center',
+            flexShrink: 0, color: '#aaa', fontSize: 24, lineHeight: 1,
             transition: 'color 0.15s',
           }}
           aria-label="Закрити пошук"
