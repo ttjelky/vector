@@ -140,6 +140,16 @@ const App = () => {
       // data.networkError — нічого не чіпаємо, лишаємо юзера де він є
       setAuthReady(true);
     });
+
+    // Застосовуємо збережені налаштування вигляду до першого рендеру сторінок
+    try {
+      if (JSON.parse(localStorage.getItem("setting_motion") ?? "false")) {
+        document.documentElement.classList.add("reduce-motion");
+      }
+      if (JSON.parse(localStorage.getItem("setting_sidebar") ?? "false")) {
+        document.documentElement.classList.add("solid-sidebar");
+      }
+    } catch {}
   }, []);
 
   if (!authReady) return null;

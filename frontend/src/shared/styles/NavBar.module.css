@@ -310,7 +310,7 @@ input[type="search"]::-webkit-search-cancel-button {
   /* Матеріал дає GlassSurface — тут лише геометрія й кромка */
   border-radius: 0;
   border: none;
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  border-right: 0.5px solid rgba(0, 0, 0, 0.08);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
   overflow: hidden;
   transition: none;
@@ -704,7 +704,7 @@ input[type="search"]::-webkit-search-cancel-button {
 
   /* Матеріал дає GlassSurface — тут лише геометрія й кромка */
   border: none;
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  border-right: 0.5px solid rgba(0, 0, 0, 0.08);
 
   /* М'яка тінь */
   box-shadow:

@@ -1,164 +1,172 @@
-/* SettingsStyle.css */
+/* SettingsStyle.css — у мові проєкту:
+   гола сторінка, сірі рядки-картки без рамок,
+   білі пастельні тайли, світчі 51px, hero як на Головній. */
 
 .settings-page {
-    padding: 32px 40px;
-    max-width: 760px;
-    font-family: inherit;
+    max-width: 1120px;
     margin: 0 auto;
+    padding: 12px 48px 64px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Section card */
+/* ── Одна колонка секцій ── */
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: start;
+}
+
+/* ── Section ── */
 .settings-section {
-    background: #ffffff;
-    border: 1px solid #e8e8e8;
-    border-radius: 14px;
-    padding: 8px 0;
-    margin-bottom: 20px;
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin-bottom: 32px;
 }
 
 .settings-section-title {
-    font-size: 11px;
-    font-weight: 600;
-    color: #aaaaaa;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 10px 20px 6px 20px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #1d1d1f;
+    margin: 0 0 12px;
+    padding: 0 4px;
 }
 
-/* Row */
+/* ── Row card ── */
 .settings-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 20px;
-    border-bottom: 1px solid #f2f2f2;
-    gap: 16px;
-    transition: background 0.15s ease;
+    gap: 14px;
+    background: #f5f5f7;
+    border: none;
+    border-radius: 18px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .settings-row:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .settings-row:hover {
-    background: #fafafa;
+    background: #ececee;
+}
+
+.settings-row.clickable {
+    cursor: pointer;
+}
+
+.settings-row.clickable:active {
+    transform: scale(0.99);
+}
+
+.settings-row:focus-visible {
+    outline: 2px solid rgba(0, 122, 255, 0.6);
+    outline-offset: 2px;
 }
 
 .settings-row-left {
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 0;
 }
 
+/* Білий пастельний тайл — як іконки сповіщень на Головній */
 .settings-row-icon {
-    width: 34px;
-    height: 34px;
-    background: #f4f4f4;
-    border-radius: 9px;
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: #555;
+    color: #1d1d1f;
 }
+
+.tile-orange { background: #ffedd5; color: #c2410c; }
+.tile-blue   { background: #e5f1fd; color: #0071e3; }
+.tile-teal   { background: #ccfbf1; color: #0f766e; }
+.tile-green  { background: #dcfce7; color: #15803d; }
+.tile-purple { background: #ede9fe; color: #6d28d9; }
+.tile-gray   { background: #ececf1; color: #6e6e73; }
 
 .settings-row-text {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    min-width: 0;
 }
 
 .settings-row-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #1a1a1a;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #1d1d1f;
 }
 
 .settings-row-desc {
-    font-size: 12px;
-    color: #999;
+    font-size: 13.5px;
+    line-height: 1.4;
+    color: #86868b;
 }
 
-/* Toggle switch */
-.toggle {
+/* ── Apple switch 51px — як на сторінці турніру ── */
+.switch {
     position: relative;
-    width: 44px;
-    height: 24px;
     flex-shrink: 0;
-}
-
-.toggle input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-    position: absolute;
-}
-
-.toggle-track {
-    position: absolute;
-    inset: 0;
-    background: #e0e0e0;
-    border-radius: 999px;
+    width: 51px;
+    height: 31px;
+    border-radius: 100px;
+    background: #e9e9eb;
+    border: none;
     cursor: pointer;
-    transition: background 0.22s ease;
+    padding: 0;
+    transition: background-color 0.2s ease;
 }
 
-.toggle input:checked + .toggle-track {
-    background: #4ade80;
-}
+.switchOn { background: #34c759; }
 
-.toggle-thumb {
+.switchKnob {
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 18px;
-    height: 18px;
-    background: #fff;
+    top: 2px;
+    left: 2px;
+    width: 27px;
+    height: 27px;
     border-radius: 50%;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.18);
-    transition: transform 0.22s ease;
-    pointer-events: none;
+    background: #fff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
 }
 
-.toggle input:checked ~ .toggle-thumb {
-    transform: translateX(20px);
+.switchOn .switchKnob { transform: translateX(20px); }
+
+/* ── Mobile ── */
+@media (max-width: 860px) {
+    .settings-page {
+        padding: 12px 20px 48px;
+    }
+
+    .settings-row {
+        padding: 13px 14px;
+    }
 }
 
-/* Logout row */
-.settings-row.danger .settings-row-icon {
-    background: #fff0f0;
-    color: #e05252;
-}
+@media (prefers-reduced-motion: reduce) {
+    .settings-row,
+    .switch,
+    .switchKnob {
+        transition: background-color 0.15s ease;
+    }
 
-.settings-row.danger .settings-row-label {
-    color: #e05252;
-}
-
-.settings-row.danger:hover {
-    background: #fff8f8;
-}
-
-/* Chevron for navigable rows */
-.settings-chevron {
-    color: #ccc;
-    flex-shrink: 0;
-}
-
-/* Language / value badge */
-.settings-value {
-    font-size: 13px;
-    color: #888;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* Logout button as row */
-.settings-logout-btn {
-    all: unset;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    cursor: pointer;
-    box-sizing: border-box;
+    .settings-row.clickable:active,
+    .switchOn .switchKnob {
+        transform: none;
+    }
 }

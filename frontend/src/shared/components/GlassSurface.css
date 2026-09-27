@@ -41,7 +41,7 @@
 
 /* Щільний варіант для сайдбарів: трохи сильніший блюр і менша прозорість. */
 .glass-surface--dense.glass-surface {
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(245, 245, 247, 0.78);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
@@ -53,6 +53,14 @@
   backdrop-filter: none;
   border: 1px solid #d1d1d1;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+}
+
+/* Непрозорий сайдбар (перемикач у Налаштуваннях):
+   щільне скло меню стає суцільним, без блюру. */
+.solid-sidebar .glass-surface--dense.glass-surface {
+  background: #f5f5f7;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 .glass-surface:focus-visible {
