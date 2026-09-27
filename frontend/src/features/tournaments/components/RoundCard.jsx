@@ -3,6 +3,7 @@ import styles from "../styles/RoundCard.module.css";
 import { API } from '@api';
 import { fileIcon, toInputDatetime } from "./tournamentHelpers";
 import { RichTextArea } from "@shared/components/RichTextArea";
+import { useDropdownPosition } from "@shared/hooks/useDropdownPosition";
 
 // ─── Icon helpers ──────────────────────────────────────────────────────────────
 
@@ -190,12 +191,19 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
                     <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
                   </svg>
                 </button>
+                {i === techReqs.length - 1 && (
+                  <button
+                    className="btn-primary btn-sm"
+                    style={{ alignSelf: "stretch", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center" }}
+                    onClick={addTechReq}
+                    type="button"
+                  >
+                    + Додати
+                  </button>
+                )}
               </div>
             ))}
           </div>
-          <button className="btn-primary btn-sm" onClick={addTechReq} type="button">
-            + Додати категорію
-          </button>
         </div>
 
         {/* ── Must have ── */}
@@ -222,12 +230,19 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
                     <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
                   </svg>
                 </button>
+                {i === mustHave.length - 1 && (
+                  <button
+                    className="btn-primary btn-sm"
+                    style={{ alignSelf: "stretch", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center" }}
+                    onClick={addMustHave}
+                    type="button"
+                  >
+                    + Додати
+                  </button>
+                )}
               </div>
             ))}
           </div>
-          <button className="btn-primary btn-sm" onClick={addMustHave} type="button">
-            + Додати критерій
-          </button>
         </div>
 
         {/* Посилання */}
@@ -258,7 +273,13 @@ function RoundEditForm({ round, tournamentId, onSaved, onCancel }) {
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
-            <button className="btn-primary btn-sm" onClick={addLink}>Додати</button>
+            <button
+              className="btn-primary btn-sm"
+              style={{ alignSelf: "stretch", display: "inline-flex", alignItems: "center" }}
+              onClick={addLink}
+            >
+              Додати
+            </button>
           </div>
         </div>
 
@@ -315,6 +336,7 @@ export function RoundCard({
   // Нові ключові пропси для drawer-режиму:
   onRoundSaved,
   onEditToggle,
+  anchorEl = null,
   // Старі пропси (залишаємо для сумісності, але не використовуємо в UI):
   readOnly,
   myRole,
@@ -332,6 +354,10 @@ export function RoundCard({
   onAddTask,
   onCloseTaskForm,
 }) {
+  const editDD = useDropdownPosition(anchorEl, !!round, {
+    side: "bottom", align: "end", gap: 10,
+  });
+
   if (!round) return null;
 
   const handleClose = () => {
@@ -340,15 +366,21 @@ export function RoundCard({
 
   return (
     <>
-      {/* Фон з blur-ефектом */}
+      {/* Фон-перехоплювач кліків повз */}
       <div
         className={styles.roundEditDrawerBackdrop}
         onClick={handleClose}
         aria-label="Закрити"
       />
 
-      {/* Drawer панель */}
-      <div className={styles.roundEditDrawer} role="dialog" aria-modal="true">
+      {/* Випадачка редагування */}
+      <div
+        className={styles.roundEditDrawer}
+        ref={editDD.panelRef}
+        style={editDD.dropdownStyle}
+        role="dialog"
+        aria-modal="true"
+      >
         <div className={styles.roundEditDrawerHeader}>
           <span className={styles.roundEditDrawerTitle}>Редагувати раунд</span>
           <button

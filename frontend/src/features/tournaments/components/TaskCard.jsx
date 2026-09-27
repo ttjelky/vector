@@ -218,20 +218,22 @@ function TeamMemberSubmissionView({ taskId, roundId, tournamentId, teamName }) {
             <span className={styles.mySubmissionLabel}>✓ Здано</span>
             {submission.team_name && (
               <span style={{
-                fontSize: 12.5, fontWeight: 600, color: "#5566aa",
-                background: "#f0f2ff", border: "1px solid #dde4f5",
-                borderRadius: 100, padding: "2px 9px"
+                fontSize: 13, fontWeight: 500, color: "#5566aa",
+                background: "#f0f2ff", border: "none",
+                borderRadius: 100, padding: "4px 11px", whiteSpace: "nowrap"
               }}>🏆 {submission.team_name}</span>
             )}
             <span className={styles.mySubmissionDate}>
               {new Date(submission.submitted_at).toLocaleString("uk-UA")}
             </span>
+            <div className={styles.mySubmissionActions}>
             {/* Не-капітан не може редагувати/видаляти */}
             <span style={{
-              fontSize: 12, fontWeight: 500, color: "#5566aa",
-              background: "#f0f2ff", border: "1px solid #dde4f5",
-              borderRadius: 100, padding: "3px 10px", whiteSpace: "nowrap"
+              fontSize: 13, fontWeight: 500, color: "#5566aa",
+              background: "#f0f2ff", border: "none",
+              borderRadius: 100, padding: "4px 11px", whiteSpace: "nowrap"
             }}>🔒 Лише перегляд</span>
+            </div>
           </div>
 
           {submission.text && (
@@ -402,9 +404,9 @@ function MySubmissionPanel({ taskId, roundId, tournamentId, deadlinePassed, canS
               )}
               {!canSubmit && (
                 <span style={{
-                  fontSize: 12, fontWeight: 500, color: "#991b1b",
-                  background: "#fff1f2", border: "1px solid #fecdd3",
-                  borderRadius: 100, padding: "3px 10px", whiteSpace: "nowrap"
+                  fontSize: 13, fontWeight: 500, color: "#991b1b",
+                  background: "#fff1f2", border: "none",
+                  borderRadius: 100, padding: "4px 11px", whiteSpace: "nowrap"
                 }}>🔒 Раунд завершено</span>
               )}
             </div>
@@ -555,9 +557,8 @@ function AllSubmissionsPanel({ taskId, roundId, tournamentId }) {
 
 // ─── TaskEditForm ─────────────────────────────────────────────────────────────
 
-function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
+function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel, editTitle, onEditTitleChange }) {
   const [form, setForm] = useState({
-    title:       task.title       || "",
     description: task.description || "",
     end_date:    task.end_date
       ? new Date(task.end_date).toISOString().slice(0, 16)
@@ -627,13 +628,13 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
     setMustHave((m) => m.map((item, idx) => idx === i ? val : item));
 
   const handleSave = async () => {
-    if (!form.title.trim()) { setError("Назва завдання обов'язкова."); return; }
+    if (!(editTitle || "").trim()) { setError("Назва завдання обов'язкова."); return; }
     setSaving(true);
     try {
       const filteredTechReqs = techReqs.filter((r) => r.category.trim() || r.value.trim());
       const filteredMustHave = mustHave.filter((m) => m.trim());
       const payload = {
-        title:             form.title.trim(),
+        title:             editTitle.trim(),
         description:       form.description.trim() || null,
         end_date:          form.end_date || null,
         tech_requirements: filteredTechReqs.length > 0 ? filteredTechReqs : null,
@@ -676,18 +677,6 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
     <>
       {/* ── Тіло форми ── */}
       <div className={styles.editFormBody}>
-
-        {/* Назва */}
-        <label className={styles.editLabel}>
-          Назва <span className={styles.editRequired}>*</span>
-          <input
-            className="input"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="Назва завдання…"
-          />
-        </label>
 
         {/* Опис */}
         <div className={styles.editLabel}>
@@ -742,12 +731,19 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
                     <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
                   </svg>
                 </button>
+                {i === techReqs.length - 1 && (
+                  <button
+                    className="btn-primary btn-sm"
+                    style={{ alignSelf: "stretch", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center" }}
+                    onClick={addTechReq}
+                    type="button"
+                  >
+                    + Додати
+                  </button>
+                )}
               </div>
             ))}
           </div>
-          <button className="btn-primary btn-sm" onClick={addTechReq} type="button">
-            + Додати категорію
-          </button>
         </div>
 
         {/* Must have */}
@@ -774,12 +770,19 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
                     <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
                   </svg>
                 </button>
+                {i === mustHave.length - 1 && (
+                  <button
+                    className="btn-primary btn-sm"
+                    style={{ alignSelf: "stretch", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center" }}
+                    onClick={addMustHave}
+                    type="button"
+                  >
+                    + Додати
+                  </button>
+                )}
               </div>
             ))}
           </div>
-          <button className="btn-primary btn-sm" onClick={addMustHave} type="button">
-            + Додати критерій
-          </button>
         </div>
 
         {/* Посилання */}
@@ -816,7 +819,12 @@ function TaskEditForm({ task, roundId, tournamentId, onSaved, onCancel }) {
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
-            <button className="btn-primary btn-sm" onClick={addLink} type="button">
+            <button
+              className="btn-primary btn-sm"
+              style={{ alignSelf: "stretch", display: "inline-flex", alignItems: "center" }}
+              onClick={addLink}
+              type="button"
+            >
               Додати
             </button>
           </div>
@@ -881,6 +889,7 @@ function TaskDrawer({ task: taskProp, roundId, tournamentId, readOnly, myRole, r
   const [activeTab,   setActiveTab]   = useState("details");
   const [task,        setTask]        = useState(taskProp);
   const [isEditing,   setIsEditing]   = useState(initialEditMode);
+  const [editTitle,   setEditTitle]   = useState(taskProp.title || "");
 
   // Підвантажуємо повні дані завдання при відкритті —
   // список tasks у раунді може не містити нових полів (tech_requirements, must_have).
@@ -910,6 +919,11 @@ function TaskDrawer({ task: taskProp, roundId, tournamentId, readOnly, myRole, r
     if (onTaskUpdated) onTaskUpdated(updatedTask);
   };
 
+  const startEdit = () => {
+    setEditTitle(task.title || "");
+    setIsEditing(true);
+  };
+
   return (
     <>
       <div className={styles.drawerBackdrop} onClick={onClose} />
@@ -924,9 +938,18 @@ function TaskDrawer({ task: taskProp, roundId, tournamentId, readOnly, myRole, r
         {/* Шапка */}
         <div className={styles.drawerHeader}>
           <div className={styles.drawerTitleGroup}>
-            <span className={styles.drawerTitle}>
-              {isEditing ? "Редагувати завдання" : task.title}
-            </span>
+            {isEditing ? (
+              <input
+                className={styles.drawerTitleInput}
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Назва завдання…"
+                aria-label="Назва завдання"
+                maxLength={200}
+              />
+            ) : (
+              <span className={styles.drawerTitle}>{task.title}</span>
+            )}
             {!isEditing && deadlineLabel && (
               <span className={styles.drawerSubtitle}>Дедлайн: {deadlineLabel}</span>
             )}
@@ -935,7 +958,8 @@ function TaskDrawer({ task: taskProp, roundId, tournamentId, readOnly, myRole, r
             {isOwnerOrAdmin && !isEditing && (
               <button
                 className="btn-primary btn-sm"
-                onClick={() => setIsEditing(true)}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+                onClick={startEdit}
                 title="Редагувати завдання"
                 aria-label="Редагувати завдання"
               >
@@ -962,6 +986,8 @@ function TaskDrawer({ task: taskProp, roundId, tournamentId, readOnly, myRole, r
             tournamentId={tournamentId}
             onSaved={handleTaskSaved}
             onCancel={() => setIsEditing(false)}
+            editTitle={editTitle}
+            onEditTitleChange={setEditTitle}
           />
         )}
 
@@ -1226,6 +1252,29 @@ export function TaskCard({
               {getDescriptionPreview(task.description, 80)}
             </p>
           )}
+          {!readOnly && (
+            <div className={styles.taskCardActions}>
+              <button
+                className={styles.taskEditBtn}
+                onClick={(e) => { e.stopPropagation(); setDrawerOpen(true); setOpenInEditMode(true); }}
+                title="Редагувати завдання"
+                aria-label="Редагувати завдання"
+              >
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z"/>
+                </svg>
+              </button>
+              <button
+                className={styles.taskDeleteBtn}
+                onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
+                disabled={deleting}
+                title="Видалити завдання"
+                aria-label="Видалити завдання"
+              >
+                {deleting ? "…" : <TrashIconSm />}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className={styles.taskCardRight}>
@@ -1242,32 +1291,6 @@ export function TaskCard({
               roundId={roundId}
               tournamentId={tournamentId}
             />
-          )}
-
-          {/* Кнопка редагування — тільки для адміна/власника */}
-          {!readOnly && (
-            <button
-              className={styles.taskEditBtn}
-              onClick={(e) => { e.stopPropagation(); setDrawerOpen(true); setOpenInEditMode(true); }}
-              title="Редагувати завдання"
-              aria-label="Редагувати завдання"
-            >
-              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z"/>
-              </svg>
-            </button>
-          )}
-
-          {!readOnly && (
-            <button
-              className={styles.taskDeleteBtn}
-              onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
-              disabled={deleting}
-              title="Видалити завдання"
-              aria-label="Видалити завдання"
-            >
-              {deleting ? "…" : <TrashIconSm />}
-            </button>
           )}
 
           <span className={styles.taskArrow}><ChevronRight /></span>

@@ -12,6 +12,10 @@ const GlassSurface = (props) => {
     style = {},
     width,
     height,
+    // Сервісні пропси матеріалу — не DOM-атрибути, у розмітку не прокидаємо
+    backgroundOpacity,
+    saturation,
+    displace,
     ...rest
   } = props;
 

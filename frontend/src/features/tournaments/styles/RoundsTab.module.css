@@ -1,17 +1,21 @@
 /* ════════════════════════════════════════════════════════════════════════════
-   RoundsTab — layout, pill tabs, round banner, shared form system, skeleton
+   RoundsTab — у мові проєкту: пласкі сірі картки без рамок,
+   випадачки біля кнопок, желейні пілюлі, SF-стек
    ════════════════════════════════════════════════════════════════════════════ */
 
 /* ─── Layout ─────────────────────────────────────────────────────────────────── */
 .tabContent {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ─── Tab Header ─────────────────────────────────────────────────────────────── */
 .tabHeader {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -20,51 +24,67 @@
 }
 
 .tabTitle {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   color: #1d1d1f;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
 }
 
 .tabCount {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   color: #86868b;
-  background: rgba(0,0,0,0.05);
-  padding: 2px 9px;
+  background: #f5f5f7;
+  padding: 3px 10px;
   border-radius: 100px;
   letter-spacing: 0;
 }
 
-/* ─── Create Round button ─────────────────────────────────────────────────────── */
-.createRoundBtn {
+/* Якір кнопки — випадачка створення відкривається під нею */
+.createAnchor {
+  position: relative;
   display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 18px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--btn-primary-text);
-  background: var(--btn-primary-bg);
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  letter-spacing: -0.01em;
-  transition: background 0.15s, transform 0.1s;
+  flex-shrink: 0;
 }
-.createRoundBtn:hover  { background: var(--btn-primary-hover-bg); }
-.createRoundBtn:active { transform: scale(0.97); }
 
-/* ─── Pill Tabs ────────────────────────────────────────────────────────────────── */
+/* ─── Випадачка створення раунду ───────────────────────────────────────────── */
+.formBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: transparent;
+}
+
+.roundFormCard {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  background: #fff;
+  border: none;
+  border-radius: 28px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 48px 120px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.12);
+  z-index: 9001;
+  animation: dropIn 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes dropIn {
+  0%   { opacity: 0; transform: translateY(-14px) scale(0.94, 0.92); }
+  60%  { opacity: 1; transform: translateY(2px) scale(1.01, 1.005); }
+  100% { opacity: 1; transform: translateY(0) scale(1, 1); }
+}
+
+/* ─── Pill Tabs (желейні) ───────────────────────────────────────────────────── */
 .pillTabsWrapper {
   display: flex;
   overflow-x: auto;
-  gap: 6px;
+  gap: 8px;
   padding: 0 0 16px;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -76,28 +96,39 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 8px 16px;
-  font-size: 13.5px;
+  padding: 9px 18px;
+  font-size: 14px;
   font-weight: 500;
   color: #6e6e73;
-  background: rgba(0,0,0,0.04);
-  border: 1px solid transparent;
+  background: #f5f5f7;
+  border: none;
   border-radius: 100px;
   cursor: pointer;
   white-space: nowrap;
   font-family: inherit;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  letter-spacing: -0.01em;
   flex-shrink: 0;
+  transform-origin: 50% 50%;
+  transition: background 0.15s ease, color 0.15s ease,
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .pillTab:hover:not(.pillTabActive) {
-  background: rgba(0,0,0,0.07);
+  background: #ececee;
   color: #1d1d1f;
+}
+.pillTab:active:not(.pillTabActive) {
+  transform: scale(0.94, 0.9);
+  transition: transform 110ms ease-in;
 }
 
 .pillTabActive {
   background: #1d1d1f;
   color: #fff;
-  border-color: #1d1d1f;
+  border: none;
+}
+.pillTabActive:active {
+  transform: scale(0.96);
+  transition: transform 110ms ease-in;
 }
 
 .pillTabDot {
@@ -113,26 +144,25 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  animation: fadeUp 0.22s ease;
+  animation: fadeUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  0%   { opacity: 0; transform: translateY(10px) scale(0.99); }
+  60%  { opacity: 1; transform: translateY(-1px) scale(1.001); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ─── Round info banner ─────────────────────────────────────────────────────── */
 .roundInfoBanner {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(0,0,0,0.07);
-  border-radius: 18px;
-  padding: 16px 20px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 24px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: none;
 }
 
 .roundInfoRow {
@@ -146,83 +176,84 @@
 .roundInfoMeta {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   flex: 1;
   min-width: 0;
 }
 
 .roundInfoTitle {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   color: #1d1d1f;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.01em;
 }
 
 .roundInfoDate {
-  font-size: 12px;
+  font-size: 13px;
   color: #86868b;
   font-variant-numeric: tabular-nums;
 }
 
 .roundInfoDesc {
-  font-size: 13.5px;
-  color: #6e6e73;
-  line-height: 1.65;
+  font-size: 15px;
+  color: #515154;
+  line-height: 1.6;
   margin: 0;
 }
 
 .roundInfoActions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
 .roundIconBtn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #86868b;
-  background: rgba(0,0,0,0.04);
+  color: #6e6e73;
+  background: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: color 0.15s ease, transform 0.1s ease;
 }
-.roundIconBtn:hover { background: rgba(0,0,0,0.08); color: #1d1d1f; }
-.roundIconBtnDanger:hover { background: #fff1f2; color: #dc2626; }
+.roundIconBtn:hover { color: #1d1d1f; }
+.roundIconBtn:active { transform: scale(0.94); }
+.roundIconBtnDanger:hover { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
 
 /* ─── Round links & files chips ─────────────────────────────────────────────── */
 .roundMetaRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  padding-top: 4px;
-  border-top: 1px solid rgba(0,0,0,0.05);
+  gap: 8px;
 }
 
 .roundLink, .roundFile {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  font-size: 12px;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #1d1d1f;
-  background: rgba(0,0,0,0.04);
+  background: #f5f5f7;
+  border: none;
   border-radius: 100px;
   text-decoration: none;
-  transition: background 0.15s;
+  transition: background 0.15s ease;
 }
-.roundLink:hover, .roundFile:hover { background: rgba(0,0,0,0.08); }
+.roundLink:hover, .roundFile:hover { background: #ececee; }
 
 /* ─── Status badge ──────────────────────────────────────────────────────────── */
 .roundStatus {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   padding: 6px 14px;
   font-size: 13.5px;
   font-weight: 500;
@@ -232,8 +263,8 @@
   letter-spacing: -0.01em;
 }
 .statusDot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -242,7 +273,7 @@
 .taskListSection {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
 .taskListHeader {
@@ -254,57 +285,115 @@
 }
 
 .taskListTitle {
-  font-size: 11px;
-  font-weight: 600;
-  color: #aeaeb2;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-}
-
-/* ─── Add task inline button ─────────────────────────────────────────────────── */
-.addTaskInlineBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 7px 14px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #6e6e73;
-  background: rgba(0,0,0,0.04);
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s, color 0.15s;
-}
-.addTaskInlineBtn:hover { background: rgba(0,0,0,0.08); color: #1d1d1f; }
-
-/* ─── Form cards ────────────────────────────────────────────────────────────── */
-.roundFormCard {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 20px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-  animation: fadeUp 0.2s ease;
-  margin-bottom: 30px;
-}
-.roundFormHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.roundFormTitle {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   color: #1d1d1f;
-  margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+}
+
+/* ══════════════════════════════════════════════════
+   TASKS — горизонтальна bleed-стрічка як на Головній
+   (картки йдуть під сайдбар, класи для ScrollRow)
+   ══════════════════════════════════════════════════ */
+.rowWrap {
+  position: relative;
+  --bleed-left: 276px;
+  --bleed-right: 28px;
+  --bleed-extra: max(0px, (100vw - 1504px) / 2);
+  --bleed-total: calc(var(--bleed-left) + var(--bleed-extra));
+  --arrow-left: 260px;
+  --arrow-right: 12px;
+}
+@media (max-width: 992px) {
+  .rowWrap {
+    --bleed-left: 28px;
+    --bleed-right: 28px;
+    --bleed-extra: max(0px, (100vw - 1016px) / 2);
+    --arrow-left: 12px;
+  }
+}
+.tournRow {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  margin-left: calc(-1 * var(--bleed-total));
+  margin-right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)));
+  padding: 4px var(--bleed-right) 16px 0;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--bleed-total);
+  scroll-padding-right: var(--bleed-right);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tournRow::-webkit-scrollbar {
+  display: none;
+}
+.tournRow::before {
+  content: "";
+  flex: 0 0 calc(var(--bleed-total) - 12px);
+}
+.tournRow .taskCell {
+  flex: 0 0 400px;
+  max-width: 400px;
+  scroll-snap-align: start;
+}
+@media (max-width: 600px) {
+  .tournRow .taskCell {
+    flex-basis: 320px;
+    max-width: 320px;
+  }
+}
+.rowArrow {
+  position: absolute;
+  top: calc(50% - 12px - 36px);
+  width: 28px;
+  height: 72px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1d1d1f;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  transition:
+    opacity 0.35s cubic-bezier(0.33, 1, 0.68, 1),
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease !important;
+}
+.rowWrap:hover .rowArrow,
+.rowWrap:focus-within .rowArrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+.rowArrowHidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.rowArrowLeft { left: calc(-1 * var(--bleed-total) + var(--arrow-left)); }
+.rowArrowRight { right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)) + var(--arrow-right)); }
+
+/* Якір кнопки — випадачка завдання відкривається під нею */
+.taskFormAnchor {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.taskFormBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: transparent;
 }
 
 /* ─── Shared form inputs ─────────────────────────────────────────────────────── */
@@ -317,54 +406,11 @@
 .editLabel {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  font-size: 11px;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 600;
-  color: #86868b;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  color: #6e6e73;
 }
-.editRequired { color: #ff3b30; }
-
-.editInput {
-  padding: 10px 14px;
-  font-size: 14px;
-  color: #1d1d1f;
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: 12px;
-  outline: none;
-  font-family: inherit;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  width: 100%;
-  box-sizing: border-box;
-}
-.editInput:focus {
-  border-color: #1d1d1f;
-  box-shadow: 0 0 0 3px rgba(29,29,31,0.07);
-}
-.editInput::placeholder { color: #d1d1d6; }
-
-.editTextarea {
-  padding: 10px 14px;
-  font-size: 14px;
-  color: #1d1d1f;
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: 12px;
-  outline: none;
-  resize: vertical;
-  font-family: inherit;
-  line-height: 1.7;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  width: 100%;
-  box-sizing: border-box;
-}
-.editTextarea:focus {
-  border-color: #1d1d1f;
-  box-shadow: 0 0 0 3px rgba(29,29,31,0.07);
-}
-.editTextarea::placeholder { color: #d1d1d6; }
 
 .editRow {
   display: grid;
@@ -380,136 +426,15 @@
   padding-top: 4px;
 }
 
-/* ─── Buttons ────────────────────────────────────────────────────────────────── */
-.cancelBtn {
-  padding: 9px 18px;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--btn-secondary-text);
-  background: var(--btn-secondary-bg);
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-}
-.cancelBtn:hover    { background: var(--btn-secondary-hover-bg); }
-.cancelBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.saveBtn {
-  padding: 9px 20px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--btn-primary-text);
-  background: var(--btn-primary-bg);
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s, transform 0.1s;
-}
-.saveBtn:hover    { background: var(--btn-primary-hover-bg); }
-.saveBtn:active   { transform: scale(0.97); }
-.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.addLinkBtn {
-  padding: 9px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--btn-primary-text);
-  background: var(--btn-primary-bg);
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  white-space: nowrap;
-  font-family: inherit;
-  transition: background 0.15s;
-}
-.addLinkBtn:hover { background: var(--btn-primary-hover-bg); }
-
-.filePickBtn {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 7px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #6e6e73;
-  background: rgba(0,0,0,0.04);
-  border: 1.5px dashed rgba(0,0,0,0.15);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-.filePickBtn:hover {
-  background: rgba(0,0,0,0.07);
-  border-color: rgba(0,0,0,0.28);
-  color: #1d1d1f;
-}
-
 .formError {
   font-size: 13px;
-  color: #dc2626;
+  color: #c53030;
   margin: 0;
-  padding: 10px 14px;
-  background: #fff1f2;
-  border: 1px solid #fecdd3;
-  border-radius: 12px;
-}
-
-/* ─── Attach section ─────────────────────────────────────────────────────────── */
-.attachSection { display: flex; flex-direction: column; gap: 8px; }
-
-.attachSectionLabel {
-  font-size: 11px;
-  font-weight: 600;
-  color: #86868b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.linkInputRow {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-.linkInputRow .editInput { flex: 1; min-width: 120px; }
-
-.attachItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: rgba(0,0,0,0.03);
-  border-radius: 10px;
-}
-.attachItemIcon { font-size: 15px; }
-.attachItemName {
-  flex: 1;
-  font-size: 13px;
-  color: #1d1d1f;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.attachItemMeta { font-size: 11.5px; color: #aeaeb2; }
-
-.attachRemove {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  color: #aeaeb2;
-  background: none;
+  padding: 9px 13px;
+  background: #fff5f5;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  border-radius: 9px;
 }
-.attachRemove:hover { background: #fff1f2; color: #dc2626; }
 
 /* ─── Access restriction notices ────────────────────────────────────────────── */
 .upcomingNotice {
@@ -517,41 +442,42 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 40px 20px;
+  padding: 48px 20px;
   text-align: center;
   color: #86868b;
-  background: rgba(0,0,0,0.025);
-  border: 1px dashed rgba(0,0,0,0.1);
-  border-radius: 16px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 24px;
   margin-top: 4px;
 }
 .upcomingNotice p {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   color: #6e6e73;
 }
 .upcomingNoticeIcon {
   font-size: 26px;
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.04);
-  border-radius: 14px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .submissionClosedBanner {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
-  font-size: 13px;
+  padding: 11px 16px;
+  font-size: 13.5px;
   font-weight: 500;
   color: #6e6e73;
-  background: rgba(0,0,0,0.035);
-  border: 1px solid rgba(0,0,0,0.07);
-  border-radius: 12px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 14px;
   margin-bottom: 2px;
 }
 
@@ -559,15 +485,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 14px;
-  font-size: 12.5px;
-  border-radius: 12px;
-  border: 1px solid transparent;
+  padding: 11px 16px;
+  font-size: 13.5px;
+  border-radius: 14px;
+  border: none;
   margin-bottom: 2px;
 }
 .privilegedNoticeBanner strong { font-weight: 600; }
-
-
 
 /* ─── Empty states ───────────────────────────────────────────────────────────── */
 .emptyBlock {
@@ -579,22 +503,22 @@
   color: #aeaeb2;
   text-align: center;
 }
-.emptyBlock p { margin: 0; font-size: 14px; color: #86868b; }
+.emptyBlock p { margin: 0; font-size: 15px; color: #6e6e73; }
 
 .emptyBlockIcon {
   font-size: 30px;
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.04);
-  border-radius: 18px;
+  background: #f5f5f7;
+  border-radius: 20px;
 }
 
 .empty {
-  font-size: 13.5px;
-  color: #aeaeb2;
+  font-size: 14px;
+  color: #a1a1a6;
   margin: 0;
   padding: 10px 0;
   text-align: center;
@@ -617,35 +541,38 @@
 .roundInfoSection { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 
 .roundInfoSectionLabel {
-  font-size: 11px; font-weight: 600; color: #86868b;
-  text-transform: uppercase; letter-spacing: 0.05em;
+  font-size: 13px; font-weight: 600; color: #86868b;
 }
 
-.roundTechReqGrid { display: flex; flex-direction: column; gap: 5px; }
+.roundTechReqGrid { display: flex; flex-direction: column; gap: 8px; }
 
 .roundTechReqCard {
   display: flex; align-items: baseline; gap: 12px;
-  padding: 9px 13px;
-  background: rgba(0,0,0,0.025); border: 1px solid rgba(0,0,0,0.06); border-radius: 10px;
+  padding: 12px 16px;
+  background: #f5f5f7; border: none; border-radius: 14px;
 }
 .roundTechReqCategory {
   flex: 0 0 auto; min-width: 90px;
-  font-size: 11px; font-weight: 700; color: #86868b;
-  text-transform: uppercase; letter-spacing: 0.04em;
+  font-size: 12.5px; font-weight: 600; color: #86868b;
 }
-.roundTechReqValue { flex: 1; font-size: 14px; font-weight: 500; color: #1d1d1f; }
+.roundTechReqValue { flex: 1; font-size: 15px; font-weight: 500; color: #1d1d1f; }
 
-.roundMustHaveList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.roundMustHaveList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 
 .roundMustHaveItem {
   display: flex; align-items: flex-start; gap: 10px;
-  padding: 9px 13px;
-  background: rgba(0,0,0,0.025); border: 1px solid rgba(0,0,0,0.06); border-radius: 10px;
-  font-size: 14px; color: #1d1d1f; line-height: 1.5;
+  padding: 12px 16px;
+  background: #f5f5f7; border: none; border-radius: 14px;
+  font-size: 15px; color: #1d1d1f; line-height: 1.5;
 }
 .roundMustHaveCheck {
-  flex-shrink: 0; width: 18px; height: 18px;
+  flex-shrink: 0; width: 20px; height: 20px;
   display: inline-flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; color: #fff;
+  font-size: 11px; font-weight: 700; color: #fff;
   background: #34c759; border-radius: 50%; margin-top: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roundContent, .roundFormCard, .pillTab { animation: none; }
+  .pillTab:active, .roundIconBtn:active { transform: none; }
 }

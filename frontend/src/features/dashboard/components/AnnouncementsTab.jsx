@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { API, getProfile, mediaUrl } from "@api";
 import { computeStatus, TournamentCard, ConfirmDeleteModal } from "@features/tournaments";
+import { useDropdownPosition } from "@shared/hooks/useDropdownPosition";
 import styles from "../styles/AnnouncementsTab.module.css";
 import { usePolling } from "@shared/hooks/usePolling";
 
@@ -268,6 +269,10 @@ function AnnouncementCard({
   const [showDelete,  setShowDelete]  = useState(false);
   const [deleting,    setDeleting]    = useState(false);
   const textareaRef = useRef(null);
+  const editBtnRef = useRef(null);
+  const editDD = useDropdownPosition(editBtnRef, editing, {
+    side: "top", align: "end", gap: 10, fallbacks: ["bottom"],
+  });
 
   const submitComment = async () => {
     const t = commentText.trim();
@@ -368,7 +373,7 @@ function AnnouncementCard({
         />
         {canManage && (
           <div className={styles.actionsRow}>
-            <button className={styles.actionEdit} onClick={startEdit}>
+            <button className={styles.actionEdit} ref={editBtnRef} onClick={startEdit}>
               Редагувати
             </button>
             <button className={styles.actionDelete} onClick={() => setShowDelete(true)}>
@@ -432,6 +437,8 @@ function AnnouncementCard({
         <div className={styles.editBackdrop} onClick={() => setEditing(false)} />
         <div
           className={styles.editPanel}
+          ref={editDD.panelRef}
+          style={editDD.dropdownStyle}
           role="dialog"
           aria-label="Редагувати оголошення"
           onKeyDown={(e) => { if (e.key === "Escape") setEditing(false); }}
@@ -514,8 +521,13 @@ function CreateAnnouncementForm({ tournamentId, onCreated }) {
     if (e.key === "Escape") reset();
   };
 
+  const wrapRef = useRef(null);
+  const createDD = useDropdownPosition(wrapRef, open, {
+    side: "left", align: "start", gap: 12, fallbacks: ["bottom"],
+  });
+
   return (
-    <span className={styles.createWrap}>
+    <span className={styles.createWrap} ref={wrapRef}>
       <button
         className="btn-primary btn-sm"
         style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 15, padding: "10px 22px" }}
@@ -534,6 +546,8 @@ function CreateAnnouncementForm({ tournamentId, onCreated }) {
       <div className={styles.createBackdrop} onClick={reset} />
       <div
         className={styles.createForm}
+        ref={createDD.panelRef}
+        style={createDD.dropdownStyle}
         onKeyDown={handleKeyDown}
         role="dialog"
         aria-label="Нове оголошення"

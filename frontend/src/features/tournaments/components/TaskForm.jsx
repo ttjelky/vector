@@ -8,7 +8,7 @@ import { RichTextArea } from "@shared/components/RichTextArea";
 // Вся логіка збережена без змін.
 // Зовнішній вигляд оновлено до нової системи стилів.
 
-export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
+export function TaskForm({ roundId, tournamentId, onCreated, onCancel, panelRef, panelStyle }) {
   const [form,         setForm]         = useState({ title: "", description: "" });
   const [techReqs,     setTechReqs]     = useState([{ category: "", value: "" }]);
   const [mustHave,     setMustHave]     = useState([""]);
@@ -94,7 +94,7 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
   };
 
   return (
-    <div className={styles.taskFormCard}>
+    <div className={styles.taskFormCard} ref={panelRef} style={panelStyle} role="dialog" aria-label="Нове завдання">
       <h4 className={styles.taskFormTitle}>Нове завдання</h4>
 
       <div className={styles.editForm}>
@@ -161,7 +161,12 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
               onChange={(e) => setLinkForm((f) => ({ ...f, label: e.target.value }))}
               onKeyDown={(e) => e.key === "Enter" && addLink()}
             />
-            <button className="btn-primary btn-sm" onClick={addLink} type="button">
+            <button
+              className="btn-primary btn-sm"
+              style={{ alignSelf: "stretch", display: "inline-flex", alignItems: "center" }}
+              onClick={addLink}
+              type="button"
+            >
               Додати
             </button>
           </div>
@@ -228,12 +233,19 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
                     <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
                   </svg>
                 </button>
+                {i === techReqs.length - 1 && (
+                  <button
+                    className="btn-primary btn-sm"
+                    style={{ alignSelf: "stretch", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center" }}
+                    onClick={addTechReq}
+                    type="button"
+                  >
+                    + Додати
+                  </button>
+                )}
               </div>
             ))}
           </div>
-          <button className="btn-primary btn-sm" onClick={addTechReq} type="button">
-            + Додати категорію
-          </button>
         </div>
 
         {/* ── Must have ── */}
@@ -260,12 +272,19 @@ export function TaskForm({ roundId, tournamentId, onCreated, onCancel }) {
                     <line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/>
                   </svg>
                 </button>
+                {i === mustHave.length - 1 && (
+                  <button
+                    className="btn-primary btn-sm"
+                    style={{ alignSelf: "stretch", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center" }}
+                    onClick={addMustHave}
+                    type="button"
+                  >
+                    + Додати
+                  </button>
+                )}
               </div>
             ))}
           </div>
-          <button className="btn-primary btn-sm" onClick={addMustHave} type="button">
-            + Додати критерій
-          </button>
         </div>
 
         {error && <p className={styles.formError}>{error}</p>}

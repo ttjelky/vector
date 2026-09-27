@@ -1,25 +1,28 @@
 /* ─── Task card (slim row) ───────────────────────────────────────────────────── */
 .taskCard {
-  background: #ffffff;
-  border: 1px solid rgba(0,0,0,0.07);
-  border-radius: 14px;
-  padding: 13px 16px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 20px;
+  padding: 20px 22px;
+  height: 176px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+  transition: background 0.15s ease, transform 0.1s ease;
   user-select: none;
 }
 .taskCard:hover {
-  border-color: rgba(0,0,0,0.13);
-  box-shadow: 0 2px 14px rgba(0,0,0,0.06);
-  transform: translateY(-1px);
+  background: #ececee;
+  border: none;
+  box-shadow: none;
+  transform: none;
 }
-.taskCard:active { transform: translateY(0); box-shadow: none; }
+.taskCard:active { transform: scale(0.99); }
 
-.taskCardExpanded { border-color: rgba(0,0,0,0.12); }
+.taskCardExpanded { border: none; }
 
 .taskCardLeft {
   display: flex;
@@ -27,26 +30,39 @@
   gap: 2px;
   min-width: 0;
   flex: 1;
+  align-self: stretch;
+  justify-content: flex-start;
 }
 
 .taskTitle {
-  font-size: 14px;
+  font-size: 19px;
   font-weight: 600;
   color: #1d1d1f;
   letter-spacing: -0.01em;
-  white-space: nowrap;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .taskDesc {
-  font-size: 12.5px;
-  color: #86868b;
-  white-space: nowrap;
+  font-size: 14.5px;
+  color: #6e6e73;
+  margin: 4px 0 0;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0;
-  line-height: 1.4;
+}
+
+.taskCardActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
 }
 
 .taskCardRight {
@@ -57,28 +73,30 @@
 }
 
 .taskDeadline {
-  font-size: 11.5px;
-  color: #aeaeb2;
+  font-size: 12.5px;
+  color: #86868b;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .taskDeadlinePast { color: #ff3b30; }
 
 .taskDeleteBtn {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: #aeaeb2;
-  background: none;
+  background: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: color 0.15s ease, transform 0.1s ease;
   flex-shrink: 0;
 }
-.taskDeleteBtn:hover { background: #fff1f2; color: #dc2626; }
+.taskDeleteBtn:hover { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
+.taskDeleteBtn:active { transform: scale(0.94); }
 
 .taskArrow {
   color: #d1d1d6;
@@ -103,24 +121,25 @@
 
 .drawer {
   position: fixed;
-  top: 0;
+  left: 0;
   right: 0;
   bottom: 0;
-  width: min(700px, 90vw);
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-left: 1px solid rgba(0,0,0,0.08);
-  box-shadow: -12px 0 48px rgba(0,0,0,0.13);
+  top: 72px;
+  background: #fff;
+  border: none;
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -12px 48px rgba(0,0,0,0.18);
   z-index: 101;
   display: flex;
   flex-direction: column;
-  animation: drawerIn 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  animation: drawerIn 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   overflow: hidden;
+  transform-origin: 50% 100%;
 }
 @keyframes drawerIn {
-  from { transform: translateX(100%); opacity: 0.8; }
-  to   { transform: translateX(0);    opacity: 1; }
+  0%   { opacity: 0; transform: translateY(64px) scale(0.98); }
+  60%  { opacity: 1; transform: translateY(-6px) scale(1.002); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .drawerHeader {
@@ -150,7 +169,7 @@
 }
 
 .drawerSubtitle {
-  font-size: 12px;
+  font-size: 13px;
   color: #86868b;
 }
 
@@ -174,41 +193,48 @@
 
 .drawerTabs {
   display: flex;
-  gap: 0;
-  padding: 0 24px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  gap: 4px;
+  padding: 4px;
+  margin: 0 24px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 16px;
   flex-shrink: 0;
   overflow-x: auto;
   scrollbar-width: none;
+  width: fit-content;
+  max-width: calc(100% - 48px);
 }
 .drawerTabs::-webkit-scrollbar { display: none; }
 
 .drawerTab {
-  padding: 10px 14px;
-  font-size: 13px;
+  padding: 7px 16px;
+  font-size: 14px;
   font-weight: 500;
-  color: #86868b;
-  background: none;
+  color: #6e6e73;
+  background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-radius: 12px;
   cursor: pointer;
   font-family: inherit;
-  transition: color 0.15s, border-color 0.15s;
-  margin-bottom: -1px;
+  letter-spacing: -0.01em;
+  transition: background 0.15s ease, color 0.15s ease;
   white-space: nowrap;
   flex-shrink: 0;
 }
 .drawerTab:hover { color: #1d1d1f; }
 .drawerTabActive {
   color: #1d1d1f;
-  border-bottom-color: #1d1d1f;
+  background: #fff;
+  border: none;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .drawerBody {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 24px;
+  padding: 20px 24px 40px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -216,15 +242,39 @@
   scrollbar-color: rgba(0,0,0,0.1) transparent;
 }
 
+/* Інлайн-назва в шапці режиму редагування */
+.drawerTitleInput {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 14px;
+  padding: 8px 14px;
+  outline: none;
+}
+
+.drawerTitleInput::placeholder { color: #a1a1a6; font-weight: 500; }
+
+.drawerTitleInput:focus {
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18);
+}
+
 .drawerDeadlineBanner {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 11px 16px;
   background: #fff7ed;
-  border: 1px solid #fed7aa;
-  border-radius: 12px;
-  font-size: 13px;
+  border: none;
+  border-radius: 14px;
+  font-size: 13.5px;
   color: #c2410c;
   font-weight: 500;
 }
@@ -236,9 +286,9 @@
 
 /* ─── Drawer content elements ────────────────────────────────────────────────── */
 .drawerDesc {
-  font-size: 14px;
-  color: #3d3d3f;
-  line-height: 1.75;
+  font-size: 15px;
+  color: #515154;
+  line-height: 1.7;
   margin: 0;
 }
 .drawerDesc b, .drawerDesc strong { font-weight: 700; }
@@ -279,34 +329,32 @@
 }
 
 .drawerSectionLabel {
-  font-size: 11px;
-  font-weight: 700;
-  color: #aeaeb2;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: 13px;
+  font-weight: 600;
+  color: #86868b;
 }
 
 .chipList {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 12px;
-  font-size: 12.5px;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #1d1d1f;
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.06);
+  background: #f5f5f7;
+  border: none;
   border-radius: 100px;
   text-decoration: none;
-  transition: background 0.15s;
+  transition: background 0.15s ease;
 }
-.chip:hover { background: rgba(0,0,0,0.08); }
+.chip:hover { background: #ececee; }
 
 /* ─── Chevron icon ───────────────────────────────────────────────────────────── */
 .chevronSvg {
@@ -316,28 +364,40 @@
 }
 .chevronSvgOpen { transform: rotate(180deg); }
 
-/* ─── Task inner tabs ────────────────────────────────────────────────────────── */
+/* ─── Task inner tabs — той же сегмент ───────────────────────────────────────── */
 .taskInnerTabs {
   display: flex;
-  gap: 0;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  gap: 4px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 16px;
+  padding: 4px;
   margin-bottom: 12px;
+  width: fit-content;
+  max-width: 100%;
 }
 .taskInnerTab {
-  padding: 7px 12px;
-  font-size: 12.5px;
+  padding: 7px 16px;
+  font-size: 14px;
   font-weight: 500;
-  color: #86868b;
-  background: none;
+  color: #6e6e73;
+  background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-radius: 12px;
   cursor: pointer;
   font-family: inherit;
-  margin-bottom: -1px;
-  transition: color 0.15s, border-color 0.15s;
+  letter-spacing: -0.01em;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
 }
 .taskInnerTab:hover { color: #1d1d1f; }
-.taskInnerTabActive { color: #1d1d1f; border-bottom-color: #1d1d1f; font-weight: 600; }
+.taskInnerTabActive {
+  color: #1d1d1f;
+  background: #fff;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
 
 /* ─── My submission panel ────────────────────────────────────────────────────── */
 .mySubmissionEmpty {
@@ -353,9 +413,9 @@
   flex-direction: column;
   gap: 12px;
   background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 14px;
-  padding: 14px 16px;
+  border: none;
+  border-radius: 18px;
+  padding: 16px 18px;
 }
 .mySubmissionHeader {
   display: flex;
@@ -367,18 +427,16 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12.5px;
+  font-weight: 600;
   color: #15803d;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   background: rgba(21,128,61,0.1);
-  padding: 3px 10px;
+  padding: 4px 11px;
   border-radius: 100px;
 }
 .mySubmissionDate {
-  font-size: 12px;
-  color: #aeaeb2;
+  font-size: 12.5px;
+  color: #86868b;
   flex: 1;
 }
 .mySubmissionActions {
@@ -387,18 +445,18 @@
   gap: 6px;
 }
 .editSubmissionBtn {
-  padding: 5px 12px;
-  font-size: 12px;
+  padding: 6px 14px;
+  font-size: 12.5px;
   font-weight: 500;
   color: #374151;
   background: #fff;
-  border: 1px solid #d1d5db;
+  border: none;
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.15s;
+  transition: background 0.15s ease;
 }
-.editSubmissionBtn:hover { background: #f9fafb; }
+.editSubmissionBtn:hover { background: #f5f5f7; }
 
 .deleteSubmissionBtn {
   width: 28px;
@@ -416,9 +474,9 @@
 .deleteSubmissionBtn:hover { background: #fff1f2; color: #dc2626; }
 
 .submissionText {
-  font-size: 14px;
-  color: #1d1d1f;
-  line-height: 1.75;
+  font-size: 15px;
+  color: #515154;
+  line-height: 1.7;
   margin: 0;
 }
 .submissionText b, .submissionText strong { font-weight: 700; }
@@ -451,19 +509,17 @@
   white-space: pre-wrap;
 }
 .submissionText a { color: #1d1d1f; text-decoration: underline; text-underline-offset: 2px; }
-.submissionExtras { display: flex; flex-direction: column; gap: 5px; }
+.submissionExtras { display: flex; flex-direction: column; gap: 6px; }
 .submissionExtrasLabel {
-  font-size: 11px;
-  font-weight: 700;
-  color: #aeaeb2;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-size: 13px;
+  font-weight: 600;
+  color: #86868b;
 }
 
 .submitWorkBtn {
-  padding: 10px 20px;
-  font-size: 13.5px;
-  font-weight: 600;
+  padding: 11px 24px;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--btn-primary-text);
   background: var(--btn-primary-bg);
   border: none;
@@ -477,10 +533,10 @@
 
 /* ─── Grade result block ─────────────────────────────────────────────────────── */
 .gradeResultBlock {
-  background: #fafafa;
-  border: 1px solid #e8e8ec;
-  border-radius: 14px;
-  padding: 16px 18px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 18px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -492,11 +548,9 @@
   gap: 10px;
 }
 .gradeResultTitle {
-  font-size: 11px;
-  font-weight: 700;
-  color: #aaa;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 600;
+  color: #86868b;
 }
 .gradeResultTotalWrap { display: flex; align-items: baseline; gap: 3px; }
 .gradeResultTotal {
@@ -515,7 +569,7 @@
   align-items: center;
   gap: 12px;
 }
-.gradeResultScoreLabel { font-size: 13px; color: #444; font-weight: 500; }
+.gradeResultScoreLabel { font-size: 14px; color: #515154; font-weight: 500; }
 .gradeResultScoreBarTrack {
   height: 7px;
   background: #ebebed;
@@ -555,8 +609,8 @@
   margin: 0;
   padding: 12px 14px;
   background: #fff;
-  border-radius: 10px;
-  border: 1px solid #e8e8ec;
+  border-radius: 12px;
+  border: none;
 }
 .gradeResultCommentAuthor {
   display: flex;
@@ -570,31 +624,31 @@
 .gradeResultDate { font-size: 11.5px; color: #bbb; }
 
 /* ─── All submissions (owner / jury view) ────────────────────────────────────── */
-.allSubmissionsList { display: flex; flex-direction: column; gap: 5px; }
+.allSubmissionsList { display: flex; flex-direction: column; gap: 8px; }
 .submissionCard {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.07);
-  border-radius: 12px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 16px;
   overflow: hidden;
-  transition: border-color 0.15s;
+  transition: background 0.15s ease;
 }
-.submissionCard:hover { border-color: rgba(0,0,0,0.12); }
-.submissionCardExpanded { border-color: rgba(0,0,0,0.1); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.submissionCard:hover { background: #ececee; border: none; }
+.submissionCardExpanded { border: none; box-shadow: none; }
 
 .submissionCardHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 11px 14px;
+  padding: 12px 16px;
   cursor: pointer;
   gap: 12px;
-  transition: background 0.15s;
+  transition: background 0.15s ease;
 }
-.submissionCardHeader:hover { background: rgba(0,0,0,0.02); }
+.submissionCardHeader:hover { background: transparent; }
 
 .submissionParticipantInfo { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .submissionParticipantName {
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 600;
   color: #1d1d1f;
   white-space: nowrap;
@@ -602,36 +656,35 @@
   text-overflow: ellipsis;
 }
 .submissionParticipantEmail {
-  font-size: 11.5px;
-  color: #aeaeb2;
+  font-size: 12.5px;
+  color: #86868b;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .submissionCardMeta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .submissionDate {
-  font-size: 11.5px;
-  color: #aeaeb2;
+  font-size: 12.5px;
+  color: #86868b;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-.submissionBadges { display: flex; align-items: center; gap: 4px; }
+.submissionBadges { display: flex; align-items: center; gap: 6px; }
 .subBadge {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 3px 9px;
-  font-size: 11.5px;
-  font-weight: 600;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12.5px;
+  font-weight: 500;
   color: #6e6e73;
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.06);
+  background: #fff;
+  border: none;
   border-radius: 100px;
   white-space: nowrap;
 }
 .submissionCardBody {
-  border-top: 1px solid rgba(0,0,0,0.05);
-  padding: 12px 14px;
+  padding: 12px 16px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -646,24 +699,25 @@
 .taskLink, .taskFile {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  font-size: 12.5px;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #1d1d1f;
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.06);
+  background: #fff;
+  border: none;
   border-radius: 100px;
   text-decoration: none;
-  transition: background 0.15s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: background 0.15s ease;
   white-space: nowrap;
 }
-.taskLink:hover, .taskFile:hover { background: rgba(0,0,0,0.08); }
+.taskLink:hover, .taskFile:hover { background: #f0f0f2; }
 
 /* ─── Empty state ────────────────────────────────────────────────────────────── */
 .empty {
-  font-size: 13.5px;
-  color: #aeaeb2;
+  font-size: 14px;
+  color: #a1a1a6;
   margin: 0;
   padding: 10px 0;
   text-align: center;
@@ -674,24 +728,23 @@
 
 .techReqCard {
   display: flex; align-items: baseline; gap: 12px;
-  padding: 9px 13px;
-  background: rgba(0,0,0,0.025); border: 1px solid rgba(0,0,0,0.06); border-radius: 10px;
+  padding: 12px 16px;
+  background: #f5f5f7; border: none; border-radius: 14px;
 }
 .techReqCategory {
   flex: 0 0 auto; min-width: 90px;
-  font-size: 11px; font-weight: 700; color: #86868b;
-  text-transform: uppercase; letter-spacing: 0.04em;
+  font-size: 12.5px; font-weight: 600; color: #86868b;
 }
-.techReqValue { flex: 1; font-size: 14px; font-weight: 500; color: #1d1d1f; }
+.techReqValue { flex: 1; font-size: 15px; font-weight: 500; color: #1d1d1f; }
 
 /* ─── Must have (перегляд у drawer) ─────────────────────────────────────────── */
-.mustHaveViewList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.mustHaveViewList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 
 .mustHaveViewItem {
   display: flex; align-items: flex-start; gap: 10px;
-  padding: 9px 13px;
-  background: rgba(0,0,0,0.025); border: 1px solid rgba(0,0,0,0.06); border-radius: 10px;
-  font-size: 14px; color: #1d1d1f; line-height: 1.5;
+  padding: 12px 16px;
+  background: #f5f5f7; border: none; border-radius: 14px;
+  font-size: 15px; color: #1d1d1f; line-height: 1.5;
 }
 .mustHaveCheck {
   flex-shrink: 0; width: 18px; height: 18px;
@@ -702,65 +755,65 @@
 
 /* ─── Edit button on task card (pencil icon) ─────────────────────────────────── */
 .taskEditBtn {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #aeaeb2;
-  background: none;
+  color: #6e6e73;
+  background: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: color 0.15s ease, transform 0.1s ease;
   flex-shrink: 0;
 }
 .taskEditBtn:hover {
-  background: rgba(0,0,0,0.07);
   color: #1d1d1f;
 }
+.taskEditBtn:active { transform: scale(0.94); }
 
 /* ─── Score badge on task card (participant view) ────────────────────────────── */
 .taskScoreBadge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 9px;
-  font-size: 12px;
-  font-weight: 700;
+  padding: 4px 11px;
+  font-size: 13px;
+  font-weight: 500;
   border-radius: 100px;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
+  border: none;
 }
 .taskScoreBadgeHigh {
   color: #15803d;
   background: #f0fdf4;
-  border: 1px solid #bbf7d0;
 }
 .taskScoreBadgeMid {
   color: #b45309;
   background: #fffbeb;
-  border: 1px solid #fde68a;
 }
 .taskScoreBadgeLow {
   color: #dc2626;
   background: #fff1f2;
-  border: 1px solid #fecdd3;
 }
 
 /* Submitted but not yet graded */
 .taskSubmittedDot {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
-  font-size: 11.5px;
-  font-weight: 600;
+  gap: 6px;
+  padding: 4px 11px;
+  font-size: 12.5px;
+  font-weight: 500;
   color: #6e6e73;
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.09);
+  background: #fff;
+  border: none;
   border-radius: 100px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -803,8 +856,8 @@
 
 /* Edit mode label */
 .drawerEditingLabel {
-  font-size: 12px;
-  color: #aeaeb2;
+  font-size: 13px;
+  color: #86868b;
   font-style: italic;
 }
 
@@ -812,7 +865,7 @@
 .editFormBody {
   flex: 1;
   overflow-y: auto;
-  padding: 22px 24px;
+  padding: 22px 24px 120px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -821,23 +874,38 @@
 }
 
 .editFormActions {
+  position: fixed;
+  bottom: 32px;
+  right: 24px;
+  z-index: 150;
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
-  padding: 14px 24px;
-  border-top: 1px solid rgba(0,0,0,0.06);
+  background: none;
+  padding: 0;
   flex-shrink: 0;
+}
+
+.editFormActions > * {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 640px) {
+  .editFormActions {
+    left: 12px;
+    right: 12px;
+    bottom: 16px;
+  }
+
+  .editFormActions > * { flex: 1; }
 }
 
 .editLabel {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  font-size: 11px;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 600;
   color: #86868b;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
 }
 .editRequired { color: #ff3b30; }
 
@@ -884,11 +952,9 @@
 
 /* Section header within edit form */
 .editSectionLabel {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: #86868b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   margin: 0 0 6px;
 }
 
@@ -946,9 +1012,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  background: rgba(0,0,0,0.03);
-  border-radius: 10px;
+  padding: 10px 14px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 12px;
 }
 .editAttachItemNew { background: rgba(52,199,89,0.06); }
 .editAttachItemIcon { font-size: 15px; flex-shrink: 0; }
@@ -1007,33 +1074,32 @@
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 7px 14px;
-  font-size: 13px;
+  gap: 6px;
+  padding: 9px 18px;
+  font-size: 13.5px;
   font-weight: 500;
-  color: #6e6e73;
-  background: rgba(0,0,0,0.04);
-  border: 1.5px dashed rgba(0,0,0,0.15);
-  border-radius: 10px;
+  color: #1d1d1f;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 100px;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s ease;
   margin-top: 4px;
 }
 .editFilePickBtn:hover {
-  background: rgba(0,0,0,0.07);
-  border-color: rgba(0,0,0,0.28);
+  background: #ececee;
   color: #1d1d1f;
 }
 
 /* Error message */
 .editFormError {
   font-size: 13px;
-  color: #dc2626;
+  color: #c53030;
   margin: 0;
-  padding: 10px 14px;
-  background: #fff1f2;
-  border: 1px solid #fecdd3;
-  border-radius: 12px;
+  padding: 9px 13px;
+  background: #fff5f5;
+  border: none;
+  border-radius: 9px;
 }
 
 /* Cancel / Save buttons — mirror .cancelBtn / .saveBtn from RoundCard */

@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "../styles/RoundsTab.module.css";
 import { API } from '@api';
 import { ConfirmDeleteModal, Toast } from "./TournamentShared";
 import { RoundCard } from "./RoundCard";
 import { TaskCard } from "./TaskCard";
 import { TaskForm } from "./TaskForm";
+import { ScrollRow } from "@features/dashboard";
+import { useDropdownPosition } from "@shared/hooks/useDropdownPosition";
 import {
   formatRoundDateRange,
   roundStatus,
@@ -71,6 +73,9 @@ export function RoundsTab({
   const [deleteRound,    setDeleteRound]    = useState(null);
   const [deletingRound,  setDeletingRound]  = useState(false);
   const [toast,          setToast]          = useState(null);
+  const [editAnchorEl,   setEditAnchorEl]   = useState(null);
+  const createAnchorRef = useRef(null);
+  const taskAnchorRef = useRef(null);
 
   // Синхронізуємо список і ставимо перший раунд активним
   useEffect(() => {
@@ -83,6 +88,14 @@ export function RoundsTab({
   }, [initialRounds]);
 
   const activeRound = rounds.find((r) => r.id === activeRoundId) ?? null;
+
+  // Випадачки: позиція там, де є місце на екрані
+  const createDD = useDropdownPosition(createAnchorRef, showForm, {
+    side: "bottom", align: "end", gap: 10,
+  });
+  const taskDD = useDropdownPosition(taskAnchorRef, activeRound ? taskForms.has(activeRound.id) : false, {
+    side: "top", align: "end", gap: 10, fallbacks: ["bottom"],
+  });
 
   // ── Права доступу ─────────────────────────────────────────────────────────
   // Власник і адмін отримують readOnly=false з TournamentPage → можуть редагувати
@@ -125,6 +138,12 @@ export function RoundsTab({
   };
 
   // ── Створення раунду ───────────────────────────────────────────────────────
+
+  const closeCreateForm = () => {
+    setForm(EMPTY_FORM);
+    setFormError("");
+    setShowForm(false);
+  };
 
   const handleCreate = async () => {
     if (!form.title.trim()) { setFormError("Назва раунду обов'язкова."); return; }
@@ -253,26 +272,30 @@ export function RoundsTab({
             <span className={styles.tabCount}>{rounds.length}</span>
           )}
         </span>
-        {!readOnly && !showForm && (
-          <button className="btn-primary btn-sm" onClick={() => setShowForm(true)}>
-            + Новий раунд
-          </button>
-        )}
-      </div>
-
-      {/* ── Форма нового раунду ── */}
-      {showForm && (
-        <div className={styles.roundFormCard}>
-          <div className={styles.roundFormHeader}>
-            <h3 className={styles.roundFormTitle}>Новий раунд</h3>
+        {!readOnly && (
+          <span className={styles.createAnchor} ref={createAnchorRef}>
             <button
-              className="btn-secondary btn-sm"
-              onClick={() => { setForm(EMPTY_FORM); setFormError(""); setShowForm(false); }}
-              disabled={saving}
+              className="btn-primary btn-sm"
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 15, padding: "10px 22px" }}
+              onClick={() => (showForm ? closeCreateForm() : setShowForm(true))}
+              aria-expanded={showForm}
             >
-              Скасувати
+              + Новий раунд
             </button>
-          </div>
+          </span>
+        )}
+
+        {/* ── Випадачка нового раунду (всередині шапки — якір позиціювання) ── */}
+        {showForm && (
+          <>
+          <div className={styles.formBackdrop} onClick={closeCreateForm} />
+          <div
+            className={styles.roundFormCard}
+            ref={createDD.panelRef}
+            style={createDD.dropdownStyle}
+            role="dialog"
+            aria-label="Новий раунд"
+          >
           <div className={styles.editForm}>
             <label className={styles.editLabel}>
               Назва
@@ -320,12 +343,17 @@ export function RoundsTab({
             {formError && <p className={styles.formError}>{formError}</p>}
           </div>
           <div className={styles.editActions}>
+            <button className="btn-secondary" onClick={closeCreateForm} disabled={saving}>
+              Скасувати
+            </button>
             <button className="btn-primary" onClick={handleCreate} disabled={saving}>
               {saving ? "Створення…" : "Створити раунд"}
             </button>
           </div>
-        </div>
-      )}
+          </div>
+          </>
+        )}
+      </div>
 
       {/* ── Порожній стан ── */}
       {rounds.length === 0 ? (
@@ -388,7 +416,7 @@ export function RoundsTab({
                       return (
                         <span
                           className={styles.roundStatus}
-                          style={{ color: sc.color, background: sc.background, border: `1px solid ${sc.border}` }}
+                          style={{ color: sc.color, background: sc.background, border: "none" }}
                         >
                           <span className={styles.statusDot} style={{ background: sc.color }} />
                           {label}
@@ -398,13 +426,15 @@ export function RoundsTab({
                     {/* Кнопки дій (тільки власнику) */}
                     {!readOnly && (
                       <div className={styles.roundInfoActions}>
-                        <button
-                          className={styles.roundIconBtn}
-                          onClick={() => setEditingRound(activeRound.id)}
-                          title="Редагувати раунд"
-                        >
-                          <EditIcon />
-                        </button>
+                        <span ref={setEditAnchorEl} style={{ display: "inline-flex" }}>
+                          <button
+                            className={styles.roundIconBtn}
+                            onClick={() => setEditingRound(activeRound.id)}
+                            title="Редагувати раунд"
+                          >
+                            <EditIcon />
+                          </button>
+                        </span>
                         <button
                           className={`${styles.roundIconBtn} ${styles.roundIconBtnDanger}`}
                           onClick={() => setDeleteRound(activeRound)}
@@ -498,10 +528,30 @@ export function RoundsTab({
                         Завдання
                         {(activeRound.tasks?.length ?? 0) > 0 && ` (${activeRound.tasks.length})`}
                       </span>
-                      {!readOnly && !taskForms.has(activeRound.id) && (
-                        <button className="btn-primary btn-sm" onClick={openTaskForm}>
-                          + Завдання
-                        </button>
+                      {!readOnly && (
+                        <span className={styles.taskFormAnchor} ref={taskAnchorRef}>
+                          <button
+                            className="btn-primary btn-sm"
+                            style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 15, padding: "10px 22px" }}
+                            onClick={() => (taskForms.has(activeRound.id) ? closeTaskForm(activeRound.id) : openTaskForm())}
+                            aria-expanded={taskForms.has(activeRound.id)}
+                          >
+                            + Завдання
+                          </button>
+                          {taskForms.has(activeRound.id) && (
+                            <>
+                              <div className={styles.taskFormBackdrop} onClick={() => closeTaskForm(activeRound.id)} />
+                              <TaskForm
+                                roundId={activeRound.id}
+                                tournamentId={tournamentId}
+                                onCreated={(task) => handleTaskCreated(activeRound.id, task)}
+                                onCancel={() => closeTaskForm(activeRound.id)}
+                                panelRef={taskDD.panelRef}
+                                panelStyle={taskDD.dropdownStyle}
+                              />
+                            </>
+                          )}
+                        </span>
                       )}
                     </div>
 
@@ -526,7 +576,7 @@ export function RoundsTab({
 
                       // Якщо турнір завершено — повідомляємо про це
                       if (tournamentStatus === "finished") return (
-                        <div className={styles.privilegedNoticeBanner} style={{ color: "#6b7280", background: "#f9fafb", borderColor: "#e5e7eb" }}>
+                        <div className={styles.privilegedNoticeBanner} style={{ color: "#6b7280", background: "#f9fafb" }}>
                           <span>🏁</span>
                           <span>Турнір завершено — учасники бачать завдання, але <strong>не можуть здавати роботи</strong>.</span>
                         </div>
@@ -561,29 +611,25 @@ export function RoundsTab({
                       <p className={styles.empty}>Завдань у цьому раунді ще немає.</p>
                     )}
 
-                    {(activeRound.tasks || []).map((task) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        tournamentId={tournamentId}
-                        roundId={activeRound.id}
-                        readOnly={readOnly || !canSubmit}
-                        myRole={myRole}
-                        roundEndDate={activeRound.end_date}
-                        canSubmit={canSubmit}
-                        isTeamCaptain={isTeamCaptain}
-                        teamName={isTeamTournament ? teamName : null}
-                        onDeleted={(taskId) => handleTaskDeleted(activeRound.id, taskId)}
-                      />
-                    ))}
-
-                    {!readOnly && taskForms.has(activeRound.id) && (
-                      <TaskForm
-                        roundId={activeRound.id}
-                        tournamentId={tournamentId}
-                        onCreated={(task) => handleTaskCreated(activeRound.id, task)}
-                        onCancel={() => closeTaskForm(activeRound.id)}
-                      />
+                    {(activeRound.tasks?.length ?? 0) > 0 && (
+                      <ScrollRow classes={styles}>
+                        {(activeRound.tasks || []).map((task) => (
+                          <div key={task.id} className={styles.taskCell}>
+                            <TaskCard
+                              task={task}
+                              tournamentId={tournamentId}
+                              roundId={activeRound.id}
+                              readOnly={readOnly || !canSubmit}
+                              myRole={myRole}
+                              roundEndDate={activeRound.end_date}
+                              canSubmit={canSubmit}
+                              isTeamCaptain={isTeamCaptain}
+                              teamName={isTeamTournament ? teamName : null}
+                              onDeleted={(taskId) => handleTaskDeleted(activeRound.id, taskId)}
+                            />
+                          </div>
+                        ))}
+                      </ScrollRow>
                     )}
                   </div>
                 );
@@ -593,13 +639,14 @@ export function RoundsTab({
         </>
       )}
 
-      {/* ── Drawer редагування раунду ── */}
+      {/* ── Випадачка редагування раунду ── */}
       {editingRound && (
         <RoundCard
           round={rounds.find((r) => r.id === editingRound)}
           tournamentId={tournamentId}
           onRoundSaved={handleRoundSaved}
           onEditToggle={() => setEditingRound(null)}
+          anchorEl={editAnchorEl}
         />
       )}
 

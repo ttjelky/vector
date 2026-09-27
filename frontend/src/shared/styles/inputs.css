@@ -41,6 +41,21 @@
   resize: vertical;
 }
 
+/* ── Поля дати: контент завжди по центру ──────────────────────────────
+   У WebKit/Safari текст у datetime-local з фіксованою висотою
+   прилипає догори. Висоту даємо симетричними падінгами —
+   так центрування симетричне в усіх рушіях. */
+.input[type="date"],
+.input[type="datetime-local"],
+.input[type="time"],
+.input[type="month"] {
+  height: auto;
+  min-height: 48px;
+  padding-top: 11px;
+  padding-bottom: 11px;
+  line-height: 1.5;
+}
+
 /* Поле з іконкою ліворуч (пошук тощо) */
 .input-icon {
   padding-left: 38px;
