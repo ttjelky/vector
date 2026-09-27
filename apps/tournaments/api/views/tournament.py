@@ -1871,12 +1871,14 @@ class AnnouncementListCreateView(APIView):
         qs = (
             Announcement.objects
             .filter(tournament_id=tournament_pk)
-            .select_related('author')
+            .select_related('author', 'author__profile')
             .prefetch_related(
                 'reactions',
                 'comments__author',
+                'comments__author__profile',
                 'comments__reactions',
                 'comments__replies__author',
+                'comments__replies__author__profile',
                 'comments__replies__reactions',
             )
         )
@@ -1906,6 +1908,27 @@ class AnnouncementListCreateView(APIView):
 
 class AnnouncementDetailView(APIView):
     permission_classes = [IsAuthenticated]
+
+    def patch(self, request, tournament_pk, ann_pk):
+        from ...models import ANNOUNCEMENT_TARGET_CHOICES
+        role = _get_membership_role(request, tournament_pk)
+        if not _can_manage_ann(role):
+            return Response({'detail': 'Недостатньо прав.'}, status=status.HTTP_403_FORBIDDEN)
+        ann = generics.get_object_or_404(Announcement, pk=ann_pk, tournament_id=tournament_pk)
+
+        title = str(request.data.get('title', '')).strip()
+        if not title:
+            return Response({'title': ['Вкажіть заголовок оголошення.']}, status=status.HTTP_400_BAD_REQUEST)
+        ann.title = title[:200]
+        if 'body' in request.data:
+            ann.body = str(request.data.get('body') or '')
+        if 'target_role' in request.data:
+            valid = {c[0] for c in ANNOUNCEMENT_TARGET_CHOICES}
+            if request.data['target_role'] not in valid:
+                return Response({'target_role': ['Невідома аудиторія.']}, status=status.HTTP_400_BAD_REQUEST)
+            ann.target_role = request.data['target_role']
+        ann.save(update_fields=['title', 'body', 'target_role'])
+        return Response(AnnouncementSerializer(ann, context={'request': request}).data)
 
     def delete(self, request, tournament_pk, ann_pk):
         role = _get_membership_role(request, tournament_pk)

@@ -44,6 +44,55 @@ class AnnouncementTests(BaseTest):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(resp.data), 1)
 
+    def test_patch_announcement_as_owner(self):
+        ann = Announcement.objects.create(
+            tournament=self.t,
+            author=self.owner,
+            title="Old",
+            body="Old body",
+        )
+        self.auth(self.owner)
+        resp = self.client.patch(
+            f"{self._url()}{ann.id}/",
+            {"title": "New", "body": "New body", "target_role": "jury"},
+            format="json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        ann.refresh_from_db()
+        self.assertEqual(ann.title, "New")
+        self.assertEqual(ann.body, "New body")
+        self.assertEqual(ann.target_role, "jury")
+
+    def test_patch_announcement_as_participant_forbidden(self):
+        ann = Announcement.objects.create(
+            tournament=self.t,
+            author=self.owner,
+            title="Old",
+            body="Old body",
+        )
+        self.auth(self.p)
+        resp = self.client.patch(
+            f"{self._url()}{ann.id}/",
+            {"title": "Hack"},
+            format="json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_patch_announcement_empty_title_rejected(self):
+        ann = Announcement.objects.create(
+            tournament=self.t,
+            author=self.owner,
+            title="Old",
+            body="Old body",
+        )
+        self.auth(self.owner)
+        resp = self.client.patch(
+            f"{self._url()}{ann.id}/",
+            {"title": "  "},
+            format="json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 13. REGISTRATION EXCEPTION

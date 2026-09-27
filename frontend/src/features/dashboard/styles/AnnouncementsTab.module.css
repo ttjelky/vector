@@ -1,5 +1,6 @@
-/* ─── macOS-native aesthetic ─────────────────────────────────────────────────
-   Inspired by: Notes.app, Messages.app
+/* ─── Оголошення — у мові проєкту ────────────────────────────────────────────
+   Пласкі сірі картки без рамок, білі вставки всередині,
+   сегмент-контрол замість чипсів, SF-стек, більший тонший текст.
    ─────────────────────────────────────────────────────────────────────────── */
 
 .tab {
@@ -7,7 +8,7 @@
   flex-direction: column;
   gap: 16px;
   padding: 8px 0 72px;
-  font-family: DM Sans, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -40,8 +41,8 @@
 }
 
 .loadingState p {
-  font-size: 13px;
-  color: #aeaeb2;
+  font-size: 13.5px;
+  color: #86868b;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -56,172 +57,103 @@
   padding: 2px 0 4px;
 }
 
+/* Сегмент-контрол — як фільтр на профілі */
 .filterRow {
   display: flex;
   align-items: center;
   gap: 4px;
   flex-wrap: wrap;
+  background: #f5f5f7;
+  border-radius: 16px;
+  padding: 4px;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .filterChip {
-  padding: 4px 13px;
-  border-radius: 20px;
-  border: 0.5px solid rgba(0, 0, 0, 0.1);
-  background: var(--glass-bg);
-  font-size: 12.5px;
+  padding: 7px 14px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
   font-weight: 500;
-  color: #636366;
+  color: #6e6e73;
   cursor: pointer;
   font-family: inherit;
   letter-spacing: -0.01em;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   white-space: nowrap;
-  box-shadow: 0 0.5px 2px rgba(0,0,0,0.06);
+  box-shadow: none;
 }
 
 .filterChip:hover {
-  background: rgba(255, 255, 255, 0.95);
-  color: #1c1c1e;
-  border-color: rgba(0,0,0,0.15);
+  background: transparent;
+  color: #1d1d1f;
+  border: none;
 }
 
 .filterChipActive {
-  background: #1c1c1e;
-  border-color: transparent;
-  color: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-}
-
-/* ─── New announcement button ─────────────────────────────────────────────── */
-.newAnnBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 16px;
-  border-radius: 20px;
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  font-size: 12.5px;
-  font-weight: 500;
+  background: #fff;
   border: none;
-  cursor: pointer;
-  font-family: inherit;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-  transition: opacity 0.15s, transform 0.1s;
+  color: #1d1d1f;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.newAnnBtn:hover  { background: var(--btn-primary-hover-bg); }
-.newAnnBtn:active { transform: scale(0.96); }
+/* ─── Create form — випадачка біля кнопки, як вікно пошуку ───────────────── */
+.createBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: transparent;
+}
 
-/* ─── Create form ─────────────────────────────────────────────────────────── */
+.toolbar {
+  position: relative;
+}
+
+/* Якір кнопки — випадачка відкривається ліворуч від неї */
+.createWrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
 .createForm {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 0.5px solid rgba(0, 0, 0, 0.1);
-  border-radius: 20px;
-  padding: 20px 20px 18px;
+  position: absolute;
+  top: 0;
+  right: calc(100% + 12px);
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  background: #fff;
+  border: none;
+  border-radius: 28px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
-  gap: 13px;
-  box-shadow:
-    0 2px 8px rgba(0,0,0,0.06),
-    0 8px 30px rgba(0,0,0,0.07),
-    inset 0 1px 0 rgba(255,255,255,0.9);
-  animation: sheetDrop 0.2s cubic-bezier(0.34, 1.4, 0.64, 1);
+  gap: 14px;
+  box-shadow: 0 48px 120px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.12);
+  z-index: 401;
+  transform-origin: 100% 0;
+  animation: sheetDrop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@media (max-width: 700px) {
+  /* На вузьких екранах ліворуч нема місця — випадачка під кнопкою */
+  .createForm {
+    top: calc(100% + 10px);
+    right: 0;
+    transform-origin: 100% 0;
+  }
 }
 
 @keyframes sheetDrop {
-  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0)     scale(1); }
-}
-
-.createFormHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.createFormTitle {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #1c1c1e;
-  letter-spacing: -0.02em;
-}
-
-.createFormCloseBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #e5e5ea;
-  border: none;
-  color: #636366;
-  cursor: pointer;
-  transition: background 0.12s;
-}
-
-.createFormCloseBtn:hover { background: #d1d1d6; color: #1c1c1e; }
-
-.formInput {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 9px 13px;
-  border-radius: 12px;
-  border: 0.5px solid rgba(0,0,0,0.12);
-  font-size: 14px;
-  font-weight: 500;
-  color: #1c1c1e;
-  font-family: inherit;
-  letter-spacing: -0.015em;
-  outline: none;
-  background: rgba(255,255,255,0.75);
-  transition: border-color 0.15s, box-shadow 0.15s;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
-}
-
-.formInput::placeholder { color: #aeaeb2; font-weight: 400; }
-
-.formInput:focus {
-  border-color: rgba(0,0,0,0.24);
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.06), inset 0 1px 2px rgba(0,0,0,0.03);
+  0%   { opacity: 0; transform: translateY(-14px) scale(0.94, 0.92); }
+  60%  { opacity: 1; transform: translateY(2px) scale(1.01, 1.005); }
+  100% { opacity: 1; transform: translateY(0) scale(1, 1); }
 }
 
 .formInputError { border-color: rgba(255, 59, 48, 0.45); }
-
-.formTextarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 9px 13px;
-  border-radius: 12px;
-  border: 0.5px solid rgba(0,0,0,0.12);
-  font-size: 13.5px;
-  color: #1c1c1e;
-  font-family: inherit;
-  letter-spacing: -0.01em;
-  resize: none;
-  min-height: 88px;
-  outline: none;
-  background: rgba(255,255,255,0.75);
-  line-height: 1.55;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
-}
-
-.formTextarea::placeholder { color: #aeaeb2; }
-
-.formTextarea:focus {
-  border-color: rgba(0,0,0,0.24);
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
-}
 
 .formAudienceRow {
   display: flex;
@@ -230,48 +162,49 @@
   flex-wrap: wrap;
 }
 
-.formAudienceLabel {
-  font-size: 10.5px;
-  font-weight: 600;
-  color: #aeaeb2;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding-top: 5px;
-  white-space: nowrap;
-  flex-shrink: 0;
+/* Той же сегмент-контрол, що й фільтр */
+.roleChips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  background: #ececee;
+  border-radius: 16px;
+  padding: 4px;
+  width: fit-content;
+  max-width: 100%;
 }
 
-.roleChips { display: flex; gap: 4px; flex-wrap: wrap; }
-
 .roleChip {
-  padding: 4px 11px;
-  border-radius: 16px;
-  border: 0.5px solid rgba(0,0,0,0.1);
-  background: rgba(255,255,255,0.65);
-  font-size: 12px;
+  padding: 7px 14px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
   font-weight: 500;
-  color: #636366;
+  color: #6e6e73;
   cursor: pointer;
   font-family: inherit;
   letter-spacing: -0.01em;
-  transition: all 0.12s;
-  box-shadow: 0 0.5px 2px rgba(0,0,0,0.06);
+  transition: background 0.15s ease, color 0.15s ease;
+  box-shadow: none;
 }
 
-.roleChip:hover { background: #fff; color: #1c1c1e; border-color: rgba(0,0,0,0.16); }
+.roleChip:hover { background: transparent; color: #1d1d1f; }
 
 .roleChipActive {
-  background: #1c1c1e;
-  border-color: transparent;
-  color: #fff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  background: #fff;
+  border: none;
+  color: #1d1d1f;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .formError {
-  font-size: 12px;
-  color: #ff3b30;
+  font-size: 13px;
+  color: #c53030;
   margin: 0;
-  padding: 0 2px;
+  padding: 9px 13px;
+  background: #fff5f5;
+  border-radius: 9px;
   letter-spacing: -0.01em;
 }
 
@@ -279,76 +212,88 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 7px;
+  gap: 8px;
 }
-
-.formCancelBtn {
-  padding: 7px 15px;
-  border-radius: 20px;
-  border: 0.5px solid var(--btn-secondary-border-color);
-  background: var(--btn-secondary-bg);
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--btn-secondary-text);
-  cursor: pointer;
-  font-family: inherit;
-  letter-spacing: -0.01em;
-  transition: background 0.12s;
-}
-
-.formCancelBtn:hover { background: var(--btn-secondary-hover-bg); color: #1c1c1e; }
-
-.formPublishBtn {
-  padding: 7px 18px;
-  border-radius: 20px;
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  font-size: 12.5px;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  letter-spacing: -0.01em;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.22);
-  transition: opacity 0.15s, transform 0.1s;
-}
-
-.formPublishBtn:disabled { opacity: 0.28; cursor: not-allowed; }
-.formPublishBtn:not(:disabled):hover  { background: var(--btn-primary-hover-bg); }
-.formPublishBtn:not(:disabled):active { transform: scale(0.96); }
 
 /* ─── Feed ────────────────────────────────────────────────────────────────── */
-.feed { display: flex; flex-direction: column; gap: 10px; }
+.feed { display: flex; flex-direction: column; gap: 12px; }
 
 /* ─── Card ────────────────────────────────────────────────────────────────── */
 .card {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 0.5px solid rgba(0, 0, 0, 0.09);
-  border-radius: 20px;
-  overflow: hidden;
-  transition: box-shadow 0.2s ease, transform 0.15s ease, border-color 0.2s;
-  box-shadow:
-    0 1px 2px rgba(0,0,0,0.04),
-    0 4px 16px rgba(0,0,0,0.05),
-    inset 0 1px 0 rgba(255,255,255,0.9);
+  background: #f5f5f7;
+  border: none;
+  border-radius: 24px;
+  /* overflow навмисно visible: випадачка реакцій має виходити за межі картки */
+  overflow: visible;
+  box-shadow: none;
+  transition: background 0.15s ease;
+  position: relative;
+  z-index: 0;
 }
 
 .card:hover {
-  border-color: rgba(0,0,0,0.12);
-  box-shadow:
-    0 2px 8px rgba(0,0,0,0.07),
-    0 8px 28px rgba(0,0,0,0.08),
-    inset 0 1px 0 rgba(255,255,255,0.9);
-  transform: translateY(-1px);
+  background: #ececee;
+  border: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.card:hover {
+  background: #ececee;
+  border: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.cardEditing {
+  z-index: 50;
+}
+
+/* ─── Edit panel — випадачка зверху від кнопки ─────────────────────────────── */
+.editBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: transparent;
+}
+
+.editPanel {
+  position: absolute;
+  bottom: 64px;
+  right: 0;
+  width: min(520px, calc(100% - 16px));
+  background: #fff;
+  border: none;
+  border-radius: 28px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 48px 120px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+  transform-origin: 100% 100%;
+  animation: editPanelIn 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes editPanelIn {
+  0%   { opacity: 0; transform: translateY(14px) scale(0.94, 0.92); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.01, 1.005); }
+  100% { opacity: 1; transform: translateY(0) scale(1, 1); }
+}
+
+@media (max-width: 640px) {
+  .editPanel {
+    right: 8px;
+    left: 8px;
+    width: auto;
+  }
 }
 
 .cardTop {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 15px 16px 0;
+  padding: 16px 18px 0;
   gap: 10px;
   min-width: 0;
 }
@@ -356,188 +301,169 @@
 .cardTopLeft {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   min-width: 0;
   flex: 1;
-}
-
-.cardTopRight {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  flex-shrink: 0;
 }
 
 .cardMeta {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
 }
 
 .cardAuthorRow {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .cardAuthorName {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
-  color: #1c1c1e;
-  letter-spacing: -0.02em;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
   white-space: nowrap;
 }
 
+/* Пастельні пілюлі без рамок — як бейджі статусів */
 .authorRoleBadge {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 1.5px 7px;
-  border-radius: 10px;
-  background: rgba(88, 86, 214, 0.09);
-  color: #5856d6;
-  border: 0.5px solid rgba(88, 86, 214, 0.18);
-  letter-spacing: 0.01em;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 100px;
+  background: #f0f2ff;
+  color: #5566aa;
+  border: none;
   white-space: nowrap;
 }
 
 .authorRoleOwner {
-  background: rgba(88, 86, 214, 0.12);
-  color: #5856d6;
-  border-color: rgba(88, 86, 214, 0.22);
+  background: #f5f3ff;
+  color: #7c3aed;
+  border: none;
 }
 
 .cardTime {
-  font-size: 11px;
-  color: #aeaeb2;
+  font-size: 12.5px;
+  color: #86868b;
   letter-spacing: -0.01em;
 }
 
-.targetBadge {
-  font-size: 10.5px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
-  background: rgba(0, 122, 255, 0.07);
-  color: #007aff;
-  border: 0.5px solid rgba(0, 122, 255, 0.15);
-  white-space: nowrap;
-  letter-spacing: 0.01em;
-}
+.cardBody { padding: 10px 18px 14px; }
 
-.targetAll {
-  background: rgba(52, 199, 89, 0.08);
-  color: #34c759;
-  border-color: rgba(52, 199, 89, 0.2);
-}
-
-.cardDeleteBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: none;
-  border: none;
-  color: #d1d1d6;
-  cursor: pointer;
-  transition: background 0.12s, color 0.12s;
-  flex-shrink: 0;
-}
-
-.cardDeleteBtn:hover {
-  background: rgba(255, 59, 48, 0.1);
-  color: #ff3b30;
-}
-
-.cardBody { padding: 10px 16px 12px; }
+.cardBodyClickable { cursor: pointer; }
 
 .cardTitle {
-  font-size: 14.5px;
-  font-weight: 600;
-  color: #1c1c1e;
-  margin: 0 0 5px;
-  line-height: 1.3;
-  letter-spacing: -0.025em;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0 0 6px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
   word-break: break-word;
   overflow-wrap: break-word;
 }
 
 .cardBodyText {
-  font-size: 13px;
-  color: #48484a;
+  font-size: 15px;
+  color: #515154;
   margin: 0;
   line-height: 1.6;
   white-space: pre-wrap;
-  letter-spacing: -0.01em;
   word-break: break-word;
   overflow-wrap: break-word;
   overflow: hidden;
 }
 
-.cardReactions { padding: 0 16px 10px; }
-
-/* ─── Comments toggle ─────────────────────────────────────────────────────── */
-.commentsToggle {
-  width: 100%;
+/* ─── Footer row: реакції зліва, дії справа ───────────────────────────────── */
+.cardFooterRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 16px;
-  background: none;
-  border: none;
-  border-top: 0.5px solid rgba(0,0,0,0.07);
-  font-size: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 0 18px 14px;
+}
+
+/* ─── Actions — 3 pill-кнопки ─────────────────────────────────────────────── */
+.actionsRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.actionEdit,
+.actionDelete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 20px;
+  font-size: 14px;
   font-weight: 500;
-  color: #aeaeb2;
-  cursor: pointer;
   font-family: inherit;
   letter-spacing: -0.01em;
-  transition: background 0.12s, color 0.12s;
+  border: none;
+  border-radius: 980px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, transform 0.1s ease;
 }
 
-.commentsToggle:hover {
-  background: rgba(0,0,0,0.02);
-  color: #636366;
+.actionEdit {
+  color: #1d1d1f;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-.commentsToggleLeft { display: flex; align-items: center; gap: 6px; }
+.actionEdit:hover { background: #f0f0f2; }
 
-.chevron {
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-  color: #c7c7cc;
+.actionDelete {
+  color: rgb(215, 125, 126);
+  background: rgba(255, 229, 230, 0.7);
 }
 
-.chevronDown { transform: rotate(180deg); }
+.actionDelete:hover { background: rgba(255, 201, 204, 0.9); }
 
-/* ─── Comments section ────────────────────────────────────────────────────── */
+.actionEdit:active,
+.actionDelete:active { transform: scale(0.97); }
+
+/* ─── Inline edit ─────────────────────────────────────────────────────────── */
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ─── Comments section — біла вставка всередині сірої картки ──────────────── */
 .commentsSection {
-  padding: 12px 16px 16px;
-  border-top: 0.5px solid rgba(0,0,0,0.07);
-  background: rgba(242, 242, 247, 0.55);
+  margin: 0 12px 12px;
+  padding: 14px;
+  border: none;
+  border-radius: 16px;
+  background: #fff;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  transform-origin: 50% 0;
+  animation: commentsIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.noComments {
-  text-align: center;
-  font-size: 12.5px;
-  color: #c7c7cc;
-  margin: 4px 0 6px;
-  letter-spacing: -0.01em;
+@keyframes commentsIn {
+  0%   { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  60%  { opacity: 1; transform: translateY(2px) scale(1.005); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ─── Comment ─────────────────────────────────────────────────────────────── */
-.comment { display: flex; align-items: flex-start; gap: 8px; }
+.comment { display: flex; align-items: flex-start; gap: 10px; }
 
 .commentReply {
-  margin-left: 18px;
-  padding-left: 11px;
-  border-left: 1.5px solid rgba(0,0,0,0.07);
+  margin-left: 20px;
 }
 
 .commentContent {
@@ -554,16 +480,16 @@
 }
 
 .commentAuthor {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: #1c1c1e;
-  letter-spacing: -0.02em;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
   white-space: nowrap;
 }
 
 .commentTime {
-  font-size: 10.5px;
-  color: #c7c7cc;
+  font-size: 12px;
+  color: #a1a1a6;
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
@@ -572,278 +498,243 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: none;
   border: none;
-  color: #d1d1d6;
+  color: #c7c7cc;
   cursor: pointer;
   margin-left: auto;
   flex-shrink: 0;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .commentDeleteBtn:hover {
-  background: rgba(255,59,48,0.1);
+  background: rgba(255, 59, 48, 0.1);
   color: #ff3b30;
 }
 
 .commentText {
-  font-size: 13px;
-  color: #3a3a3c;
-  margin: 0 0 5px;
+  font-size: 14px;
+  color: #515154;
+  margin: 0 0 6px;
   line-height: 1.55;
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: break-word;
-  letter-spacing: -0.01em;
   overflow: hidden;
 }
 
 .commentFooter {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .replyBtn {
   background: none;
   border: none;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
-  color: #c7c7cc;
+  color: #86868b;
   cursor: pointer;
   padding: 0;
   font-family: inherit;
   letter-spacing: -0.01em;
-  transition: color 0.12s;
+  transition: color 0.15s ease;
   white-space: nowrap;
 }
 
-.replyBtn:hover { color: #636366; }
+.replyBtn:hover { color: #1d1d1f; }
 
-.replyForm { display: flex; flex-direction: column; gap: 6px; margin-top: 7px; }
-
-.replyTextarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 7px 11px;
-  border-radius: 12px;
-  border: 0.5px solid rgba(0,0,0,0.12);
-  font-size: 12.5px;
-  color: #1c1c1e;
-  font-family: inherit;
-  letter-spacing: -0.01em;
-  resize: none;
-  outline: none;
-  background: #fff;
-  line-height: 1.5;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.replyTextarea::placeholder { color: #aeaeb2; }
-.replyTextarea:focus {
-  border-color: rgba(0,0,0,0.22);
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
-}
-
-.replySendBtn {
-  align-self: flex-end;
-  padding: 5px 13px;
-  border-radius: 16px;
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  font-size: 11.5px;
-  font-weight: 500;
+.repliesToggle {
+  background: none;
   border: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: #86868b;
   cursor: pointer;
+  padding: 0;
   font-family: inherit;
   letter-spacing: -0.01em;
-  transition: opacity 0.15s;
+  transition: color 0.15s ease;
+  white-space: nowrap;
 }
 
-.replySendBtn:disabled { opacity: 0.28; cursor: not-allowed; }
-.replySendBtn:not(:disabled):hover { background: var(--btn-primary-hover-bg); }
+.repliesToggle:hover { color: #1d1d1f; }
+
+.replyForm { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 
 .repliesList {
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  margin-top: 9px;
+  gap: 10px;
+  margin-top: 10px;
+  transform-origin: 50% 0;
+  animation: commentsIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ─── New comment row ─────────────────────────────────────────────────────── */
+/* ─── New comment row — один ряд: аватар + інпут-пілюля + кнопка ─────────── */
 .newCommentRow {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
-  padding-top: 8px;
-  border-top: 0.5px solid rgba(0,0,0,0.07);
 }
 
-.newCommentField { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-
-.newCommentTextarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 8px 12px;
-  border-radius: 14px;
-  border: 0.5px solid rgba(0,0,0,0.12);
-  font-size: 13px;
-  color: #1c1c1e;
-  font-family: inherit;
-  letter-spacing: -0.01em;
-  resize: none;
-  outline: none;
-  background: #fff;
-  line-height: 1.55;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.newCommentTextarea::placeholder { color: #aeaeb2; }
-
-.newCommentTextarea:focus {
-  border-color: rgba(0,0,0,0.22);
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.05), inset 0 1px 2px rgba(0,0,0,0.02);
-}
-
-.newCommentSend {
-  align-self: flex-end;
-  padding: 6px 15px;
-  border-radius: 16px;
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  font-size: 12px;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  letter-spacing: -0.01em;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  transition: opacity 0.15s, transform 0.1s;
+.newCommentRow > button {
   flex-shrink: 0;
 }
 
-.newCommentSend:disabled { opacity: 0.28; cursor: not-allowed; }
-.newCommentSend:not(:disabled):hover  { background: var(--btn-primary-hover-bg); }
-.newCommentSend:not(:disabled):active { transform: scale(0.95); }
+.commentInput {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  min-height: 38px;
+  box-sizing: border-box;
+  padding: 8px 16px;
+  border-radius: 980px;
+  resize: none;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.5;
+}
 
 /* ─── Reactions ───────────────────────────────────────────────────────────── */
-.reactionRow { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-.reactionRowCompact { gap: 3px; }
+.reactionRow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.reactionRowCompact { gap: 5px; }
+
+/* Компактні (у коментарях) — менші */
+.reactionRowCompact .reactionChip {
+  height: 30px;
+  padding: 0 10px;
+  gap: 4px;
+}
+
+.reactionRowCompact .reactionEmoji { font-size: 13px; }
+
+.reactionRowCompact .reactionCount { font-size: 11.5px; }
+
+.reactionRowCompact .reactionAdd {
+  height: 30px;
+  min-width: 30px;
+  padding: 0 7px;
+}
 
 .reactionChip {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 2.5px 8px;
-  border-radius: 12px;
-  border: 0.5px solid rgba(0,0,0,0.1);
-  background: rgba(255,255,255,0.72);
+  gap: 5px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 980px;
+  border: none;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.12s;
-  box-shadow: 0 0.5px 2px rgba(0,0,0,0.05);
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .reactionChip:hover {
-  background: rgba(255,255,255,0.97);
-  border-color: rgba(0,0,0,0.14);
+  background: #fff;
+  border: none;
+  transform: scale(1.04);
 }
+
+.reactionChip:active { transform: scale(0.96); }
 
 .reactionChipActive {
-  background: rgba(0, 122, 255, 0.07);
-  border-color: rgba(0, 122, 255, 0.2);
+  background: #e5f1fd;
+  border: none;
 }
 
-.reactionEmoji { font-size: 13px; line-height: 1; }
+.reactionEmoji { font-size: 15px; line-height: 1; }
 
 .reactionCount {
-  font-size: 11px;
-  color: #636366;
+  font-size: 13px;
+  color: #6e6e73;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
-.reactionChipActive .reactionCount { color: #007aff; }
+.reactionChipActive .reactionCount { color: #0071e3; }
 
 .reactionAdd {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 22px;
-  border-radius: 12px;
-  border: 0.5px dashed rgba(0,0,0,0.16);
-  background: transparent;
-  color: #c7c7cc;
+  height: 38px;
+  min-width: 38px;
+  padding: 0 10px;
+  border-radius: 980px;
+  border: none;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  color: #a1a1a6;
   cursor: pointer;
-  transition: all 0.12s;
+  transition: color 0.15s ease, transform 0.1s ease;
 }
 
 .reactionAdd:hover {
-  border-color: rgba(0,0,0,0.26);
-  color: #636366;
-  background: rgba(0,0,0,0.03);
+  border: none;
+  color: #6e6e73;
+  background: #fff;
 }
 
+.reactionAdd:active { transform: scale(0.94); }
+
 .reactionAddActive {
-  border-color: rgba(0,122,255,0.3);
-  color: #007aff;
+  border: none;
+  color: #0071e3;
 }
 
 .pickerWrap { position: relative; }
 
 .reactionPicker {
   position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 0.5px solid rgba(0,0,0,0.1);
-  border-radius: 18px;
-  padding: 7px 8px;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px;
   display: flex;
-  gap: 1px;
-  box-shadow:
-    0 4px 20px rgba(0,0,0,0.1),
-    0 1px 4px rgba(0,0,0,0.07),
-    inset 0 1px 0 rgba(255,255,255,0.95);
+  gap: 2px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08);
   z-index: 300;
   white-space: nowrap;
-  animation: pickerPop 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: pickerPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes pickerPop {
-  from { opacity: 0; transform: translateX(-50%) scale(0.8); }
-  to   { opacity: 1; transform: translateX(-50%) scale(1); }
+  0%   { opacity: 0; transform: translateY(-50%) scale(0.8); }
+  60%  { opacity: 1; transform: translateY(-50%) scale(1.05); }
+  100% { opacity: 1; transform: translateY(-50%) scale(1); }
 }
 
 .pickerBtn {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: none;
   border: none;
-  border-radius: 10px;
-  font-size: 19px;
+  border-radius: 12px;
+  font-size: 20px;
   cursor: pointer;
   transition: background 0.1s, transform 0.12s;
 }
 
 .pickerBtn:hover {
-  background: rgba(0,0,0,0.06);
-  transform: scale(1.28);
+  background: #f5f5f7;
+  transform: scale(1.2);
 }
 
-.pickerBtnActive { background: rgba(0,122,255,0.09); }
+.pickerBtnActive { background: #e5f1fd; }
 
 /* ─── Avatar ──────────────────────────────────────────────────────────────── */
 .avatar {
@@ -857,7 +748,13 @@
   flex-shrink: 0;
   user-select: none;
   letter-spacing: -0.02em;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+
+.avatarImg {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
 }
 
 /* ─── Empty state ─────────────────────────────────────────────────────────── */
@@ -874,16 +771,25 @@
 .emptyIcon { font-size: 36px; line-height: 1; filter: grayscale(0.25); }
 
 .emptyTitle {
-  font-size: 14px;
-  font-weight: 500;
-  color: #aeaeb2;
+  font-size: 16px;
+  font-weight: 600;
+  color: #6e6e73;
   margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 .emptyHint {
-  font-size: 12.5px;
-  color: #c7c7cc;
+  font-size: 14px;
+  color: #a1a1a6;
   margin: 0;
   letter-spacing: -0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .createForm,
+  .reactionPicker,
+  .commentsSection,
+  .editPanel {
+    animation: none;
+  }
 }

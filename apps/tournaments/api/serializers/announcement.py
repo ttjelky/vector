@@ -4,8 +4,22 @@ from ...models import Announcement, AnnouncementComment, TournamentMember
 from .mixins import get_display_name, reaction_counts
 
 
+def author_avatar_url(author, request):
+    profile = getattr(author, "profile", None)
+    if not profile or not profile.avatar:
+        return None
+    try:
+        url = profile.avatar.url
+    except ValueError:
+        return None
+    if request:
+        return request.build_absolute_uri(url)
+    return url
+
+
 class AnnouncementCommentSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
+    author_avatar = serializers.SerializerMethodField()
     is_mine     = serializers.SerializerMethodField()
     replies     = serializers.SerializerMethodField()
     reactions   = serializers.SerializerMethodField()
@@ -14,16 +28,19 @@ class AnnouncementCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model  = AnnouncementComment
         fields = [
-            'id', 'text', 'author_name', 'is_mine',
+            'id', 'text', 'author_name', 'author_avatar', 'is_mine',
             'created_at', 'replies', 'reactions', 'my_reaction',
         ]
         read_only_fields = [
-            'id', 'author_name', 'is_mine', 'created_at',
-            'replies', 'reactions', 'my_reaction',
+            'id', 'author_name', 'author_avatar', 'is_mine',
+            'created_at', 'replies', 'reactions', 'my_reaction',
         ]
 
     def get_author_name(self, obj):
         return get_display_name(obj.author)
+
+    def get_author_avatar(self, obj):
+        return author_avatar_url(obj.author, self.context.get('request'))
 
     def get_is_mine(self, obj):
         request = self.context.get('request')
@@ -34,7 +51,7 @@ class AnnouncementCommentSerializer(serializers.ModelSerializer):
             return []
         qs = (
             obj.replies
-            .select_related('author')
+            .select_related('author', 'author__profile')
             .prefetch_related('reactions')
         )
         return AnnouncementCommentSerializer(qs, many=True, context=self.context).data
@@ -50,6 +67,7 @@ class AnnouncementCommentSerializer(serializers.ModelSerializer):
 
 class AnnouncementSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
+    author_avatar = serializers.SerializerMethodField()
     author_role = serializers.SerializerMethodField()
     comments    = serializers.SerializerMethodField()
     reactions   = serializers.SerializerMethodField()
@@ -59,16 +77,19 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         model  = Announcement
         fields = [
             'id', 'title', 'body', 'target_role',
-            'author_name', 'author_role', 'created_at',
+            'author_name', 'author_avatar', 'author_role', 'created_at',
             'comments', 'reactions', 'my_reaction',
         ]
         read_only_fields = [
-            'id', 'author_name', 'author_role',
+            'id', 'author_name', 'author_avatar', 'author_role',
             'created_at', 'comments', 'reactions', 'my_reaction',
         ]
 
     def get_author_name(self, obj):
         return get_display_name(obj.author)
+
+    def get_author_avatar(self, obj):
+        return author_avatar_url(obj.author, self.context.get('request'))
 
     def get_author_role(self, obj):
         if not obj.author:
@@ -82,10 +103,11 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         qs = (
             obj.comments
             .filter(parent__isnull=True)
-            .select_related('author')
+            .select_related('author', 'author__profile')
             .prefetch_related(
                 'reactions',
                 'replies__author',
+                'replies__author__profile',
                 'replies__reactions',
             )
         )

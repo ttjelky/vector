@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { API, getProfile } from "@api";
+import { API, getProfile, mediaUrl } from "@api";
+import { computeStatus, TournamentCard, ConfirmDeleteModal } from "@features/tournaments";
 import styles from "../styles/AnnouncementsTab.module.css";
 import { usePolling } from "@shared/hooks/usePolling";
 
@@ -13,10 +14,6 @@ const ROLE_OPTIONS = [
   { value: "admin",       label: "Адміністратори",   short: "Адміни" },
   { value: "owner",       label: "Власник",          short: "Власник" },
 ];
-
-function roleLabel(value) {
-  return ROLE_OPTIONS.find(r => r.value === value)?.label ?? value;
-}
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
 function timeAgo(dateStr) {
@@ -42,8 +39,19 @@ function avatarColor(name = "?") {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-// ─── Avatar ───────────────────────────────────────────────────────────────────
-function Avatar({ name = "?", size = 32 }) {
+// ─── Avatar (фото, інакше ініціали) ─────────────────────────────────────────
+function Avatar({ name = "?", size = 32, src }) {
+  const url = src ? mediaUrl(src) : null;
+  if (url) {
+    return (
+      <img
+        src={url}
+        alt={name}
+        className={styles.avatarImg}
+        style={{ width: size, height: size }}
+      />
+    );
+  }
   return (
     <div
       className={styles.avatar}
@@ -77,17 +85,6 @@ function ReactionStrip({ reactions = {}, myReaction, onReact, compact = false })
 
   return (
     <div className={`${styles.reactionRow} ${compact ? styles.reactionRowCompact : ""}`}>
-      {active.map(([emoji, count]) => (
-        <button
-          key={emoji}
-          className={`${styles.reactionChip} ${myReaction === emoji ? styles.reactionChipActive : ""}`}
-          onClick={() => onReact(emoji)}
-        >
-          <span className={styles.reactionEmoji}>{emoji}</span>
-          <span className={styles.reactionCount}>{count}</span>
-        </button>
-      ))}
-
       <div className={styles.pickerWrap} ref={pickerRef}>
         <button
           className={`${styles.reactionAdd} ${myReaction ? styles.reactionAddActive : ""}`}
@@ -116,6 +113,17 @@ function ReactionStrip({ reactions = {}, myReaction, onReact, compact = false })
           </div>
         )}
       </div>
+
+      {active.map(([emoji, count]) => (
+        <button
+          key={emoji}
+          className={`${styles.reactionChip} ${myReaction === emoji ? styles.reactionChipActive : ""}`}
+          onClick={() => onReact(emoji)}
+        >
+          <span className={styles.reactionEmoji}>{emoji}</span>
+          <span className={styles.reactionCount}>{count}</span>
+        </button>
+      ))}
     </div>
   );
 }
@@ -123,9 +131,11 @@ function ReactionStrip({ reactions = {}, myReaction, onReact, compact = false })
 // ─── Single Comment ───────────────────────────────────────────────────────────
 function CommentItem({ comment, canManage, onReply, onDelete, onReact, depth = 0 }) {
   const [showReply, setShowReply] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [sending,   setSending]   = useState(false);
   const textareaRef = useRef(null);
+  const repliesCount = comment.replies?.length ?? 0;
 
   useEffect(() => {
     if (showReply && textareaRef.current) {
@@ -149,7 +159,7 @@ function CommentItem({ comment, canManage, onReply, onDelete, onReact, depth = 0
 
   return (
     <div className={`${styles.comment} ${depth > 0 ? styles.commentReply : ""}`}>
-      <Avatar name={comment.author_name} size={depth > 0 ? 26 : 28} />
+      <Avatar name={comment.author_name} size={depth > 0 ? 26 : 28} src={comment.author_avatar} />
 
       <div className={styles.commentContent}>
         <div className={styles.commentHeader}>
@@ -183,7 +193,16 @@ function CommentItem({ comment, canManage, onReply, onDelete, onReact, depth = 0
               className={styles.replyBtn}
               onClick={() => setShowReply(s => !s)}
             >
-              {showReply ? "Скасувати" : "↩ Відповісти"}
+              {showReply ? "Скасувати" : "Відповісти"}
+            </button>
+          )}
+          {repliesCount > 0 && (
+            <button
+              className={styles.repliesToggle}
+              onClick={() => setShowReplies(s => !s)}
+              aria-expanded={showReplies}
+            >
+              {showReplies ? "Сховати відповіді" : `Переглянути відповіді (${repliesCount})`}
             </button>
           )}
         </div>
@@ -209,7 +228,7 @@ function CommentItem({ comment, canManage, onReply, onDelete, onReact, depth = 0
           </div>
         )}
 
-        {comment.replies?.length > 0 && (
+        {showReplies && repliesCount > 0 && (
           <div className={styles.repliesList}>
             {comment.replies.map(r => (
               <CommentItem
@@ -232,19 +251,23 @@ function CommentItem({ comment, canManage, onReply, onDelete, onReact, depth = 0
 // ─── Announcement Card ────────────────────────────────────────────────────────
 function AnnouncementCard({
   ann, canManage,
-  currentUserName,
-  onDelete, onReact,
+  currentUserName, currentUserAvatar,
+  onEdit, onDelete, onReact,
   onComment, onReplyComment,
   onDeleteComment, onReactComment,
 }) {
   const [expanded,    setExpanded]    = useState(false);
   const [commentText, setCommentText] = useState("");
   const [sending,     setSending]     = useState(false);
+  const [editing,     setEditing]     = useState(false);
+  const [editTitle,   setEditTitle]   = useState(ann.title);
+  const [editBody,    setEditBody]    = useState(ann.body || "");
+  const [editRole,    setEditRole]    = useState(ann.target_role || "all");
+  const [savingEdit,  setSavingEdit]  = useState(false);
+  const [editError,   setEditError]   = useState("");
+  const [showDelete,  setShowDelete]  = useState(false);
+  const [deleting,    setDeleting]    = useState(false);
   const textareaRef = useRef(null);
-
-  const totalComments = (ann.comments ?? []).reduce(
-    (acc, c) => acc + 1 + (c.replies?.length ?? 0), 0
-  );
 
   const submitComment = async () => {
     const t = commentText.trim();
@@ -261,17 +284,57 @@ function AnnouncementCard({
 
   const toggleComments = () => {
     setExpanded(e => !e);
-    if (!expanded) setTimeout(() => textareaRef.current?.focus(), 150);
   };
 
-  const targetIsAll = ann.target_role === "all";
+  // Клік по тексту оголошення розкриває коментарі (виділення тексту ігноруємо)
+  const handleBodyClick = () => {
+    if (editing) return;
+    if (window.getSelection()?.toString()) return;
+    toggleComments();
+  };
+
+  const startEdit = () => {
+    setEditTitle(ann.title);
+    setEditBody(ann.body || "");
+    setEditRole(ann.target_role || "all");
+    setEditError("");
+    setEditing(true);
+  };
+
+  const submitEdit = async () => {
+    if (!editTitle.trim()) { setEditError("Вкажіть заголовок оголошення"); return; }
+    setSavingEdit(true);
+    setEditError("");
+    try {
+      await onEdit(ann.id, {
+        title: editTitle.trim(),
+        body: editBody.trim(),
+        target_role: editRole,
+      });
+      setEditing(false);
+    } catch {
+      setEditError("Не вдалося зберегти. Спробуйте ще раз.");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await onDelete(ann.id);
+      setShowDelete(false);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${editing ? styles.cardEditing : ""}`}>
       {/* ── Header ── */}
       <div className={styles.cardTop}>
         <div className={styles.cardTopLeft}>
-          <Avatar name={ann.author_name} size={34} />
+          <Avatar name={ann.author_name} size={34} src={ann.author_avatar} />
           <div className={styles.cardMeta}>
             <div className={styles.cardAuthorRow}>
               <span className={styles.cardAuthorName}>{ann.author_name}</span>
@@ -284,67 +347,60 @@ function AnnouncementCard({
             <span className={styles.cardTime}>{timeAgo(ann.created_at)}</span>
           </div>
         </div>
-
-        <div className={styles.cardTopRight}>
-          <span className={`${styles.targetBadge} ${targetIsAll ? styles.targetAll : ""}`}>
-            {roleLabel(ann.target_role)}
-          </span>
-          {canManage && (
-            <button
-              className={styles.cardDeleteBtn}
-              onClick={() => onDelete(ann.id)}
-              title="Видалити оголошення"
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <line x1="2" y1="2" x2="10" y2="10"/>
-                <line x1="10" y1="2" x2="2" y2="10"/>
-              </svg>
-            </button>
-          )}
-        </div>
       </div>
 
       {/* ── Body ── */}
-      <div className={styles.cardBody}>
+      <div
+        className={`${styles.cardBody} ${styles.cardBodyClickable}`}
+        onClick={handleBodyClick}
+        title="Показати коментарі"
+      >
         <h3 className={styles.cardTitle}>{ann.title}</h3>
         {ann.body && <p className={styles.cardBodyText}>{ann.body}</p>}
       </div>
 
-      {/* ── Reactions ── */}
-      <div className={styles.cardReactions}>
+      {/* ── Reactions + actions ── */}
+      <div className={styles.cardFooterRow}>
         <ReactionStrip
           reactions={ann.reactions ?? {}}
           myReaction={ann.my_reaction}
           onReact={(emoji) => onReact(ann.id, emoji)}
         />
+        {canManage && (
+          <div className={styles.actionsRow}>
+            <button className={styles.actionEdit} onClick={startEdit}>
+              Редагувати
+            </button>
+            <button className={styles.actionDelete} onClick={() => setShowDelete(true)}>
+              Видалити
+            </button>
+          </div>
+        )}
       </div>
-
-      {/* ── Comments toggle ── */}
-      <button className={styles.commentsToggle} onClick={toggleComments}>
-        <span className={styles.commentsToggleLeft}>
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 9a1 1 0 0 1-1 1H4l-2 2V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1z"/>
-          </svg>
-          {totalComments > 0
-            ? `${totalComments} ${totalComments === 1 ? "коментар" : totalComments < 5 ? "коментарі" : "коментарів"}`
-            : "Залишити коментар"
-          }
-        </span>
-        <svg
-          className={`${styles.chevron} ${expanded ? styles.chevronDown : ""}`}
-          width="14" height="14" viewBox="0 0 16 16" fill="none"
-          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-        >
-          <polyline points="4 6 8 10 12 6"/>
-        </svg>
-      </button>
 
       {/* ── Comments section ── */}
       {expanded && (
         <div className={styles.commentsSection}>
-          {ann.comments?.length === 0 && (
-            <p className={styles.noComments}>Будьте першим, хто залишить коментар 💬</p>
-          )}
+          {/* New comment input — зверху */}
+          <div className={styles.newCommentRow}>
+            <Avatar name={currentUserName} size={32} src={currentUserAvatar} />
+            <textarea
+              ref={textareaRef}
+              className={`input ${styles.commentInput}`}
+              placeholder="Написати коментар…"
+              value={commentText}
+              onChange={e => setCommentText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              rows={1}
+            />
+            <button
+              className="btn-primary btn-sm"
+              onClick={submitComment}
+              disabled={sending || !commentText.trim()}
+            >
+              {sending ? "…" : "Надіслати"}
+            </button>
+          </div>
 
           {(ann.comments ?? []).map(c => (
             <CommentItem
@@ -356,30 +412,68 @@ function AnnouncementCard({
               onReact={(cid, emoji) => onReactComment(ann.id, cid, emoji)}
             />
           ))}
+        </div>
+      )}
 
-          {/* New comment input */}
-          <div className={styles.newCommentRow}>
-            <Avatar name={currentUserName} size={28} />
-            <div className={styles.newCommentField}>
-              <textarea
-                ref={textareaRef}
-                className="input input-area"
-                placeholder="Написати коментар… (Ctrl+Enter для надсилання)"
-                value={commentText}
-                onChange={e => setCommentText(e.target.value)}
-                onKeyDown={handleKeyDown}
-                rows={2}
-              />
+      {showDelete && (
+        <ConfirmDeleteModal
+          icon="🗑️"
+          title="Видалити оголошення?"
+          description={<>Оголошення <strong>«{ann.title}»</strong> та всі коментарі до нього буде видалено назавжди.</>}
+          confirmLabel="Так, видалити"
+          onConfirm={confirmDelete}
+          onCancel={() => setShowDelete(false)}
+          loading={deleting}
+        />
+      )}
+
+      {editing && (
+        <>
+        <div className={styles.editBackdrop} onClick={() => setEditing(false)} />
+        <div
+          className={styles.editPanel}
+          role="dialog"
+          aria-label="Редагувати оголошення"
+          onKeyDown={(e) => { if (e.key === "Escape") setEditing(false); }}
+        >
+          <input
+            className="input"
+            placeholder="Заголовок *"
+            value={editTitle}
+            onChange={e => { setEditTitle(e.target.value); setEditError(""); }}
+            maxLength={200}
+            autoFocus
+          />
+          <textarea
+            className="input input-area"
+            placeholder="Текст оголошення (необов'язково)…"
+            value={editBody}
+            onChange={e => setEditBody(e.target.value)}
+            rows={3}
+          />
+          <div className={styles.roleChips}>
+            {ROLE_OPTIONS.map(opt => (
               <button
-                className="btn-primary btn-sm"
-                onClick={submitComment}
-                disabled={sending || !commentText.trim()}
+                key={opt.value}
+                type="button"
+                className={`${styles.roleChip} ${editRole === opt.value ? styles.roleChipActive : ""}`}
+                onClick={() => setEditRole(opt.value)}
               >
-                {sending ? "…" : "Надіслати"}
+                {opt.label}
               </button>
-            </div>
+            ))}
+          </div>
+          {editError && <p className={styles.formError}>{editError}</p>}
+          <div className={styles.editActions}>
+            <button className="btn-secondary btn-sm" onClick={() => setEditing(false)} disabled={savingEdit}>
+              Скасувати
+            </button>
+            <button className="btn-primary btn-sm" onClick={submitEdit} disabled={savingEdit || !editTitle.trim()}>
+              {savingEdit ? "Збереження…" : "Зберегти"}
+            </button>
           </div>
         </div>
+        </>
       )}
     </div>
   );
@@ -420,30 +514,30 @@ function CreateAnnouncementForm({ tournamentId, onCreated }) {
     if (e.key === "Escape") reset();
   };
 
-  if (!open) {
-    return (
-      <button className="btn-primary btn-sm" onClick={() => setOpen(true)}>
+  return (
+    <span className={styles.createWrap}>
+      <button
+        className="btn-primary btn-sm"
+        style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 15, padding: "10px 22px" }}
+        onClick={() => (open ? reset() : setOpen(true))}
+        aria-expanded={open}
+      >
         <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <line x1="7" y1="1" x2="7" y2="13"/>
           <line x1="1" y1="7" x2="13" y2="7"/>
         </svg>
         Нове оголошення
       </button>
-    );
-  }
 
-  return (
-    <div className={styles.createForm} onKeyDown={handleKeyDown}>
-      <div className={styles.createFormHeader}>
-        <span className={styles.createFormTitle}>Нове оголошення</span>
-        <button className={styles.createFormCloseBtn} onClick={reset} title="Закрити (Esc)">
-          <svg width="13" height="13" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-            <line x1="2" y1="2" x2="10" y2="10"/>
-            <line x1="10" y1="2" x2="2" y2="10"/>
-          </svg>
-        </button>
-      </div>
-
+      {open && (
+      <>
+      <div className={styles.createBackdrop} onClick={reset} />
+      <div
+        className={styles.createForm}
+        onKeyDown={handleKeyDown}
+        role="dialog"
+        aria-label="Нове оголошення"
+      >
       <input
         className={`input ${error && !title.trim() ? styles.formInputError : ""}`}
         placeholder="Заголовок *"
@@ -462,7 +556,6 @@ function CreateAnnouncementForm({ tournamentId, onCreated }) {
       />
 
       <div className={styles.formAudienceRow}>
-        <span className={styles.formAudienceLabel}>Аудиторія</span>
         <div className={styles.roleChips}>
           {ROLE_OPTIONS.map(opt => (
             <button
@@ -488,16 +581,20 @@ function CreateAnnouncementForm({ tournamentId, onCreated }) {
           {saving ? "Публікація…" : "Опублікувати"}
         </button>
       </div>
-    </div>
+      </div>
+      </>
+      )}
+    </span>
   );
 }
 
 // ─── Main Tab ─────────────────────────────────────────────────────────────────
 export function AnnouncementsTab({ tournamentId, myRole }) {
-  const [announcements,   setAnnouncements]   = useState([]);
-  const [loading,         setLoading]         = useState(true);
-  const [currentUserName, setCurrentUserName] = useState("Я");
-  const [filter,          setFilter]          = useState("all");
+  const [announcements,     setAnnouncements]     = useState([]);
+  const [loading,           setLoading]           = useState(true);
+  const [currentUserName,   setCurrentUserName]   = useState("Я");
+  const [currentUserAvatar, setCurrentUserAvatar] = useState(null);
+  const [filter,            setFilter]            = useState("all");
 
   const canManage = myRole === "owner" || myRole === "admin";
 
@@ -537,9 +634,10 @@ export function AnnouncementsTab({ tournamentId, myRole }) {
         ]);
         if (annRes.status === "fulfilled") setAnnouncements(annRes.value.data);
         if (profileRes.status === "fulfilled") {
-          const { first_name, last_name, username } = profileRes.value.data;
+          const { first_name, last_name, username, avatar } = profileRes.value.data;
           const full = `${first_name ?? ""} ${last_name ?? ""}`.trim();
           setCurrentUserName(full || username || "Я");
+          setCurrentUserAvatar(avatar ?? null);
         }
       } catch (err) {
         console.error(err);
@@ -560,10 +658,13 @@ export function AnnouncementsTab({ tournamentId, myRole }) {
   }, []);
 
   const handleDelete = useCallback(async (annId) => {
-    try {
-      await API.delete(`/tournaments/${tournamentId}/announcements/${annId}/`);
-      setAnnouncements(prev => prev.filter(a => a.id !== annId));
-    } catch (err) { console.error(err); }
+    await API.delete(`/tournaments/${tournamentId}/announcements/${annId}/`);
+    setAnnouncements(prev => prev.filter(a => a.id !== annId));
+  }, [tournamentId]);
+
+  const handleEdit = useCallback(async (annId, data) => {
+    const r = await API.patch(`/tournaments/${tournamentId}/announcements/${annId}/`, data);
+    setAnnouncements(prev => prev.map(a => (a.id === annId ? r.data : a)));
   }, [tournamentId]);
 
   const handleReact = useCallback(async (annId, emoji) => {
@@ -705,6 +806,8 @@ export function AnnouncementsTab({ tournamentId, myRole }) {
               ann={ann}
               canManage={canManage}
               currentUserName={currentUserName}
+              currentUserAvatar={currentUserAvatar}
+              onEdit={handleEdit}
               onDelete={handleDelete}
               onReact={handleReact}
               onComment={handleComment}
