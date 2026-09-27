@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { API, getProfile, mediaUrl } from "@api";
 import { computeStatus, TournamentCard, ConfirmDeleteModal } from "@features/tournaments";
 import { useDropdownPosition } from "@shared/hooks/useDropdownPosition";
@@ -129,6 +130,21 @@ function ReactionStrip({ reactions = {}, myReaction, onReact, compact = false })
   );
 }
 
+// ─── Клікабельне ім'я → профіль ─────────────────────────────────────────────
+function AuthorLink({ userId, className, children }) {
+  const navigate = useNavigate();
+  if (!userId) return <span className={className}>{children}</span>;
+  return (
+    <button
+      type="button"
+      className={`${className ?? ""} ${styles.authorLink}`}
+      onClick={() => navigate(`/profile/${userId}`)}
+    >
+      {children}
+    </button>
+  );
+}
+
 // ─── Single Comment ───────────────────────────────────────────────────────────
 function CommentItem({ comment, canManage, onReply, onDelete, onReact, depth = 0 }) {
   const [showReply, setShowReply] = useState(false);
@@ -164,7 +180,9 @@ function CommentItem({ comment, canManage, onReply, onDelete, onReact, depth = 0
 
       <div className={styles.commentContent}>
         <div className={styles.commentHeader}>
-          <span className={styles.commentAuthor}>{comment.author_name}</span>
+          <AuthorLink userId={comment.author_id} className={styles.commentAuthor}>
+            {comment.author_name}
+          </AuthorLink>
           <span className={styles.commentTime}>{timeAgo(comment.created_at)}</span>
           {(canManage || comment.is_mine) && (
             <button
@@ -274,6 +292,10 @@ function AnnouncementCard({
     side: "top", align: "end", gap: 10, fallbacks: ["bottom"],
   });
 
+  const totalComments = (ann.comments ?? []).reduce(
+    (acc, c) => acc + 1 + (c.replies?.length ?? 0), 0
+  );
+
   const submitComment = async () => {
     const t = commentText.trim();
     if (!t) return;
@@ -342,7 +364,9 @@ function AnnouncementCard({
           <Avatar name={ann.author_name} size={34} src={ann.author_avatar} />
           <div className={styles.cardMeta}>
             <div className={styles.cardAuthorRow}>
-              <span className={styles.cardAuthorName}>{ann.author_name}</span>
+              <AuthorLink userId={ann.author_id} className={styles.cardAuthorName}>
+                {ann.author_name}
+              </AuthorLink>
               {ann.author_role && (
                 <span className={`${styles.authorRoleBadge} ${ann.author_role === "owner" ? styles.authorRoleOwner : ""}`}>
                   {ann.author_role === "owner" ? "Власник" : "Адмін"}
@@ -366,6 +390,23 @@ function AnnouncementCard({
 
       {/* ── Reactions + actions ── */}
       <div className={styles.cardFooterRow}>
+        <button
+          className={styles.commentsToggle}
+          onClick={toggleComments}
+          aria-expanded={expanded}
+        >
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 9a1 1 0 0 1-1 1H4l-2 2V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1z"/>
+          </svg>
+          Коментарі{totalComments > 0 ? ` · ${totalComments}` : ""}
+          <svg
+            className={`${styles.commentsChevron} ${expanded ? styles.commentsChevronOpen : ""}`}
+            width="13" height="13" viewBox="0 0 16 16" fill="none"
+            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          >
+            <polyline points="4 6 8 10 12 6"/>
+          </svg>
+        </button>
         <ReactionStrip
           reactions={ann.reactions ?? {}}
           myReaction={ann.my_reaction}
@@ -614,6 +655,8 @@ export function AnnouncementsTab({ tournamentId, myRole }) {
 
   // ── Завантаження оголошень (викликається і при поллінгу) ──────────────────
   const fetchAnnouncements = useCallback(async () => {
+    const countReplies = (list) =>
+      (list ?? []).reduce((n, c) => n + (c.replies?.length ?? 0), 0);
     try {
       const r = await API.get(`/tournaments/${tournamentId}/announcements/`);
       setAnnouncements(prev => {
@@ -624,12 +667,13 @@ export function AnnouncementsTab({ tournamentId, myRole }) {
         return r.data.map(a => {
           const old = prevMap[a.id];
           if (!old) return a;
-          // Оновлюємо reactions + нові коментарі, але не перезаписуємо
+          // Оновлюємо reactions + нові коментарі/відповіді, але не перезаписуємо
           // якщо стан ідентичний — повертаємо старий об'єкт (React bailout)
           const same =
-            old.reactions === a.reactions &&
             JSON.stringify(old.reactions) === JSON.stringify(a.reactions) &&
-            (old.comments?.length ?? 0) === (a.comments?.length ?? 0);
+            old.my_reaction === a.my_reaction &&
+            (old.comments?.length ?? 0) === (a.comments?.length ?? 0) &&
+            countReplies(old.comments) === countReplies(a.comments);
           return same ? old : { ...old, ...a };
         });
       });

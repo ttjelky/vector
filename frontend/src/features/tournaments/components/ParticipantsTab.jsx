@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../styles/ParticipantsTab.module.css";
 import { API, mediaUrl } from '@api';
-import { X, Shield, Users, Crown, Upload, UserPlus } from "lucide-react";
+import { X, Shield, Users, Crown, Upload, UserPlus, Pencil, Trash2, ChevronDown } from "lucide-react";
 import { ConfirmDeleteModal } from "./TournamentShared";
 import { usePolling } from "@shared/hooks/usePolling";
 
@@ -87,6 +88,22 @@ function MemberAvatar({ member }) {
 
   if (src) return <img src={src} alt={initials} className={styles.memberAvatar} />;
   return <div className={styles.memberAvatarPlaceholder}>{initials}</div>;
+}
+
+// ─── Клікабельне ім'я → профіль ─────────────────────────────────────────────
+
+function NameLink({ userId, className, children }) {
+  const navigate = useNavigate();
+  if (!userId) return <span className={className}>{children}</span>;
+  return (
+    <button
+      type="button"
+      className={`${className ?? ""} ${styles.nameLink}`}
+      onClick={() => navigate(`/profile/${userId}`)}
+    >
+      {children}
+    </button>
+  );
 }
 
 // ─── Картка команди ───────────────────────────────────────────────────────────
@@ -214,20 +231,20 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
 
         <div className={styles.teamCardRight} onClick={e => e.stopPropagation()}>
           {(isCaptain || isPrivileged) && !renaming && (
-            <button className={styles.teamActionBtn} onClick={() => setRenaming(true)} title="Перейменувати">✏️</button>
+            <button className={styles.teamActionBtn} onClick={() => setRenaming(true)} title="Перейменувати"><Pencil size={14} /></button>
           )}
           {renaming && (
             <>
               <button className={styles.teamActionBtnSave} onClick={handleRename} disabled={saving}>
                 {saving ? "…" : "✓"}
               </button>
-              <button className={styles.teamActionBtn} onClick={() => { setRenaming(false); setNewName(team.name); }}>✕</button>
+              <button className={styles.teamActionBtn} onClick={() => { setRenaming(false); setNewName(team.name); }}><X size={13} /></button>
             </>
           )}
           {(isCaptain || isPrivileged) && !renaming && (
-            <button className={styles.teamActionBtnDanger} onClick={() => setConfirmDelete(true)} title="Видалити команду">🗑</button>
+            <button className={styles.teamActionBtnDanger} onClick={() => setConfirmDelete(true)} title="Видалити команду"><Trash2 size={14} /></button>
           )}
-          <span className={styles.expandArrow}>{expanded ? "▲" : "▼"}</span>
+          <span className={`${styles.expandArrow} ${expanded ? styles.expandArrowOpen : ""}`}><ChevronDown size={15} /></span>
         </div>
       </div>
 
@@ -237,9 +254,9 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
           {/* Капітан */}
           <div className={styles.teamMemberRow}>
             <Crown size={13} className={styles.captainIcon} />
-            <span className={styles.teamMemberName}>
+            <NameLink userId={team.captain?.id} className={styles.teamMemberName}>
               {team.captain?.first_name} {team.captain?.last_name || team.captain?.username}
-            </span>
+            </NameLink>
             <span className={styles.uploadTag} title="Капітан завжди може завантажувати">
               <Upload size={11} /> Завантаження
             </span>
@@ -248,7 +265,12 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
           {/* Інші учасники */}
           {nonCaptainMembers.map(m => (
             <div key={m.id} className={styles.teamMemberRow}>
-              <span className={styles.teamMemberName}>{m.first_name} {m.last_name || m.username}</span>
+              <NameLink
+                userId={typeof m.user === "object" ? m.user?.id : m.user}
+                className={styles.teamMemberName}
+              >
+                {m.first_name} {m.last_name || m.username}
+              </NameLink>
 
               {isCaptain ? (
                 <button
@@ -271,7 +293,7 @@ function TeamCard({ team, members, myRole, myUserId, tournamentId, onTeamUpdated
                   onClick={() => handleRemoveMember(m.id)}
                   title="Видалити з команди"
                 >
-                  <X size={12} />
+                  <X size={13} />
                 </button>
               )}
             </div>
@@ -713,15 +735,15 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
               display: "flex",
               alignItems: "center",
               gap: 10,
-              padding: "10px 14px",
+              padding: "11px 16px",
               marginBottom: 16,
-              borderRadius: 12,
-              fontSize: 13,
+              borderRadius: 14,
+              fontSize: 14,
               color: statusBanner.color,
               background: statusBanner.bg,
-              border: `1px solid ${statusBanner.border}`,
+              border: "none",
             }}>
-              <span style={{ fontSize: 16 }}>{statusBanner.icon}</span>
+              <span style={{ fontSize: 17 }}>{statusBanner.icon}</span>
               <span>{statusBanner.text}</span>
             </div>
           )}
@@ -764,7 +786,7 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
                   className={styles.inviteBtn}
                   onClick={() => setShowLinks((v) => !v)}
                 >
-                  {showLinks ? "Сховати посилання" : `🔗 Посилання (${activeLinks.length}/3)`}
+                  {showLinks ? "Сховати посилання" : `Показати посилання (${activeLinks.length}/3)`}
                 </button>
               )}
 
@@ -819,33 +841,33 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
           {/* Панель посилань-запрошень: тільки унікальні посилання, без PIN */}
           {isPrivilegedUser && showLinks && showInviteBtn && (
             <div style={{
-              border: "1px solid #e5e7eb", borderRadius: 12, padding: 12,
-              marginBottom: 14, background: "#fafafa",
+              border: "none", borderRadius: 18, padding: 16,
+              marginBottom: 14, background: "#f5f5f7",
             }}>
-              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
+              <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 10, letterSpacing: "-0.01em" }}>
                 {INVITE_LABELS[activeTab]} — {activeLinks.length}/3
               </div>
-              {invitesLoading && <p style={{ fontSize: 12, color: "#888" }}>Завантаження…</p>}
+              {invitesLoading && <p style={{ fontSize: 13, color: "#86868b" }}>Завантаження…</p>}
               {activeLinks.map((l) => {
                 const url = l.invite_url?.includes("http") ? l.invite_url : fullInviteUrl(l.token);
                 return (
                   <div key={l.id} style={{
                     display: "flex", gap: 8, alignItems: "center",
-                    background: "#fff", border: "1px solid #eee", borderRadius: 10,
-                    padding: "8px 10px", marginBottom: 6, fontSize: 12,
+                    background: "#fff", border: "none", borderRadius: 12,
+                    padding: "10px 12px", marginBottom: 8, fontSize: 13,
                   }}>
-                    <span style={{ fontWeight: 700, minWidth: 90 }}>{l.name || "Посилання"}</span>
+                    <span style={{ fontWeight: 600, minWidth: 90 }}>{l.name || "Посилання"}</span>
                     <span style={{
                       flex: 1, overflow: "hidden", textOverflow: "ellipsis",
                       whiteSpace: "nowrap", color: "#555",
                     }} title={url}>{url}</span>
                     <button className={styles.inviteBtn}
-                      style={{ padding: "6px 10px", fontSize: 12 }}
+                      style={{ padding: "7px 14px", fontSize: 13 }}
                       onClick={() => copyText(url, l.id)}>
                       {copiedId === l.id ? "✓ Скопійовано" : "Копіювати"}
                     </button>
                     <button className={styles.removeBtn}
-                      onClick={() => handleDeleteLink(activeTab, l.id)} title="Видалити">✕</button>
+                      onClick={() => handleDeleteLink(activeTab, l.id)} title="Видалити"><X size={14} /></button>
                   </div>
                 );
               })}
@@ -856,10 +878,7 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
                     placeholder="Назва посилання (необов'язково)"
                     value={linkName}
                     onChange={(e) => setLinkName(e.target.value)}
-                    style={{
-                      flex: 1, border: "1px solid #ddd", borderRadius: 10,
-                      padding: "8px 10px", fontSize: 12,
-                    }}
+                    style={{ flex: 1, fontSize: 14 }}
                   />
                   <button className="btn-primary btn-sm"
                     disabled={linkCreating}
@@ -868,16 +887,13 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
                   </button>
                 </div>
               ) : (
-                <p style={{ fontSize: 12, color: "#b45309" }}>
+                <p style={{ fontSize: 13, color: "#b45309" }}>
                   Досягнуто максимум (3 посилання). Видаліть старе щоб створити нове.
                 </p>
               )}
-              {linkError && <p style={{ fontSize: 12, color: "#d04d3e" }}>{linkError}</p>}
-              <p style={{ fontSize: 11.5, color: "#888", marginTop: 6 }}>
-                PIN-код більше не потрібен — достатньо перейти за унікальним посиланням.
-              </p>
+              {linkError && <p style={{ fontSize: 13, color: "#c53030" }}>{linkError}</p>}
               {!canRegisterNow && activeTab === "participant" && (
-                <p style={{ fontSize: 12, color: "#b45309", marginTop: 4 }}>
+                <p style={{ fontSize: 13, color: "#b45309", marginTop: 4 }}>
                   ⚠️ {registrationMessage || "Реєстрація зараз закрита — посилання спрацюють, коли вона відкриється."}
                 </p>
               )}
@@ -894,7 +910,9 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
                   <div style={{ display: "flex", gap: 10, alignItems: "center", width: "100%" }}>
                     <MemberAvatar member={member} />
                     <div className={styles.teamInfo}>
-                      <span className={styles.teamName}>{getDisplayName(member)}</span>
+                      <NameLink userId={member.user} className={styles.teamName}>
+                        {getDisplayName(member)}
+                      </NameLink>
                       {(() => {
                         const email = member.email || member.fullusername;
                         const displayName = getDisplayName(member);
@@ -908,7 +926,9 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
                       </span>
                     </div>
                     {isPrivilegedUser && member.role !== "owner" && (
-                      <button className={styles.removeBtn} onClick={() => setMemberToDelete(member)}>✕</button>
+                      <button className={styles.removeBtn} onClick={() => setMemberToDelete(member)} title="Видалити учасника">
+                        <X size={14} />
+                      </button>
                     )}
                     {member.joined_at && (
                       <div className={styles.teamDate}>
@@ -918,13 +938,13 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
                   </div>
                   {member.registration_display?.length > 0 && (
                     <div style={{
-                      marginTop: 8, background: "#f8fafc", border: "1px solid #eef2f7",
-                      borderRadius: 10, padding: "8px 10px", fontSize: 12, color: "#334155",
+                      marginTop: 10, background: "#fff", border: "none",
+                      borderRadius: 12, padding: "10px 12px", fontSize: 13, color: "#515154",
                     }}>
-                      <div style={{ fontWeight: 700, marginBottom: 4 }}>📝 Відповіді при реєстрації:</div>
+                      <div style={{ fontWeight: 600, marginBottom: 4 }}>📝 Відповіді при реєстрації:</div>
                       {member.registration_display.map((a) => (
                         <div key={a.field_id} style={{ marginBottom: 2 }}>
-                          <span style={{ color: "#64748b" }}>{a.label}: </span>
+                          <span style={{ color: "#86868b" }}>{a.label}: </span>
                           <strong>{a.value || "—"}</strong>
                         </div>
                       ))}

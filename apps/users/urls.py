@@ -8,6 +8,7 @@ from .views import (
     VerifyEmailView,
     ResendCodeView,
     profile,
+    public_profile,
     jury_submissions,
     dashboard_data,
 )
@@ -23,6 +24,7 @@ urlpatterns = [
 
     # ── Profile & misc ────────────────────────────────────────────────────────
     path("profile/",           profile,          name="profile"),
+    path("<int:user_id>/profile/", public_profile, name="public-profile"),
     path("jury-submissions/",  jury_submissions,  name="jury-submissions"),
     path("dashboard/",         dashboard_data,    name="dashboard"),
 ]

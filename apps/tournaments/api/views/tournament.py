@@ -372,7 +372,9 @@ class VerifyInvitePinView(APIView):
 
         expected_pin = tournament.get_invite_pin_for_role(role)
         if str(expected_pin) == str(pin):
-            if request.user.is_authenticated and request.user.role != role:
+            # Службові посилання — тільки зі своєю системною роллю.
+            # Посилання учасника відкрите всім залогіненим.
+            if role != 'participant' and request.user.is_authenticated and request.user.role != role:
                 ROLE_UA = {
                     'participant': 'учасника',
                     'jury':        'журі',
@@ -449,7 +451,10 @@ class JoinByTokenView(APIView):
         if not tournament:
             return Response({'detail': 'Невірний або недійсний інвайт-токен.'}, status=status.HTTP_404_NOT_FOUND)
 
-        if request.user.role != role:
+        # Посилання учасника відкрите всім залогіненим (членство participant
+        # привілеїв не дає). Службові посилання (журі/адмін) — тільки
+        # користувачам з відповідною системною роллю.
+        if role != 'participant' and request.user.role != role:
             ROLE_UA = {'participant': 'учасника', 'jury': 'журі', 'admin': 'адміністратора'}
             return Response({
                 'detail': (

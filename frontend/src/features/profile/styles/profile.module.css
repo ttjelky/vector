@@ -8,6 +8,24 @@
   position: relative;
 }
 
+/* Кнопка повернення (чужий профіль) */
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: none;
+  border: none;
+  padding: 6px 4px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #6e6e73;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.backBtn:hover { color: #1d1d1f; }
+
 /* ── Layout: full page ──────────────────────────────────────────── */
 .profileLayout {
   display: flex;
@@ -58,6 +76,11 @@
   height: 300px;
   border-radius: 24px;
   overflow: hidden;
+  /* Окремий композитний шар — інакше перемалювання сторінки
+     (напр. hover станів) дає моргання зображення */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  isolation: isolate;
 }
 
 .bannerImg {
@@ -65,6 +88,10 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .bannerPlaceholder {

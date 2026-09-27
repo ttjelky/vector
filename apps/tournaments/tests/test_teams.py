@@ -92,3 +92,53 @@ class TeamTournamentTests(BaseTest):
 # ─────────────────────────────────────────────────────────────────────────────
 # 20. ANNOUNCEMENT COMMENTS
 # ─────────────────────────────────────────────────────────────────────────────
+
+class TeamCaptainAnnouncementsTests(BaseTest):
+
+    def setUp(self):
+        self.owner = self.make_user("capannowner", role="admin")
+        self.t = self.make_tournament(self.owner, t_type="team")
+
+    def test_team_creation_grants_tournament_membership(self):
+        """Капітан без membership-рядка отримує його при створенні команди."""
+        from ..models import TournamentMember
+        newcomer = self.make_user("newcap")
+        self.auth(newcomer)
+        resp = self.client.post(
+            f"/api/tournaments/{self.t.id}/teams/", {"name": "Fresh"}
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(
+            TournamentMember.objects.filter(
+                tournament=self.t, user=newcomer, role="participant"
+            ).exists()
+        )
+
+    def test_captain_can_view_and_comment_announcements(self):
+        """Капітан бачить оголошення і пише коментарі/відповіді."""
+        from ..models import Announcement
+        newcomer = self.make_user("anncap")
+        self.auth(newcomer)
+        team_resp = self.client.post(
+            f"/api/tournaments/{self.t.id}/teams/", {"name": "Ann Team"}
+        )
+        self.assertEqual(team_resp.status_code, status.HTTP_201_CREATED)
+        ann = Announcement.objects.create(
+            tournament=self.t, author=self.owner, title="Hi", body="yo",
+        )
+        r = self.client.get(f"/api/tournaments/{self.t.id}/announcements/")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(r.data), 1)
+        r = self.client.post(
+            f"/api/tournaments/{self.t.id}/announcements/{ann.id}/comments/",
+            {"text": "ok"},
+            content_type="application/json",
+        )
+        self.assertIn(r.status_code, [status.HTTP_200_OK, status.HTTP_201_CREATED])
+        cid = r.data["id"]
+        r = self.client.post(
+            f"/api/tournaments/{self.t.id}/announcements/{ann.id}/comments/",
+            {"text": "reply", "parent": cid},
+            content_type="application/json",
+        )
+        self.assertIn(r.status_code, [status.HTTP_200_OK, status.HTTP_201_CREATED])

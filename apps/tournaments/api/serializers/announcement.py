@@ -20,6 +20,7 @@ def author_avatar_url(author, request):
 class AnnouncementCommentSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     author_avatar = serializers.SerializerMethodField()
+    author_id = serializers.IntegerField(read_only=True)
     is_mine     = serializers.SerializerMethodField()
     replies     = serializers.SerializerMethodField()
     reactions   = serializers.SerializerMethodField()
@@ -28,11 +29,11 @@ class AnnouncementCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model  = AnnouncementComment
         fields = [
-            'id', 'text', 'author_name', 'author_avatar', 'is_mine',
+            'id', 'text', 'author_name', 'author_avatar', 'author_id', 'is_mine',
             'created_at', 'replies', 'reactions', 'my_reaction',
         ]
         read_only_fields = [
-            'id', 'author_name', 'author_avatar', 'is_mine',
+            'id', 'author_name', 'author_avatar', 'author_id', 'is_mine',
             'created_at', 'replies', 'reactions', 'my_reaction',
         ]
 
@@ -68,6 +69,7 @@ class AnnouncementCommentSerializer(serializers.ModelSerializer):
 class AnnouncementSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     author_avatar = serializers.SerializerMethodField()
+    author_id = serializers.IntegerField(read_only=True)
     author_role = serializers.SerializerMethodField()
     comments    = serializers.SerializerMethodField()
     reactions   = serializers.SerializerMethodField()
@@ -77,11 +79,11 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         model  = Announcement
         fields = [
             'id', 'title', 'body', 'target_role',
-            'author_name', 'author_avatar', 'author_role', 'created_at',
+            'author_name', 'author_avatar', 'author_id', 'author_role', 'created_at',
             'comments', 'reactions', 'my_reaction',
         ]
         read_only_fields = [
-            'id', 'author_name', 'author_avatar', 'author_role',
+            'id', 'author_name', 'author_avatar', 'author_id', 'author_role',
             'created_at', 'comments', 'reactions', 'my_reaction',
         ]
 

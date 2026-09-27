@@ -305,6 +305,18 @@
   white-space: nowrap;
 }
 
+/* Клікабельне ім'я → профіль */
+.authorLink {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: color 0.15s ease;
+}
+button.authorLink:hover { color: #0071e3; text-decoration: underline; text-underline-offset: 3px; }
+
 /* Пастельні пілюлі без рамок — як бейджі статусів */
 .authorRoleBadge {
   font-size: 12.5px;
@@ -365,7 +377,34 @@
   padding: 0 18px 14px;
 }
 
-/* ─── Actions — 3 pill-кнопки ─────────────────────────────────────────────── */
+/* ─── Comments toggle (лічильник) ─────────────────────────────────────────── */
+.commentsToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #86868b;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.commentsToggle:hover { color: #1d1d1f; }
+
+.commentsChevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.commentsChevronOpen { transform: rotate(180deg); }
+
+/* ─── Actions — pill-кнопки ───────────────────────────────────────────────── */
 .actionsRow {
   display: flex;
   gap: 8px;

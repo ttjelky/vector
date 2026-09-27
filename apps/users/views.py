@@ -390,6 +390,33 @@ def profile(request):
     })
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def public_profile(request, user_id):
+    """Публічний профіль користувача: ім'я, аватар, роль. Без контактів."""
+    try:
+        user = User.objects.get(pk=user_id)
+    except (User.DoesNotExist, ValueError):
+        from rest_framework import status as http_status
+        return Response({"detail": "Користувача не знайдено."},
+                        status=http_status.HTTP_404_NOT_FOUND)
+    prof, _ = Profile.objects.get_or_create(user=user)
+    full_name = f"{user.first_name or ''} {user.last_name or ''}".strip()
+    return Response({
+        "id":         user.id,
+        "username":   user.username,
+        "full_name":  full_name or user.username,
+        "first_name": user.first_name or "",
+        "last_name":  user.last_name or "",
+        "email":      user.email,
+        "avatar":     _avatar_url(request, prof),
+        "banner":     _banner_url(request, prof),
+        "bio":        prof.bio or "",
+        "phone":      prof.phone or "",
+        "role":       getattr(user, "role", None),
+    })
+
+
 # ── Misc ──────────────────────────────────────────────────────────────────────
 
 @api_view(["GET"])

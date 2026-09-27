@@ -31,7 +31,8 @@ const BIO_PLACEHOLDERS = [
 
 // ── Profile ───────────────────────────────────────────────────────────────────
 
-const Profile = () => {
+const Profile = ({ userId }) => {
+    const isOwn = !userId;
     const role = localStorage.getItem("userRole") ?? "participant";
     const navigate = useNavigate();
 
@@ -57,7 +58,17 @@ const Profile = () => {
 
     useEffect(() => {
         const loadProfile = async () => {
-            const data = await fetchProfile();
+            let data;
+            if (isOwn) {
+                data = await fetchProfile();
+            } else {
+                try {
+                    const r = await API.get(`/users/${userId}/profile/`);
+                    data = r.data;
+                } catch {
+                    data = null;
+                }
+            }
             if (data) {
                 setProfile(data);
                 setFormData({
@@ -75,10 +86,10 @@ const Profile = () => {
             setLoading(false);
         };
         loadProfile();
-    }, []);
+    }, [isOwn, userId]);
 
     useEffect(() => {
-        if (role !== "jury") return;
+        if (!isOwn || role !== "jury") return;
         setSubsLoading(true);
         API.get("/profile/jury-submissions/")
             .then(r => setSubmissions(r.data ?? []))
@@ -167,12 +178,20 @@ const Profile = () => {
     if (loading)
         return <NavBar><p className={styles.loading}>Завантаження...</p></NavBar>;
 
-    if (!profile || !profile.first_name)
+    if (!profile || (isOwn && !profile.first_name))
         return <p className={styles.error}>Не вдалося завантажити профіль</p>;
 
     return (
         <NavBar>
             <div className={styles.pageWrapper}>
+                {!isOwn && (
+                    <button className={styles.backBtn} onClick={() => navigate(-1)}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                        Назад
+                    </button>
+                )}
                 <div className={styles.profileLayout}>
 
                     {/* ── Ліва колонка: картка профілю ── */}
@@ -284,24 +303,26 @@ const Profile = () => {
                             </form>
                         ) : (
                             <>
-                                <div className={styles.cardFooter}>
-                                    <button onClick={() => setEditMode(true)} className="btn-primary">
-                                        Редагувати
-                                    </button>
-                                    <button
-                                        onClick={() => setLogoutConfirm(true)}
-                                        className={styles.btnDanger}
-                                    >
-                                        Вийти
-                                    </button>
-                                </div>
+                                {isOwn && (
+                                    <div className={styles.cardFooter}>
+                                        <button onClick={() => setEditMode(true)} className="btn-primary">
+                                            Редагувати
+                                        </button>
+                                        <button
+                                            onClick={() => setLogoutConfirm(true)}
+                                            className={styles.btnDanger}
+                                        >
+                                            Вийти
+                                        </button>
+                                    </div>
+                                )}
                             </>
                         )}
                         </div>
                     </div>
 
-                    {/* ── Права колонка: деталі по ролі ── */}
-                    {role === "jury" && (
+                    {/* ── Права колонка: деталі по ролі (тільки свої) ── */}
+                    {isOwn && role === "jury" && (
                         <div className={styles.detailsCard}>
                             <h2 className={styles.cardTitle}>Мої оцінені роботи</h2>
                             <JurySubmissions submissions={submissions} loading={subsLoading} />

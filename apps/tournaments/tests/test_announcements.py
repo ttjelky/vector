@@ -43,6 +43,7 @@ class AnnouncementTests(BaseTest):
         resp = self.client.get(self._url())
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(resp.data), 1)
+        self.assertEqual(resp.data[0]["author_id"], self.owner.id)
 
     def test_patch_announcement_as_owner(self):
         ann = Announcement.objects.create(

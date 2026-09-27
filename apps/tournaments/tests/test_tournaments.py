@@ -2,7 +2,7 @@
 from rest_framework import status
 from .base import BaseTest
 
-from ..models import Tournament, TournamentMember
+from ..models import Tournament, TournamentMember, TournamentInviteLink
 class TournamentCRUDTests(BaseTest):
 
     def setUp(self):
@@ -122,6 +122,50 @@ class TournamentJoinTests(BaseTest):
         self.assertIn(resp.status_code, [
             status.HTTP_400_BAD_REQUEST, status.HTTP_200_OK
         ])
+
+    def _invite_link(self, role):
+        return TournamentInviteLink.objects.create(
+            tournament=self.t, role=role, created_by=self.owner,
+        )
+
+    def test_staff_can_join_via_participant_link(self):
+        """Адмін/журі за системною роллю можуть приєднатися як учасники."""
+        link = self._invite_link("participant")
+        for sys_role in ("admin", "jury"):
+            u = self.make_user(f"staff_{sys_role}", role=sys_role)
+            self.auth(u)
+            resp = self.client.post("/api/tournaments/join/", {
+                "token": str(link.token),
+            })
+            self.assertEqual(resp.status_code, status.HTTP_200_OK)
+            self.assertTrue(
+                TournamentMember.objects.filter(
+                    tournament=self.t, user=u, role="participant"
+                ).exists()
+            )
+
+    def test_participant_cannot_join_via_jury_link(self):
+        """Службові посилання лишаються закритими для чужих системних ролей."""
+        link = self._invite_link("jury")
+        self.auth(self.user)
+        resp = self.client.post("/api/tournaments/join/", {
+            "token": str(link.token),
+        })
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(resp.data.get("role_mismatch"))
+
+    def test_jury_can_join_via_jury_link(self):
+        jury = self.make_user("staffjury", role="jury")
+        self.auth(jury)
+        resp = self.client.post("/api/tournaments/join/", {
+            "token": str(self._invite_link("jury").token),
+        })
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertTrue(
+            TournamentMember.objects.filter(
+                tournament=self.t, user=jury, role="jury"
+            ).exists()
+        )
 
     def test_my_role_as_owner(self):
         self.auth(self.owner)

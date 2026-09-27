@@ -118,12 +118,21 @@ class TeamCreateSerializer(serializers.Serializer):
     def create(self, validated_data):
         tournament = self.context['tournament']
         captain    = self.context['captain']
-        return Team.objects.create(
+        team = Team.objects.create(
             tournament=tournament,
             captain=captain,
             status=Team.STATUS_DRAFT,
             **validated_data,
         )
+        # Капітан — теж учасник турніру: без цього рядка він не бачить
+        # оголошення/коментарі/раунди (role=None → 403).
+        from ...models import TournamentMember
+        TournamentMember.objects.get_or_create(
+            tournament=tournament,
+            user=captain,
+            defaults={'role': 'participant'},
+        )
+        return team
 
 
 class TeamUpdateSerializer(serializers.Serializer):

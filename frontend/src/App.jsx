@@ -19,6 +19,7 @@ import { JuryDashboard }        from "@features/jury";
 import { Help }                from "@pages/Help";
 import { NotFound }            from "@pages/NotFound";
 import { Profile }              from "@features/profile";
+import { UserProfile }          from "@features/profile/pages/UserProfile";
 import { Settings }             from "@features/profile";
 import { Works }                from "@features/submissions";
 import { Tournaments }          from "@features/tournaments";
@@ -97,6 +98,7 @@ function AppRoutes() {
         <Route path="/tournament/:id" element={<ProtectedRoute><TournamentPage /></ProtectedRoute>} />
         <Route path="/works"          element={<ProtectedRoute><Works /></ProtectedRoute>} />
         <Route path="/profile"        element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/profile/:userId" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
         <Route path="/settings"       element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/help"           element={<ProtectedRoute><Help /></ProtectedRoute>} />
 
