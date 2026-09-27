@@ -73,9 +73,26 @@
 }
 
 .editActions {
+  position: fixed;
+  bottom: 32px;
+  right: 24px;
+  z-index: 200;
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
+  align-items: center;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.editActions > * {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+/* Відступ знизу, щоб зафіксовані кнопки не перекривали контент */
+.tabContentEditing {
+  padding-bottom: 96px;
 }
 
 .formError {
@@ -184,12 +201,11 @@
 .richContent strike       { text-decoration: line-through; }
 
 /* ══════════════════════════════════════════════════
-   DETAIL GRID CARDS — macOS Liquid Glass
+   DETAILS — Apple minimal: горизонтальна стрічка,
+   білі картки, тонка рамка, монохромні іконки
    ══════════════════════════════════════════════════ */
 
-/* ─── Leave section ───────────────────────────────────────────────────────── */
-
-/* ── Details horizontal bleed-row (як стрічки на Головній) ──
+/* ── Horizontal bleed-row (як стрічки на Головній) ──
    Класи ті ж, що чекає ScrollRow (rowWrap, tournRow, rowArrow…),
    цифри — під геометрію сторінки турніру (контент 960px, падінг 28px). */
 .rowWrap {
@@ -211,14 +227,14 @@
 }
 .tournRow {
   display: flex;
-  gap: 20px;
+  gap: 12px;
   overflow-x: auto;
   margin-left: calc(-1 * var(--bleed-total));
   margin-right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)));
-  padding: 4px 0 28px 0;
+  padding: 4px var(--bleed-right) 28px 0;
   scroll-snap-type: x proximity;
   scroll-padding-left: var(--bleed-total);
-  scroll-padding-right: 0;
+  scroll-padding-right: var(--bleed-right);
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -227,7 +243,7 @@
 }
 .tournRow::before {
   content: "";
-  flex: 0 0 calc(var(--bleed-total) - 20px);
+  flex: 0 0 calc(var(--bleed-total) - 12px);
 }
 .tournRow .dc {
   flex: 0 0 240px;
@@ -280,42 +296,37 @@
 .rowArrowRight { right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)) + var(--arrow-right)); }
 
 .dc {
-  position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  column-gap: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   padding: 16px;
   border-radius: 24px;
-  overflow: hidden;
   background: #f5f5f7;
   border: none;
   box-shadow: none;
+  transition: background-color 0.2s ease;
 }
 
 .dc:hover {
-  transform: none;
+  background: #ececee;
+  border: none;
   box-shadow: none;
-  background: #f5f5f7;
+  transform: none;
 }
 
-.dc::before {
-  display: none;
-}
-
+.dc::before,
 .dc::after { display: none; }
 
 .dcIcon {
   display: flex;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  flex-shrink: 0;
-  color: var(--accent, #0071e3);
-  background: #e5f1fd;
-  background: color-mix(in srgb, var(--accent, #0071e3) 12%, #ffffff);
+  color: #1d1d1f;
+  background: #fff;
   border: none;
   box-shadow: none;
 }
@@ -326,31 +337,195 @@
   flex-shrink: 0;
 }
 
-.dcLabel {
-  font-size: 13px;
-  font-weight: 600;
-  color: #6e6e73;
-  line-height: 1.3;
+.dcText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
+  flex: 1;
+}
+
+.dcLabel {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #86868b;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dcValue {
-  grid-column: 1 / -1;
   font-size: 17px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.01em;
   color: #1d1d1f;
-  line-height: 1.35;
-  margin-top: 8px;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow-wrap: break-word;
 }
 
-.dcOpenRegHint {
-  grid-column: 1 / -1;
+.dcHint {
   font-size: 13px;
-  color: #6e6e73;
-  margin-top: 1px;
+  font-weight: 400;
+  color: #a1a1a6;
   line-height: 1.4;
 }
+
+/* Зелена крапка статусу — єдиний кольоровий акцент */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #30d158;
+  flex-shrink: 0;
+}
+
+/* Старі класи-аліаси (щоб нічого не зламалось, якщо десь лишились) */
+.dcOpenRegHint { display: none; }
+.dcBlue, .dcGreen, .dcOrange, .dcOpenReg { background: #f5f5f7; border: none; }
+
+/* ─── Inline editing ──────────────────────────────────────────────────────── */
+
+/* Картка в режимі редагування — клік фокусує поле */
+.dcEditable { cursor: text; }
+
+.dcEditable:focus-within {
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18);
+}
+
+/* Поле всередині картки — безрамкове, як текст значення */
+.dcInput {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1d1d1f;
+  line-height: 1.4;
+}
+
+.dcInput::placeholder { color: #a1a1a6; font-weight: 400; }
+.dcInput::-webkit-calendar-picker-indicator { opacity: 0.45; cursor: pointer; }
+
+.dcInputDate { font-size: 14px; }
+
+.dcTeamInputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dcTeamInputs .dcInput { text-align: center; }
+
+.dcDash { color: #a1a1a6; font-weight: 400; }
+
+/* Рядок з Apple-світчем */
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 2px;
+}
+
+.toggleText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.toggleTitle {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1d1d1f;
+}
+
+.toggleHint {
+  font-size: 13px;
+  color: #86868b;
+  line-height: 1.4;
+}
+
+.switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 51px;
+  height: 31px;
+  border-radius: 100px;
+  background: #e9e9eb;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.2s ease;
+}
+
+.switchOn { background: #34c759; }
+
+.switchKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.switchOn .switchKnob { transform: translateX(20px); }
+
+/* ─── Actions section ─────────────────────────────────────────────────────── */
+
+.actionsRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.actionEdit,
+.actionDelete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 400;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  border: none;
+  border-radius: 980px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.actionEdit {
+  color: #fff;
+  background: #0071e3;
+}
+
+.actionEdit:hover { background: #0077ed; }
+.actionEdit:active { transform: scale(0.97); }
+
+.actionDelete {
+  color: rgb(215, 125, 126);
+  background: rgba(255, 229, 230, 0.7);
+}
+
+.actionDelete:hover { background: rgba(255, 201, 204, 0.9); }
+.actionDelete:active { transform: scale(0.97); }
 
 /* ─── Leave section ───────────────────────────────────────────────────────── */
 
@@ -416,14 +591,14 @@
 
   /* ── Картка ─────────────────────────────────────────────────── */
   .dc {
-    padding: 16px;
+    padding: 14px;
     border-radius: 20px;
   }
 
   .dcIcon {
-    width: 28px;
-    height: 28px;
-    margin-bottom: 6px;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
   }
 
   .dcIcon svg {
@@ -432,14 +607,41 @@
   }
 
   .dcLabel {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .dcValue {
-    font-size: 15px;
+    font-size: 16px;
   }
 
-  .dcOpenRegHint { font-size: 12px; }
+  .dcHint { font-size: 12.5px; }
+
+  .dcInput { font-size: 16px; }
+  .dcInputDate { font-size: 16px; }
+
+  /* ── Дії ────────────────────────────────────────────────────── */
+  .actionsRow { gap: 10px; }
+
+  .actionEdit,
+  .actionDelete {
+    flex: 1 1 100%;
+    justify-content: center;
+    padding: 13px 16px;
+    font-size: 14px;
+  }
+
+  /* ── Закріплені кнопки редагування ──────────────────────────── */
+  .editActions {
+    left: 12px;
+    right: 12px;
+    bottom: 16px;
+  }
+
+  .editActions > * { flex: 1; }
+
+  .tabContentEditing {
+    padding-bottom: 120px;
+  }
 }
 
 /* ── Дуже вузький (≤360px, старі iPhone SE) ─────────────────── */
