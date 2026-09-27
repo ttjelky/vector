@@ -53,13 +53,13 @@ export const computeStatus = (t) => {
 export const getStatusStyle = (status) => {
   switch (status) {
     case "ongoing":
-      return { background: "#e6f4ed", color: "#2a7a4b", border: "1px solid #b7e0ca" };
+      return { background: "#e6f4ed", color: "#2a7a4b", border: "none" };
     case "registration":
-      return { background: "#eff6ff", color: "#1d4ed8", border: "1px solid #bfdbfe" };
+      return { background: "#eff6ff", color: "#1d4ed8", border: "none" };
     case "finished":
-      return { background: "#f2f2f4", color: "#888", border: "1px solid #ddd" };
+      return { background: "#f2f2f4", color: "#888", border: "none" };
     default: // "upcoming"
-      return { background: "#fffbeb", color: "#b45309", border: "1px solid #fde68a" };
+      return { background: "#fffbeb", color: "#b45309", border: "none" };
   }
 };
 
@@ -67,11 +67,11 @@ export const getStatusStyle = (status) => {
 export const getRoundStatusStyle = (status) => {
   switch (status) {
     case "Триває":
-      return { background: "#e6f4ed", color: "#2a7a4b", border: "1px solid #b7e0ca" };
+      return { background: "#e6f4ed", color: "#2a7a4b", border: "none" };
     case "Завершено":
-      return { background: "#f2f2f4", color: "#888", border: "1px solid #ddd" };
+      return { background: "#f2f2f4", color: "#888", border: "none" };
     default: // "Очікується"
-      return { background: "#eef3ff", color: "#3a5cbf", border: "1px solid #c4d0f5" };
+      return { background: "#eef3ff", color: "#3a5cbf", border: "none" };
   }
 };
 

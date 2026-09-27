@@ -387,13 +387,13 @@ export function TournamentPage() {
               <StatusBadge status={status} />
               {isJuryPanel && (
                 <span style={{
-                  fontSize: 11.5,
-                  fontWeight: 600,
+                  fontSize: 13,
+                  fontWeight: 500,
                   color: myRole === "admin" ? "#7c3aed" : "#5566aa",
                   background: myRole === "admin" ? "#f5f3ff" : "#f0f2ff",
-                  border: `1px solid ${myRole === "admin" ? "#ddd6fe" : "#dde4f5"}`,
+                  border: "none",
                   borderRadius: 100,
-                  padding: "3px 10px",
+                  padding: "6px 14px",
                   whiteSpace: "nowrap",
                 }}>
                   {myRole === "admin" ? "Адміністратор" : "Права журі"}

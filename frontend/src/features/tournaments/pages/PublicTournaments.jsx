@@ -208,19 +208,19 @@ const PublicTournaments = () => {
                 </div>
                 <div style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 12, color: "#666", padding: "0 4px", flexWrap: "wrap" }}>
                   <span style={{
-                    background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#15803d",
-                    borderRadius: 100, padding: "2px 8px", fontWeight: 700,
+                    background: "#f0fdf4", border: "none", color: "#15803d",
+                    borderRadius: 100, padding: "5px 12px", fontSize: 13, fontWeight: 500,
                   }}>{STATUS_LABELS[computeStatus(t)] || computeStatus(t)}</span>
                   <span>{t.tournament_type === "team" ? "👥 Командний" : "👤 Одиночний"}</span>
                   {t.registration_open === false ? (
                     <span title={t.registration_message || "Реєстрація закрита"} style={{
-                      background: "#fffbeb", border: "1px solid #fde68a", color: "#b45309",
-                      borderRadius: 100, padding: "2px 8px", fontWeight: 700,
+                      background: "#fffbeb", border: "none", color: "#b45309",
+                      borderRadius: 100, padding: "5px 12px", fontSize: 13, fontWeight: 500,
                     }}>🔒 Реєстрація закрита</span>
                   ) : (
                     <span style={{
-                      background: "#eff6ff", border: "1px solid #bfdbfe", color: "#1d4ed8",
-                      borderRadius: 100, padding: "2px 8px", fontWeight: 700,
+                      background: "#eff6ff", border: "none", color: "#1d4ed8",
+                      borderRadius: 100, padding: "5px 12px", fontSize: 13, fontWeight: 500,
                     }}>✅ Реєстрація відкрита</span>
                   )}
                   <button className="btn-primary btn-sm" style={{ marginLeft: "auto" }}

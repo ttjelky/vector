@@ -34,23 +34,23 @@ export function getDescriptionPreview(html, maxLen = 80) {
 // ─── Статусний бейдж ──────────────────────────────────────────────────────────
 // Статуси: "upcoming" | "registration" | "ongoing" | "finished"
 const STATUS_CONFIG = {
-  upcoming:     { label: "Очікується",        color: "#b45309", bg: "#fffbeb", border: "#fde68a" },
-  registration: { label: "Реєстрація команд", color: "#1d4ed8", bg: "#eff6ff", border: "#bfdbfe" },
-  ongoing:      { label: "Триває",            color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0" },
-  finished:     { label: "Завершено",         color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb" },
+  upcoming:     { label: "Очікується",        color: "#b45309", bg: "#fffbeb" },
+  registration: { label: "Реєстрація команд", color: "#1d4ed8", bg: "#eff6ff" },
+  ongoing:      { label: "Триває",            color: "#15803d", bg: "#f0fdf4" },
+  finished:     { label: "Завершено",         color: "#6b7280", bg: "#f9fafb" },
 };
 
 export function StatusBadge({ status }) {
   const s = STATUS_CONFIG[status] ?? STATUS_CONFIG.upcoming;
   return (
     <span style={{
-      fontSize: 11.5,
-      fontWeight: 600,
+      fontSize: 13.5,
+      fontWeight: 500,
       color: s.color,
       background: s.bg,
-      border: `1px solid ${s.border}`,
+      border: "none",
       borderRadius: 100,
-      padding: "3px 10px",
+      padding: "6px 14px",
       whiteSpace: "nowrap",
     }}>
       {s.label}
