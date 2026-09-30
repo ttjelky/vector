@@ -144,6 +144,55 @@ export const pluralize = (n, one, few, many) => {
   return `${n} ${form}`;
 };
 
+// ─── Спільні хелпери вкладки «Турніри» ────────────────────────────────────────
+
+export const STATUS_ORDER = { ongoing: 0, registration: 1, upcoming: 2, finished: 3 };
+
+export function startMs(t) {
+  if (!t.start_date) return null;
+  const ms = new Date(t.start_date).getTime();
+  return Number.isFinite(ms) ? ms : null;
+}
+
+export function sortTournaments(list, sortBy, sortAsc) {
+  const dir = sortAsc ? 1 : -1;
+  return [...list].sort((a, b) => {
+    if (sortBy === "date") {
+      const da = startMs(a);
+      const db = startMs(b);
+      // Без дати — завжди в кінець, в обох напрямках.
+      if (da == null && db == null) return 0;
+      if (da == null) return 1;
+      if (db == null) return -1;
+      return (da - db) * dir;
+    }
+    if (sortBy === "status") {
+      const sa = STATUS_ORDER[computeStatus(a)] ?? 99;
+      const sb = STATUS_ORDER[computeStatus(b)] ?? 99;
+      if (sa !== sb) return (sa - sb) * dir;
+      return (a.name ?? "").localeCompare(b.name ?? "", "uk");
+    }
+    return (a.name ?? "").localeCompare(b.name ?? "", "uk") * dir;
+  });
+}
+
+// Чистий текст з HTML-опису для пошуку (без обрізання).
+export function stripHtml(html) {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Пошук по назві + очищеному опису: теги не повинні збігатися.
+export function matchesQuery(t, q) {
+  if (!q) return true;
+  const hay = `${t.name ?? ""} ${stripHtml(t.description ?? "")}`.toLowerCase();
+  return hay.includes(q);
+}
+
 // ─── Escape key hook ──────────────────────────────────────────────────────────
 
 export function useEscape(handler) {

@@ -23,6 +23,7 @@ import { UserProfile }          from "@features/profile/pages/UserProfile";
 import { Settings }             from "@features/profile";
 import { Works }                from "@features/submissions";
 import { Tournaments }          from "@features/tournaments";
+import { TournamentsGrid }      from "@features/tournaments";
 import { ResetPassword }        from "@features/auth";
 import { TournamentPage }       from "@features/tournaments";
 import { JoinTournamentPage }   from "@features/tournaments";
@@ -94,6 +95,8 @@ function AppRoutes() {
 
         {/* ── Спільні ───────────────────────────────────────────── */}
         <Route path="/tournaments"    element={<ProtectedRoute><Tournaments /></ProtectedRoute>} />
+        <Route path="/tournaments/active"  element={<ProtectedRoute><TournamentsGrid filter="active" /></ProtectedRoute>} />
+        <Route path="/tournaments/archive" element={<ProtectedRoute><TournamentsGrid filter="archive" /></ProtectedRoute>} />
         <Route path="/public"         element={<ProtectedRoute><PublicTournaments /></ProtectedRoute>} />
         <Route path="/tournament/:id" element={<ProtectedRoute><TournamentPage /></ProtectedRoute>} />
         <Route path="/works"          element={<ProtectedRoute><Works /></ProtectedRoute>} />

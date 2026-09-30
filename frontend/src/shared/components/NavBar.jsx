@@ -298,7 +298,7 @@ const MobileSearch = ({ onSearch }) => {
 };
 
 /* ─── Main NavBar ─── */
-const NavBar = ({ children }) => {
+const NavBar = ({ children, topbarSlot }) => {
   const { openTabs, closeTab, removeTabById, isFreshTab, markTabSeen } = useTabs();
   const { searchQuery, setSearchQuery, clearSearch } = useSearch();
   const navigate = useNavigate();
@@ -691,6 +691,12 @@ const NavBar = ({ children }) => {
         >
           <img src={Logo} alt="Vector" className={styles.logo} />
         </NavLink>
+
+        {topbarSlot && (
+          <div className={styles.topbarSlot}>
+            {topbarSlot}
+          </div>
+        )}
 
         <MobileSearch onSearch={setSearchQuery} />
 

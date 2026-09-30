@@ -508,3 +508,393 @@
   .pageTitle   { font-size: 28px; }
   .segmentTab  { font-size: 12px; padding: 6px 8px; }
 }
+
+@media (max-width: 360px) {
+  .pageTitle   { font-size: 28px; }
+  .segmentTab  { font-size: 12px; padding: 6px 8px; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Вкладка «Турніри» в мові Головної:
+   повітря, великий кегль, жодних рамок, желейні натискання,
+   горизонтальні bleed-стрічки зі стрілками.
+   (Класи вище лишаються для сторінки «Публічні».)
+   ══════════════════════════════════════════════════════════════ */
+
+.content {
+  padding: 12px 48px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  animation: tournFadeIn 0.3s ease;
+}
+
+@keyframes tournFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.reveal {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.revealVisible { opacity: 1; }
+
+/* ── Hero: без карток і рамок ── */
+
+.hero {
+  padding: 40px 8px 32px;
+  margin-bottom: 32px;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+.heroTitle {
+  font-size: 48px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: #1d1d1f;
+}
+.heroSub {
+  font-size: 19px;
+  line-height: 1.5;
+  color: #6e6e73;
+  margin: 0 0 24px;
+  max-width: 680px;
+}
+.heroActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Stats: сірі плашки без рамок, цифри з count-up ── */
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.statCard {
+  background: #f5f5f7;
+  border: none;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: default;
+}
+.statNum {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #1d1d1f;
+  font-variant-numeric: tabular-nums;
+}
+.statLbl {
+  font-size: 15px;
+  color: #6e6e73;
+}
+
+/* ── Секції: заголовок 24px, тонкий розділювач, синє посилання ── */
+
+.section {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  min-width: 0;
+}
+.section + .section { margin-top: 40px; }
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8ed;
+}
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: #1d1d1f;
+}
+.countText {
+  font-size: 17px;
+  font-weight: 400;
+  color: #6e6e73;
+}
+.linkBtn {
+  background: none;
+  border: none;
+  color: #0066cc;
+  font-size: 16px;
+  font-weight: 400;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.linkBtn:hover { text-decoration: underline; }
+
+/* Група контролів праворуч від заголовка секції */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ── Горизонтальна стрічка від краю до краю (геометрія — як на Головній) ── */
+
+.rowWrap {
+  position: relative;
+  --bleed-left: 296px;
+  --bleed-right: 48px;
+  --bleed-extra: max(0px, (100vw - 1544px) / 2);
+  --bleed-total: calc(var(--bleed-left) + var(--bleed-extra));
+  --arrow-left: 264px;
+  --arrow-right: 16px;
+}
+@media (max-width: 1000px) {
+  .rowWrap {
+    --bleed-left: 268px;
+    --bleed-right: 20px;
+    --bleed-extra: max(0px, (100vw - 1488px) / 2);
+  }
+}
+@media (max-width: 992px) {
+  .rowWrap {
+    --bleed-left: 20px;
+    --bleed-right: 20px;
+    --bleed-extra: max(0px, (100vw - 1240px) / 2);
+    --arrow-left: 12px;
+  }
+}
+.tournRow {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  margin-left: calc(-1 * var(--bleed-total));
+  margin-right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)));
+  padding: 4px var(--bleed-right) 28px 0;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--bleed-total);
+  scroll-padding-right: var(--bleed-right);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tournRow::-webkit-scrollbar { display: none; }
+.tournRow::before {
+  content: "";
+  flex: 0 0 calc(var(--bleed-total) - 20px);
+}
+.rowArrow {
+  position: absolute;
+  top: calc(50% - 12px - 36px);
+  width: 28px;
+  height: 72px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1d1d1f;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  transition:
+    opacity 0.35s cubic-bezier(0.33, 1, 0.68, 1),
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease !important;
+}
+.rowWrap:hover .rowArrow,
+.rowWrap:focus-within .rowArrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+.rowArrowHidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.rowArrowLeft { left: calc(-1 * var(--bleed-total) + var(--arrow-left)); }
+.rowArrowRight { right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)) + var(--arrow-right)); }
+
+/* ── Клітинка стрічки: фіксована ширина, желейне натискання ── */
+
+.cell {
+  flex: 0 0 400px;
+  max-width: 400px;
+  scroll-snap-align: start;
+  cursor: pointer;
+  border-radius: 18px;
+  transform-origin: 50% 50%;
+  transition:
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    box-shadow 0.22s ease;
+}
+@media (hover: hover) {
+  .cell:hover {
+    transform: none;
+    filter: brightness(0.96);
+  }
+}
+.cell:active {
+  transform: scale(0.96, 0.93);
+  filter: brightness(0.92);
+  transition:
+    transform 110ms ease-in,
+    filter 110ms ease-in;
+}
+.cell:focus-visible {
+  outline: 2px solid rgba(0,122,255,0.6);
+  outline-offset: 3px;
+}
+.cellDimmed { opacity: 0.72; }
+@media (hover: hover) {
+  .cellDimmed:hover { opacity: 0.9; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cell { transition: filter 150ms ease; }
+  .cell:active { transform: none; }
+}
+
+/* ── Скелети й порожні стани в мові Головної ── */
+
+.row {
+  display: flex;
+  gap: 20px;
+}
+.skeleton {
+  flex: 0 0 400px;
+  max-width: 400px;
+  height: 250px;
+  border-radius: 18px;
+  background: linear-gradient(90deg, #f5f5f7 25%, #ececf0 50%, #f5f5f7 75%);
+  background-size: 200% 100%;
+  animation: tournShimmer 1.5s infinite;
+}
+@keyframes tournShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.emptyBlock {
+  color: #6e6e73;
+  font-size: 17px;
+  line-height: 1.5;
+  padding: 32px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+.emptyBlock p { margin: 0; max-width: 560px; }
+
+/* ── Сторінка сітки: вертикальна адаптивна сітка ── */
+
+/* Кнопка «назад» у топбарі: висота як у пошуку (50px),
+   та сама тінь і тонка обводка, що в пілюль топбару. */
+.topbarBackBtn {
+  padding: 10px 22px;
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+/* Висота кнопки: 20 + 10 + 10 = 40px; зі слотом (+5px зверху)
+   центр рівно збігається з центром пошуку (50px). */
+
+/* Кнопка «назад» усередині контенту — тільки для вузьких екранів,
+   де слот топбару приховано. На десктопі вона живе в навбарі. */
+.gridTop {
+  display: none;
+  padding: 24px 8px 0;
+}
+@media (max-width: 992px) {
+  .gridTop {
+    display: block;
+  }
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+  gap: 20px;
+  padding: 4px 0 16px;
+}
+.gridCell {
+  min-width: 0;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 18px;
+  transform-origin: 50% 50%;
+  transition:
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    box-shadow 0.22s ease;
+}
+@media (hover: hover) {
+  .gridCell:hover {
+    transform: none;
+    filter: brightness(0.96);
+  }
+}
+.gridCell:active {
+  transform: scale(0.96, 0.93);
+  filter: brightness(0.92);
+  transition:
+    transform 110ms ease-in,
+    filter 110ms ease-in;
+}
+.gridCell:focus-visible {
+  outline: 2px solid rgba(0,122,255,0.6);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gridCell { transition: filter 150ms ease; }
+  .gridCell:active { transform: none; }
+}
+.gridSkeleton {
+  min-width: 0;
+  height: 250px;
+  border-radius: 18px;
+  background: linear-gradient(90deg, #f5f5f7 25%, #ececf0 50%, #f5f5f7 75%);
+  background-size: 200% 100%;
+  animation: tournShimmer 1.5s infinite;
+}
+
+/* ── Мобільна версія нового блоку ── */
+
+@media (max-width: 1000px) {
+  .content { padding: 8px 20px 48px; }
+  .heroTitle { font-size: 36px; }
+  .heroSub { font-size: 17px; }
+}
+@media (max-width: 680px) {
+  .content { padding-left: 16px; padding-right: 16px; }
+  .hero { padding-top: 24px; }
+  .heroTitle { font-size: 32px; letter-spacing: -0.8px; }
+  .heroSub { font-size: 15px; }
+  .sectionTitle { font-size: 20px; }
+  .cell { flex-basis: 300px; }
+  .skeleton { flex-basis: 300px; max-width: 300px; }
+  .row { gap: 14px; }
+  .grid { gap: 14px; }
+  .statNum { font-size: 28px; }
+}

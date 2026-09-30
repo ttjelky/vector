@@ -59,10 +59,10 @@ export function StatusBadge({ status }) {
 }
 
 const formatDate = (value) => {
-  const d = value ? new Date(value) : new Date();
-  return isNaN(d.getTime())
-    ? new Date().toLocaleDateString("uk-UA", { day: "numeric", month: "long" })
-    : d.toLocaleDateString("uk-UA", { day: "numeric", month: "long" });
+  if (!value) return null;
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("uk-UA", { day: "numeric", month: "long" });
 };
 
 export function TournamentCard({
@@ -109,6 +109,8 @@ export function TournamentCard({
     return null;
   };
 
+  const dateText = formatDate(date);
+
   return (
     <div className={styles.previewCard} style={{ "--accent": accentColor }}>
       {renderImage()}
@@ -127,7 +129,9 @@ export function TournamentCard({
           {info ? getDescriptionPreview(info, 80) : "Детальний опис вашого турніру, який буде видно учасникам."}
         </p>
         <div className={styles.previewFooter}>
-          <span className={styles.previewDate}>{formatDate(date)}</span>
+          {dateText
+            ? <span className={styles.previewDate}>{dateText}</span>
+            : <span className={styles.previewDateMuted}>Дата не вказана</span>}
         </div>
       </div>
     </div>

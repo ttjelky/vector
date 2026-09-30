@@ -2,6 +2,7 @@ export * from './pages/AdminTournaments';
 export * from './pages/ParticipantTournaments';
 export * from './pages/PublicTournaments';
 export * from './pages/Tournaments';
+export * from './pages/TournamentsGrid';
 export * from './pages/TournamentPage';
 export * from './pages/JoinTournamentPage';
 export * from './components/CreateTournamentModal';
