@@ -66,11 +66,20 @@ class Team(models.Model):
             return False
         if self.roster_locked:
             return False
+        # Склад можна міняти лише поки відкрита реєстрація в турнір:
+        # враховує вільну реєстрацію, виняток, вікно дат і фініш турніру.
+        # (Раніше перевірявся тільки registration_end — через це при
+        # open_registration / винятку склад безпідставно блокувався,
+        # а при finished + відсутності дат — залишався відкритим.)
         t = self.tournament
-        now = timezone.now()
-        if t.registration_end and now > t.registration_end:
-            return False
-        return True
+        # Уникаємо зайвого запиту, якщо турнір вже підтягнутий.
+        try:
+            return bool(t.registration_open())
+        except Exception:
+            now = timezone.now()
+            if t.registration_end and now > t.registration_end:
+                return False
+            return True
 
     def accepted_member_count(self):
         return self.members.filter(status=TeamMember.STATUS_ACCEPTED).count()

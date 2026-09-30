@@ -445,6 +445,8 @@ export function CreateTournamentModal({ onClose, onCreate }) {
                   status={computeStatus({
                     start_date: startDate ? startDate + "T00:00:00" : null,
                     end_date: endDate ? endDate + "T00:00:00" : null,
+                    registration_start: !openRegistration && regStart ? regStart : null,
+                    registration_end: !openRegistration && regEnd ? regEnd : null,
                     open_registration: openRegistration,
                   })}
                 />

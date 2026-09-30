@@ -756,9 +756,10 @@ export function ParticipantsTab({ tournamentId, myRole, loading, tournamentType,
             </span>
 
             <div className={styles.headerActions}>
-              {/* Кнопка винятку — тільки ongoing/finished і тільки якщо є дати реєстрації */}
+              {/* Кнопка винятку — коли реєстрація закрита, але турнір ще не завершено.
+                  На finished виняток не діє (бекенд: finished > exception), тому ховаємо. */}
               {isOwner && activeTab === "participant" && !isOpenAndActive &&
-                (tournamentStatus === "ongoing" || tournamentStatus === "finished") && (
+                tournamentStatus !== "finished" && (
                 exceptionActive ? (
                   <button
                     className={styles.exceptionActiveBtn}

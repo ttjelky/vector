@@ -29,23 +29,60 @@ export const formatRoundDateRange = (start, end) => {
 
 // ─── Status helpers ───────────────────────────────────────────────────────────
 
-// Чотири статуси турніру залежно від дат:
-//   "upcoming"     — до start_date (або дати немає)        → Очікується
-//   "registration" — після start_date і до registration_end → Реєстрація команд
-//                  — або якщо open_registration=true (завжди відкрита реєстрація)
-//   "ongoing"      — після registration_end і до end_date   → Триває
-//   "finished"     — після end_date                         → Завершено
+// Чотири статуси турніру. Пріоритет перевірок (має збігатися з бекендом
+// Tournament.registration_status, де finished > exception > open > window):
+//   "finished"     — після end_date (навіть з винятком/вільною реєстрацією) → Завершено
+//   "registration" — реєстрація відкрита: виняток активний, або
+//                    open_registration=true, або зараз усередині вікна
+//                    [registration_start, registration_end], або дат
+//                    реєстрації немає взагалі (бета: відкрито до фінішу) → Реєстрація
+//   "upcoming"     — реєстрація ще не починалась (now < registration_start),
+//                    або турнір ще не стартував і реєстрація закрита → Очікується
+//   "ongoing"      — реєстрація вже закрилась (now > registration_end),
+//                    турнір стартував і ще триває → Триває
+//
+// Увага: з "Вільною реєстрацією" статус тримається "registration" аж до
+// finished (реєстрація ніколи не закривається). Тому видимість раундів /
+// завдань НЕ можна прив'язувати тільки до "ongoing" — RoundsTab окремо
+// враховує openRegistration (див. canSeeRounds).
 export const computeStatus = (t) => {
   const now    = new Date();
-  const start  = t.start_date       ? new Date(t.start_date)       : null;
-  const regEnd = t.registration_end ? new Date(t.registration_end) : null;
-  const end    = t.end_date         ? new Date(t.end_date)         : null;
+  const start  = t.start_date         ? new Date(t.start_date)         : null;
+  const end    = t.end_date           ? new Date(t.end_date)           : null;
+  const regStart = t.registration_start ? new Date(t.registration_start) : null;
+  const regEnd   = t.registration_end   ? new Date(t.registration_end)   : null;
+  const exceptionUntil = t.registration_exception_until
+    ? new Date(t.registration_exception_until)
+    : null;
 
-  if (!start || now < start)   return "upcoming";
+  // 1. Фініш — найвищий пріоритет (як на бекенді).
   if (end && now > end)        return "finished";
-  // Якщо відкрита реєстрація — показуємо "registration" поки турнір не завершився
+
+  // 2. Активний виняток відкриває реєстрацію (але не після фінішу — див. вище).
+  if (exceptionUntil && now < exceptionUntil) return "registration";
+
+  // 3. Вільна реєстрація — відкрита до завершення турніру.
   if (t.open_registration)     return "registration";
-  if (regEnd && now <= regEnd) return "registration";
+
+  // 4. Явне вікно реєстрації.
+  if (regStart || regEnd) {
+    // Ще не почалась — чекаємо (навіть якщо турнір уже стартував).
+    if (regStart && now < regStart) return "upcoming";
+    // Вже закінчилась — турнір триває (або ще не стартував → upcoming).
+    if (regEnd && now > regEnd) {
+      if (!start || now < start) return "upcoming";
+      return "ongoing";
+    }
+    return "registration";
+  }
+
+  // 5. Дат реєстрації немає — бекенд вважає відкритою до фінішу.
+  // Для бейджа показуємо фазу турніру, а відкритість береться з
+  // registration_open з API (див. ParticipantsTab baseOpen):
+  //   не стартував → upcoming, стартував → ongoing.
+  // (Раніше тут завжди було "upcoming" при відсутності start_date,
+  // що ховало раунди навіть у активному турнірі без дат.)
+  if (!start || now < start)   return "upcoming";
   return "ongoing";
 };
 

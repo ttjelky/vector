@@ -102,8 +102,15 @@ export function RoundsTab({
   // Журі і учасники отримують readOnly=true → тільки перегляд
   const isPrivileged = !readOnly || myRole === "jury" || myRole === "admin";
 
-  // Учасники бачать раунди лише коли турнір "ongoing" або "finished",
-  // або якщо увімкнена вільна реєстрація (openRegistration=true)
+  // Учасники бачать раунди коли турнір "ongoing" або "finished",
+  // або якщо увімкнена вільна реєстрація (openRegistration=true — TournamentPage
+  // передає tournament.open_registration || відсутність дат реєстрації).
+  // Без цього прапорця вільна реєстрація тримала статус "registration" до самого
+  // фінішу — і завдання були приховані весь турнір ("після завершення реєстрації",
+  // яке ніколи не настане). Не прив'язувати сюди статус "registration" для
+  // звичайного вікна: за задумом завдання відкриваються після його закриття
+  // (див. банер нижче), а видимість всередині раунду додатково ріжуть дати
+  // самого раунду в getParticipantAccess.
   const canSeeRounds = isPrivileged
     || openRegistration
     || tournamentStatus === "ongoing"

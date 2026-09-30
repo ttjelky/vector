@@ -9,9 +9,15 @@ const POLL_INTERVAL = 5000; // мс
 // ── Utilities ──────────────────────────────────────────────────────────────
 
 function registrationStatusMeta(status) {
+  // Бекенд (TeamSerializer.get_registration_status) повертає reason з
+  // Tournament.registration_status: open / exception→open / not_started /
+  // ended / finished. Мапимо все, щоб не показувати сирий "ended"/"finished".
   const MAP = {
     open:        { text: "Реєстрація відкрита",    color: "green" },
+    exception:   { text: "Реєстрація відкрита",    color: "green" },
     closed:      { text: "Реєстрацію закрито",     color: "red"   },
+    ended:       { text: "Реєстрацію закрито",     color: "red"   },
+    finished:    { text: "Турнір завершено",       color: "gray"  },
     not_started: { text: "Реєстрація не відкрита", color: "amber" },
   };
   return MAP[status] ?? { text: status, color: "gray" };
@@ -528,17 +534,23 @@ export function MyTeamTab({ tournamentId, tournament, myRole, tournamentStatus, 
   const [loading,  setLoading]  = useState(true);
   const [creating, setCreating] = useState(false);
 
-  // Реєстрація відкрита якщо:
-  // 1. статус турніру "registration", АБО
-  // 2. дати реєстрації не вказані взагалі (вільна реєстрація), АБО
-  // 3. є активний виняток реєстрації
+  // Реєстрація відкрита якщо бекенд каже registration_open=true.
+  // Fallback (коли поле відсутнє): статус "registration" або відсутність
+  // дат реєстрації — але ТІЛЬКИ поки турнір не завершено.
+  // (Раніше noRegDates давав true навіть на finished — дозволяло
+  // створювати команди після фінішу.)
   const noRegDates = !tournament?.registration_start && !tournament?.registration_end;
   const hasException = tournament?.registration_exception_until
     && new Date(tournament.registration_exception_until).getTime() > Date.now();
-  const registrationOpen =
-    tournamentStatus === "registration" ||
-    noRegDates ||
-    !!hasException;
+  const backendOpen = typeof tournament?.registration_open === "boolean"
+    ? tournament.registration_open
+    : null;
+  const fallbackOpen = tournamentStatus === "registration"
+    || (noRegDates && tournamentStatus !== "finished")
+    || (!!hasException && tournamentStatus !== "finished");
+  // Бекенд вже враховує виняток і finished (finished > exception),
+  // тому при наявності поля беремо його як є.
+  const registrationOpen = backendOpen ?? fallbackOpen;
 
   // Оновлює локальний стан і сповіщає TournamentPage.
   // Приймає або дані, або updater-функцію (для оптимістичних оновлень).

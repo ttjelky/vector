@@ -87,8 +87,9 @@ class Tournament(models.Model):
     # ── Реєстрація: відкрита чи ні + причина ────────────────────────────────
     #
     # Семантика (порядок перевірок):
-    #   1. Виняток (registration_exception_until) — завжди відкрито.
-    #   2. Турнір завершено (end_date в минулому) — закрито (finished).
+    #   1. Турнір завершено (end_date в минулому) — закрито (finished).
+    #      Завершений турнір не відкриває навіть виняток.
+    #   2. Виняток (registration_exception_until) — завжди відкрито.
     #   3. Вільна реєстрація (open_registration) — відкрито.
     #   4. Явне вікно (registration_start / registration_end):
     #        now < start → закрито (not_started, з датою початку)
@@ -103,14 +104,14 @@ class Tournament(models.Model):
         """
         now = timezone.now()
 
-        if self.registration_exception_until and now < self.registration_exception_until:
-            return True, 'exception', None
-
         if self.end_date and now > self.end_date:
             return (
                 False, 'finished',
                 f"Турнір завершено {self.end_date.strftime('%d.%m.%Y, %H:%M')}. Реєстрація закрита."
             )
+
+        if self.registration_exception_until and now < self.registration_exception_until:
+            return True, 'exception', None
 
         if self.open_registration:
             return True, 'open', None

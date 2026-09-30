@@ -461,6 +461,10 @@ export function TournamentPage() {
               isTeamTournament={isTeamTournament}
               isTeamCaptain={myTeam?.is_captain ?? true}
               teamName={isTeamTournament ? (myTeam?.name ?? null) : null}
+              openRegistration={
+                tournament?.open_registration ||
+                (!tournament?.registration_start && !tournament?.registration_end)
+              }
             />
           )}
 

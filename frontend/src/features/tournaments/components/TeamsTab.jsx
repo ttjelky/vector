@@ -214,8 +214,18 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
 
   const exceptionActive = exceptionUntil && new Date() < new Date(exceptionUntil);
   // Вільна реєстрація: якщо дати не вказані — реєстрація завжди відкрита
+  // (як на бекенді), але ТІЛЬКИ поки турнір не завершено.
+  // Джерело правди — бекенд (tournament.registration_open), локальний
+  // розрахунок — лише fallback, коли поле відсутнє (старий кеш).
   const noRegDates    = !tournament?.registration_start && !tournament?.registration_end;
-  const canRegisterNow = tournamentStatus === "registration" || exceptionActive || noRegDates;
+  const backendOpen   = typeof tournament?.registration_open === "boolean"
+    ? tournament.registration_open
+    : null;
+  const fallbackOpen  = tournamentStatus === "registration"
+    || (noRegDates && tournamentStatus !== "finished");
+  const baseOpen      = backendOpen ?? fallbackOpen;
+  // Виняток не відкриває завершений турнір (як на бекенді: finished > exception).
+  const canRegisterNow = baseOpen || (exceptionActive && tournamentStatus !== "finished");
   const canInvite    = isOwner && canRegisterNow;
 
   const mergeTeams = useCallback((fresh) => {
@@ -409,8 +419,9 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
           {registered.length}{tournament?.max_teams ? ` / ${tournament.max_teams}` : ""} команд
         </span>
         <div className={styles.headerActions}>
-          {/* Кнопка винятку — тільки коли є дати реєстрації і статус ongoing/finished */}
-          {isOwner && !noRegDates && (tournamentStatus === "ongoing" || tournamentStatus === "finished") && (
+          {/* Кнопка винятку — коли реєстрація закрита, але турнір ще не завершено.
+              На finished виняток не діє (бекенд: finished > exception), тому ховаємо. */}
+          {isOwner && !baseOpen && tournamentStatus !== "finished" && (
             exceptionActive ? (
               <button
                 className={styles.exceptionActiveBtn}

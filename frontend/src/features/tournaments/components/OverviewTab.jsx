@@ -62,7 +62,11 @@ export function OverviewTab({ tournament, status, onSave, readOnly = false, myRo
   const [leaveError,       setLeaveError]       = useState(null);
 
   const tournamentEnded = tournament.end_date && new Date() > new Date(tournament.end_date);
-  const canLeave = isRegistered && tournamentEnded && (myRole === "participant" || myRole === "jury");
+  // Вийти може будь-який зареєстрований учасник/журі в будь-який момент
+  // (бекенд LeaveTournamentView дозволяє це завжди, крім власника).
+  // Раніше кнопка з'являлась ТІЛЬКИ після end_date — учасники були
+  // заблоковані в турнірі на весь час його проведення.
+  const canLeave = isRegistered && (myRole === "participant" || myRole === "jury");
 
   useEffect(() => {
     setForm(buildForm(tournament));
