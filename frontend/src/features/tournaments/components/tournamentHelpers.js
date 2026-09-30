@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { API } from "@api";
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 
@@ -201,4 +202,106 @@ export function useEscape(handler) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [handler]);
+}
+
+// ─── Reveal on scroll + count-up (мова Головної) ─────────────────────────────
+
+export function useReveal() {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold: 0.1 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return [ref, visible];
+}
+
+export function useCountUp(target, duration = 800) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if (!target) { setVal(0); return; }
+    let raf;
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min(1, (now - start) / duration);
+      setVal(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return val;
+}
+
+// ─── Приєднання до публічного турніру (каталог і сітки) ──────────────────────
+
+export function usePublicJoin(navigate) {
+  const [selected, setSelected] = useState(null);
+  const [regFields, setRegFields] = useState([]);
+  const [answers, setAnswers] = useState({});
+  const [formErrors, setFormErrors] = useState({});
+  const [joining, setJoining] = useState(false);
+  const [joinError, setJoinError] = useState("");
+  const [joinedId, setJoinedId] = useState(null);
+
+  const openJoin = async (t) => {
+    setSelected(t);
+    setAnswers({});
+    setFormErrors({});
+    setJoinError("");
+    setRegFields([]);
+    // Статус реєстрації (registration_open/message) вже є в картці зі списку.
+    try {
+      const r = await API.get(`/tournaments/${t.id}/registration-form/`).catch(() => ({ data: [] }));
+      setRegFields(r.data || []);
+    } catch {
+      setRegFields([]);
+    }
+  };
+
+  const closeJoin = () => setSelected(null);
+
+  const handleJoin = async () => {
+    if (!selected) return;
+    setJoining(true);
+    setJoinError("");
+    setFormErrors({});
+    try {
+      const payload = Object.keys(answers).length ? { answers } : {};
+      const res = await API.post(`/tournaments/${selected.id}/join-public/`, payload);
+      setJoinedId(selected.id);
+      setTimeout(() => {
+        setSelected(null);
+        setJoinedId(null);
+        navigate(`/tournament/${res.data.tournament_id}`);
+      }, 1200);
+    } catch (err) {
+      const data = err.response?.data;
+      if (data?.errors && typeof data.errors === "object") setFormErrors(data.errors);
+      else {
+        setJoinError(data?.detail || "Не вдалось приєднатися.");
+        // Якщо бекенд каже що закрито (stale картки) — оновлюємо статус модалки
+        if (data?.reason) {
+          setSelected((prev) => prev ? {
+            ...prev,
+            registration_open: false,
+            registration_reason: data.reason,
+            registration_message: data.detail,
+          } : prev);
+        }
+      }
+    } finally {
+      setJoining(false);
+    }
+  };
+
+  return {
+    selected, regFields, answers, setAnswers, formErrors,
+    joining, joinError, joinedId, openJoin, closeJoin, handleJoin,
+  };
 }

@@ -305,7 +305,7 @@ const NavBar = ({ children, topbarSlot }) => {
   const location = useLocation();
 
   // Сторінки де пошук фільтрує вбудований список — оверлей не потрібен
-  const TOURNAMENT_PATHS = ["/tournaments", "/admin/tournaments", "/participant/tournaments"];
+  const TOURNAMENT_PATHS = ["/tournaments", "/admin/tournaments", "/participant/tournaments", "/public"];
   const isOnTournamentsPage = TOURNAMENT_PATHS.some(p => location.pathname.startsWith(p));
 
   // Сторінка турніру — щільніше скло сайдбара: сильніший блюр і фрост

@@ -15,6 +15,7 @@ import { ParticipantDashboard } from "@features/dashboard";
 import { AdminTournaments }     from "@features/tournaments";
 import { ParticipantTournaments } from "@features/tournaments";
 import { PublicTournaments } from "@features/tournaments";
+import { PublicGrid } from "@features/tournaments";
 import { JuryDashboard }        from "@features/jury";
 import { Help }                from "@pages/Help";
 import { NotFound }            from "@pages/NotFound";
@@ -98,6 +99,10 @@ function AppRoutes() {
         <Route path="/tournaments/active"  element={<ProtectedRoute><TournamentsGrid filter="active" /></ProtectedRoute>} />
         <Route path="/tournaments/archive" element={<ProtectedRoute><TournamentsGrid filter="archive" /></ProtectedRoute>} />
         <Route path="/public"         element={<ProtectedRoute><PublicTournaments /></ProtectedRoute>} />
+        <Route path="/public/registration" element={<ProtectedRoute><PublicGrid status="registration" /></ProtectedRoute>} />
+        <Route path="/public/ongoing"      element={<ProtectedRoute><PublicGrid status="ongoing" /></ProtectedRoute>} />
+        <Route path="/public/upcoming"     element={<ProtectedRoute><PublicGrid status="upcoming" /></ProtectedRoute>} />
+        <Route path="/public/archive"      element={<ProtectedRoute><PublicGrid status="finished" /></ProtectedRoute>} />
         <Route path="/tournament/:id" element={<ProtectedRoute><TournamentPage /></ProtectedRoute>} />
         <Route path="/works"          element={<ProtectedRoute><Works /></ProtectedRoute>} />
         <Route path="/profile"        element={<ProtectedRoute><Profile /></ProtectedRoute>} />

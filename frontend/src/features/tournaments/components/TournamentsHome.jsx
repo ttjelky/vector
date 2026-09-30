@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTabs } from "@shared/contexts/TabsContext";
 import { useSearch } from "@shared/contexts/SearchContext";
@@ -8,44 +8,12 @@ import { ScrollRow } from "@features/dashboard";
 import { CreateTournamentModal } from "./CreateTournamentModal";
 import { TournamentCard } from "./TournamentCard";
 import { JoinByCodeModal } from "@features/teams";
-import { computeStatus, sortTournaments, matchesQuery } from "./tournamentHelpers";
+import { computeStatus, sortTournaments, matchesQuery, useReveal, useCountUp } from "./tournamentHelpers";
 import styles from "../styles/tournaments.module.css";
 
 // ─── Reveal + count-up у мові Головної ────────────────────────────────────────
 
-function useReveal() {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { setVisible(true); obs.disconnect(); }
-    }, { threshold: 0.1 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-  return [ref, visible];
-}
-
-function useCountUp(target, duration = 800) {
-  const [val, setVal] = useState(0);
-  useEffect(() => {
-    if (!target) { setVal(0); return; }
-    let raf;
-    const start = performance.now();
-    const tick = (now) => {
-      const p = Math.min(1, (now - start) / duration);
-      setVal(Math.round(target * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, duration]);
-  return val;
-}
-
-function Stat({ value, label, delay }) {
+export function Stat({ value, label, delay }) {
   const [ref, vis] = useReveal();
   const animated = useCountUp(vis ? value : 0);
   return (
@@ -149,6 +117,11 @@ export function TournamentsHome({ variant }) {
   const sortedArchive = useMemo(
     () => sortTournaments(archive, sortBy, sortAsc), [archive, sortBy, sortAsc]);
 
+  // У горизонтальних стрічках — максимум 6 карток, решта на сторінках сіток.
+  const ROW_LIMIT = 6;
+  const rowActive = sortedActive.slice(0, ROW_LIMIT);
+  const rowArchive = sortedArchive.slice(0, ROW_LIMIT);
+
   const openTournament = (t) => {
     addTab({ id: t.id, name: t.name });
     navigate(`/tournament/${t.id}`);
@@ -180,7 +153,7 @@ export function TournamentsHome({ variant }) {
               <button type="button" className="btn-primary" onClick={() => setModalOpen(true)}>
                 {isAdmin ? "Створити турнір" : "Приєднатися"}
               </button>
-              {sortedActive.length > 0 && (
+              {sortedActive.length > ROW_LIMIT && (
                 <button type="button" className={styles.linkBtn}
                   onClick={() => navigate("/tournaments/active")}>
                   Показати всі
@@ -205,7 +178,7 @@ export function TournamentsHome({ variant }) {
             </div>
           ) : (
             <ScrollRow classes={styles}>
-              {sortedActive.map((t) => (
+              {rowActive.map((t) => (
                 <TournamentCell key={t.id} tournament={t} onOpen={openTournament} />
               ))}
             </ScrollRow>
@@ -220,7 +193,7 @@ export function TournamentsHome({ variant }) {
                 <span className={styles.countText}>&nbsp;· {sortedArchive.length}</span>
               )}
             </h3>
-            {sortedArchive.length > 0 && (
+            {sortedArchive.length > ROW_LIMIT && (
               <button type="button" className={styles.linkBtn}
                 onClick={() => navigate("/tournaments/archive")}>
                 Показати всі
@@ -235,7 +208,7 @@ export function TournamentsHome({ variant }) {
             <div className={styles.emptyBlock}>Завершені турніри автоматично потрапляють сюди</div>
           ) : (
             <ScrollRow classes={styles}>
-              {sortedArchive.map((t) => (
+              {rowArchive.map((t) => (
                 <TournamentCell key={t.id} tournament={t} dimmed onOpen={openTournament} />
               ))}
             </ScrollRow>
