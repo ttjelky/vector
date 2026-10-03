@@ -299,7 +299,7 @@
 .composeModal {
   background: #ffffff;
   border-radius: 28px;
-  border: 1px solid lightgray;
+  border: none;
   width: min(560px, 96vw);
   max-height: 90vh;
   max-height: 90dvh;
@@ -346,8 +346,8 @@
   font-weight: 700;
   color: #111;
   background: #fff;
-  border: 1px solid #d1d1d1;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border: none;
+  box-shadow: none;
   border-radius: 1000px;
   pointer-events: auto;
 }
@@ -360,8 +360,8 @@
   align-items: center;
   justify-content: center;
   background: #fff;
-  border: 1px solid #d1d1d1;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border: none;
+  box-shadow: none;
   border-radius: 1000px;
   cursor: pointer;
   color: #555;
@@ -414,15 +414,15 @@
   width: 100%;
   min-height: 48px;
   padding: 0 16px;
-  border: 0.5px solid rgba(0,0,0,0.2);
+  border: none;
   border-radius: 14px;
   font-size: 14px;
   font-family: inherit;
   color: #111;
-  background: #fff;
+  background: #f5f5f7;
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.12s, box-shadow 0.12s;
+  transition: background-color 0.12s;
   resize: vertical;
 }
 .composeField textarea {
@@ -432,11 +432,12 @@
 .composeField input::placeholder,
 .composeField textarea::placeholder { color: #d0d0d0; }
 .composeField input:hover,
-.composeField textarea:hover         { border-color: #cacaca; }
+.composeField textarea:hover         { background: #ececf0; }
 .composeField input:focus,
 .composeField textarea:focus {
-  box-shadow: 0 0 0 2px #378ADD55;
-  border-color: #378ADD;
+  background: #ececf0;
+  box-shadow: none;
+  border: none;
 }
 
 .recipientWrap {
@@ -450,19 +451,19 @@
   width: 100%;
   min-height: 48px;
   padding: 0 16px;
-  border: 0.5px solid rgba(0,0,0,0.2);
+  border: none;
   border-radius: 14px;
   font-size: 14px;
   font-family: inherit;
   color: #111;
-  background: #fff;
+  background: #f5f5f7;
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.12s, box-shadow 0.12s;
+  transition: background-color 0.12s;
 }
 .recipientWrap input::placeholder { color: #d0d0d0; }
-.recipientWrap input:hover  { border-color: #cacaca; }
-.recipientWrap input:focus  { box-shadow: 0 0 0 2px #378ADD55; border-color: #378ADD; }
+.recipientWrap input:hover  { background: #ececf0; }
+.recipientWrap input:focus  { background: #ececf0; box-shadow: none; border: none; }
 
 .selectedBadge {
   display: inline-flex;
@@ -486,7 +487,7 @@
   top: calc(100% + 4px);
   left: 0; right: 0;
   background: #fff;
-  border: 0.5px solid rgba(0,0,0,0.12);
+  border: none;
   border-radius: 14px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   z-index: 200;

@@ -20,8 +20,8 @@
 
 .card {
   background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 16px;
+  border: none;
+  border-radius: 20px;
   padding: 14px 16px;
   cursor: pointer;
   outline: none;

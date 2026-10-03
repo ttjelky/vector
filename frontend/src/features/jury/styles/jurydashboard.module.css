@@ -6,21 +6,24 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 .pageHeader { margin: 0; }
 
 .pageTitle {
-  font-size: 1.5rem;
+  font-size: 28px;
   font-weight: 700;
-  margin: 0 0 0.3rem;
-  color: #111;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+  color: #1d1d1f;
 }
 
 .pageSubtitle {
-  font-size: 0.9rem;
-  color: #888;
+  font-size: 15px;
+  color: #6e6e73;
   margin: 0;
 }
 
@@ -35,22 +38,24 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
-  border: 1px solid #ebebeb;
-  border-radius: 12px;
-  padding: 10px 18px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 20px;
+  padding: 14px 20px;
+  animation: fadeUp 0.5s ease both;
 }
 
 .statNum {
-  font-size: 1.4rem;
+  font-size: 30px;
   font-weight: 700;
-  color: #111;
+  letter-spacing: -0.02em;
+  color: #1d1d1f;
   line-height: 1;
 }
 
 .statLbl {
-  font-size: 0.78rem;
-  color: #888;
+  font-size: 15px;
+  color: #6e6e73;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -68,16 +73,17 @@
 
 /* ── Section ─────────────────────────────────────────────────────────────── */
 .section {
-  background: #fff;
-  border: 1px solid #ebebeb;
-  border-radius: 16px;
-  padding: 1.25rem 1.5rem 1.5rem;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 22px;
+  padding: 20px 24px 24px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   min-height: 320px;
   overflow: hidden;
   min-width: 0;
+  animation: fadeUp 0.5s ease both;
 }
 
 .sectionHeader {
@@ -85,12 +91,16 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  padding-bottom: 12px;
+  border: none;
+  border-bottom: 1px solid #e8e8ed;
 }
 
 .sectionTitle {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #111;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1d1d1f;
   margin: 0;
   display: flex;
   align-items: center;
@@ -101,7 +111,8 @@
 .carouselWrapper {
   flex: 1;
   overflow: hidden;
-  border-radius: 12px;
+  border: none;
+  border-radius: 18px;
   min-height: 200px;
   display: flex;
   flex-direction: column;
@@ -140,21 +151,22 @@
 }
 
 .arrowBtn {
-  background: none;
-  border: 1px solid #e1e1e1;
-  border-radius: 8px;
+  background: #fff;
+  border: none;
+  border-radius: 999px;
   width: 30px;
   height: 30px;
   font-size: 1.1rem;
   cursor: pointer;
-  color: #555;
+  color: #1d1d1f;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.18s, border-color 0.18s;
+  transition: transform 340ms cubic-bezier(0.34,1.56,0.64,1), filter 200ms ease;
   padding: 0;
 }
-.arrowBtn:hover { background: #f4f4f4; border-color: #c8c8c8; }
+.arrowBtn:hover { filter: brightness(0.96); }
+.arrowBtn:active { transform: scale(0.96,0.93); transition: transform 110ms ease-in; }
 
 .carouselDots {
   display: flex;
@@ -165,13 +177,14 @@
 .dot {
   width: 6px;
   height: 6px;
+  border: none;
   border-radius: 50%;
-  background: #d1d5db;
+  background: #e8e8ed;
   transition: background 0.2s, width 0.2s;
 }
 
 .dotActive {
-  background: #6366f1;
+  background: #1d1d1f;
   width: 16px;
   border-radius: 3px;
 }
@@ -185,38 +198,45 @@
 }
 
 .pendingCard {
-  border-radius: 14px;
+  border: none;
+  border-radius: 18px;
   padding: 16px 14px 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
   cursor: pointer;
-  border: 1.5px solid transparent;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-              box-shadow 0.2s ease;
+  transition: transform 340ms cubic-bezier(0.34,1.56,0.64,1), filter 200ms ease;
   position: relative;
   overflow: hidden;
+  animation: fadeUp 0.5s ease both;
 }
 
 .pendingCard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  filter: brightness(0.96);
 }
 
-/* Urgency colors */
+.pendingCard:active {
+  transform: scale(0.96,0.93);
+  transition: transform 110ms ease-in;
+}
+
+/* Urgency colors — м'які пастельні плашки без рамок */
 .urgency_high {
-  background: linear-gradient(135deg, #fff1f2, #ffe4e6);
-  border-color: #fecdd3;
+  background: #fdeceb;
+  border: none;
+  color: #b42318;
 }
 
 .urgency_mid {
-  background: linear-gradient(135deg, #fffbeb, #fef3c7);
-  border-color: #fde68a;
+  background: #fef3c7;
+  border: none;
+  color: #92520a;
 }
 
 .urgency_low {
-  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-  border-color: #bbf7d0;
+  background: #dcf5e5;
+  border: none;
+  color: #15803d;
 }
 
 .pendingTop {
@@ -226,24 +246,25 @@
 }
 
 .pendingCount {
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1;
-  color: #111;
+  color: #1d1d1f;
 }
 
 .pendingLabel {
-  font-size: 0.72rem;
+  font-size: 13px;
   font-weight: 600;
-  color: #666;
+  color: #6e6e73;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
 .pendingName {
-  font-size: 0.8rem;
+  font-size: 15px;
   font-weight: 600;
-  color: #333;
+  color: #1d1d1f;
   margin: 0;
   line-height: 1.3;
   display: -webkit-box;
@@ -253,16 +274,17 @@
 }
 
 .pendingCta {
-  font-size: 0.72rem;
+  font-size: 14px;
   font-weight: 600;
-  color: #6366f1;
+  color: #1d4ed8;
   margin-top: auto;
 }
 
 .pendingBadge {
-  background: #ef4444;
-  color: #fff;
-  font-size: 0.72rem;
+  background: #fdeceb;
+  color: #b42318;
+  border: none;
+  font-size: 13px;
   font-weight: 700;
   border-radius: 20px;
   padding: 2px 8px;
@@ -276,17 +298,23 @@
   50%       { opacity: 0.7; }
 }
 
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ── Notifications section ────────────────────────────────────────────────── */
 .notifSection {
-  background: #fff;
-  border: 1px solid #ebebeb;
-  border-radius: 16px;
-  padding: 1.25rem 1.5rem 1.5rem;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 22px;
+  padding: 20px 24px 24px;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   overflow: hidden;
   min-width: 0;
+  animation: fadeUp 0.5s ease both;
 }
 
 .notifList {
@@ -303,33 +331,35 @@
 }
 
 .notifList::-webkit-scrollbar { width: 4px; }
-.notifList::-webkit-scrollbar-thumb { background: #e1e1e1; border-radius: 4px; }
+.notifList::-webkit-scrollbar-thumb { background: #e8e8ed; border-radius: 4px; }
 
 .notifTile {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 0.7rem 1rem;
-  border-radius: 10px;
-  border-left: 3px solid transparent;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 14px;
   position: relative;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: transform 340ms cubic-bezier(0.34,1.56,0.64,1), filter 200ms ease;
   width: 100%;
   box-sizing: border-box;
   min-width: 0;
   overflow: hidden;
+  animation: fadeUp 0.5s ease both;
 }
-.notifTile:hover { opacity: 0.8; }
+.notifTile:hover { filter: brightness(0.96); }
+.notifTile:active { transform: scale(0.96,0.93); transition: transform 110ms ease-in; }
 
 .notif_unread {
-  background: #f0f4ff;
-  border-color: #6366f1;
+  background: #e3edff;
+  border: none;
 }
 
 .notif_read {
-  background: #fafafa;
-  border-color: #e5e7eb;
+  background: #fff;
+  border: none;
 }
 
 .notifDot {
@@ -338,8 +368,9 @@
   right: 10px;
   width: 7px;
   height: 7px;
+  border: none;
   border-radius: 50%;
-  background: #6366f1;
+  background: #1d4ed8;
 }
 
 .notifContent {
@@ -351,17 +382,17 @@
 }
 
 .notifTitle {
-  font-size: 0.82rem;
+  font-size: 15px;
   font-weight: 600;
-  color: #111;
+  color: #1d1d1f;
   word-break: break-word;
   overflow-wrap: anywhere;
   overflow: hidden;
 }
 
 .notifMsg {
-  font-size: 0.78rem;
-  color: #555;
+  font-size: 15px;
+  color: #6e6e73;
   white-space: normal;
   word-break: break-word;
   overflow-wrap: anywhere;
@@ -369,23 +400,24 @@
 }
 
 .notifTag {
-  font-size: 0.72rem;
-  color: #7a9abf;
+  font-size: 13px;
+  color: #6e6e73;
   margin-top: 2px;
 }
 
 .notifTime {
-  font-size: 0.72rem;
-  color: #aaa;
+  font-size: 13px;
+  color: #aeaeb2;
   white-space: nowrap;
   flex-shrink: 0;
   margin-top: 1px;
 }
 
 .notifCount {
-  background: #6366f1;
-  color: #fff;
-  font-size: 0.72rem;
+  background: #e3edff;
+  color: #1d4ed8;
+  border: none;
+  font-size: 13px;
   font-weight: 600;
   border-radius: 20px;
   padding: 2px 8px;
@@ -394,9 +426,9 @@
 }
 
 .markAllBtn {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  color: #888;
+  color: #6e6e73;
   background: none;
   border: none;
   cursor: pointer;
@@ -404,7 +436,7 @@
   transition: color 0.15s;
   margin-left: auto;
 }
-.markAllBtn:hover { color: #111; }
+.markAllBtn:hover { color: #1d1d1f; }
 
 /* ── Empty states ─────────────────────────────────────────────────────────── */
 .emptyState {
@@ -413,8 +445,8 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: #bbb;
-  font-size: 0.85rem;
+  color: #aeaeb2;
+  font-size: 15px;
   padding: 2rem 0;
   text-align: center;
   margin: auto;
@@ -424,8 +456,8 @@
 .emptyIcon { font-size: 1.8rem; opacity: 0.5; }
 
 .emptyInline {
-  font-size: 0.85rem;
-  color: #bbb;
+  font-size: 15px;
+  color: #aeaeb2;
   text-align: center;
   padding: 1.5rem 0;
 }
@@ -437,17 +469,17 @@
 }
 
 .skeletonCard {
-  border-radius: 14px;
+  border: none;
+  border-radius: 18px;
   overflow: hidden;
-  border: 1px solid #ebebeb;
-  background: #fff;
+  background: #f5f5f7;
   width: 100%;
   max-width: 400px;
 }
 
 .skeletonImg {
   height: 130px;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #e8e8ed 25%, #f5f5f7 50%, #e8e8ed 75%);
   background-size: 800px 100%;
   animation: shimmer 1.4s infinite linear;
 }
@@ -462,26 +494,55 @@
 .skeletonLine {
   height: 11px;
   border-radius: 6px;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #e8e8ed 25%, #f5f5f7 50%, #e8e8ed 75%);
   background-size: 800px 100%;
   animation: shimmer 1.4s infinite linear;
 }
 
 .skeletonPending {
-  border-radius: 12px;
+  border: none;
+  border-radius: 18px;
   padding: 14px;
-  background: #f9f9f9;
+  background: #f5f5f7;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .skeletonTile {
-  border-radius: 10px;
+  border: none;
+  border-radius: 14px;
   padding: 12px 14px;
-  background: #f9f9f9;
+  background: #fff;
   display: flex;
   flex-direction: column;
   gap: 7px;
   max-width: 400px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section,
+  .notifSection,
+  .statChip,
+  .pendingCard,
+  .notifTile,
+  .pendingBadge,
+  .skeletonImg,
+  .skeletonLine,
+  .slideEnter,
+  .slideExitLeft,
+  .slideExitRight {
+    animation: none !important;
+    transition: none !important;
+  }
+  .pendingCard:hover,
+  .notifTile:hover,
+  .arrowBtn:hover {
+    filter: none !important;
+  }
+  .pendingCard:active,
+  .notifTile:active,
+  .arrowBtn:active {
+    transform: none !important;
+  }
 }

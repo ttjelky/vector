@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { API } from '@api';
+import "../styles/CertificatesPage.css";
 
 export function MyCertificatesPage() {
   const [certificates, setCertificates] = useState([]);
@@ -7,24 +8,26 @@ export function MyCertificatesPage() {
   const [error,        setError]        = useState(null);
 
   useEffect(() => {
-    api.get(`/tournaments/${cert.tournament_id}/certificates/${cert.id}/download/`)
-      .then(({ data }) => setCertificates(data))
+    API.get(`/tournaments/my-certificates/`)
+      .then(({ data }) => setCertificates(data ?? []))
       .catch(() => setError("Не вдалося завантажити сертифікати"))
       .finally(() => setLoading(false));
   }, []);
 
   async function handleDownload(cert) {
     try {
-      const resp = await api.get(
-        `/tournaments/${cert.template}/certificates/${cert.id}/download/`,
+      const resp = await API.get(
+        `/tournaments/${cert.tournament_id}/certificates/${cert.id}/download/`,
         { responseType: "blob" }
       );
       const url = URL.createObjectURL(new Blob([resp.data], { type: "application/pdf" }));
       const a = document.createElement("a");
       a.href = url;
       a.download = `certificate_${cert.id}.pdf`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch {
       alert("Помилка завантаження PDF");
     }
@@ -45,6 +48,9 @@ export function MyCertificatesPage() {
               <div className="cert-card__type">
                 <span className="type-badge">{c.cert_type_display}</span>
               </div>
+              {c.tournament_name && (
+                <p className="cert-card__tournament">{c.tournament_name}</p>
+              )}
               <p className="cert-card__date">
                 Видано: {new Date(c.issued_at).toLocaleDateString("uk-UA")}
               </p>
@@ -56,7 +62,7 @@ export function MyCertificatesPage() {
                   Завантажити PDF
                 </button>
               ) : (
-                <span className="text-muted" style={{ fontSize: "0.8rem" }}>
+                <span className="text-muted">
                   PDF генерується…
                 </span>
               )}

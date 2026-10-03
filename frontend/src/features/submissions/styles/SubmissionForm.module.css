@@ -3,7 +3,13 @@
    ════════════════════════════════════════════════════════════════════════════ */
 
 /* ─── Submission form ────────────────────────────────────────────────────────── */
-.submissionForm { display: flex; flex-direction: column; gap: 14px; }
+.submissionForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
 .submissionFormTitle {
   font-size: 16px;
   font-weight: 700;
@@ -15,28 +21,30 @@
 /* ─── Answer textarea ────────────────────────────────────────────────────────── */
 .answerTextarea {
   padding: 12px 14px;
-  font-size: 14px;
+  font-size: 15px;
   color: #1d1d1f;
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(0,0,0,0.1);
+  background: #f5f5f7;
+  border: none;
   border-radius: 12px;
   outline: none;
   resize: vertical;
   font-family: inherit;
-  line-height: 1.7;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  line-height: 1.6;
+  transition: background 0.15s, box-shadow 0.15s;
   width: 100%;
   box-sizing: border-box;
   min-height: 120px;
 }
+.answerTextarea::placeholder { color: #aeaeb2; }
+.answerTextarea:hover { background: #ececee; }
 .answerTextarea:focus {
-  border-color: #1d1d1f;
-  box-shadow: 0 0 0 3px rgba(29,29,31,0.07);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18);
 }
 
 /* ─── Extras toggle ──────────────────────────────────────────────────────────── */
 .extrasToggle {
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 500;
   color: #6e6e73;
   background: none;
@@ -53,22 +61,23 @@
 /* ─── Shared form elements ───────────────────────────────────────────────────── */
 .editInput {
   padding: 10px 14px;
-  font-size: 14px;
+  font-size: 15px;
   color: #1d1d1f;
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(0,0,0,0.1);
+  background: #f5f5f7;
+  border: none;
   border-radius: 12px;
   outline: none;
   font-family: inherit;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: background 0.15s, box-shadow 0.15s;
   width: 100%;
   box-sizing: border-box;
 }
+.editInput:hover { background: #ececee; }
 .editInput:focus {
-  border-color: #1d1d1f;
-  box-shadow: 0 0 0 3px rgba(29,29,31,0.07);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18);
 }
-.editInput::placeholder { color: #d1d1d6; }
+.editInput::placeholder { color: #aeaeb2; }
 
 .editActions {
   display: flex;
@@ -79,7 +88,7 @@
 
 .cancelBtn {
   padding: 9px 18px;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--btn-secondary-text);
   background: var(--btn-secondary-bg);
@@ -94,7 +103,7 @@
 
 .submitBtn {
   padding: 10px 22px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--btn-primary-text);
   background: var(--btn-primary-bg);
@@ -110,7 +119,7 @@
 
 .addLinkBtn {
   padding: 9px 16px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--btn-primary-text);
   background: var(--btn-primary-bg);
@@ -129,13 +138,14 @@
   align-items: center;
   gap: 6px;
   padding: 9px 18px;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
   color: #1d1d1f;
   background: #f5f5f7;
   border: none;
   border-radius: 100px;
   cursor: pointer;
+  font-family: inherit;
   transition: background 0.15s ease;
 }
 .filePickBtn:hover {
@@ -144,7 +154,7 @@
 }
 
 .formError {
-  font-size: 13px;
+  font-size: 14px;
   color: #c53030;
   margin: 0;
   padding: 9px 13px;
@@ -157,9 +167,10 @@
 .attachSection { display: flex; flex-direction: column; gap: 8px; }
 
 .attachSectionLabel {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
-  color: #86868b;
+  letter-spacing: -0.01em;
+  color: #1d1d1f;
 }
 
 .linkInputRow {
@@ -182,13 +193,13 @@
 .attachItemIcon { font-size: 15px; }
 .attachItemName {
   flex: 1;
-  font-size: 13.5px;
+  font-size: 14px;
   color: #1d1d1f;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.attachItemMeta { font-size: 12px; color: #a1a1a6; }
+.attachItemMeta { font-size: 13px; color: #a1a1a6; }
 
 .attachRemove {
   display: inline-flex;
@@ -204,3 +215,15 @@
   transition: background 0.15s, color 0.15s;
 }
 .attachRemove:hover { background: #fff1f2; color: #dc2626; }
+
+@media (prefers-reduced-motion: reduce) {
+  .answerTextarea,
+  .editInput,
+  .cancelBtn,
+  .submitBtn,
+  .addLinkBtn,
+  .filePickBtn,
+  .attachRemove {
+    transition: none;
+  }
+}

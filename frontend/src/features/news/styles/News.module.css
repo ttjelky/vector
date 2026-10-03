@@ -3,7 +3,8 @@
 /* ── Page shell ── */
 .page {
   padding: 40px 32px 80px;
-  font-family: -apple-system, "SF Pro Display", "SF Pro Text", BlinkMacSystemFont, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ── Content container ── */
@@ -20,34 +21,37 @@
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+  padding-bottom: 12px;
+  border: none;
+  border-bottom: 1px solid #e8e8ed;
 }
 
 .title {
   font-size: 28px;
   font-weight: 700;
-  letter-spacing: -0.4px;
-  color: #1c1c1e;
+  letter-spacing: -0.02em;
+  color: #1d1d1f;
   margin: 0;
 }
 
 .subtitle {
-  font-size: 14px;
-  color: rgba(60, 60, 67, 0.5);
+  font-size: 15px;
+  color: #6e6e73;
   margin: 4px 0 0;
   font-weight: 400;
 }
 
-/* Unread badge — black accent */
+/* Unread badge — м'яка пастельна плашка без рамки */
 .unreadBadge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: rgba(28, 28, 30, 0.07);
-  color: #1c1c1e;
-  border: 1px solid rgba(28, 28, 30, 0.15);
+  background: #e3edff;
+  color: #1d4ed8;
+  border: none;
   border-radius: 20px;
   padding: 4px 12px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -59,51 +63,54 @@
   gap: 12px;
 }
 
-/* ── Grade card ── */
+/* ── Grade card — пласка сіра картка ── */
 .card {
   position: relative;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 16px;
-  box-shadow:
-    0 1px 4px rgba(0, 0, 0, 0.05),
-    0 4px 16px rgba(0, 0, 0, 0.04);
+  background: #f5f5f7;
+  border: none;
+  border-radius: 22px;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 340ms cubic-bezier(0.34,1.56,0.64,1), filter 200ms ease;
   cursor: pointer;
-  animation: cardIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+  animation: fadeUp 0.5s ease both;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.08),
-    0 1px 4px rgba(0, 0, 0, 0.05);
+  filter: brightness(0.96);
 }
 
-/* Unread dot — black */
+.card:active {
+  transform: scale(0.96,0.93);
+  transition: transform 110ms ease-in;
+}
+
+/* Unread dot — синя крапка-індикатор без border */
 .card.unread::after {
   content: "";
   position: absolute;
   top: 18px;
   right: 18px;
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
+  border: none;
   border-radius: 50%;
-  background: #1c1c1e;
-  box-shadow: 0 0 0 2px rgba(28, 28, 30, 0.12);
+  background: #1d4ed8;
 }
 
-/* Unread — subtle left accent, black */
+/* Unread — м'яка блакитна плашка без border-left */
 .card.unread {
-  border-left: 3px solid rgba(28, 28, 30, 0.25);
+  background: #e3edff;
+  border: none;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0);    }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .card:nth-child(1) { animation-delay: 0.03s; }
@@ -124,13 +131,13 @@
   flex-shrink: 0;
   width: 42px;
   height: 42px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #e8e8ed 0%, #d8d8e8 100%);
+  border: none;
+  border-radius: 14px;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  border: 1px solid rgba(255,255,255,0.8);
 }
 
 .cardMeta {
@@ -139,9 +146,10 @@
 }
 
 .cardTask {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
-  color: #1c1c1e;
+  letter-spacing: -0.01em;
+  color: #1d1d1f;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -149,14 +157,14 @@
 }
 
 .cardRound {
-  font-size: 12px;
-  color: rgba(60, 60, 67, 0.5);
+  font-size: 15px;
+  color: #6e6e73;
   margin: 0 0 2px;
 }
 
 .cardJury {
-  font-size: 12px;
-  color: rgba(60, 60, 67, 0.65);
+  font-size: 15px;
+  color: #6e6e73;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -175,21 +183,21 @@
 }
 
 .scoreMain {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 700;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.02em;
   line-height: 1;
-  color: #1c1c1e; /* default */
+  color: #1d1d1f; /* default */
 }
 
 /* Score colour by tier */
-.score_high { color: #00916e; }
-.score_mid  { color: #c87c00; }
-.score_low  { color: #c0392b; }
+.score_high { color: #15803d; }
+.score_mid  { color: #92520a; }
+.score_low  { color: #b42318; }
 
 .scoreOf {
-  font-size: 12px;
-  color: rgba(60, 60, 67, 0.38);
+  font-size: 14px;
+  color: #aeaeb2;
   margin-top: 2px;
   line-height: 1;
 }
@@ -197,26 +205,27 @@
 /* ── Divider ── */
 .divider {
   height: 1px;
-  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  background: #e8e8ed;
   margin: 0 18px;
 }
 
-/* ── Expand toggle — black accent ── */
+/* ── Expand toggle ── */
 .expandToggle {
   padding: 8px 18px;
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
-  color: rgba(60, 60, 67, 0.6);
+  color: #6e6e73;
   background: none;
   border: none;
   cursor: pointer;
   width: 100%;
   transition: color 0.15s;
 }
-.expandToggle:hover { color: #1c1c1e; }
+.expandToggle:hover { color: #1d1d1f; }
 
 .chevron {
   transition: transform 0.25s ease;
@@ -235,7 +244,7 @@
 
 @keyframes expandIn {
   from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0);    }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Criteria ── */
@@ -246,11 +255,11 @@
 }
 
 .sectionLabel {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(60, 60, 67, 0.4);
+  color: #6e6e73;
   margin: 0 0 2px;
 }
 
@@ -267,25 +276,26 @@
 }
 
 .criterionName {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
-  color: #3a3a3c;
+  color: #1d1d1f;
 }
 
 .criterionScore {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
-  color: #1c1c1e;
+  color: #1d1d1f;
 }
 
 /* Criterion score tinted per tier */
-.cs_high { color: #00916e; }
-.cs_mid  { color: #c87c00; }
-.cs_low  { color: #c0392b; }
+.cs_high { color: #15803d; }
+.cs_mid  { color: #92520a; }
+.cs_low  { color: #b42318; }
 
 .barTrack {
   height: 5px;
-  background: rgba(0, 0, 0, 0.07);
+  background: #e8e8ed;
+  border: none;
   border-radius: 100px;
   overflow: hidden;
 }
@@ -293,46 +303,45 @@
 .barFill {
   height: 100%;
   border-radius: 100px;
-  background: linear-gradient(90deg, #74b9ff, #0984e3); /* fallback */
+  background: #1d4ed8; /* fallback */
   transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* ≥70% → green, 40–69% → yellow, <40% → red */
-.barFill.high { background: linear-gradient(90deg, #55efc4, #00b894); }
-.barFill.mid  { background: linear-gradient(90deg, #ffeaa7, #fdcb6e); }
-.barFill.low  { background: linear-gradient(90deg, #ff7675, #d63031); }
+/* ≥70% → green, 40–69% → amber, <40% → red — пласкі без градієнтів */
+.barFill.high { background: #15803d; }
+.barFill.mid  { background: #d97706; }
+.barFill.low  { background: #b42318; }
 
-/* ── Comment box — black left border ── */
+/* ── Comment box — біла вставка без border ── */
 .commentBox {
-  background: rgba(0, 0, 0, 0.025);
-  border-left: 2.5px solid rgba(28, 28, 30, 0.18);
-  border-radius: 0 8px 8px 0;
-  padding: 8px 12px;
+  background: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 10px 14px;
 }
 
 .commentText {
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.55;
-  color: rgba(60, 60, 67, 0.8);
+  color: #1d1d1f;
   margin: 0;
   white-space: pre-wrap;
 }
 
 /* ── Timestamp ── */
 .cardTimestamp {
-  font-size: 11px;
-  color: rgba(60, 60, 67, 0.35);
+  font-size: 13px;
+  color: #aeaeb2;
   margin: 0;
   text-align: right;
 }
 
-/* ── Skeleton loader ── */
+/* ── Skeleton loader — плаский без рамок ── */
 .skeleton {
-  border-radius: 16px;
+  border: none;
+  border-radius: 22px;
   overflow: hidden;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: #f5f5f7;
   padding: 16px 18px;
   display: flex;
   gap: 12px;
@@ -342,9 +351,9 @@
 .skeletonAvatar {
   width: 42px;
   height: 42px;
-  border-radius: 12px;
+  border-radius: 14px;
   flex-shrink: 0;
-  background: linear-gradient(90deg, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.09) 50%, rgba(0,0,0,0.05) 75%);
+  background: linear-gradient(90deg, #e8e8ed 25%, #f5f5f7 50%, #e8e8ed 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
@@ -359,7 +368,7 @@
 .skeletonLine {
   height: 11px;
   border-radius: 6px;
-  background: linear-gradient(90deg, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.09) 50%, rgba(0,0,0,0.05) 75%);
+  background: linear-gradient(90deg, #e8e8ed 25%, #f5f5f7 50%, #e8e8ed 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
@@ -377,8 +386,8 @@
 @media (max-width: 600px) {
   .page { padding: 24px 16px 60px; }
   .title { font-size: 22px; }
-  .scoreMain { font-size: 22px; }
-  .card { border-radius: 14px; }
+  .scoreMain { font-size: 28px; }
+  .card { border: none; border-radius: 20px; }
 }
 
 /* ── Empty state ── */
@@ -394,27 +403,27 @@
 .emptyIllustration {
   width: 72px;
   height: 72px;
-  color: rgba(60, 60, 67, 0.2);
+  color: #aeaeb2;
   margin-bottom: 4px;
 }
 
 .emptyTitle {
   font-size: 16px;
   font-weight: 600;
-  color: rgba(60, 60, 67, 0.45);
+  color: #6e6e73;
   margin: 0;
   letter-spacing: -0.1px;
 }
 
 .emptyText {
-  font-size: 13px;
-  color: rgba(60, 60, 67, 0.32);
+  font-size: 15px;
+  color: #aeaeb2;
   margin: 0;
   max-width: 260px;
   line-height: 1.55;
 }
 
-/* ── Load more ── */
+/* ── Load more — сіра пілюля btn-secondary ── */
 .loadMoreWrap {
   display: flex;
   justify-content: center;
@@ -425,25 +434,25 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 10px 22px;
-  background: var(--btn-secondary-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--btn-secondary-border-color);
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--btn-secondary-text);
+  padding: 11px 28px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d1d1f;
   cursor: pointer;
-  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: transform 340ms cubic-bezier(0.34,1.56,0.64,1), filter 200ms ease;
 }
 
 .loadMoreBtn:hover:not(:disabled) {
-  background: var(--btn-secondary-hover-bg);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  color: #1c1c1e;
+  filter: brightness(0.96);
+  color: #1d1d1f;
+}
+
+.loadMoreBtn:active:not(:disabled) {
+  transform: scale(0.96,0.93);
+  transition: transform 110ms ease-in;
 }
 
 .loadMoreBtn:disabled {
@@ -455,12 +464,32 @@
   display: inline-block;
   width: 13px;
   height: 13px;
-  border: 2px solid rgba(60, 60, 67, 0.2);
-  border-top-color: rgba(60, 60, 67, 0.6);
+  border: 2px solid #e8e8ed;
+  border-top-color: #6e6e73;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .cardBody,
+  .skeletonAvatar,
+  .skeletonLine,
+  .loadMoreSpinner,
+  .chevron {
+    animation: none !important;
+    transition: none !important;
+  }
+  .card:hover,
+  .loadMoreBtn:hover:not(:disabled) {
+    filter: none !important;
+  }
+  .card:active,
+  .loadMoreBtn:active:not(:disabled) {
+    transform: none !important;
+  }
 }

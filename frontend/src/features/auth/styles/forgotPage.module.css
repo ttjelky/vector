@@ -9,13 +9,16 @@
   align-items: center;
   padding: 20px;
   z-index: 9999;
+  border: none;
 }
 
 /* ── Modal container ─────────────────────────────────────────────────────── */
 .forgot {
-  background: #ffffff;
-  border-radius: 28px;
-  border: 1px solid lightgray;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #f5f5f7;
+  border-radius: 22px;
+  border: none;
   width: 100%;
   max-width: 520px;
   max-height: 90vh;
@@ -24,7 +27,7 @@
   position: relative;
   overflow: hidden;
   overflow-y: auto;
-  animation: modalIn 0.4s ease;
+  animation: jellyIn 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ── Floating header ─────────────────────────────────────────────────────── */
@@ -40,6 +43,7 @@
   padding: 20px;
   z-index: 10;
   pointer-events: none;
+  border: none;
 }
 
 .header::before {
@@ -47,21 +51,21 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, transparent 100%);
-  border-radius: 24px 24px 0 0;
+  border-radius: 22px 22px 0 0;
   z-index: -1;
+  border: none;
 }
 
 .title {
   padding: 5px 16px;
   font-size: 24px;
-  font-weight: 500;
-  color: #111;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05);
-  border-radius: 1000px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1d1d1f;
+  background: #fff;
+  border: none;
+  box-shadow: none;
+  border-radius: 100px;
   margin: 0;
   pointer-events: auto;
 }
@@ -69,18 +73,22 @@
 .cross {
   width: 30px;
   padding: 5px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05);
-  border-radius: 1000px;
+  background: #fff;
+  border: none;
+  box-shadow: none;
+  border-radius: 100px;
   cursor: pointer;
   pointer-events: auto;
+  transition: transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .cross:hover {
-  background: #ececec;
+  background: #e8e8ed;
+}
+
+.cross:active {
+  transform: scale(0.96, 0.93);
+  transition: transform 110ms ease-in;
 }
 
 /* ── Body ────────────────────────────────────────────────────────────────── */
@@ -89,21 +97,22 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  border: none;
 }
 
 /* ── Subtitle ────────────────────────────────────────────────────────────── */
 .subtitle {
-  font-size: 14px;
-  color: #888;
+  font-size: 15px;
+  color: #6e6e73;
   margin: 0;
   line-height: 1.5;
 }
 
 /* ── Fields ──────────────────────────────────────────────────────────────── */
 .fieldLabel {
-  font-size: 14px;
-  font-weight: 500;
-  color: #666;
+  font-size: 15px;
+  font-weight: 600;
+  color: #6e6e73;
   margin-left: 4px;
   margin-bottom: 6px;
 }
@@ -113,49 +122,57 @@
   width: 100%;
   height: 48px;
   padding: 0 14px;
-  border: 0.5px solid rgba(0, 0, 0, 0.2);
-  border-radius: 14px;
-  font-size: 14px;
-  color: #111;
+  border: none;
+  border-radius: 16px;
+  font-size: 15px;
+  color: #1d1d1f;
   background: #fff;
   box-sizing: border-box;
   outline: none;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
 }
 
 .input:focus {
-  box-shadow: 0 0 0 2px #378ADD55;
-  border-color: #378ADD;
+  border: none;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18);
 }
 
 /* ── Status messages ─────────────────────────────────────────────────────── */
 .successText {
-  font-size: 13px;
+  font-size: 15px;
   color: #4ade80;
 }
 
 .errorText {
-  font-size: 13px;
+  font-size: 15px;
   color: #ff4d4d;
 }
 
 /* ── Divider ─────────────────────────────────────────────────────────────── */
 .sectionDivider {
   border: none;
-  border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #e8e8ed;
   margin: 4px 0;
 }
 
 /* ── Back link ───────────────────────────────────────────────────────────── */
 .backToLogin {
-  font-size: 13px;
-  color: #555;
+  font-size: 15px;
+  color: #6e6e73;
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
+  border: none;
+  transition: transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .backToLogin:hover {
-  color: #111;
+  color: #1d1d1f;
+}
+
+.backToLogin:active {
+  transform: scale(0.96, 0.93);
+  transition: transform 110ms ease-in;
 }
 
 /* ── Floating footer ─────────────────────────────────────────────────────── */
@@ -171,6 +188,7 @@
   box-sizing: border-box;
   z-index: 10;
   pointer-events: none;
+  border: none;
 }
 
 .footer::after {
@@ -179,23 +197,24 @@
   inset: 0;
   height: 120%;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.1) 0%, transparent 100%);
-  border-radius: 0 0 24px 24px;
+  border-radius: 0 0 22px 22px;
   z-index: -1;
+  border: none;
 }
 
 .footer > * {
   pointer-events: auto;
 }
 
-/* ── Buttons ─────────────────────────────────────────────────────────────── */
+/* ── Buttons (глобальні .btn-primary/.btn-secondary задають вигляд, локально тільки рамка+желе) ── */
 .btnCancel,
 .btnSubmit {
   padding: 9px 18px;
   border-radius: 100px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
   border: none;
   display: inline-flex;
   align-items: center;
@@ -205,7 +224,7 @@
 .btnCancel {
   background: var(--btn-secondary-bg);
   color: var(--btn-secondary-text);
-  border: 1px solid var(--btn-secondary-border-color);
+  border: none;
 }
 
 .btnCancel:hover {
@@ -213,9 +232,15 @@
   transform: translateY(-1px);
 }
 
+.btnCancel:active {
+  transform: scale(0.96, 0.93);
+  transition: transform 110ms ease-in;
+}
+
 .btnSubmit {
   background: var(--btn-primary-bg);
   color: var(--btn-primary-text);
+  border: none;
   box-shadow: 0 4px 12px rgba(52, 52, 52, 0.2);
 }
 
@@ -224,14 +249,25 @@
   transform: translateY(-1px);
 }
 
+.btnSubmit:active:not(:disabled) {
+  transform: scale(0.96, 0.93);
+  transition: transform 110ms ease-in;
+}
+
 .btnSubmit:disabled {
   background: #555;
   opacity: 0.6;
   cursor: not-allowed;
+  border: none;
 }
 
 /* ── Animation ───────────────────────────────────────────────────────────── */
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.95) translateY(10px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+@keyframes jellyIn {
+  0% { opacity: 0; transform: translateY(14px) scale(0.96); }
+  60% { opacity: 1; transform: translateY(-2px) scale(1.01); }
+  100% { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none; }
 }
