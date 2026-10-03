@@ -19,7 +19,7 @@ function FAQItem({ item, isOpen, onToggle }) {
         <div className={styles.faqItem}>
           <button onClick={onToggle} className={styles.faqQuestion}>
             {item.question}
-          <span className={`${styles.cross} ${isOpen ? styles.active : ""}`}><X size={18} /></span>
+          <span className={`${styles.cross} ${isOpen ? styles.active : ""}`}><X size={30} /></span>
           </button>
           <div
             ref={contentRef}

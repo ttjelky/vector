@@ -1,155 +1,116 @@
 .contentArea {
     padding: 40px;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
 }
 
 .title {
-    font-size: 34px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #1d1d1f;
-    margin-bottom: 8px;
-    margin-top: 0;
+    font-size: 45px;
+    margin-bottom: 5px;
 }
 
 .subtitle {
-    font-size: 16px;
-    color: #6e6e73;
+    font-size: 20px;
     margin-bottom: 20px;
-    margin-top: 0;
 }
 
 .faqContainer {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
 }
 
 .faqtitle {
-    font-size: 34px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #1d1d1f;
-    margin-bottom: 16px;
-    margin-top: 0;
+    font-size: 35px;
+    margin-bottom: 10px;
 }
 
 .faqSection {
-    border: none;
+    border-top: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
     padding: 20px 0px;
 }
 
-.faqItem {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-}
-
 .faqQuestion {
-    font-family: inherit;
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: #1d1d1f;
+    font-size: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
-    background: #f5f5f7;
+    background: rgb(246, 246, 246);
     border: none;
-    border-radius: 18px;
-    padding: 16px 12px 16px 20px;
-    margin: 0;
+    border-radius: 20px;
+    padding: 8px 10px;
+    margin: 5px 0px;
     cursor: pointer;
     width: 100%;
-    box-sizing: border-box;
-    text-align: left;
-    transition: background 0.15s;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow:
+    0 8px 32px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.05),
+    0 0 0 0.5px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .faqQuestion:hover {
-    background: #ececee;
-    transform: none;
-    box-shadow: none;
+    background: var(--glass-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    transition-duration: 0.2s;
 }
 
 .faqAnswer {
-    font-size: 15px;
-    line-height: 1.6;
-    padding: 4px 20px 2px;
-    color: #6e6e73;
-}
-
-.faqAnswer p {
-    margin: 10px 0;
+    font-size: 18px;
+    padding: 2px 10px;
+    color: gray;
 }
 
 .cross {
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-    background: #ececee;
-    border: none;
-    box-shadow: none;
+    width: 40px;
+    height: 40px;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow:
+    0 8px 32px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.05),
+    0 0 0 0.5px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
     border-radius: 1000px;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
     transform: rotate(45deg);
-    transition: background 0.15s, color 0.15s, transform 0.2s ease-out;
-    color: #1d1d1f;
+    transition: 0.2s ease-out;
 }
 
 .cross:hover {
-    background: #e2e2e6;
+    background: lightgray;
 }
 
 .active {
   transform: rotate(0deg);
-  background: #1d1d1f;
-  color: #fff;
+  background: var(--glass-bg);
 }
 
 .contactUs {
     margin-top: 30px;
-    border: none;
-    border-radius: 24px;
-    background: #f5f5f7;
-    padding: 32px;
+    border: 3px solid black;
+    padding: 30px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
 }
 
 .contactUsTitle {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #1d1d1f;
-    margin-bottom: 8px;
-    margin-top: 0;
-    text-align: center;
+    font-size: 35px;
+    margin-bottom: 5px;
 }
 
 .contactUsText {
     font-size: 15px;
-    line-height: 1.55;
-    color: #6e6e73;
+    color: rgb(100, 100, 100);
     margin-bottom: 20px;
-    margin-top: 0;
 }
 
 .email {
     margin-bottom: 10px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .faqQuestion,
-    .cross {
-        transition: none;
-    }
 }

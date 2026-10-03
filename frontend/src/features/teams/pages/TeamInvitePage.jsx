@@ -63,8 +63,8 @@ export function TeamInvitePage() {
   };
 
   if (loading) return (
-    <div className={styles.loadingWrap}>
-      <p className={styles.loadingText}>Завантаження…</p>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
+      <p style={{ color: "#999", fontSize: 14 }}>Завантаження…</p>
     </div>
   );
 
@@ -81,7 +81,7 @@ export function TeamInvitePage() {
       {info && !showLogin && (
         <div className={styles.overlay}>
           <div className={styles.modal}>
-            <div className={styles.icon} aria-hidden="true">🏆</div>
+            <div className={styles.icon}>🏆</div>
 
             <h2 className={styles.title}>Запрошення в команду</h2>
 
@@ -110,7 +110,7 @@ export function TeamInvitePage() {
       {error && !info && !showLogin && (
         <div className={styles.overlay}>
           <div className={styles.modal}>
-            <div className={styles.icon} aria-hidden="true">⚠️</div>
+            <div className={styles.icon}>⚠️</div>
             <h2 className={styles.title}>Посилання недійсне</h2>
             <p className={styles.description}>{error}</p>
             <button className="btn-primary btn-block" onClick={() => navigate("/")}>
