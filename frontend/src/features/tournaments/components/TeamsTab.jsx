@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { API, mediaUrl } from '@api';
 import styles from "../styles/TeamsTab.module.css";
-import { X } from "lucide-react";
+import { X, ChevronDown, Lock, LockOpen, Trash2 } from "lucide-react";
+import { ScrollRow } from "@features/dashboard";
 import { usePolling } from "@shared/hooks/usePolling";
 
 const POLL_INTERVAL = 5000;
 
 // ── Avatar helper ──────────────────────────────────────────────────────────
-function Avatar({ name, avatar, size = 28 }) {
+function Avatar({ name, avatar, size = 40 }) {
   const [imgError, setImgError] = useState(false);
   const initials = (name ?? "?").charAt(0).toUpperCase();
 
@@ -19,15 +20,15 @@ function Avatar({ name, avatar, size = 28 }) {
     display:        "flex",
     alignItems:     "center",
     justifyContent: "center",
-    fontSize:       size * 0.42,
-    fontWeight:     600,
+    fontSize:       size * 0.38,
+    fontWeight:     700,
     overflow:       "hidden",
   };
 
   if (avatar && !imgError) {
     const src = mediaUrl(avatar);
     if (!src) return (
-      <div style={{ ...baseStyle, background: "#f0f0f0", color: "#555" }}>
+      <div style={{ ...baseStyle }} className={styles.avatarFallback}>
         {initials}
       </div>
     );
@@ -44,7 +45,7 @@ function Avatar({ name, avatar, size = 28 }) {
   }
 
   return (
-    <div style={{ ...baseStyle, background: "#f0f0f0", color: "#555" }}>
+    <div style={{ ...baseStyle }} className={styles.avatarFallback}>
       {initials}
     </div>
   );
@@ -102,15 +103,27 @@ function TeamCard({ team, tournamentId, isPrivileged, onLockToggled, onDeleted }
         aria-expanded={expanded}
       >
         <div className={styles.teamCardLeft}>
-          <span className={styles.teamCardChevron}>{expanded ? "▾" : "▸"}</span>
-          <div>
+          <Avatar
+            name={team.captain?.full_name ?? team.captain_name}
+            avatar={team.captain?.avatar}
+            size={44}
+          />
+          <div className={styles.teamCardTitles}>
             <span className={styles.teamCardName}>{team.name}</span>
-            {team.city && <span className={styles.teamCardCity}>📍 {team.city}</span>}
+            <span className={styles.teamCardSub}>
+              {team.captain?.full_name ?? team.captain_name ?? "—"}
+              {team.city ? ` · 📍 ${team.city}` : ""}
+            </span>
           </div>
         </div>
         <div className={styles.teamCardRight}>
           <span className={styles.memberCountBadge}>👥 {memberTotal}</span>
-          <span className={styles.lockIndicator}>{team.roster_locked ? "🔒" : "✏️"}</span>
+          <span className={styles.lockIndicator} title={team.roster_locked ? "Склад зафіксовано" : "Склад відкритий"}>
+            {team.roster_locked ? <Lock size={15} /> : <LockOpen size={15} />}
+          </span>
+          <span className={`${styles.expandArrow} ${expanded ? styles.expandArrowOpen : ""}`}>
+            <ChevronDown size={16} />
+          </span>
         </div>
       </div>
 
@@ -122,7 +135,7 @@ function TeamCard({ team, tournamentId, isPrivileged, onLockToggled, onDeleted }
             <Avatar
               name={team.captain?.full_name ?? team.captain_name}
               avatar={team.captain?.avatar}
-              size={24}
+              size={32}
             />
             <span className={styles.captainName}>
               {team.captain?.full_name ?? team.captain_name}
@@ -144,7 +157,7 @@ function TeamCard({ team, tournamentId, isPrivileged, onLockToggled, onDeleted }
                 const avatar = m.avatar    ?? m.user?.avatar;
                 return (
                   <div key={m.id} className={styles.memberChip}>
-                    <Avatar name={name} avatar={avatar} size={26} />
+                    <Avatar name={name} avatar={avatar} size={30} />
                     <span className={styles.memberChipName}>{name}</span>
                     {email && <span className={styles.memberChipEmail}>{email}</span>}
                   </div>
@@ -156,7 +169,7 @@ function TeamCard({ team, tournamentId, isPrivileged, onLockToggled, onDeleted }
           {isPrivileged && (
             <div className={styles.adminActions}>
               <button
-                className={`${styles.adminBtn} ${styles.lockBtn}`}
+                className="btn-secondary btn-sm"
                 onClick={handleLockToggle}
                 disabled={locking}
               >
@@ -165,15 +178,15 @@ function TeamCard({ team, tournamentId, isPrivileged, onLockToggled, onDeleted }
 
               {!confirmDelete ? (
                 <button
-                  className={`${styles.adminBtn} ${styles.deleteBtn}`}
+                  className={styles.deleteBtn}
                   onClick={() => setConfirmDelete(true)}
                 >
-                  Видалити
+                  <Trash2 size={14} /> Видалити
                 </button>
               ) : (
                 <div className={styles.confirmRow}>
                   <span>Видалити «{team.name}»?</span>
-                  <button className={`${styles.adminBtn} ${styles.confirmDeleteBtn}`} onClick={handleDelete} disabled={deleting}>
+                  <button className={styles.confirmDeleteBtn} onClick={handleDelete} disabled={deleting}>
                     {deleting ? "…" : "Так"}
                   </button>
                   <button className="btn-secondary btn-sm" onClick={() => setConfirmDelete(false)}>
@@ -198,7 +211,7 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
   const [invite,        setInvite]        = useState({ url: null, pin: null });
   const [inviteLoading, setInviteLoading] = useState(false);
   const [copied,        setCopied]        = useState(false);
-  const [showPin,       setShowPin]       = useState(false);
+  const [showInvite,    setShowInvite]    = useState(false);
   const [regenConfirm,  setRegenConfirm]  = useState(false);
   const [regenLoading,  setRegenLoading]  = useState(false);
 
@@ -323,12 +336,21 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
       .finally(() => setInviteLoading(false));
   }, [tournamentId, isOwner]);
 
-  const handleInvite = useCallback(() => {
+  const handleCopyInvite = useCallback(async () => {
     const { url } = invite;
     if (!url) return;
-    navigator.clipboard?.writeText(url).catch(() => {});
+    try {
+      await navigator.clipboard?.writeText(url);
+    } catch {
+      const el = document.createElement("textarea");
+      el.value = url;
+      el.style.cssText = "position:fixed;opacity:0";
+      document.body.appendChild(el);
+      el.select();
+      try { document.execCommand("copy"); } catch { /* ігнор */ }
+      document.body.removeChild(el);
+    }
     setCopied(true);
-    setShowPin(true);
     setTimeout(() => setCopied(false), 2500);
   }, [invite]);
 
@@ -343,7 +365,6 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
     try {
       const { data } = await API.post(`/tournaments/${tournamentId}/regenerate-pin/?role=participant`);
       setInvite(prev => ({ ...prev, pin: data.invite_pin }));
-      setShowPin(true);
     } catch (err) {
       console.error("Regen PIN:", err);
     } finally {
@@ -372,7 +393,8 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
     return list.filter(t =>
       t.name.toLowerCase().includes(q) ||
       (t.captain_name  ?? "").toLowerCase().includes(q) ||
-      (t.captain_email ?? "").toLowerCase().includes(q)
+      (t.captain_email ?? "").toLowerCase().includes(q) ||
+      (t.captain?.full_name ?? "").toLowerCase().includes(q)
     );
   };
 
@@ -381,43 +403,28 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
 
   if (loading) {
     return (
-      <div className={styles.loadingWrap}>
-        {[0, 1, 2].map(i => (
-          <div key={i} className={styles.skeleton} style={{ height: 60, marginBottom: 8 }} />
-        ))}
+      <div className={styles.wrap}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Команди</h2>
+        </div>
+        <div className={styles.skeletonRow}>
+          {[0, 1, 2].map(i => (
+            <div key={i} className={styles.skeleton} />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.statsBar}>
-        <div className={styles.stat}>
-          <span className={styles.statValue}>{registered.length}</span>
-          <span className={styles.statLabel}>зареєстровано</span>
-        </div>
-        {tournament?.max_teams && (
-          <div className={styles.stat}>
-            <span className={styles.statValue}>{tournament.max_teams}</span>
-            <span className={styles.statLabel}>ліміт</span>
-          </div>
-        )}
-        <div className={styles.stat}>
-          <span className={styles.statValue}>{teams.filter(t => t.roster_locked).length}</span>
-          <span className={styles.statLabel}>зафіксовано</span>
-        </div>
-        {isPrivileged && drafts.length > 0 && (
-          <div className={styles.stat}>
-            <span className={styles.statValue}>{drafts.length}</span>
-            <span className={styles.statLabel}>чернеток</span>
-          </div>
-        )}
-      </div>
-
-      <div className={styles.listHeader}>
-        <span className={styles.listCount}>
-          {registered.length}{tournament?.max_teams ? ` / ${tournament.max_teams}` : ""} команд
-        </span>
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>
+          Команди
+          <span className={styles.countText}>
+            &nbsp;· {registered.length}{tournament?.max_teams ? ` / ${tournament.max_teams}` : ""}
+          </span>
+        </h2>
         <div className={styles.headerActions}>
           {/* Кнопка винятку — коли реєстрація закрита, але турнір ще не завершено.
               На finished виняток не діє (бекенд: finished > exception), тому ховаємо. */}
@@ -434,7 +441,7 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
               </button>
             ) : (
               <button
-                className={styles.exceptionBtn}
+                className="btn-secondary btn-sm"
                 onClick={() => setShowException(v => !v)}
                 disabled={exceptionLoading}
               >
@@ -446,17 +453,73 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
           {isOwner && (
             <button
               className="btn-primary btn-sm"
-              onClick={canInvite ? handleInvite : undefined}
+              onClick={() => canInvite && setShowInvite(v => !v)}
               disabled={inviteLoading || !invite.url || !canInvite}
               title={!canInvite
                 ? tournamentStatus === "upcoming" ? "Реєстрація ще не відкрита" : "Реєстрація закрита"
                 : undefined}
             >
-              {inviteLoading ? "Завантаження…" : copied ? "✓ Скопійовано!" : "+ Запросити команду"}
+              {inviteLoading ? "Завантаження…" : "+ Запросити команду"}
             </button>
           )}
         </div>
       </div>
+
+      {/* Статистика — пласкі плашки */}
+      <div className={styles.statsBar}>
+        <div className={styles.stat}>
+          <span className={styles.statValue}>{registered.length}</span>
+          <span className={styles.statLabel}>зареєстровано</span>
+        </div>
+        {tournament?.max_teams ? (
+          <div className={styles.stat}>
+            <span className={styles.statValue}>{tournament.max_teams}</span>
+            <span className={styles.statLabel}>ліміт</span>
+          </div>
+        ) : null}
+        <div className={styles.stat}>
+          <span className={styles.statValue}>{teams.filter(t => t.roster_locked).length}</span>
+          <span className={styles.statLabel}>зафіксовано</span>
+        </div>
+        {isPrivileged && drafts.length > 0 && (
+          <div className={styles.stat}>
+            <span className={styles.statValue}>{drafts.length}</span>
+            <span className={styles.statLabel}>чернеток</span>
+          </div>
+        )}
+      </div>
+
+      {/* Панель запрошення: видиме посилання + PIN */}
+      {isOwner && showInvite && invite.url && (
+        <div className={styles.invitePanel}>
+          <div className={styles.invitePanelTitle}>Запрошення для команд</div>
+          <div className={styles.inviteLinkRow}>
+            <span className={styles.inviteLinkUrl} title={invite.url}>{invite.url}</span>
+            <button className="btn-secondary btn-sm" onClick={handleCopyInvite}>
+              {copied ? "✓ Скопійовано!" : "Копіювати"}
+            </button>
+            <button className={styles.inviteClose} onClick={() => setShowInvite(false)} aria-label="Закрити">
+              <X size={15} />
+            </button>
+          </div>
+          {invite.pin && (
+            <div className={styles.pinRow}>
+              <span className={styles.pinLabel}>PIN для команди:</span>
+              <span className={styles.pinCode}>{invite.pin}</span>
+              <button
+                className={styles.regenBtn}
+                onClick={handleRegenerate}
+                disabled={regenLoading}
+              >
+                {regenLoading ? "Оновлення…" : regenConfirm ? "Підтвердити?" : "Змінити PIN"}
+              </button>
+            </div>
+          )}
+          <span className={styles.inviteHint}>
+            Поділіться посиланням — капітани зможуть зареєструвати свої команди
+          </span>
+        </div>
+      )}
 
       {/* Exception panel */}
       {showException && isOwner && (
@@ -492,61 +555,48 @@ export function TeamsTab({ tournamentId, myRole, tournament, tournamentStatus })
         </div>
       )}
 
-      {/* PIN */}
-      {isOwner && showPin && invite.pin && (
-        <div className={styles.pinSection}>
-          <div className={styles.pinInfo}>
-            <span className={styles.pinText}>PIN для команди:</span>
-            <div className={styles.pinCode}>{invite.pin}</div>
-          </div>
-          <button
-            className={`${styles.regenBtn} ${regenConfirm ? styles.regenConfirm : ""}`}
-            onClick={handleRegenerate}
-            disabled={regenLoading}
-          >
-            {regenLoading ? "Оновлення…" : regenConfirm ? "Підтвердити?" : "Змінити PIN"}
-          </button>
-          <button className={styles.pinClose} onClick={() => setShowPin(false)} aria-label="Закрити">
-            <X size={14} />
-          </button>
-        </div>
-      )}
-
       {teams.length > 4 && (
         <input
-          className="input"
+          className={styles.searchInput}
           placeholder="Пошук команди або капітана…"
           value={search}
           onChange={e => setSearch(e.target.value)}
+          aria-label="Пошук команди або капітана"
         />
       )}
 
       {filteredRegistered.length === 0 ? (
-        <div className={styles.empty}>
-          {registered.length === 0
-            ? "Жодної зареєстрованої команди ще немає."
-            : "Команд за вашим запитом не знайдено."}
+        <div className={styles.emptyBlock}>
+          <div className={styles.emptyBlockIcon}>👥</div>
+          <p>
+            {registered.length === 0
+              ? "Жодної зареєстрованої команди ще немає."
+              : "Команд за вашим запитом не знайдено."}
+          </p>
         </div>
       ) : (
-        <div className={styles.teamList}>
+        <ScrollRow classes={styles}>
           {filteredRegistered.map(team => (
             <TeamCard key={team.id} team={team} tournamentId={tournamentId}
               isPrivileged={isPrivileged} onLockToggled={handleLockToggled} onDeleted={handleDeleted} />
           ))}
-        </div>
+        </ScrollRow>
       )}
 
       {isPrivileged && filteredDrafts.length > 0 && (
-        <div style={{ marginTop: 32 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#ccc", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
-            Чернетки ({filteredDrafts.length})
+        <div className={styles.draftsSection}>
+          <div className={styles.draftsTitle}>
+            Чернетки
+            <span className={styles.countText}>&nbsp;· {filteredDrafts.length}</span>
           </div>
-          <div className={styles.teamList} style={{ opacity: 0.6 }}>
+          <ScrollRow classes={styles}>
             {filteredDrafts.map(team => (
-              <TeamCard key={team.id} team={team} tournamentId={tournamentId}
-                isPrivileged={isPrivileged} onLockToggled={handleLockToggled} onDeleted={handleDeleted} />
+              <div key={team.id} className={styles.draftCell}>
+                <TeamCard team={team} tournamentId={tournamentId}
+                  isPrivileged={isPrivileged} onLockToggled={handleLockToggled} onDeleted={handleDeleted} />
+              </div>
             ))}
-          </div>
+          </ScrollRow>
         </div>
       )}
     </div>

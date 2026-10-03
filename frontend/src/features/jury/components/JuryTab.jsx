@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { usePolling } from "@shared/hooks/usePolling";
+import { ScrollRow } from "@features/dashboard";
 import styles from "../styles/JuryTab.module.css";
 import { API } from '@api';
 
@@ -93,7 +94,7 @@ function DistributePanel({ tournamentId }) {
         Розподіл робіт між журі
         <svg
           width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-          style={{ marginLeft: "auto", transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "none" }}
+          className={`${styles.distributeChevron} ${open ? styles.distributeChevronOpen : ""}`}
         >
           <path d="m6 9 6 6 6-6"/>
         </svg>
@@ -176,15 +177,7 @@ function DistributePanel({ tournamentId }) {
                 Розподіляємо...
               </>
             ) : (
-              <>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="16 3 21 3 21 8"/>
-                  <line x1="4" y1="20" x2="21" y2="3"/>
-                  <polyline points="21 16 21 21 16 21"/>
-                  <line x1="15" y1="15" x2="21" y2="21"/>
-                </svg>
-                {reset ? "Перерозподілити роботи" : "Запустити розподіл"}
-              </>
+              <>{reset ? "Перерозподілити роботи" : "Запустити розподіл"}</>
             )}
           </button>
         </div>
@@ -234,8 +227,9 @@ export function JuryTab({ tournamentId, rounds = [], loading, myRole }) {
     fetchSubmissions(true);
   }, [tournamentId, fetchSubmissions]);
 
-  // Polling — оновлюємо список без перезавантаження сторінки
-  usePolling(fetchSubmissions, 15_000, !subsLoading && !!tournamentId);
+  // Polling — оновлюємо список без перезавантаження сторінки.
+  // У відкритій деталізації не смикаємо фон, щоб не збити форму оцінки.
+  usePolling(fetchSubmissions, 15_000, !subsLoading && !!tournamentId && selectedSub === null);
 
   const filtered = useMemo(() => {
     let list = [...submissions];
@@ -249,7 +243,9 @@ export function JuryTab({ tournamentId, rounds = [], loading, myRole }) {
       const q = search.trim().toLowerCase();
       list = list.filter(s =>
         (s.task_title  || "").toLowerCase().includes(q) ||
-        (s.round_title || "").toLowerCase().includes(q)
+        (s.round_title || "").toLowerCase().includes(q) ||
+        (s.author_name || "").toLowerCase().includes(q) ||
+        (s.team_name   || "").toLowerCase().includes(q)
       );
     }
     list.sort((a, b) => {
@@ -286,8 +282,9 @@ export function JuryTab({ tournamentId, rounds = [], loading, myRole }) {
   const handleGradeSave = async () => {
     if (!selectedSub || !gradeForm) return;
     for (const c of criteria) {
-      const v = Number(gradeForm.scores[c.key]);
-      if (gradeForm.scores[c.key] === "" || isNaN(v) || v < 0 || v > c.max) {
+      const raw = gradeForm.scores[c.key] ?? "";
+      const v = Number(raw);
+      if (raw === "" || isNaN(v) || v < 0 || v > c.max) {
         setGradeError(`Введіть коректний бал для «${c.label}» (0–${c.max}).`);
         return;
       }
@@ -343,6 +340,19 @@ export function JuryTab({ tournamentId, rounds = [], loading, myRole }) {
 
   return (
     <div className={styles.tabContent}>
+
+      {/* ── Заголовок секції ── */}
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>
+          Панель журі
+          {submissions.length > 0 && (
+            <span className={styles.countText}>&nbsp;· {submissions.length}</span>
+          )}
+        </h2>
+        {pendingCount > 0 && (
+          <span className={styles.pendingBadge}>Не оцінено · {pendingCount}</span>
+        )}
+      </div>
 
       {/* ── Admin: розподіл робіт ── */}
       {isPrivileged && (
@@ -412,10 +422,11 @@ export function JuryTab({ tournamentId, rounds = [], loading, myRole }) {
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           <input
-            className="input input-icon"
-            placeholder="Пошук за назвою завдання або раунду..."
+            className={styles.searchInput}
+            placeholder="Пошук за завданням, раундом або автором…"
             value={search}
             onChange={e => setSearch(e.target.value)}
+            aria-label="Пошук робіт"
           />
         </div>
 
@@ -477,7 +488,7 @@ export function JuryTab({ tournamentId, rounds = [], loading, myRole }) {
           )}
         </div>
       ) : (
-        <div className={styles.submissionList}>
+        <ScrollRow classes={styles}>
           {filtered.map((sub, idx) => (
             <SubmissionCard
               key={sub.id}
@@ -488,7 +499,7 @@ export function JuryTab({ tournamentId, rounds = [], loading, myRole }) {
               onClick={() => openSubmission(sub)}
             />
           ))}
-        </div>
+        </ScrollRow>
       )}
     </div>
   );
@@ -517,21 +528,26 @@ function SubmissionCard({ submission: sub, index, maxTotal, isTeam, onClick }) {
 
   return (
     <button className={styles.subCard} onClick={onClick}>
-      <span className={styles.subIndex}>{index}</span>
+      <div className={styles.subCardTop}>
+        <span className={styles.subIndex}>{index}</span>
+        <span className={`${styles.statusPill} ${isGraded ? styles.statusGraded : styles.statusPending}`}>
+          {isGraded ? "Оцінено ✓" : "Не оцінено"}
+        </span>
+      </div>
 
       <div className={styles.subInfo}>
         <span className={styles.subTask}>{sub.task_title || "Без назви"}</span>
         {authorName && (
           <span className={styles.subAuthor}>
             {isTeam ? (
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
             ) : (
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
@@ -546,14 +562,13 @@ function SubmissionCard({ submission: sub, index, maxTotal, isTeam, onClick }) {
         </div>
       </div>
 
-      <div className={styles.subCardRight}>
-        {isGraded && total !== null && (
+      <div className={styles.subCardBottom}>
+        {isGraded && total !== null ? (
           <span className={styles.scoreBadge}>{total} / {maxTotal}</span>
+        ) : (
+          <span className={styles.scoreBadgeMuted}>макс. {maxTotal}</span>
         )}
-        <span className={`${styles.statusPill} ${isGraded ? styles.statusGraded : styles.statusPending}`}>
-          {isGraded ? "Оцінено ✓" : "Не оцінено"}
-        </span>
-        <svg className={styles.chevron} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg className={styles.chevron} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="m9 18 6-6-6-6"/>
         </svg>
       </div>
@@ -727,7 +742,7 @@ function SubmissionDetail({ submission: sub, criteria, gradeForm, setGradeForm, 
                                 max={c.max}
                                 step={1}
                                 className={styles.scoreInput}
-                                value={gradeForm.scores[c.key]}
+                                value={gradeForm.scores[c.key] ?? ""}
                                 onChange={e => setGradeForm(f => ({ ...f, scores: { ...f.scores, [c.key]: e.target.value } }))}
                                 placeholder="0"
                               />

@@ -197,7 +197,10 @@ function RoundSection({ round, criteria_meta, criteriaColors, isPrivileged, show
       )}
 
       {submissions && submissions.length > 0 && (
-        <div className={detailStyles.submissionsTable}>
+        <div
+          className={detailStyles.submissionsTable}
+          style={{ "--crit-count": Math.max(criteria_meta.length, 1) }}
+        >
           <div className={detailStyles.submissionsHead}>
             <span className={detailStyles.subThName}>Учасник</span>
             <span className={detailStyles.subThTask}>Завдання</span>
@@ -237,7 +240,10 @@ function RoundSection({ round, criteria_meta, criteriaColors, isPrivileged, show
       {isPrivileged && showJuryBreak && round.jury_breakdown?.length > 0 && (
         <div className={detailStyles.jurySection}>
           <p className={detailStyles.jurySectionTitle}><JuryIcon /> Оцінки журі</p>
-          <div className={detailStyles.juryTable}>
+          <div
+            className={detailStyles.juryTable}
+            style={{ "--criteria-count": Math.max(criteria_meta.length, 1) }}
+          >
             <div className={detailStyles.juryTableHead}>
               <span className={detailStyles.juryTableThName}>Журі</span>
               {criteria_meta.map(c => (
@@ -317,7 +323,6 @@ function TeamDetail({ tournamentId, teamId, isPrivileged, onClose }) {
   const team_name = _tn ?? _pn ?? "Команда";
 
   const visibleRounds = activeRound ? rounds.filter(r => r.round_id === activeRound) : rounds;
-  const hasJury = rounds.some(r => r.jury_breakdown?.length > 0);
 
   return (
     <div className={detailStyles.panel}>
@@ -570,7 +575,10 @@ function ParticipantDetail({ tournamentId, participantId, isPrivileged, onClose 
               <p className={detailStyles.jurySectionTitle}>
                 <JuryIcon /> Оцінки журі
               </p>
-              <div className={detailStyles.juryTable}>
+              <div
+                className={detailStyles.juryTable}
+                style={{ "--criteria-count": Math.max(criteria_meta.length, 1) }}
+              >
                 <div className={detailStyles.juryTableHead}>
                   <span className={detailStyles.juryTableThName}>Журі</span>
                   {criteria_meta.map(c => (
@@ -650,7 +658,6 @@ export function LeaderboardTab({ tournamentId, tournamentType, rounds = [], roun
   const [exporting,     setExporting]     = useState(false);
   const [lastUpdated,   setLastUpdated]   = useState(null);
   const [refreshing,    setRefreshing]    = useState(false);
-  const [selectedPid,   setSelectedPid]   = useState(null);
 
   const canAlwaysSee = isOwner || myRole === "admin";
   const isTeam = tournamentType === "team";
@@ -695,10 +702,12 @@ export function LeaderboardTab({ tournamentId, tournamentType, rounds = [], roun
 
   useEffect(() => {
     if (!tournamentId) return;
+    // У деталізації рядка поллінг не потрібен — не смикаємо таблицю позаду
+    if (selected !== null) return;
     fetchLeaderboard();
     const timer = setInterval(() => fetchLeaderboard(true), POLL_INTERVAL);
     return () => clearInterval(timer);
-  }, [tournamentId, fetchLeaderboard]);
+  }, [tournamentId, fetchLeaderboard, selected]);
 
   const handleTogglePublish = async () => {
     if (published === null) return;
@@ -794,6 +803,15 @@ export function LeaderboardTab({ tournamentId, tournamentType, rounds = [], roun
 
   return (
     <div className={styles.wrap}>
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>
+          Таблиця лідерів
+          {leaderboard.length > 0 && (
+            <span className={styles.countText}>&nbsp;· {leaderboard.length}</span>
+          )}
+        </h2>
+      </div>
+
       {isTeam && (
         <div className={styles.teamBadge}>👥 Командний турнір — результати по командах</div>
       )}
@@ -898,20 +916,24 @@ export function LeaderboardTab({ tournamentId, tournamentType, rounds = [], roun
                     ? (p.team_id ?? p.participant_id ?? p.team_name ?? idx)
                     : (p.participant_id ?? p.participant_name ?? idx);
                   const detailId = isTeam
-                    ? (p.team_id ?? p.participant_id ?? p.team_name)
-                    : (p.participant_id ?? p.participant_name);
+                    ? (p.team_id ?? p.participant_id)
+                    : p.participant_id;
+                  // Деталізація доступна тільки за числовим id (бекенд чекає int).
+                  // Агреговані fallback-рядки без id — неклікабельні.
+                  const clickable = detailId !== null && detailId !== undefined
+                    && detailId !== "" && Number.isFinite(Number(detailId));
                   return (
                   <tr
                     key={String(rowKey)}
                     className={[
                       styles.row,
-                      styles.rowClickable,
+                      clickable ? styles.rowClickable : "",
                       idx === 0 ? styles.rowGold   : "",
                       idx === 1 ? styles.rowSilver : "",
                       idx === 2 ? styles.rowBronze : "",
                     ].join(" ")}
-                    onClick={() => setSelected({ type: isTeam ? "team" : "participant", id: detailId })}
-                    title="Переглянути деталізацію"
+                    onClick={clickable ? () => setSelected({ type: isTeam ? "team" : "participant", id: detailId }) : undefined}
+                    title={clickable ? "Переглянути деталізацію" : undefined}
                   >
                     <td className={styles.tdRank}>
                       {MEDAL[p.rank] ?? <span className={styles.rankNum}>{p.rank}</span>}
@@ -944,7 +966,7 @@ export function LeaderboardTab({ tournamentId, tournamentType, rounds = [], roun
                       <span className={styles.totalValue}>{p.total}</span>
                     </td>
                     <td className={styles.tdAction}>
-                      <span className={styles.detailArrow}>›</span>
+                      {clickable ? <span className={styles.detailArrow}>›</span> : null}
                     </td>
                   </tr>
                   );

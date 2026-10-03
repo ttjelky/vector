@@ -157,9 +157,19 @@ export function CreateTeamForm({ tournamentId, tournament, onCreated, onCancel }
 
   // ── Copy invite link ──────────────────────────────────────────────────────
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     const url = `${window.location.origin}/team-invite/${team.team_invite_token}/`;
-    navigator.clipboard?.writeText(url).catch(() => {});
+    try {
+      await navigator.clipboard?.writeText(url);
+    } catch {
+      const el = document.createElement("textarea");
+      el.value = url;
+      el.style.cssText = "position:fixed;opacity:0";
+      document.body.appendChild(el);
+      el.select();
+      try { document.execCommand("copy"); } catch { /* ігнор */ }
+      document.body.removeChild(el);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2200);
   };
@@ -169,21 +179,10 @@ export function CreateTeamForm({ tournamentId, tournament, onCreated, onCancel }
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className={styles.formWrap} style={{
-      maxWidth: 560,
-      margin: "0 auto",
-      padding: "0 16px",
-    }}>
+    <div className={styles.formWrap}>
 
       {/* Заголовок */}
-      <div className={styles.formHeader} style={{
-        marginBottom: 20,
-        paddingBottom: 16,
-        borderBottom: "1px solid rgba(0,0,0,0.07)",
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-      }}>
+      <div className={styles.formHeader}>
         <div>
           <h2 className={styles.formTitle}>
             {team ? team.name : "Нова команда"}
@@ -289,12 +288,12 @@ export function CreateTeamForm({ tournamentId, tournament, onCreated, onCancel }
                 type="button"
                 className="btn-secondary btn-sm"
                 onClick={handleCopyLink}
-                style={copied
-                  ? { color: "#1a7f4c", background: "rgba(26,127,76,0.07)", borderColor: "rgba(26,127,76,0.18)" }
-                  : undefined}
               >
                 {copied ? "✓ Посилання скопійовано!" : "Копіювати посилання"}
               </button>
+              <span className={styles.inviteLinkUrl} title={`${window.location.origin}/team-invite/${team.team_invite_token}/`}>
+                {`${window.location.origin}/team-invite/${team.team_invite_token}/`}
+              </span>
             </div>
           )}
         </>
@@ -320,7 +319,6 @@ export function CreateTeamForm({ tournamentId, tournament, onCreated, onCancel }
             onClick={handleRegister}
             disabled={loading || !canRegister}
             title={!canRegister ? `Потрібно ще ${shortage} учасник(ів)` : undefined}
-            style={{ width: "100%" }}
           >
             {loading
               ? "Реєстрація…"

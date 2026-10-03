@@ -1,38 +1,51 @@
-/* LeaderboardDetail.module.css
-   Стилі для панелі деталізації учасника (ParticipantDetail)
-   Розмісти поруч з LeaderboardTab.module.css у ./styles/
-*/
+/* ════════════════════════════════════════════════════════════════════════════
+   LeaderboardDetail — у мові Головної/Турнірів:
+   повітря, великий кегль, жодних рамок, желейні натискання.
+   ════════════════════════════════════════════════════════════════════════════ */
 
-/* ─── Panel shell ─────────────────────────────────────────────────────────── */
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  animation: fadeUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes fadeUp {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.99); }
+  60%  { opacity: 1; transform: translateY(-1px) scale(1.001); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ─── State boxes ─────────────────────────────────────────────────────────── */
+
 .stateBox {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 60px 20px;
+  padding: 64px 20px;
   text-align: center;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 24px;
 }
 
 .spinner {
-  width: 22px; height: 22px;
-  border: 2.5px solid #eee;
-  border-top-color: #999;
+  width: 26px; height: 26px;
+  border: 3px solid #e4e4e8;
+  border-top-color: #86868b;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.errorText { color: #e76b6b; font-size: 14px; font-weight: 500; }
+.errorText { color: #d04d3e; font-size: 16px; font-weight: 500; }
 
 /* ─── Panel header ────────────────────────────────────────────────────────── */
+
 .panelHeader {
   display: flex;
   align-items: center;
@@ -45,18 +58,19 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px 6px 10px;
-  border: 1px solid var(--btn-secondary-border-color);
+  padding: 10px 22px;
+  border: none;
   border-radius: 100px;
-  background: var(--btn-secondary-bg);
-  color: var(--btn-secondary-text);
-  font-size: 13px;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.13s, color 0.13s;
+  transition: background 0.15s, transform 0.1s;
 }
-.backBtn:hover { background: var(--btn-secondary-hover-bg); color: var(--btn-secondary-text); }
+.backBtn:hover { background: #ececee; }
+.backBtn:active { transform: scale(0.96); }
 
 .headerRight {
   display: flex;
@@ -67,123 +81,141 @@
 .juryToggle {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border: 1.5px solid #d4d4d8;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
   border-radius: 100px;
-  background: #fff;
-  color: #555;
-  font-size: 13px;
+  background: #f5f5f7;
+  color: #515154;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.13s, color 0.13s, border-color 0.13s;
+  transform-origin: 50% 50%;
+  transition: background 0.15s, color 0.15s,
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.juryToggle:hover { background: #f4f4f6; }
+.juryToggle:active { transform: scale(0.94, 0.9); transition: transform 110ms ease-in; }
 .juryToggleOn {
-  background: #111;
-  border-color: #111;
+  background: #1d1d1f;
   color: #fff;
 }
-.juryToggleOn:hover { background: #333; }
 
-/* ─── Hero ────────────────────────────────────────────────────────────────── */
+/* ─── Hero: пласка сіра плашка ────────────────────────────────────────────── */
+
 .hero {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px 22px;
-  background: #fafafa;
-  border: 1px solid #ebebeb;
-  border-radius: 16px;
+  gap: 18px;
+  padding: 24px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 24px;
 }
 
 .heroAvatar {
-  width: 52px; height: 52px;
+  width: 64px; height: 64px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
-  color: #444;
+  color: #1d1d1f;
   flex-shrink: 0;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .heroInfo {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
+  min-width: 0;
 }
 
 .heroName {
   margin: 0;
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 700;
-  color: #111;
+  color: #1d1d1f;
   line-height: 1.2;
+  letter-spacing: -0.02em;
+  overflow-wrap: break-word;
 }
 
 .heroTotal {
-  font-size: 13.5px;
-  color: #888;
+  font-size: 16px;
+  color: #6e6e73;
 }
-.heroTotal strong { color: #111; font-weight: 700; }
+.heroTotal strong { color: #1d1d1f; font-weight: 700; font-variant-numeric: tabular-nums; }
 
-/* ─── Round pills ─────────────────────────────────────────────────────────── */
+/* ─── Round pills: желейні ────────────────────────────────────────────────── */
+
 .roundPills {
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
 }
+.roundPills::-webkit-scrollbar { display: none; }
 
 .roundPill {
-  padding: 5px 14px;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 18px;
+  font-size: 14px;
   font-weight: 500;
-  color: #666;
-  background: #f4f4f6;
-  border: 1px solid transparent;
+  color: #6e6e73;
+  background: #f5f5f7;
+  border: none;
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.13s, color 0.13s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transform-origin: 50% 50%;
+  transition: background 0.15s ease, color 0.15s ease,
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.roundPill:hover { background: #ebebed; color: #333; }
+.roundPill:hover:not(.roundPillActive) { background: #ececee; color: #1d1d1f; }
+.roundPill:active:not(.roundPillActive) { transform: scale(0.94, 0.9); transition: transform 110ms ease-in; }
 .roundPillActive {
-  color: #111;
-  background: #fff;
-  border-color: #d4d4d8;
-  font-weight: 600;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  color: #fff;
+  background: #1d1d1f;
 }
+.roundPillActive:active { transform: scale(0.96); transition: transform 110ms ease-in; }
 
-/* ─── Generic section ─────────────────────────────────────────────────────── */
+/* ─── Generic section: пласка сіра ────────────────────────────────────────── */
+
 .section {
-  padding: 18px 20px;
-  background: #fff;
-  border: 1px solid #ebebeb;
-  border-radius: 16px;
+  padding: 22px 24px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 24px;
 }
 
 .sectionTitle {
-  margin: 0 0 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #999;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  margin: 0 0 16px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
 }
 
 /* ─── Round section ───────────────────────────────────────────────────────── */
+
 .roundSection {
-  padding: 18px 20px;
-  background: #fff;
-  border: 1px solid #ebebeb;
-  border-radius: 16px;
+  padding: 22px 24px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+  animation: fadeUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 .roundSectionHeader {
@@ -192,33 +224,41 @@
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e4e4e8;
 }
 
 .roundTitle {
   margin: 0;
-  font-size: 15px;
+  font-size: 19px;
   font-weight: 700;
-  color: #111;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
 }
 
 .roundAvg {
-  font-size: 13px;
-  color: #888;
+  font-size: 15px;
+  color: #6e6e73;
   white-space: nowrap;
 }
-.roundAvg strong { color: #111; font-weight: 700; }
+.roundAvg strong { color: #1d1d1f; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ─── Criteria grid ───────────────────────────────────────────────────────── */
+
 .criteriaGrid {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .criteriaRow {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  background: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 12px 16px;
 }
 
 .criteriaLabelRow {
@@ -229,28 +269,30 @@
 }
 
 .criteriaLabel {
-  font-size: 13px;
-  color: #444;
+  font-size: 15px;
+  color: #515154;
   font-weight: 500;
 }
 
 .criteriaValue {
-  font-size: 13.5px;
+  font-size: 16px;
   font-weight: 700;
   white-space: nowrap;
   flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .criteriaMax {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 400;
-  color: #bbb;
+  color: #aeaeb2;
 }
 
 /* ─── Score bar ───────────────────────────────────────────────────────────── */
+
 .scoreBar {
-  height: 6px;
-  background: #f0f0f0;
+  height: 8px;
+  background: #f0f0f2;
   border-radius: 100px;
   overflow: hidden;
 }
@@ -262,62 +304,68 @@
 }
 
 /* ─── Jury section ────────────────────────────────────────────────────────── */
+
 .jurySection {
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+  border-top: 1px solid #e4e4e8;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .jurySectionTitle {
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #aaa;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
 }
 
-/* ─── Jury table ──────────────────────────────────────────────────────────── */
+/* ─── Jury table: білі рядки без рамок ────────────────────────────────────── */
+
 .juryTable {
-  border: 1px solid #ebebeb;
-  border-radius: 10px;
+  border: none;
+  border-radius: 16px;
   overflow: hidden;
-  font-size: 12.5px;
+  overflow-x: auto;
+  font-size: 14px;
+  background: #fff;
+  padding: 4px 8px;
 }
 
 .juryTableHead,
 .juryTableRow {
   display: grid;
-  /* Name + criteria cols + total */
-  grid-template-columns: 1fr repeat(var(--criteria-count, 6), minmax(40px, 1fr)) 60px;
+  grid-template-columns: 1fr repeat(var(--criteria-count, 6), minmax(44px, 1fr)) 64px;
   gap: 0;
+  min-width: 420px;
 }
 
 .juryTableHead {
-  background: #fafafa;
-  border-bottom: 1px solid #ebebeb;
-  padding: 8px 12px;
+  background: none;
+  border-bottom: 1px solid #f0f0f2;
+  padding: 10px 12px;
 }
 
 .juryTableRow {
-  padding: 8px 12px;
-  border-bottom: 1px solid #f5f5f5;
-  transition: background 0.1s;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f5f5f7;
+  transition: filter 0.1s;
 }
 .juryTableRow:last-child { border-bottom: none; }
-.juryTableRow:hover { background: #fafafa; }
+@media (hover: hover) {
+  .juryTableRow:hover { filter: brightness(0.97); }
+}
 
 .juryTableThName,
 .juryTableTh,
 .juryTableThTotal {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  color: #aaa;
+  color: #aeaeb2;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   white-space: nowrap;
@@ -328,37 +376,43 @@
 
 .juryTableThName { text-align: left; padding-left: 0; }
 .juryTableTh     { text-align: center; }
-.juryTableThTotal { text-align: center; color: #555; }
+.juryTableThTotal { text-align: center; color: #515154; }
 
 .juryTableName {
   font-weight: 500;
-  color: #333;
+  font-size: 14px;
+  color: #1d1d1f;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   padding-right: 8px;
+  display: flex;
+  align-items: center;
 }
 
 .juryTableCell {
   text-align: center;
-  color: #555;
+  color: #515154;
   padding: 0 4px;
+  font-variant-numeric: tabular-nums;
 }
 
 .juryTableTotal {
   text-align: center;
   font-weight: 700;
-  color: #111;
+  font-size: 15px;
+  color: #1d1d1f;
+  font-variant-numeric: tabular-nums;
 }
 
-.noScore { color: #ccc; }
+.noScore { color: #c7c7cc; }
 
 /* ── Team Detail additions ─────────────────────────────────────────────────── */
 
 .heroSub {
   display: block;
-  font-size: 12px;
-  color: #9ca3af;
+  font-size: 14px;
+  color: #86868b;
   margin-top: 2px;
 }
 
@@ -374,127 +428,133 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 10px 12px;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 12px;
-  background: #fafafa;
+  gap: 6px;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 18px;
+  background: #fff;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
-  min-width: 80px;
+  transform-origin: 50% 50%;
+  transition: filter 200ms ease,
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 92px;
   position: relative;
   font: inherit;
 }
-
-.memberCard:hover {
-  border-color: #a5b4fc;
-  background: #f5f3ff;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+@media (hover: hover) {
+  .memberCard:hover { filter: brightness(0.96); }
 }
+.memberCard:active { transform: scale(0.94, 0.9); transition: transform 110ms ease-in; }
 
 .memberCardActive {
-  border-color: #6366f1;
-  background: #eef2ff;
-  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.15);
+  background: #1d1d1f;
 }
+.memberCardActive .memberName { color: #fff; }
+.memberCardActive .memberScore { background: rgba(255, 255, 255, 0.16); color: #fff; }
 
 .memberAvatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
-  color: #374151;
+  color: #1d1d1f;
   flex-shrink: 0;
+  background: #f5f5f7;
 }
 
 .memberName {
-  font-size: 11.5px;
-  font-weight: 500;
-  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d1d1f;
   text-align: center;
-  max-width: 80px;
+  max-width: 92px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .memberScore {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
-  color: #6366f1;
-  background: #eef2ff;
+  color: #1d4ed8;
+  background: #e3edff;
   border-radius: 100px;
-  padding: 1px 7px;
+  padding: 3px 10px;
+  font-variant-numeric: tabular-nums;
 }
 
 .captainBadge {
   position: absolute;
-  top: 5px;
-  right: 6px;
-  font-size: 10px;
+  top: 8px;
+  right: 10px;
+  font-size: 12px;
   line-height: 1;
 }
 
-/* Submissions table */
+/* Submissions table: білі рядки без рамок */
 .submissionsTable {
-  margin-top: 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  margin-top: 4px;
+  border: none;
+  border-radius: 16px;
   overflow: hidden;
-  font-size: 13px;
+  overflow-x: auto;
+  font-size: 14px;
+  background: #fff;
+  padding: 4px 8px;
 }
 
 .submissionsHead,
 .submissionsRow {
   display: grid;
-  /* name | task | criteria... | total */
-  grid-template-columns: 160px 1fr repeat(var(--crit-count, 3), 56px) 56px;
+  grid-template-columns: 170px 1fr repeat(var(--crit-count, 3), 60px) 60px;
   align-items: center;
   gap: 0;
+  min-width: 480px;
 }
 
 .submissionsHead {
-  background: #f3f4f6;
-  border-bottom: 1px solid #e5e7eb;
+  background: none;
+  border-bottom: 1px solid #f0f0f2;
   font-weight: 600;
-  color: #6b7280;
-  font-size: 11.5px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .submissionsRow {
-  border-bottom: 1px solid #f3f4f6;
-  transition: background 0.1s;
+  border-bottom: 1px solid #f5f5f7;
+  transition: filter 0.1s;
 }
 
 .submissionsRow:last-child {
   border-bottom: none;
 }
 
-.submissionsRow:hover {
-  background: #f9fafb;
+@media (hover: hover) {
+  .submissionsRow:hover { filter: brightness(0.97); }
 }
 
 .subThName,
 .subCellName {
-  padding: 9px 12px;
+  padding: 12px;
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-weight: 500;
-  color: #374151;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1d1d1f;
   overflow: hidden;
 }
 
 .subThTask,
 .subCellTask {
-  padding: 9px 10px;
-  color: #374151;
+  padding: 12px 10px;
+  color: #515154;
+  font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -502,36 +562,58 @@
 
 .subThCrit,
 .subCellCrit {
-  padding: 9px 6px;
+  padding: 12px 6px;
   text-align: center;
-  color: #6b7280;
+  color: #515154;
+  font-variant-numeric: tabular-nums;
 }
 
 .subThTotal,
 .subCellTotal {
-  padding: 9px 10px;
+  padding: 12px 10px;
   text-align: center;
   font-weight: 700;
-  color: #111827;
+  font-size: 15px;
+  color: #1d1d1f;
+  font-variant-numeric: tabular-nums;
 }
 
 .subThName,
 .subThTask,
 .subThCrit,
 .subThTotal {
-  color: #9ca3af;
+  color: #aeaeb2;
   font-weight: 600;
 }
 
 .subAvatar {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  color: #374151;
+  color: #1d1d1f;
   flex-shrink: 0;
+  background: #f5f5f7;
+}
+
+/* ─── Mobile ──────────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .hero { padding: 20px; gap: 14px; }
+  .heroAvatar { width: 56px; height: 56px; font-size: 18px; }
+  .heroName { font-size: 20px; }
+  .heroTotal { font-size: 15px; }
+  .section, .roundSection { padding: 18px; border-radius: 20px; }
+  .roundTitle { font-size: 17px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel, .roundSection { animation: none; }
+  .backBtn:active, .juryToggle:active, .memberCard:active { transform: none; }
+  .scoreBarFill { transition: none; }
+  .spinner { animation-duration: 1.6s; }
 }

@@ -1,25 +1,71 @@
-/* ─── Wrap ────────────────────────────────────────────────────────────────── */
-.wrap { display: flex; flex-direction: column; gap: 16px; }
+/* ════════════════════════════════════════════════════════════════════════════
+   LeaderboardTab — у мові Головної/Турнірів:
+   повітря, великий кегль, жодних рамок, желейні натискання.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  animation: fadeUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes fadeUp {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.99); }
+  60%  { opacity: 1; transform: translateY(-1px) scale(1.001); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── Заголовок секції ─────────────────────────────────────────────────────── */
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8ed;
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: #1d1d1f;
+}
+
+.countText {
+  font-size: 17px;
+  font-weight: 400;
+  color: #6e6e73;
+}
 
 /* ─── State box ───────────────────────────────────────────────────────────── */
+
 .stateBox {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 60px 20px;
+  gap: 10px;
+  padding: 64px 20px;
   text-align: center;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 24px;
 }
-.stateIcon { font-size: 32px; margin-bottom: 4px; }
-.errorText { color: #e76b6b; font-weight: 500; font-size: 14px; }
-.emptyText { color: #888; font-weight: 500; font-size: 15px; }
-.emptyHint { color: #bbb; font-size: 13px; max-width: 300px; line-height: 1.5; }
+.stateIcon { font-size: 30px; }
+.errorText { color: #d04d3e; font-weight: 500; font-size: 16px; }
+.emptyText { color: #1d1d1f; font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
+.emptyHint { color: #6e6e73; font-size: 15px; max-width: 340px; line-height: 1.55; }
 
 .spinner {
-  width: 22px; height: 22px;
-  border: 2.5px solid #eee;
-  border-top-color: #999;
+  width: 26px; height: 26px;
+  border: 3px solid #e4e4e8;
+  border-top-color: #86868b;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   margin-bottom: 4px;
@@ -31,36 +77,31 @@
 .teamBadge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   align-self: flex-start;
-  padding: 6px 14px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #555;
-  background: #f4f4f6;
-  border: 1px solid #e4e4e8;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #515154;
+  background: #f5f5f7;
+  border: none;
   border-radius: 100px;
-  animation: fadeInSlideUp 0.25s ease-out;
+  animation: fadeUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@keyframes fadeInSlideUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ─── Publish bar ─────────────────────────────────────────────────────────── */
+/* ─── Publish bar: м'яка плашка без рамки ─────────────────────────────────── */
 
 .publishBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px 18px;
-  border-radius: 14px;
-  border: 1px solid;
+  padding: 18px 20px;
+  border-radius: 24px;
+  border: none;
 }
-.publishBarDraft  { background: #fafafa; border-color: #e8e8e8; }
-.publishBarActive { background: #f0faf4; border-color: #c3e8d1; }
+.publishBarDraft  { background: #f5f5f7; }
+.publishBarActive { background: #eef9f1; }
 
 .publishInfo { display: flex; align-items: center; gap: 12px; }
 
@@ -69,189 +110,218 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-.publishBarDraft  .publishDot { background: #ccc; }
-.publishBarActive .publishDot { background: #4caf7d; box-shadow: 0 0 0 3px rgba(76,175,125,0.18); }
+.publishBarDraft  .publishDot { background: #aeaeb2; }
+.publishBarActive .publishDot { background: #30d158; box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.18); }
 
-.publishStatus { display: block; font-size: 13.5px; font-weight: 600; color: #222; }
-.publishHint   { display: block; font-size: 12px; color: #aaa; margin-top: 1px; }
+.publishStatus { display: block; font-size: 16px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.01em; }
+.publishHint   { display: block; font-size: 14px; color: #86868b; margin-top: 2px; }
 
 .publishBtn {
-  padding: 7px 16px;
-  font-size: 13px;
+  padding: 10px 22px;
+  font-size: 15px;
   font-weight: 500;
   border-radius: 100px;
-  border: 1px solid;
+  border: none;
   cursor: pointer;
   font-family: inherit;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background 0.14s, transform 0.1s;
+  transform-origin: 50% 50%;
+  transition: background 0.15s, transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.publishBtn:active   { transform: scale(0.97); }
+.publishBtn:active   { transform: scale(0.96, 0.93); transition: transform 110ms ease-in; }
 .publishBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.publishBtnShow { background: var(--btn-primary-bg); border-color: var(--btn-primary-border-color); color: var(--btn-primary-text); }
-.publishBtnShow:hover:not(:disabled) { background: var(--btn-primary-hover-bg); }
+.publishBtnShow { background: #0071e3; color: #fff; }
+.publishBtnShow:hover:not(:disabled) { background: #0077ed; }
 
-.publishBtnHide { background: var(--btn-secondary-bg); border-color: var(--btn-secondary-border-color); color: var(--btn-secondary-text); }
-.publishBtnHide:hover:not(:disabled) { background: var(--btn-secondary-hover-bg); border-color: #ccc; }
+.publishBtnHide { background: #fff; color: #1d1d1f; }
+.publishBtnHide:hover:not(:disabled) { background: #ececee; }
 
-/* ─── Controls ────────────────────────────────────────────────────────────── */
+/* ─── Controls: желейні пілюлі ────────────────────────────────────────────── */
 
 .controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.controlsLabel { font-size: 13px; font-weight: 500; color: #999; white-space: nowrap; }
+.controlsLabel { font-size: 15px; font-weight: 500; color: #86868b; white-space: nowrap; }
 
-.pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.pills { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .pill {
-  padding: 5px 14px;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  font-size: 14px;
   font-weight: 500;
-  color: #666;
-  background: #f4f4f6;
-  border: 1px solid transparent;
+  color: #6e6e73;
+  background: #f5f5f7;
+  border: none;
   border-radius: 100px;
   cursor: pointer;
   font-family: inherit;
+  letter-spacing: -0.01em;
   white-space: nowrap;
-  transition: background 0.14s, color 0.14s;
+  transform-origin: 50% 50%;
+  transition: background 0.15s ease, color 0.15s ease,
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.pill:hover { background: #ebebed; color: #333; }
+.pill:hover:not(.pillActive) { background: #ececee; color: #1d1d1f; }
+.pill:active:not(.pillActive) { transform: scale(0.94, 0.9); transition: transform 110ms ease-in; }
 .pillActive {
-  color: #111;
-  background: #fff;
-  border-color: #d4d4d8;
-  font-weight: 600;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  color: #fff;
+  background: #1d1d1f;
+  font-weight: 500;
 }
+.pillActive:active { transform: scale(0.96); transition: transform 110ms ease-in; }
 
-/* ─── Table ───────────────────────────────────────────────────────────────── */
+/* ─── Table: сірий контейнер, білі рядки-картки, жодних рамок ─────────────── */
 
 .tableWrap {
   overflow-x: auto;
-  border-radius: 16px;
-  border: 1px solid #ebebeb;
-  background: #fff;
+  border-radius: 24px;
+  border: none;
+  background: #f5f5f7;
+  padding: 8px 12px;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.tableWrap::-webkit-scrollbar { display: none; }
 
-.table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-.table thead tr { border-bottom: 1px solid #ebebeb; background: #fafafa; }
+.table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  font-size: 15px;
+}
+.table thead tr { background: none; }
 
 .thRank, .thName, .thScore {
-  padding: 11px 16px;
-  font-size: 11.5px;
+  padding: 8px 16px;
+  font-size: 13px;
   font-weight: 600;
-  color: #aaa;
+  color: #86868b;
   text-align: left;
   white-space: nowrap;
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
-.thRank  { width: 52px; text-align: center; padding-left: 20px; }
+.thRank  { width: 56px; text-align: center; }
 .thScore { text-align: center; }
-.thTotal { color: #555; }
-.thActive { color: #111; background: #f3f4f8; }
+.thTotal { color: #515154; }
+.thActive { color: #1d1d1f; }
 
-.row { border-bottom: 1px solid #f0f0f0; transition: background 0.12s; }
-.row:last-child { border-bottom: none; }
-.row:hover { background: #fafafa; }
+.row { transition: filter 200ms ease; }
+.row > td { background: #fff; }
+.row > td:first-child { border-radius: 16px 0 0 16px; }
+.row > td:last-child { border-radius: 0 16px 16px 0; }
+@media (hover: hover) {
+  .row:hover > td { filter: brightness(0.97); }
+}
 
-.rowGold   { background: #fffdf0; }
-.rowSilver { background: #fafafa; }
-.rowBronze { background: #fdf8f4; }
-.rowGold:hover   { background: #fff9d6; }
-.rowSilver:hover { background: #f3f3f3; }
-.rowBronze:hover { background: #f9f0e8; }
+.rowGold   > td { background: #fff8e1; }
+.rowSilver > td { background: #f4f4f6; }
+.rowBronze > td { background: #fdefe4; }
+@media (hover: hover) {
+  .rowGold:hover   > td { filter: brightness(0.97); }
+  .rowSilver:hover > td { filter: brightness(0.97); }
+  .rowBronze:hover > td { filter: brightness(0.97); }
+}
 
-.tdRank { text-align: center; padding: 12px 16px 12px 20px; font-size: 18px; width: 52px; }
-.rankNum { font-size: 13px; font-weight: 600; color: #ccc; }
+/* Клікабельні рядки — желейне натискання */
+.rowClickable { cursor: pointer; }
+.rowClickable:active > td { filter: brightness(0.93); }
 
-.tdName  { padding: 10px 16px; min-width: 180px; }
-.tdScore { text-align: center; padding: 12px 20px; white-space: nowrap; }
-.tdActive { background: #f3f4f8; }
+.tdRank { text-align: center; padding: 14px 12px 14px 18px; font-size: 20px; width: 56px; white-space: nowrap; }
+.rankNum { font-size: 15px; font-weight: 700; color: #aeaeb2; font-variant-numeric: tabular-nums; }
+
+.tdName  { padding: 12px 16px; min-width: 200px; }
+.tdScore { text-align: center; padding: 12px 16px; white-space: nowrap; }
+.tdActive { font-weight: 600; }
 .tdTotal  { font-weight: 700; }
 
 /* ─── Participant / Team cell ─────────────────────────────────────────────── */
 
-.participant { display: flex; align-items: center; gap: 10px; }
+.participant { display: flex; align-items: center; gap: 12px; }
 
 .avatar {
-  width: 32px; height: 32px;
+  width: 40px; height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
-  color: #444;
+  color: #1d1d1f;
   flex-shrink: 0;
+  background: #f5f5f7;
 }
 
-/* Для команд — квадратний аватар з заокругленими кутами */
 .teamAvatar {
-  width: 32px; height: 32px;
-  border-radius: 8px;
+  width: 40px; height: 40px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
-  color: #444;
+  color: #1d1d1f;
   flex-shrink: 0;
 }
 
 .participantInfo {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
 }
 
 .participantName {
-  font-weight: 500;
-  color: #111;
-  font-size: 13.5px;
+  font-weight: 600;
+  color: #1d1d1f;
+  font-size: 16px;
+  letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .participantSub {
-  font-size: 11.5px;
-  color: #aaa;
+  font-size: 13px;
+  color: #86868b;
 }
 
 /* ─── Score cells ─────────────────────────────────────────────────────────── */
 
-.scoreValue { font-size: 13.5px; font-weight: 500; color: #444; }
-.totalValue { font-size: 14px; font-weight: 700; color: #111; }
-.noScore    { color: #ccc; font-size: 13px; }
+.scoreValue { font-size: 15px; font-weight: 500; color: #515154; font-variant-numeric: tabular-nums; }
+.totalValue { font-size: 17px; font-weight: 700; color: #1d1d1f; font-variant-numeric: tabular-nums; }
+.noScore    { color: #c7c7cc; font-size: 15px; }
 
 /* ─── Footnote ────────────────────────────────────────────────────────────── */
 
-.footnote { font-size: 12px; color: #ccc; margin: 0; padding-left: 2px; }
+.footnote { font-size: 14px; color: #aeaeb2; margin: 0; padding-left: 2px; line-height: 1.5; }
 
 /* ─── Export button ───────────────────────────────────────────────────────── */
 
 .exportBtn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin-left: auto;
-  padding: 6px 14px;
-  border: 1.5px solid #121212;
+  padding: 9px 20px;
+  border: none;
   border-radius: 100px;
-  background: transparent;
-  color: #000;
-  font-size: 13px;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  font-size: 14px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  transform-origin: 50% 50%;
+  transition: background 0.15s, transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.exportBtn:hover:not(:disabled) { background: #000; color: #fff; }
+.exportBtn:hover:not(:disabled) { background: #1d1d1f; color: #fff; }
+.exportBtn:active:not(:disabled) { transform: scale(0.94, 0.9); transition: transform 110ms ease-in; }
 .exportBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .exportIcon { width: 16px; height: 16px; flex-shrink: 0; }
@@ -264,38 +334,30 @@
   animation: spin 0.7s linear infinite;
   flex-shrink: 0;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ─── Додай ці рядки в кінець LeaderboardTab.module.css ─────────────────── */
-
-/* Клікабельні рядки таблиці */
-.rowClickable {
-  cursor: pointer;
-}
 
 /* Стрілка деталізації */
-.thAction { width: 32px; }
+.thAction { width: 36px; }
 
 .tdAction {
-  padding: 0 12px 0 4px;
+  padding: 0 16px 0 4px;
   text-align: right;
-  width: 32px;
+  width: 36px;
 }
 
 .detailArrow {
-  font-size: 18px;
-  color: #ccc;
+  font-size: 22px;
+  color: #c7c7cc;
   line-height: 1;
   transition: color 0.13s, transform 0.13s;
   display: inline-block;
 }
 
 .rowClickable:hover .detailArrow {
-  color: #888;
+  color: #1d1d1f;
   transform: translateX(2px);
 }
 
-/* Realtime bar (якщо ще не додано) */
+/* Realtime bar */
 .realtimeBar {
   display: flex;
   align-items: center;
@@ -303,35 +365,54 @@
 }
 
 .realtimeDot {
-  width: 6px; height: 6px;
+  width: 7px; height: 7px;
   border-radius: 50%;
-  background: #4caf7d;
+  background: #30d158;
   flex-shrink: 0;
-  box-shadow: 0 0 0 2px rgba(76,175,125,0.18);
+  box-shadow: 0 0 0 3px rgba(48, 209, 88, 0.18);
 }
 
 .realtimeText {
-  font-size: 12px;
-  color: #bbb;
+  font-size: 13px;
+  color: #aeaeb2;
 }
 
 .refreshBtn {
   display: inline-flex;
   align-items: center;
-  padding: 4px;
+  padding: 6px;
   border: none;
-  background: transparent;
+  background: #f5f5f7;
   cursor: pointer;
-  color: #bbb;
-  border-radius: 6px;
-  transition: color 0.13s;
+  color: #86868b;
+  border-radius: 50%;
+  transition: color 0.13s, transform 0.1s;
   margin-left: auto;
 }
-.refreshBtn:hover:not(:disabled) { color: #666; }
+.refreshBtn:hover:not(:disabled) { color: #1d1d1f; }
+.refreshBtn:active:not(:disabled) { transform: scale(0.9); }
 .refreshBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.refreshIcon { width: 14px; height: 14px; }
+.refreshIcon { width: 16px; height: 16px; }
 
 .refreshIconSpin {
   animation: spin 0.8s linear infinite;
+}
+
+/* ─── Mobile ──────────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .sectionTitle { font-size: 20px; }
+  .countText { font-size: 15px; }
+  .participantName { font-size: 15px; }
+  .totalValue { font-size: 16px; }
+  .publishBar { flex-direction: column; align-items: flex-start; }
+  .table { min-width: 520px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrap, .teamBadge { animation: none; }
+  .pill:active, .publishBtn:active, .exportBtn:active, .refreshBtn:active { transform: none; }
+  .rowClickable:active > td { filter: none; }
+  .spinner, .exportSpinner, .refreshIconSpin { animation-duration: 1.6s; }
 }

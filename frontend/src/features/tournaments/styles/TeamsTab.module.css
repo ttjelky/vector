@@ -1,251 +1,427 @@
-/* ─── TeamsTab.module.css ───────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════════════════
+   TeamsTab — у мові Головної/Турнірів:
+   повітря, великий кегль, жодних рамок, желейні натискання,
+   горизонтальна bleed-стрічка зі стрілками (під сайдбар).
+   ════════════════════════════════════════════════════════════════════════════ */
 
-.wrap { padding: 28px 24px; max-width: 760px; }
-
-/* ── Stats bar ────────────────────────────────────────────────────────────── */
-.statsBar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.stat {
-  flex: 1;
-  min-width: 80px;
+.wrap {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  padding: 16px 18px;
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  animation: fadeUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.statValue {
-  font-size: 24px;
-  font-weight: 700;
-  color: #111;
-  line-height: 1;
-  letter-spacing: -0.03em;
-}
-.statLabel {
-  font-size: 11px;
-  color: #ccc;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  margin-top: 4px;
-  font-weight: 600;
+@keyframes fadeUp {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.99); }
+  60%  { opacity: 1; transform: translateY(-1px) scale(1.001); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ── List header ──────────────────────────────────────────────────────────── */
-.listHeader {
+/* ─── Заголовок секції ─────────────────────────────────────────────────────── */
+
+.sectionHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 16px;
-  flex-wrap: wrap;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8ed;
 }
-.listCount { font-size: 13px; font-weight: 600; color: #bbb; }
-.headerActions { display: flex; align-items: center; gap: 8px; }
 
-/* ── Invite button ────────────────────────────────────────────────────────── */
-.inviteBtn {
-  padding: 9px 20px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--btn-primary-text);
-  background: var(--btn-primary-bg);
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  white-space: nowrap;
-  font-family: inherit;
-  transition: background 0.15s, box-shadow 0.15s;
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: #1d1d1f;
 }
-.inviteBtn:hover:not(:disabled) { background: var(--btn-primary-hover-bg); box-shadow: 0 4px 14px rgba(0,0,0,0.16); }
-.inviteBtn:active:not(:disabled) { transform: scale(0.98); }
-.inviteBtn:disabled { background: #e4e4e7; color: #bbb; cursor: not-allowed; }
 
-/* ── PIN section ──────────────────────────────────────────────────────────── */
-.pinSection {
+.countText {
+  font-size: 17px;
+  font-weight: 400;
+  color: #6e6e73;
+}
+
+.headerActions {
   display: flex;
   align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ─── Статистика: пласкі сірі плашки ───────────────────────────────────────── */
+
+.statsBar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px;
-  padding: 12px 18px;
   margin-bottom: 16px;
-  background: #fafafa;
-  border: 1px solid #f0f0f0;
-  border-radius: 14px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 20px;
+}
+
+.statValue {
+  font-size: 34px;
+  font-weight: 700;
+  color: #1d1d1f;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.statLabel {
+  font-size: 15px;
+  color: #6e6e73;
+}
+
+/* ─── Панель запрошення ────────────────────────────────────────────────────── */
+
+.invitePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 24px;
+  animation: fadeUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.invitePanelTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
+}
+
+.inviteLinkRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
 }
-.pinInfo { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-.pinText { font-size: 13px; color: #888; white-space: nowrap; }
+
+.inviteLinkUrl {
+  flex: 1;
+  min-width: 200px;
+  font-size: 14px;
+  color: #515154;
+  background: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inviteClose {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  background: #fff; border: none; cursor: pointer; color: #aeaeb2;
+  border-radius: 50%; flex-shrink: 0; transition: color 0.15s, transform 0.1s;
+}
+.inviteClose:hover { color: #1d1d1f; }
+.inviteClose:active { transform: scale(0.9); }
+
+.pinRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pinLabel { font-size: 15px; color: #6e6e73; }
 .pinCode {
-  font-size: 15px; font-weight: 700; letter-spacing: 0.14em;
-  color: #111; background: #fff;
-  border: 1px solid #ebebeb;
-  border-radius: 10px; padding: 4px 14px;
+  font-size: 17px; font-weight: 700; letter-spacing: 0.14em;
+  color: #1d1d1f; background: #fff;
+  border: none;
+  border-radius: 12px; padding: 8px 18px;
   font-family: 'SF Mono', 'Menlo', 'Fira Code', monospace;
 }
 
 .regenBtn {
-  padding: 6px 14px;
-  font-size: 12px; font-weight: 600; color: #888;
-  background: #f4f4f5; border: 1px solid #ebebeb;
+  padding: 8px 18px;
+  font-size: 14px; font-weight: 500; color: #6e6e73;
+  background: #fff; border: none;
   border-radius: 100px; cursor: pointer; white-space: nowrap; font-family: inherit;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.1s;
 }
-.regenBtn:hover:not(:disabled) { background: #ebebeb; }
+.regenBtn:hover:not(:disabled) { background: #ececee; color: #1d1d1f; }
+.regenBtn:active:not(:disabled) { transform: scale(0.96); }
 .regenBtn:disabled { opacity: 0.4; cursor: not-allowed; }
-.regenConfirm { color: #c0392b; background: rgba(192,57,43,0.06); border-color: rgba(192,57,43,0.16); }
-.regenConfirm:hover { background: rgba(192,57,43,0.1) !important; }
 
-.pinClose {
-  display: flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px;
-  background: none; border: none; cursor: pointer; color: #d4d4d8;
-  border-radius: 100px; flex-shrink: 0; transition: color 0.15s, background 0.15s;
-}
-.pinClose:hover { color: #555; background: #f0f0f0; }
+.inviteHint { font-size: 14px; color: #86868b; line-height: 1.5; }
 
-/* ── Search ───────────────────────────────────────────────────────────────── */
+/* ─── Пошук ────────────────────────────────────────────────────────────────── */
+
 .searchInput {
-  width: 100%; max-width: 340px;
-  padding: 9px 16px;
-  border: 1px solid #ebebeb; border-radius: 100px;
-  font-size: 13px; font-family: inherit; outline: none;
-  margin-bottom: 16px; background: #fff; color: #111;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+  max-width: 420px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 100px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 16px;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  transition: background 0.15s, box-shadow 0.15s;
 }
-.searchInput:focus { border-color: #111; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
-.searchInput::placeholder { color: #d4d4d8; }
+.searchInput:focus { background: #fff; box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18); }
+.searchInput::placeholder { color: #aeaeb2; }
 
-/* ── Team list & empty ────────────────────────────────────────────────────── */
-.teamList { display: flex; flex-direction: column; gap: 6px; }
-.empty    { font-size: 14px; color: #ccc; font-style: italic; padding: 28px 0; }
+/* ══════════════════════════════════════════════════
+   КОМАНДИ — горизонтальна bleed-стрічка як на Головній
+   ══════════════════════════════════════════════════ */
 
-/* ── Team card ────────────────────────────────────────────────────────────── */
+.rowWrap {
+  position: relative;
+  --bleed-left: 276px;
+  --bleed-right: 28px;
+  --bleed-extra: max(0px, (100vw - 1504px) / 2);
+  --bleed-total: calc(var(--bleed-left) + var(--bleed-extra));
+  --arrow-left: 260px;
+  --arrow-right: 12px;
+}
+@media (max-width: 992px) {
+  .rowWrap {
+    --bleed-left: 28px;
+    --bleed-right: 28px;
+    --bleed-extra: max(0px, (100vw - 1016px) / 2);
+    --arrow-left: 12px;
+  }
+}
+.tournRow {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  overflow-x: auto;
+  margin-left: calc(-1 * var(--bleed-total));
+  margin-right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)));
+  padding: 4px var(--bleed-right) 28px 0;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--bleed-total);
+  scroll-padding-right: var(--bleed-right);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tournRow::-webkit-scrollbar { display: none; }
+.tournRow::before {
+  content: "";
+  flex: 0 0 calc(var(--bleed-total) - 16px);
+}
+.tournRow .teamCard {
+  flex: 0 0 360px;
+  max-width: 360px;
+  scroll-snap-align: start;
+}
+@media (max-width: 600px) {
+  .tournRow .teamCard { flex-basis: 300px; max-width: 300px; }
+}
+.rowArrow {
+  position: absolute;
+  top: calc(50% - 12px - 36px);
+  width: 28px;
+  height: 72px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1d1d1f;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  transition:
+    opacity 0.35s cubic-bezier(0.33, 1, 0.68, 1),
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease !important;
+}
+.rowWrap:hover .rowArrow,
+.rowWrap:focus-within .rowArrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+.rowArrowHidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.rowArrowLeft { left: calc(-1 * var(--bleed-total) + var(--arrow-left)); }
+.rowArrowRight { right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)) + var(--arrow-right)); }
+
+/* ─── Картка команди: пласка сіра ─────────────────────────────────────────── */
+
 .teamCard {
-  border: 1px solid #f0f0f0;
-  border-radius: 16px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 24px;
   overflow: hidden;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  background: #fff;
+  transform-origin: 50% 50%;
+  transition:
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    background-color 0.15s ease;
+  animation: fadeUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
-.teamCard:hover { border-color: #e0e0e0; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-.teamCardExpanded { border-color: #e0e0e0; box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+@media (hover: hover) {
+  .teamCard:hover { filter: brightness(0.96); }
+}
 
 .teamCardHeader {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 15px 20px; cursor: pointer; user-select: none;
+  gap: 12px;
+  padding: 18px 20px; cursor: pointer; user-select: none;
 }
-.teamCardLeft  { display: flex; align-items: center; gap: 10px; }
-.teamCardRight { display: flex; align-items: center; gap: 10px; }
-.teamCardChevron { font-size: 10px; color: #ccc; width: 12px; flex-shrink: 0; }
-.teamCardName  { font-size: 14px; font-weight: 650; color: #111; letter-spacing: -0.01em; }
-.teamCardCity  { font-size: 12px; color: #ccc; margin-left: 8px; }
+.teamCardLeft  { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1; }
+.teamCardRight { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.avatarFallback { background: #fff !important; color: #1d1d1f !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); }
+
+.teamCardTitles { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.teamCardName  { font-size: 17px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.teamCardSub   { font-size: 14px; color: #86868b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .memberCountBadge {
-  font-size: 12px; font-weight: 600; color: #aaa;
-  background: #f4f4f5; padding: 3px 11px; border-radius: 100px;
+  font-size: 13px; font-weight: 600; color: #6e6e73;
+  background: #fff; padding: 5px 12px; border-radius: 100px;
+  white-space: nowrap; font-variant-numeric: tabular-nums;
 }
-.lockIndicator { font-size: 14px; }
+.lockIndicator { display: inline-flex; color: #aeaeb2; }
 
-/* ── Team card body ───────────────────────────────────────────────────────── */
+.expandArrow {
+  display: inline-flex;
+  align-items: center;
+  color: #aeaeb2;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.expandArrowOpen { transform: rotate(180deg); }
+
+/* ─── Тіло картки ──────────────────────────────────────────────────────────── */
+
 .teamCardBody {
-  padding: 16px 20px 20px;
-  border-top: 1px solid #f4f4f5;
-  background: #fafafa;
+  padding: 4px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .captainRow {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 13px; margin-bottom: 14px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 15px; flex-wrap: wrap;
+  background: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 12px 14px;
 }
 .captainLabel {
-  font-weight: 700; font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase;
-  color: #999; background: #f4f4f5; border: 1px solid #ebebeb;
-  padding: 2px 8px; border-radius: 100px;
+  font-weight: 600; font-size: 13px;
+  color: #1d4ed8; background: #e3edff;
+  padding: 4px 12px; border-radius: 100px;
+  white-space: nowrap;
 }
-.captainName  { font-weight: 600; color: #111; }
-.captainEmail { color: #ccc; font-size: 12px; }
+.captainName  { font-weight: 600; color: #1d1d1f; }
+.captainEmail { color: #86868b; font-size: 14px; }
 
-.membersList { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.membersList { display: flex; flex-direction: column; gap: 6px; }
 .memberChip {
-  display: flex; align-items: center; gap: 6px;
-  padding: 5px 12px;
-  background: #fff; border: 1px solid #ebebeb; border-radius: 100px; font-size: 12px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: #fff; border: none; border-radius: 16px;
+  min-width: 0;
 }
-.memberChipAvatar {
-  width: 18px; height: 18px; border-radius: 50%;
-  background: #f0f0f0; color: #888;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 10px; flex-shrink: 0;
-}
-.memberChipName  { font-weight: 600; color: #333; }
-.memberChipEmail { color: #ccc; }
+.memberChipName  { font-size: 15px; font-weight: 600; color: #1d1d1f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.memberChipEmail { font-size: 13px; color: #aeaeb2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: auto; flex-shrink: 0; }
 
-/* ── Admin actions ────────────────────────────────────────────────────────── */
+/* ─── Дії адміна ───────────────────────────────────────────────────────────── */
+
 .adminActions {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  padding-top: 14px; border-top: 1px solid #f0f0f0;
+  padding-top: 4px;
 }
-.adminBtn {
-  padding: 6px 14px; border-radius: 100px;
-  font-size: 12px; font-weight: 600; cursor: pointer;
-  transition: background 0.15s; border: 1px solid transparent; font-family: inherit;
+
+.deleteBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 18px; border-radius: 100px;
+  font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit;
+  background: none; color: #d04d3e; border: none;
+  transition: background 0.15s, transform 0.1s;
 }
-.adminBtn:disabled { opacity: 0.4; cursor: not-allowed; }
-.lockBtn   { background: #f4f4f5; color: #555; border-color: #ebebeb; }
-.lockBtn:hover:not(:disabled) { background: #ebebeb; }
-.deleteBtn { background: none; color: #c0392b; border-color: rgba(192,57,43,0.22); }
-.deleteBtn:hover { background: rgba(192,57,43,0.05); }
-.confirmDeleteBtn { background: #c0392b; color: #fff; border-color: #c0392b; }
-.confirmDeleteBtn:hover { background: #a93226; }
-.cancelBtn { background: var(--btn-secondary-bg); color: var(--btn-secondary-text); border-color: var(--btn-secondary-border-color); }
-.cancelBtn:hover { background: var(--btn-secondary-hover-bg); }
+.deleteBtn:hover { background: rgba(208, 77, 62, 0.08); }
+.deleteBtn:active { transform: scale(0.96); }
+
+.confirmDeleteBtn {
+  padding: 8px 18px; border-radius: 100px;
+  font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit;
+  background: #d04d3e; color: #fff; border: none;
+  transition: background 0.15s, transform 0.1s;
+}
+.confirmDeleteBtn:hover { background: #b94234; }
+.confirmDeleteBtn:active { transform: scale(0.96); }
+.confirmDeleteBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+
 .confirmRow {
   display: flex; align-items: center; gap: 8px;
-  font-size: 13px; color: #777; flex-wrap: wrap;
+  font-size: 15px; color: #515154; flex-wrap: wrap;
 }
 
-/* ── Skeleton ─────────────────────────────────────────────────────────────── */
-.loadingWrap { padding: 28px 24px; }
-.skeleton {
-  background: linear-gradient(90deg, #f4f4f5 25%, #ebebeb 50%, #f4f4f5 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-  border-radius: 12px;
-}
-@keyframes shimmer { to { background-position: -200% 0; } }
+/* ─── Чернетки ─────────────────────────────────────────────────────────────── */
 
-/* ── Registration exception ───────────────────────────────────────────────── */
-.exceptionBtn {
-  padding: 8px 16px;
-  font-size: 12px; font-weight: 600; color: #111;
-  background: #f4f4f5; border: 1px solid #e0e0e0;
-  border-radius: 100px; cursor: pointer; font-family: inherit;
-  transition: background 0.15s;
+.draftsSection { margin-top: 8px; opacity: 0.75; }
+
+.draftsTitle {
+  font-size: 17px; font-weight: 700; color: #86868b;
+  letter-spacing: -0.01em; margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8ed;
 }
-.exceptionBtn:hover:not(:disabled) { background: #ebebeb; }
-.exceptionBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.draftCell { display: contents; }
+
+/* ─── Виняток реєстрації ───────────────────────────────────────────────────── */
 
 .exceptionActiveBtn {
-  display: flex; align-items: center; gap: 7px;
-  padding: 8px 16px;
-  font-size: 12px; font-weight: 600; color: #16a34a;
-  background: #f0fdf4; border: 1px solid #bbf7d0;
-  border-radius: 100px; cursor: pointer; font-family: inherit;
-  transition: background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2a7a4b;
+  background: #e6f4ed;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
 }
-.exceptionActiveBtn:hover:not(:disabled) { background: #dcfce7; }
+.exceptionActiveBtn:hover:not(:disabled) { background: #d9efe2; }
+.exceptionActiveBtn:active:not(:disabled) { transform: scale(0.96); }
 .exceptionActiveBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .exceptionDot {
   width: 7px; height: 7px; border-radius: 50%;
-  background: #16a34a;
+  background: #30d158;
   animation: pulse 1.6s ease-in-out infinite;
 }
 @keyframes pulse {
@@ -254,41 +430,152 @@
 }
 
 .exceptionPanel {
-  display: flex; flex-direction: column; gap: 10px;
-  padding: 16px 20px;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 20px;
   margin-bottom: 16px;
-  background: #fafafa; border: 1px solid #ebebeb;
-  border-radius: 14px;
+  background: #f5f5f7; border: none;
+  border-radius: 24px;
+  animation: fadeUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.exceptionPanelTitle { font-size: 13px; font-weight: 700; color: #111; }
+.exceptionPanelTitle { font-size: 17px; font-weight: 700; color: #1d1d1f; letter-spacing: -0.01em; }
 .exceptionPanelRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.exceptionPanelLabel { font-size: 12px; color: #888; }
+.exceptionPanelLabel { font-size: 15px; color: #6e6e73; }
 
 .exceptionPill {
-  padding: 4px 14px; border-radius: 100px;
-  font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
-  background: #fff; border: 1px solid #ebebeb; color: #555;
-  transition: background 0.15s, border-color 0.15s;
+  padding: 9px 20px; border-radius: 100px;
+  font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit;
+  background: #fff; border: none; color: #6e6e73;
+  transform-origin: 50% 50%;
+  transition: background 0.15s, color 0.15s,
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.exceptionPill:hover { background: #f4f4f5; }
-.exceptionPillActive { background: #111; border-color: #111; color: #fff; }
-.exceptionPillActive:hover { background: #2a2a2a; }
+.exceptionPill:active { transform: scale(0.94, 0.9); transition: transform 110ms ease-in; }
+.exceptionPillActive { background: #1d1d1f; color: #fff; }
 
-.exceptionPanelActions { display: flex; gap: 8px; }
-.exceptionConfirmBtn {
-  padding: 7px 18px; border-radius: 100px;
-  font-size: 12px; font-weight: 600; color: var(--btn-primary-text);
-  background: var(--btn-primary-bg); border: none; cursor: pointer; font-family: inherit;
+.exceptionPanelActions { display: flex; gap: 8px; flex-wrap: wrap; }
+.exceptionPanelHint { font-size: 14px; color: #86868b; line-height: 1.5; }
+
+/* старі класи-аліаси */
+.exceptionBtn {
+  padding: 8px 18px;
+  font-size: 14px; font-weight: 500; color: #1d1d1f;
+  background: #f5f5f7; border: none;
+  border-radius: 100px; cursor: pointer; font-family: inherit;
   transition: background 0.15s;
 }
-.exceptionConfirmBtn:hover:not(:disabled) { background: var(--btn-primary-hover-bg); }
-.exceptionConfirmBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.exceptionCancelBtn {
-  padding: 7px 18px; border-radius: 100px;
-  font-size: 12px; font-weight: 600; color: var(--btn-secondary-text);
-  background: var(--btn-secondary-bg); border: 1px solid var(--btn-secondary-border-color); cursor: pointer; font-family: inherit;
+.exceptionBtn:hover:not(:disabled) { background: #ececee; }
+.exceptionBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.exceptionConfirmBtn {
+  padding: 8px 18px; border-radius: 100px;
+  font-size: 14px; font-weight: 500; color: #fff;
+  background: #0071e3; border: none; cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
 }
-.exceptionCancelBtn:hover { background: var(--btn-secondary-hover-bg); }
+.exceptionConfirmBtn:hover:not(:disabled) { background: #0077ed; }
+.exceptionConfirmBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.exceptionCancelBtn {
+  padding: 8px 18px; border-radius: 100px;
+  font-size: 14px; font-weight: 500; color: #1d1d1f;
+  background: #f5f5f7; border: none; cursor: pointer; font-family: inherit;
+}
+.exceptionCancelBtn:hover { background: #ececee; }
 
-.exceptionPanelHint { font-size: 11px; color: #aaa; }
+/* ─── Порожній стан / скелети ─────────────────────────────────────────────── */
+
+.emptyBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 20px;
+  text-align: center;
+}
+.emptyBlock p { margin: 0; font-size: 16px; color: #6e6e73; }
+.emptyBlockIcon {
+  font-size: 30px;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 20px;
+}
+.empty { font-size: 16px; color: #86868b; padding: 32px 0; text-align: center; margin: 0; }
+
+.skeletonRow { display: flex; gap: 16px; }
+.skeleton {
+  flex: 0 0 360px;
+  height: 120px;
+  border-radius: 24px;
+  background: linear-gradient(90deg, #f5f5f7 25%, #ececf0 50%, #f5f5f7 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* старі класи-аліаси */
+.loadingWrap { display: flex; flex-direction: column; gap: 12px; }
+.inviteBtn {
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: #0071e3;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background 0.15s, transform 0.1s;
+}
+.inviteBtn:hover:not(:disabled) { background: #0077ed; }
+.inviteBtn:active:not(:disabled) { transform: scale(0.96); }
+.inviteBtn:disabled { background: #e4e4e7; color: #aaa; cursor: not-allowed; }
+.pinSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 20px;
+  flex-wrap: wrap;
+}
+.pinInfo { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.pinText { font-size: 15px; color: #6e6e73; white-space: nowrap; }
+.pinClose {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  background: #fff; border: none; cursor: pointer; color: #aeaeb2;
+  border-radius: 50%; flex-shrink: 0; transition: color 0.15s, transform 0.1s;
+}
+.pinClose:hover { color: #1d1d1f; }
+.pinClose:active { transform: scale(0.9); }
+
+/* ─── Mobile ──────────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .sectionTitle { font-size: 20px; }
+  .countText { font-size: 15px; }
+  .sectionHeader { flex-direction: column; align-items: flex-start; }
+  .headerActions { width: 100%; justify-content: flex-start; }
+  .statValue { font-size: 28px; }
+  .statLabel { font-size: 14px; }
+  .teamCardName { font-size: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrap, .teamCard, .teamCardBody, .invitePanel, .exceptionPanel { animation: none; }
+  .teamCard:hover { filter: none; }
+  .deleteBtn:active, .confirmDeleteBtn:active, .regenBtn:active,
+  .exceptionPill:active, .exceptionActiveBtn:active, .inviteClose:active,
+  .pinClose:active { transform: none; }
+  .exceptionDot { animation: none; }
+  .expandArrowOpen { transform: none; }
+}

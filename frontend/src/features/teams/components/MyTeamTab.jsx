@@ -105,14 +105,15 @@ function RosterProgress({ current, min, max }) {
 
 function MemberRow({ member, canRemove, onRemove, isRemoving }) {
   const isPending = member.status === "pending";
-  const { full_name, email } = member.user;
+  const full_name = member.user?.full_name || member.full_name || member.user?.username || "?";
+  const email = member.user?.email || member.email || "";
 
   return (
     <div className={`${styles.memberRow} ${isPending ? styles.memberRowPending : ""}`}>
       <Avatar name={full_name} avatar={member.user?.avatar} size="sm" />
       <div className={styles.memberInfo}>
         <span className={styles.memberName}>{full_name}</span>
-        <span className={styles.memberEmail}>{email}</span>
+        {email ? <span className={styles.memberEmail}>{email}</span> : null}
       </div>
       {isPending && <Badge color="amber">очікує</Badge>}
       {canRemove && (
@@ -129,7 +130,7 @@ function MemberRow({ member, canRemove, onRemove, isRemoving }) {
   );
 }
 
-// ── Invite link (copy + show PIN) ─────────────────────────────────────────
+// ── Invite link (посилання + копіювання) ────────────────────────────────────
 
 function InviteLink({ token }) {
   const [copied, setCopied] = useState(false);
@@ -138,8 +139,18 @@ function InviteLink({ token }) {
 
   const url = `${window.location.origin}/team-invite/${token}`;
 
-  const handleCopy = () => {
-    navigator.clipboard?.writeText(url).catch(() => {});
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard?.writeText(url);
+    } catch {
+      const el = document.createElement("textarea");
+      el.value = url;
+      el.style.cssText = "position:fixed;opacity:0";
+      document.body.appendChild(el);
+      el.select();
+      try { document.execCommand("copy"); } catch { /* ігнор */ }
+      document.body.removeChild(el);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2200);
   };
@@ -147,7 +158,7 @@ function InviteLink({ token }) {
   return (
     <div className={styles.inviteLinkWrap}>
       <div className={styles.inviteLinkRow}>
-        <span className={styles.inviteLinkLabel}>Посилання для запрошення:</span>
+        <span className={styles.inviteLinkUrl} title={url}>{url}</span>
         <button
           className={`btn-secondary btn-sm ${copied ? styles.copyBtnCopied : ""}`}
           onClick={handleCopy}
@@ -155,6 +166,9 @@ function InviteLink({ token }) {
           {copied ? "✓ Скопійовано!" : "Копіювати посилання"}
         </button>
       </div>
+      <span className={styles.inviteLinkHint}>
+        Поділіться посиланням — учасники зможуть приєднатися до команди
+      </span>
     </div>
   );
 }
@@ -238,7 +252,6 @@ function TeamDashboard({ team, tournamentId, myRole, onUpdated, onDeleted }) {
   const isCaptain    = !!team.is_captain;
   const canEdit      = ((team.is_editable && isCaptain) || isAdmin) && !isRegistered;
 
-  const regMeta  = registrationStatusMeta(team.registration_status);
   const accepted = (team.members ?? []).filter(m => m.status === "accepted");
   const pending  = (team.members ?? []).filter(m => m.status === "pending");
 
@@ -482,7 +495,7 @@ function EmptyState({ registrationOpen, onCreate }) {
           : "Реєстрація команд наразі закрита."}
       </p>
       {registrationOpen && (
-        <button className="btn-primary" onClick={onCreate} style={{ marginTop: 8 }}>
+        <button className="btn-primary" onClick={onCreate}>
           + Створити команду
         </button>
       )}
@@ -587,11 +600,11 @@ export function MyTeamTab({ tournamentId, tournament, myRole, tournamentStatus, 
 
   // ── Polling ───────────────────────────────────────────────────────────────
   //
-  // Під час polling порівнюємо кількість учасників та їх статуси.
-  // Якщо щось змінилося — оновлюємо стан.
+  // Поллимо завжди (навіть без команди): користувача могли додати до команди
+  // в іншій вкладці, або команду могли видалити — порожній стан теж має
+  // оновлюватися без перезавантаження сторінки.
 
   const pollMyTeam = useCallback(async () => {
-    if (!team?.id) return; // Немає команди — нічого поллити
     try {
       const { data } = await API.get(`/tournaments/${tournamentId}/my-team/`);
       setTeam(prev => {
@@ -606,7 +619,8 @@ export function MyTeamTab({ tournamentId, tournament, myRole, tournamentStatus, 
           || prev.status       !== data.status
           || prev.member_count !== data.member_count
           || prev.roster_locked !== data.roster_locked
-          || prev.can_register  !== data.can_register;
+          || prev.can_register  !== data.can_register
+          || prev.name          !== data.name;
 
         if (changed) {
           onTeamUpdated?.(data);
@@ -616,16 +630,18 @@ export function MyTeamTab({ tournamentId, tournament, myRole, tournamentStatus, 
       });
     } catch (err) {
       if (err?.response?.status === 404) {
-        setTeam(null);
-        onTeamUpdated?.(null);
+        setTeam(prev => {
+          if (prev !== null) onTeamUpdated?.(null);
+          return null;
+        });
       } else {
         console.error("Poll my-team:", err);
       }
     }
-  }, [tournamentId, team?.id, onTeamUpdated]);
+  }, [tournamentId, onTeamUpdated]);
 
-  // Polling активний тільки коли є команда і вже пройшло перше завантаження
-  usePolling(pollMyTeam, POLL_INTERVAL, !loading && !!team);
+  // Polling активний після першого завантаження — незалежно від наявності команди
+  usePolling(pollMyTeam, POLL_INTERVAL, !loading);
 
   if (loading)  return <Skeleton />;
 
@@ -648,16 +664,26 @@ export function MyTeamTab({ tournamentId, tournament, myRole, tournamentStatus, 
   );
 
   if (!team) return (
-    <EmptyState registrationOpen={registrationOpen} onCreate={() => setCreating(true)} />
+    <>
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>Моя команда</h2>
+      </div>
+      <EmptyState registrationOpen={registrationOpen} onCreate={() => setCreating(true)} />
+    </>
   );
 
   return (
-    <TeamDashboard
-      team={team}
-      tournamentId={tournamentId}
-      myRole={myRole}
-      onUpdated={handleTeamUpdate}
-      onDeleted={() => { setTeam(null); onTeamUpdated?.(null); }}
-    />
+    <>
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>Моя команда</h2>
+      </div>
+      <TeamDashboard
+        team={team}
+        tournamentId={tournamentId}
+        myRole={myRole}
+        onUpdated={handleTeamUpdate}
+        onDeleted={() => { setTeam(null); onTeamUpdated?.(null); }}
+      />
+    </>
   );
 }

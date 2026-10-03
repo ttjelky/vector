@@ -1,6 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { API } from '@api';
+import { ScrollRow } from "@features/dashboard";
 import "../styles/CertificatesPage.css";
+
+// Класи для горизонтальної bleed-стрічки (під сайдбар), як на Головній.
+// ScrollRow очікує об'єкт з іменами класів — глобальний CSS їх надає.
+const SCROLL_CLASSES = {
+  rowWrap: "cert-rowWrap",
+  tournRow: "cert-tournRow",
+  rowArrow: "cert-rowArrow",
+  rowArrowLeft: "cert-rowArrowLeft",
+  rowArrowRight: "cert-rowArrowRight",
+  rowArrowHidden: "cert-rowArrowHidden",
+};
 
 const CERT_TYPES = [
   { value: "winner",      label: "Переможець (1 місце)" },
@@ -105,14 +117,23 @@ function ParticipantCertificates({ tournamentId }) {
       const a = document.createElement("a");
       a.href = url;
       a.download = `certificate_${recipientName.replace(/ /g, "_")}.pdf`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch {
       setMessage({ type: "error", text: "Не вдалося завантажити PDF" });
     }
   }
 
-  if (loading) return <p className="page-loading">Завантаження…</p>;
+  if (loading) return (
+    <div className="certificates-page">
+      <h2 className="page-title">Мої сертифікати</h2>
+      <div className="cert-skeleton-row">
+        {[0, 1, 2].map(i => <div key={i} className="cert-skeleton" />)}
+      </div>
+    </div>
+  );
 
   return (
     <div className="certificates-page">
@@ -126,7 +147,7 @@ function ParticipantCertificates({ tournamentId }) {
           <p className="empty-state__text">У вас ще немає сертифікатів у цьому турнірі.</p>
         </div>
       ) : (
-        <div className="cert-cards">
+        <ScrollRow classes={SCROLL_CLASSES}>
           {certificates.map(c => (
             <div key={c.id} className="cert-card">
               <div className="cert-card__icon">
@@ -147,7 +168,7 @@ function ParticipantCertificates({ tournamentId }) {
               )}
             </div>
           ))}
-        </div>
+        </ScrollRow>
       )}
     </div>
   );
@@ -200,7 +221,9 @@ function AdminCertificates({ tournamentId, isAdmin, isTeamTournament }) {
   async function fetchParticipants(role = "participant") {
     try {
       const { data } = await API.get(`/tournaments/${tid}/members/`);
-      setParticipants(data.filter(m => m.user_role === role));
+      // У TournamentMemberSerializer турнірна роль — поле `role`
+      // (`user_role` — це глобальна роль користувача, не плутати).
+      setParticipants(data.filter(m => m.role === role));
     } catch {}
   }
 
@@ -260,8 +283,10 @@ function AdminCertificates({ tournamentId, isAdmin, isTeamTournament }) {
       const a = document.createElement("a");
       a.href = url;
       a.download = `certificate_${recipientName.replace(/ /g, "_")}.pdf`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch {
       notify("error", "Не вдалося завантажити PDF");
     }
@@ -300,7 +325,7 @@ function AdminCertificates({ tournamentId, isAdmin, isTeamTournament }) {
       </div>
 
       {activeTab === "templates" && (
-        <div className="templates-grid">
+        <ScrollRow classes={SCROLL_CLASSES}>
           {CERT_TYPES.map(ct => {
             const tmpl = templates.find(t => t.cert_type === ct.value);
             return (
@@ -309,7 +334,7 @@ function AdminCertificates({ tournamentId, isAdmin, isTeamTournament }) {
                 onUpload={handleUploadTemplate} onDelete={handleDeleteTemplate} />
             );
           })}
-        </div>
+        </ScrollRow>
       )}
 
       {activeTab === "stock" && (
@@ -388,16 +413,14 @@ function StockTab({ isAdmin, isTeamTournament, participants, teams, generating, 
   );
 
   return (
-    <div>
+    <div className="stock-tab">
       {/* Тип */}
-      <div style={{ marginBottom: "1.25rem" }}>
-        <p style={{ fontSize: "0.75rem", color: "#aaa", marginBottom: "0.5rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em" }}>
-          Тип сертифіката
-        </p>
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+      <div className="stock-block">
+        <p className="stock-label">Тип сертифіката</p>
+        <div className="stock-pills">
           {CERT_TYPES.map(ct => (
             <button key={ct.value}
-              className={`btn ${certType === ct.value ? "btn--primary" : "btn--secondary"}`}
+              className={`pill ${certType === ct.value ? "pill--active" : ""}`}
               onClick={() => setCertType(ct.value)}>
               {ct.label}
             </button>
@@ -406,46 +429,47 @@ function StockTab({ isAdmin, isTeamTournament, participants, teams, generating, 
       </div>
 
       {/* Стиль */}
-      <p style={{ fontSize: "0.75rem", color: "#aaa", marginBottom: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em" }}>
-        Стиль сертифіката
-      </p>
-      <div className="templates-grid" style={{ marginBottom: "1.5rem" }}>
+      <p className="stock-label">Стиль сертифіката</p>
+      <ScrollRow classes={SCROLL_CLASSES}>
         {Object.entries(STOCK_PREVIEWS).map(([key, tmpl]) => (
-          <div key={key} className="template-card"
-            style={{ cursor: "pointer", outline: selectedStyle === key ? "2px solid #111" : "none", outlineOffset: 2 }}
-            onClick={() => setSelectedStyle(key)}>
+          <div key={key} className={`template-card template-card--pickable ${selectedStyle === key ? "template-card--picked" : ""}`}
+            onClick={() => setSelectedStyle(key)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => (e.key === "Enter" || e.key === " ") && setSelectedStyle(key)}
+            aria-pressed={selectedStyle === key}>
             <div className="template-card__header">
               <h3>{tmpl.label}</h3>
               {selectedStyle === key && (
-                <span style={{ fontSize: "0.72rem", background: "#111", color: "#fff", padding: "2px 8px", borderRadius: 999 }}>✓ Обрано</span>
+                <span className="picked-badge">✓ Обрано</span>
               )}
             </div>
-            <div className="template-card__preview" style={{ padding: "0.5rem" }}>{tmpl.svg}</div>
-            <p style={{ fontSize: "0.82rem", color: "#888", margin: 0 }}>{tmpl.description}</p>
+            <div className="template-card__preview template-card__preview--stock">{tmpl.svg}</div>
+            <p className="template-card__desc">{tmpl.description}</p>
           </div>
         ))}
-      </div>
+      </ScrollRow>
 
       {/* Отримувачі */}
       {isAdmin && (
-        <div style={{ marginBottom: "1.5rem" }}>
-          <p style={{ fontSize: "0.75rem", color: "#aaa", marginBottom: "0.75rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em" }}>
+        <div className="stock-block">
+          <p className="stock-label">
             {isTeamTournament && certType !== "jury" ? "Команди" : certType === "jury" ? "Журі" : "Учасники"}
           </p>
-          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem" }}>
-            <button className={`btn ${selectMode === "all" ? "btn--primary" : "btn--secondary"}`}
+          <div className="stock-pills">
+            <button className={`pill ${selectMode === "all" ? "pill--active" : ""}`}
               onClick={() => setSelectMode("all")}>
               {isTeamTournament && certType !== "jury" ? "Всі команди" : certType === "jury" ? "Все журі" : "Всі учасники"}
             </button>
-            <button className={`btn ${selectMode === "select" ? "btn--primary" : "btn--secondary"}`}
+            <button className={`pill ${selectMode === "select" ? "pill--active" : ""}`}
               onClick={() => setSelectMode("select")}>
               Обрати вручну
             </button>
           </div>
 
           {selectMode === "select" && (
-            <div style={{ border: "1px solid #e8e8e8", borderRadius: 10, overflow: "hidden" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.6rem 0.85rem", background: "#f7f7f7", borderBottom: "1px solid #eee" }}>
+            <div className="recipients-box">
+              <div className="recipients-head">
                 <input type="checkbox"
                   checked={
                     (isTeamTournament && certType !== "jury")
@@ -456,7 +480,7 @@ function StockTab({ isAdmin, isTeamTournament, participants, teams, generating, 
                     (isTeamTournament && certType !== "jury") ? toggleAllTeams : toggleAllUsers
                   }
                   style={{ cursor: "pointer" }} />
-                <span style={{ fontSize: "0.8rem", color: "#555", fontWeight: 500 }}>
+                <span className="recipients-count">
                   Обрати всіх ({
                     (isTeamTournament && certType !== "jury")
                       ? `${selectedTeams.size} / ${teams.length}`
@@ -464,15 +488,15 @@ function StockTab({ isAdmin, isTeamTournament, participants, teams, generating, 
                   })
                 </span>
                 {isTeamTournament && certType !== "jury" && selectedTeams.size > 0 && (
-                  <span style={{ marginLeft: "auto", fontSize: "0.75rem", color: "#888" }}>
+                  <span className="recipients-hint">
                     ~{teams.filter(t => selectedTeams.has(t.id)).reduce((acc, t) => acc + 1 + (t.members?.filter(m => m.status === "accepted").length ?? 0), 0)} сертифікатів
                   </span>
                 )}
               </div>
-              <div style={{ maxHeight: 320, overflowY: "auto" }}>
+              <div className="recipients-list">
                 {(isTeamTournament && certType !== "jury") ? (
                   teams.length === 0
-                    ? <div style={{ padding: "1.5rem", textAlign: "center", color: "#bbb", fontSize: "0.875rem" }}>Зареєстрованих команд немає</div>
+                    ? <div className="recipients-empty">Зареєстрованих команд немає</div>
                     : teams.map(team => {
                       const memberCount = 1 + (team.members?.filter(m => m.status === "accepted").length ?? 0);
                       const memberNames = [
@@ -480,16 +504,16 @@ function StockTab({ isAdmin, isTeamTournament, participants, teams, generating, 
                         ...(team.members?.filter(m => m.status === "accepted" && m.id !== team.captain_id).map(m => m.full_name) ?? [])
                       ].filter(Boolean);
                       return (
-                        <div key={team.id} style={{ borderBottom: "1px solid #f3f3f3" }}>
-                          <label style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.6rem 0.85rem", cursor: "pointer" }}>
+                        <div key={team.id} className="recipient-row">
+                          <label className="recipient-label">
                             <input type="checkbox" checked={selectedTeams.has(team.id)} onChange={() => toggleTeam(team.id)} style={{ cursor: "pointer" }} />
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "#111" }}>{team.name}</div>
-                              <div style={{ fontSize: "0.78rem", color: "#888", marginTop: 2 }}>
+                            <div className="recipient-info">
+                              <div className="recipient-name">{team.name}</div>
+                              <div className="recipient-sub">
                                 {memberNames.join(" · ")}
                               </div>
                             </div>
-                            <span style={{ fontSize: "0.75rem", color: "#bbb", whiteSpace: "nowrap" }}>
+                            <span className="recipient-badge">
                               👥 {memberCount} серт.
                             </span>
                           </label>
@@ -498,17 +522,17 @@ function StockTab({ isAdmin, isTeamTournament, participants, teams, generating, 
                     })
                 ) : (
                   participants.length === 0
-                    ? <div style={{ padding: "1.5rem", textAlign: "center", color: "#bbb", fontSize: "0.875rem" }}>
+                    ? <div className="recipients-empty">
                         {certType === "jury" ? "Журі немає" : "Учасників немає"}
                       </div>
                     : participants.map(p => {
                       const name = `${p.first_name || ""} ${p.last_name || ""}`.trim() || p.username || p.email;
                       return (
-                        <label key={p.user} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.6rem 0.85rem", borderBottom: "1px solid #f3f3f3", cursor: "pointer" }}>
+                        <label key={p.user} className="recipient-row recipient-label">
                           <input type="checkbox" checked={selectedUsers.has(p.user)} onChange={() => toggleUser(p.user)} style={{ cursor: "pointer" }} />
-                          <div>
-                            <div style={{ fontSize: "0.875rem", fontWeight: 500, color: "#111" }}>{name}</div>
-                            {p.email && <div style={{ fontSize: "0.78rem", color: "#888" }}>{p.email}</div>}
+                          <div className="recipient-info">
+                            <div className="recipient-name">{name}</div>
+                            {p.email && <div className="recipient-sub">{p.email}</div>}
                           </div>
                         </label>
                       );
@@ -522,7 +546,7 @@ function StockTab({ isAdmin, isTeamTournament, participants, teams, generating, 
 
       {/* Кнопка */}
       {isAdmin && (
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+        <div className="stock-generate-row">
           <button className="btn-primary"
             disabled={!canGenerate || isGenerating}
             onClick={handleGenerate}>
@@ -533,7 +557,7 @@ function StockTab({ isAdmin, isTeamTournament, participants, teams, generating, 
                 : "Спочатку оберіть стиль"}
           </button>
           {selectedStyle && (
-            <span style={{ fontSize: "0.82rem", color: "#aaa" }}>
+            <span className="stock-generate-hint">
               {selectMode === "all"
                 ? (isTeamTournament && certType !== "jury") ? `Всі команди (${teams.length})` : certType === "jury" ? `Все журі (${participants.length})` : `Всі учасники (${participants.length})`
                 : (isTeamTournament && certType !== "jury") ? `Обрано команд: ${selectedTeams.size}` : `Обрано: ${selectedUsers.size}`}
@@ -656,7 +680,7 @@ function CertificateTable({ certificates, onDownload, isTeamTournament }) {
 
   return (
     <div className="cert-table-wrap">
-      <input className="input" type="text"
+      <input className="input cert-search" type="text"
         placeholder={isTeamTournament ? "Пошук за ім'ям, email або командою…" : "Пошук за ім'ям або email…"}
         value={search} onChange={e => setSearch(e.target.value)} />
       {filtered.length === 0 && search === "" ? (
@@ -667,13 +691,13 @@ function CertificateTable({ certificates, onDownload, isTeamTournament }) {
       ) : isTeamTournament ? (
         // ── Командний вигляд: згруповано по командах ──
         Object.entries(grouped).length === 0
-          ? <p style={{ color: "#bbb", fontSize: "0.875rem" }}>Нічого не знайдено</p>
+          ? <p className="cert-nothing">Нічого не знайдено</p>
           : Object.entries(grouped).map(([teamName, certs]) => (
-            <div key={teamName} style={{ marginBottom: "1.5rem" }}>
-              <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div key={teamName} className="cert-team-group">
+              <div className="cert-team-group__title">
                 <span>👥</span>
                 <span>{teamName}</span>
-                <span style={{ fontWeight: 400, color: "#ccc" }}>({certs.length})</span>
+                <span className="cert-team-group__count">({certs.length})</span>
               </div>
               <table className="cert-table">
                 <thead>
@@ -682,10 +706,10 @@ function CertificateTable({ certificates, onDownload, isTeamTournament }) {
                 <tbody>
                   {certs.map(c => (
                     <tr key={c.id}>
-                      <td>{c.recipient_name}</td>
-                      <td style={{ color: "#888" }}>{c.recipient_email}</td>
+                      <td className="cert-td-name">{c.recipient_name}</td>
+                      <td className="cert-td-sub">{c.recipient_email}</td>
                       <td><span className="type-badge">{c.cert_type_display}</span></td>
-                      <td style={{ color: "#888" }}>{new Date(c.issued_at).toLocaleDateString("uk-UA")}</td>
+                      <td className="cert-td-sub">{new Date(c.issued_at).toLocaleDateString("uk-UA")}</td>
                       <td>
                         {c.pdf_file
                           ? <button className="btn-primary btn-sm" onClick={() => onDownload(c.id, c.recipient_name)}>Завантажити</button>
@@ -708,10 +732,10 @@ function CertificateTable({ certificates, onDownload, isTeamTournament }) {
               ? <tr><td colSpan={5} className="cert-table__empty">Нічого не знайдено</td></tr>
               : filtered.map(c => (
                 <tr key={c.id}>
-                  <td>{c.recipient_name}</td>
-                  <td style={{ color: "#888" }}>{c.recipient_email}</td>
+                  <td className="cert-td-name">{c.recipient_name}</td>
+                  <td className="cert-td-sub">{c.recipient_email}</td>
                   <td><span className="type-badge">{c.cert_type_display}</span></td>
-                  <td style={{ color: "#888" }}>{new Date(c.issued_at).toLocaleDateString("uk-UA")}</td>
+                  <td className="cert-td-sub">{new Date(c.issued_at).toLocaleDateString("uk-UA")}</td>
                   <td>
                     {c.pdf_file
                       ? <button className="btn-primary btn-sm" onClick={() => onDownload(c.id, c.recipient_name)}>Завантажити</button>

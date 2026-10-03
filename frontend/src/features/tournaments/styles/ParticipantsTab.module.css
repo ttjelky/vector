@@ -1,17 +1,59 @@
-/* ─── Учасники — у мові проєкту ────────────────────────────────────────────
-   SF-стек, окремі сірі картки без рамок, білі вставки,
-   сегмент-контрол, пастельні пілюлі, lucide-іконки.
-   ─────────────────────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════════════════
+   ParticipantsTab — у мові Головної/Турнірів:
+   повітря, великий кегль, жодних рамок, желейні натискання,
+   горизонтальна bleed-стрічка зі стрілками (під сайдбар).
+   ════════════════════════════════════════════════════════════════════════════ */
 
 .tabContent {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  animation: fadeUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ─── Sub-tabs (сегмент-контрол) ──────────────────────────────────────────── */
+@keyframes fadeUp {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.99); }
+  60%  { opacity: 1; transform: translateY(-1px) scale(1.001); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── Заголовок секції ─────────────────────────────────────────────────────── */
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8ed;
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: #1d1d1f;
+}
+
+.countText {
+  font-size: 17px;
+  font-weight: 400;
+  color: #6e6e73;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ─── Sub-tabs (сегмент-контрол, желейний) ─────────────────────────────────── */
 
 .subTabs {
   display: flex;
@@ -20,6 +62,7 @@
   border: none;
   border-radius: 16px;
   padding: 4px;
+  margin-bottom: 16px;
 }
 
 .subTab {
@@ -27,132 +70,204 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: 8px;
+  padding: 10px 12px;
   border: none;
   border-radius: 12px;
   background: transparent;
   color: #6e6e73;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   font-family: inherit;
   letter-spacing: -0.01em;
-  transition: background 0.15s ease, color 0.15s ease;
   white-space: nowrap;
+  transform-origin: 50% 50%;
+  transition: background 0.15s ease, color 0.15s ease,
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.subTab:hover     { background: transparent; color: #1d1d1f; }
-.subTabActive     { background: #fff; color: #1d1d1f; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
+.subTab:hover { color: #1d1d1f; }
+.subTab:active { transform: scale(0.96, 0.92); transition: transform 110ms ease-in; }
+.subTabActive { background: #fff; color: #1d1d1f; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
 
 .subTabCount {
   background: #ececee;
   color: #6e6e73;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   border-radius: 100px;
-  padding: 2px 8px;
+  padding: 2px 10px;
   min-width: 20px;
   text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 .subTabActive .subTabCount { background: #f5f5f7; }
 
-/* ─── Empty ───────────────────────────────────────────────────────────────── */
+/* ─── Статусний банер ──────────────────────────────────────────────────────── */
 
-.empty {
+.statusBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  border-radius: 18px;
   font-size: 15px;
-  color: #6e6e73;
-  margin: 0;
-  padding: 48px 0;
-  text-align: center;
-}
-
-/* ─── Header row ──────────────────────────────────────────────────────────── */
-
-.participantsHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.teamCount { font-size: 15px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.01em; }
-
-/* ─── Buttons ─────────────────────────────────────────────────────────────── */
-
-.headerActions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.inviteBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  background: #0071e3;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
+  line-height: 1.5;
   border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s ease, transform 0.1s ease;
-  white-space: nowrap;
+  animation: fadeUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.inviteBtn:hover   { background: #0077ed; }
-.inviteBtn:active  { transform: scale(0.97); }
-.inviteBtn:disabled { opacity: 0.5; cursor: default; }
+.statusBannerOpen { color: #15803d; background: #f0fdf4; }
+.statusBannerClosed { color: #b45309; background: #fffbeb; }
+.statusBannerIcon { font-size: 18px; flex-shrink: 0; }
 
-/* ─── Members list — окремі сірі картки ───────────────────────────────────── */
+/* ══════════════════════════════════════════════════
+   УЧАСНИКИ — горизонтальна bleed-стрічка як на Головній
+   ══════════════════════════════════════════════════ */
 
-.teamList {
+.rowWrap {
+  position: relative;
+  --bleed-left: 276px;
+  --bleed-right: 28px;
+  --bleed-extra: max(0px, (100vw - 1504px) / 2);
+  --bleed-total: calc(var(--bleed-left) + var(--bleed-extra));
+  --arrow-left: 260px;
+  --arrow-right: 12px;
+}
+@media (max-width: 992px) {
+  .rowWrap {
+    --bleed-left: 28px;
+    --bleed-right: 28px;
+    --bleed-extra: max(0px, (100vw - 1016px) / 2);
+    --arrow-left: 12px;
+  }
+}
+.tournRow {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  overflow-x: auto;
+  margin-left: calc(-1 * var(--bleed-total));
+  margin-right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)));
+  padding: 4px var(--bleed-right) 28px 0;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--bleed-total);
+  scroll-padding-right: var(--bleed-right);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tournRow::-webkit-scrollbar { display: none; }
+.tournRow::before {
+  content: "";
+  flex: 0 0 calc(var(--bleed-total) - 16px);
+}
+.rowArrow {
+  position: absolute;
+  top: calc(50% - 12px - 36px);
+  width: 28px;
+  height: 72px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1d1d1f;
+  cursor: pointer;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+  transition:
+    opacity 0.35s cubic-bezier(0.33, 1, 0.68, 1),
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease !important;
+}
+.rowWrap:hover .rowArrow,
+.rowWrap:focus-within .rowArrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+.rowArrowHidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.rowArrowLeft { left: calc(-1 * var(--bleed-total) + var(--arrow-left)); }
+.rowArrowRight { right: calc(-1 * (var(--bleed-right) + var(--bleed-extra)) + var(--arrow-right)); }
+
+/* ─── Картка учасника ─────────────────────────────────────────────────────── */
+
+.memberCell {
+  flex: 0 0 320px;
+  max-width: 320px;
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  background: none;
-  border: none;
-  border-radius: 0;
-}
-
-.teamCard {
-  display: flex;
-  align-items: center;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 20px;
   background: #f5f5f7;
   border: none;
-  border-radius: 18px;
-  transition: background 0.15s ease;
+  border-radius: 24px;
+  transform-origin: 50% 50%;
+  transition:
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 200ms ease,
+    background-color 0.15s ease;
+  animation: fadeUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
-.teamCard:hover { background: #ececee; }
+@media (hover: hover) {
+  .memberCell:hover { filter: brightness(0.96); }
+}
+@media (max-width: 600px) {
+  .memberCell { flex-basis: 280px; max-width: 280px; }
+}
+
+.memberTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
 
 .memberAvatar {
-  width: 40px; height: 40px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   object-fit: cover;
   border: none;
   flex-shrink: 0;
+  background: #ececee;
 }
 .memberAvatarPlaceholder {
-  width: 40px; height: 40px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: #fff;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
-  color: #6e6e73;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1d1d1f;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.teamInfo   { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.teamName   { font-size: 16px; font-weight: 600; color: #1d1d1f; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.memberInfo { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+
+.memberName {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+}
 
 /* Клікабельне ім'я → профіль */
 .nameLink {
@@ -167,395 +282,110 @@
   transition: color 0.15s ease;
 }
 button.nameLink:hover { color: #0071e3; text-decoration: underline; text-underline-offset: 3px; }
-.teamMeta   { font-size: 13px; color: #86868b; }
-.teamEmail  { font-size: 12.5px; color: #86868b; line-height: 1.3; }
-.teamDate   { font-size: 12.5px; color: #86868b; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+
+.memberEmail {
+  font-size: 14px;
+  color: #86868b;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.memberMeta { font-size: 14px; color: #86868b; line-height: 1.4; }
 
 .removeBtn {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: none;
-  border: none;
-  border-radius: 50%;
-  color: #aeaeb2;
-  cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease;
-  flex-shrink: 0;
-}
-.removeBtn:hover { color: #ff3b30; background: rgba(255, 59, 48, 0.1); }
-
-/* ══════════════════════════════════════════════════════
-   КОМАНДНІ ТУРНІРИ
-   ══════════════════════════════════════════════════════ */
-
-/* ─── Панель "Створити команду" ───────────────────────────────────────────── */
-
-.createTeamBar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.createTeamForm {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  width: 100%;
-  padding: 16px 18px;
-  background: #f5f5f7;
-  border: none;
-  border-radius: 18px;
-}
-
-.addError {
-  font-size: 13px;
-  color: #c53030;
-  margin: 0;
-  width: 100%;
-}
-
-/* ─── Картка команди ──────────────────────────────────────────────────────── */
-
-.teamCard {
-  background: #f5f5f7;
-  border: none;
-  border-radius: 20px;
-  overflow: hidden;
-  transition: background 0.15s ease;
-  margin-bottom: 10px;
-}
-.teamCard:last-child { margin-bottom: 0; }
-.teamCard:hover { background: #f5f5f7; }
-
-/* Рядки учасників у .teamList — ті ж сірі картки (див. вище) */
-.teamList .teamCard {
-  border-radius: 18px;
-  border: none;
-  margin-bottom: 0;
-}
-.teamList .teamCard:hover { background: #ececee; }
-
-/* ─── Заголовок картки команди ────────────────────────────────────────────── */
-
-.teamCardHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 14px 16px;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.15s ease;
-}
-.teamCardHeader:hover { background: transparent; }
-
-.teamCardLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.teamCardIcon {
-  display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
   background: #fff;
   border: none;
-  border-radius: 10px;
-  color: #1d1d1f;
-  flex-shrink: 0;
-}
-
-.teamCardName {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1d1d1f;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.teamMemberCount {
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #6e6e73;
-  background: #fff;
-  padding: 3px 10px;
-  border-radius: 100px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.teamCardRight {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.expandArrow {
-  display: inline-flex;
-  align-items: center;
-  color: #aeaeb2;
-  transition: transform 0.2s ease;
-}
-.expandArrowOpen { transform: rotate(180deg); }
-
-/* ─── Кнопки дій у заголовку ──────────────────────────────────────────────── */
-
-.teamActionBtn {
-  width: 30px; height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  border: none;
   border-radius: 50%;
+  color: #aeaeb2;
   cursor: pointer;
-  color: #6e6e73;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   transition: color 0.15s ease, transform 0.1s ease;
+  flex-shrink: 0;
 }
-.teamActionBtn:hover { color: #1d1d1f; }
-.teamActionBtn:active { transform: scale(0.94); }
+.removeBtn:hover { color: #ff3b30; background: rgba(255, 59, 48, 0.1); }
+.removeBtn:active { transform: scale(0.9); }
 
-.teamActionBtnSave {
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  font-weight: 700;
-  box-shadow: none;
-}
-.teamActionBtnSave:hover { background: var(--btn-primary-hover-bg); color: var(--btn-primary-text); }
-
-.teamActionBtnDanger:hover { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
-
-.renameInput {
-  padding: 8px 14px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1d1d1f;
+/* Відповіді форми реєстрації — біла вставка */
+.answersBox {
   background: #fff;
-  border: 1px solid #e8e8ed;
-  border-radius: 12px;
-  outline: none;
-  font-family: inherit;
-  max-width: 220px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-.renameInput:focus {
-  border-color: #0071e3;
-  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
-}
-
-/* ─── Тіло картки команди (розгорнуте) ───────────────────────────────────── */
-
-.teamCardBody {
+  border: none;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #515154;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 4px 8px 10px;
+  gap: 4px;
 }
+.answersTitle { font-weight: 600; font-size: 14px; color: #1d1d1f; margin-bottom: 4px; }
+.answerRow { line-height: 1.5; }
+.answerLabel { color: #86868b; }
 
-/* ─── Рядок учасника всередині команди ───────────────────────────────────── */
+/* ─── Панель посилань-запрошень ───────────────────────────────────────────── */
 
-.teamMemberRow {
+.invitePanel {
+  border: none;
+  border-radius: 24px;
+  padding: 20px;
+  margin-bottom: 16px;
+  background: #f5f5f7;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 10px;
-  border-radius: 12px;
-  transition: background 0.15s ease;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.teamMemberRow:hover { background: rgba(255, 255, 255, 0.6); }
 
-.captainIcon { color: #f59e0b; flex-shrink: 0; }
-
-.teamMemberName {
-  flex: 1;
-  font-size: 14px;
-  font-weight: 500;
+.invitePanelTitle {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   color: #1d1d1f;
-  white-space: nowrap;
+  margin-bottom: 2px;
+}
+
+.inviteLoading { font-size: 14px; color: #86868b; margin: 0; }
+
+.inviteRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.inviteRowName { font-weight: 600; min-width: 90px; color: #1d1d1f; }
+
+.inviteRowUrl {
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* ─── Теги і кнопки дозволу завантаження ─────────────────────────────────── */
-
-.uploadTag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 11px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #1d4ed8;
-  background: #fff;
-  border: none;
-  border-radius: 100px;
   white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.uploadToggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  font-size: 12.5px;
-  font-weight: 500;
   color: #6e6e73;
-  background: #fff;
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-.uploadToggle:hover { background: #eff6ff; color: #1d4ed8; }
-.uploadToggleOn {
-  color: #1d4ed8;
-  background: #eff6ff;
-}
-.uploadToggleOn:hover { background: #dbeafe; }
-
-.removeMemberBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px; height: 26px;
-  background: none;
-  border: none;
-  border-radius: 50%;
-  color: #aeaeb2;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-.removeMemberBtn:hover { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
-
-/* ─── Рядок "Додати учасника" ─────────────────────────────────────────────── */
-
-.addMemberRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px 4px;
-  flex-wrap: wrap;
 }
 
-.addMemberSelect {
-  flex: 1;
-  min-width: 160px;
-  padding: 10px 14px;
-  font-size: 14px;
-  color: #1d1d1f;
-  background-color: #fff;
-  border: 1px solid #e8e8ed;
-  border-radius: 12px;
-  outline: none;
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23aeaeb2' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 32px;
-}
-.addMemberSelect:focus {
-  border-color: #0071e3;
-  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
-}
+.inviteCreateRow { display: flex; gap: 8px; margin-top: 4px; }
+.inviteCreateRow :global(.input) { flex: 1; }
 
-.addMemberBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--btn-primary-text);
-  background: var(--btn-primary-bg);
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  font-family: inherit;
-  white-space: nowrap;
-  transition: background 0.15s ease, transform 0.1s ease;
-}
-.addMemberBtn:hover    { background: var(--btn-primary-hover-bg); }
-.addMemberBtn:active   { transform: scale(0.97); }
-.addMemberBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.inviteLimit { font-size: 14px; color: #b45309; margin: 4px 0 0; }
+.inviteWarn { font-size: 14px; color: #b45309; margin: 4px 0 0; }
+.formError { font-size: 14px; color: #c53030; margin: 4px 0 0; }
 
-/* ─── Чекбокс "Зробити капітаном" ────────────────────────────────────────── */
-
-.captainCheckbox {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #92400e;
-  background: #fff;
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  white-space: nowrap;
-  user-select: none;
-  transition: background 0.15s ease;
-}
-.captainCheckbox:hover { background: #fef3c7; }
-.captainCheckbox input[type="checkbox"] {
-  accent-color: #f59e0b;
-  width: 14px;
-  height: 14px;
-  cursor: pointer;
-}
-
-/* ─── Animation ───────────────────────────────────────────────────────────── */
-
-@keyframes fadeInSlideUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ─── Exception (тимчасова реєстрація) ───────────────────────────────────── */
-
-.exceptionBtn {
-  padding: 10px 20px;
-  background: #f5f5f7;
-  color: #1d1d1f;
-  font-size: 14px;
-  font-weight: 500;
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  white-space: nowrap;
-  font-family: inherit;
-}
-.exceptionBtn:hover {
-  background: #ececee;
-  color: #1d1d1f;
-}
+/* ─── Виняток (тимчасова реєстрація) ─────────────────────────────────────── */
 
 .exceptionActiveBtn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 8px 18px;
   background: #e6f4ed;
   color: #2a7a4b;
   font-size: 14px;
@@ -563,13 +393,12 @@ button.nameLink:hover { color: #0071e3; text-decoration: underline; text-underli
   border: none;
   border-radius: 100px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, transform 0.1s ease;
   white-space: nowrap;
   font-family: inherit;
 }
-.exceptionActiveBtn:hover {
-  background: #d9efe2;
-}
+.exceptionActiveBtn:hover { background: #d9efe2; }
+.exceptionActiveBtn:active { transform: scale(0.96); }
 
 .exceptionDot {
   width: 7px;
@@ -583,17 +412,18 @@ button.nameLink:hover { color: #0071e3; text-decoration: underline; text-underli
 .exceptionPanel {
   background: #f5f5f7;
   border: none;
-  border-radius: 20px;
-  padding: 18px 20px;
+  border-radius: 24px;
+  padding: 20px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  animation: fadeInSlideUp 0.2s ease-out forwards;
+  animation: fadeUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .exceptionPanelTitle {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   color: #1d1d1f;
   letter-spacing: -0.01em;
 }
@@ -605,94 +435,96 @@ button.nameLink:hover { color: #0071e3; text-decoration: underline; text-underli
   flex-wrap: wrap;
 }
 
-.exceptionPanelLabel {
-  font-size: 14px;
-  color: #6e6e73;
-  margin-right: 2px;
-}
+.exceptionPanelLabel { font-size: 15px; color: #6e6e73; margin-right: 2px; }
 
 .exceptionPill {
-  padding: 7px 16px;
+  padding: 9px 20px;
   border-radius: 100px;
   border: none;
   background: #fff;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
   color: #6e6e73;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.15s ease, color 0.15s ease;
+  transform-origin: 50% 50%;
+  transition: background 0.15s ease, color 0.15s ease,
+    transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.exceptionPill:hover {
-  background: #fff;
-  color: #1d1d1f;
-}
-.exceptionPillActive {
-  background: #0071e3;
-  color: #fff;
-}
+.exceptionPill:active { transform: scale(0.94, 0.9); transition: transform 110ms ease-in; }
+.exceptionPillActive { background: #1d1d1f; color: #fff; }
 
-.exceptionPanelActions {
-  display: flex;
-  gap: 8px;
-}
-
-.exceptionConfirmBtn {
-  padding: 10px 22px;
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  border: none;
-  border-radius: 100px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s ease;
-}
-.exceptionConfirmBtn:hover {
-  background: var(--btn-primary-hover-bg);
-}
-
-.exceptionCancelBtn {
-  padding: 10px 20px;
-  background: var(--btn-secondary-bg);
-  color: var(--btn-secondary-text);
-  border: none;
-  border-radius: 100px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-.exceptionCancelBtn:hover {
-  background: var(--btn-secondary-hover-bg);
-  color: #111;
-}
-
-.exceptionPanelHint {
-  font-size: 13px;
-  color: #86868b;
-}
-
-.teamEmail {
-  font-size: 12.5px;
-  color: #86868b;
-  line-height: 1.3;
-}
+.exceptionPanelActions { display: flex; gap: 8px; flex-wrap: wrap; }
+.exceptionPanelHint { font-size: 14px; color: #86868b; line-height: 1.5; }
 
 @keyframes exceptionPulse {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.35; }
 }
 
+/* ─── Порожній стан / скелети ─────────────────────────────────────────────── */
+
+.emptyBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 20px;
+  text-align: center;
+}
+.emptyBlock p { margin: 0; font-size: 16px; color: #6e6e73; }
+.emptyBlockIcon {
+  font-size: 30px;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f7;
+  border: none;
+  border-radius: 20px;
+}
+
+.empty {
+  font-size: 16px;
+  color: #6e6e73;
+  margin: 0;
+  padding: 48px 0;
+  text-align: center;
+}
+
+.skeletonRow { display: flex; gap: 16px; }
+.skeleton {
+  flex: 0 0 320px;
+  height: 140px;
+  border-radius: 24px;
+  background: linear-gradient(90deg, #f5f5f7 25%, #ececf0 50%, #f5f5f7 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Mobile ──────────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .sectionTitle { font-size: 20px; }
+  .countText { font-size: 15px; }
+  .sectionHeader { flex-direction: column; align-items: flex-start; }
+  .headerActions { width: 100%; justify-content: flex-start; }
+  .subTab { font-size: 14px; padding: 9px 8px; }
+  .statusBanner { font-size: 14px; }
+  .memberName { font-size: 16px; }
+  .inviteRow { flex-wrap: wrap; }
+  .inviteRowUrl { flex-basis: 100%; order: 3; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .teamCardBody,
-  .exceptionPanel {
-    animation: none;
-  }
-  .exceptionDot {
-    animation: none;
-  }
-  .expandArrowOpen { transform: none; }
+  .tabContent, .memberCell, .statusBanner, .invitePanel, .exceptionPanel { animation: none; }
+  .memberCell:hover { filter: none; }
+  .subTab:active, .exceptionPill:active, .removeBtn:active, .exceptionActiveBtn:active { transform: none; }
+  .exceptionDot { animation: none; }
+  .skeleton { animation-duration: 3s; }
 }
