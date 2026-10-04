@@ -110,6 +110,7 @@ docker compose cp web:/data/media ./backup-media-$(date +%F)
 |---|---|
 | `400 Bad Request` на проді | Домену немає в `ALLOWED_HOSTS` |
 | `403 CSRF` в адмінці | Домену немає в `CSRF_TRUSTED_ORIGINS`, або змішаний http/https — увімкни `*_SECURE`/`SECURE_SSL_REDIRECT` |
+| `CRASHED ... ImproperlyConfigured: Set the SECRET_KEY environment variable` | Не задано змінні оточення **або сервіс зібрано не через Dockerfile** (у логах видно `/app/.venv`, `mise`, Nixpacks — це не наш образ). Фікс: 1) **Settings → Builder → Dockerfile** (не Nixpacks); 2) задай всі Variables з кроку 3; 3) Redeploy |
 | Порожня сторінка / 404 на `/tournament/5` після refresh | Немає `frontend/dist` в образі (локальний запуск без збірки) — виконай `npm run build` у `frontend/` |
 | Пропали турніри/картинки після redeploy | БД/медіа не на persistent volume: перевір Volume `/data` + `DATABASE_PATH=/data/db.sqlite3`, `MEDIA_ROOT=/data/media` |
 | Websocket не конектиться | Перевір, що `WEB_CONCURRENCY=1` (більше воркерів — лише з Redis channel layer) |

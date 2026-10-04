@@ -2,6 +2,13 @@
 # Entrypoint production-контейнера: міграції → gunicorn (ASGI, websockets).
 set -e
 
+# Явна перевірка замість незрозумілого ImproperlyConfigured глибоко в Django.
+if [ -z "${SECRET_KEY:-}" ]; then
+  echo "ПОМИЛКА: не задано SECRET_KEY." >&2
+  echo "Додай змінні оточення сервісу (див. DEPLOY.md, крок 3) і передеплой." >&2
+  exit 1
+fi
+
 # Папка даних (volume) — SQLite + media живуть тут, щоб переживати redeploy.
 mkdir -p "$(dirname "${DATABASE_PATH:-/app/db.sqlite3}")" "${MEDIA_ROOT:-/app/media}"
 
