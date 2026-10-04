@@ -171,10 +171,13 @@ const RotatingText = forwardRef((props, ref) => {
       {...rest}
       animate={{ width: targetWidth }}
       transition={transition}
-      style={{ display: 'inline-flex', overflow: 'hidden', whiteSpace: 'nowrap', ...style }}
+      style={{ display: 'inline-flex', overflow: 'hidden', whiteSpace: 'nowrap', position: 'relative', maxWidth: '100%', ...style }}
     >
       <span className="text-rotate-sr-only">{texts[currentTextIndex]}</span>
-      {/* Прихований замірник — природна ширина кожного слова в тому ж шрифті */}
+      {/* Прихований замірник — природна ширина кожного слова в тому ж шрифті.
+          position:relative вище робить цей спан контейнером для absolute-
+          замірювача, а overflow:hidden його обрізає: інакше смуга з усіх слів
+          в рядок (~1500px) давала горизонтальний скрол сторінки. */}
       <span
         aria-hidden="true"
         style={{

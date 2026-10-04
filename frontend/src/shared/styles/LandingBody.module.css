@@ -325,12 +325,14 @@ span.heroRotatorWord {
     }
 
     .title {
-        font-size: 50px;
+        /* clamp: найдовше слово ("Досліджуйте") влазить і в 320px */
+        font-size: clamp(2.5rem, 12.5vw, 3.125rem);
         padding: 6px;
         text-align: center;
         width: 100%;
         white-space: normal;
         word-break: keep-all;
+        text-wrap: balance;
     }
 
     /* LogoText — абсолютний, підлаштовуємо під менший контейнер */
@@ -338,7 +340,7 @@ span.heroRotatorWord {
         position: absolute;
         margin-top: 35px;
         margin-bottom: 15px;
-        font-size: 50px;
+        font-size: clamp(2.5rem, 12.5vw, 3.125rem);
     }
 
     .HelloS,
@@ -512,7 +514,7 @@ span.heroRotatorWord {
 /* iPhone SE */
 @media (max-width: 390px) {
     .title {
-        font-size: 42px;
+        font-size: clamp(2.25rem, 12vw, 2.625rem);
     }
 
     .headerContent {
@@ -520,7 +522,7 @@ span.heroRotatorWord {
     }
 
     .LogoText {
-        font-size: 42px;
+        font-size: clamp(2.25rem, 12vw, 2.625rem);
         margin-top: 25px;
     }
 

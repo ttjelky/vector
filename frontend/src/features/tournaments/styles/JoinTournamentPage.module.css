@@ -174,3 +174,19 @@
 .closeBtn:hover {
   color: #333;
 }
+
+/* ── Mobile: компактна модалка (ПК не чіпаємо) ── */
+@media (max-width: 480px) {
+  .modal {
+    padding: 28px 20px 24px;
+    border-radius: 22px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .hint {
+    font-size: 14px;
+  }
+}
