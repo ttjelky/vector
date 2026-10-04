@@ -137,6 +137,14 @@ EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
 # Fail fast замість хвилин зависання, якщо SMTP недоступний з хостингу.
 EMAIL_TIMEOUT = env.int('EMAIL_TIMEOUT', default=10)
 
+# HTTP email-API (Brevo) — для хостингів на кшталт Railway, де вихідний
+# SMTP заблоковано (Network is unreachable). Якщо ключ задано — листи йдуть
+# через Brevo, SMTP ігнорується. Безкоштовно ~300/день, свій домен не потрібен:
+# достатньо підтвердити адресу відправника на сторінці Brevo → Senders.
+BREVO_API_KEY = env('BREVO_API_KEY', default='')
+# Має збігатися з підтвердженою в Brevo адресою; порожнє = EMAIL_HOST_USER.
+BREVO_SENDER = env('BREVO_SENDER', default='')
+
 # ========================== CORS ==========================
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[

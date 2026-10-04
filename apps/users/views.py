@@ -160,22 +160,18 @@ class LogoutView(APIView):
 
 def _send_verification_email(email: str, code: str):
     """Надсилає 6-значний код. Не кидає виняток назовні — логує помилку."""
-    from django.core.mail import send_mail
-    from django.conf import settings as dj_settings
+    from .email_utils import send_transactional_email
+
     subject = "Vector — код підтвердження пошти"
     message = (
         f"Ваш код підтвердження Vector: {code}\n\n"
         f"Код дійсний 15 хвилин. Нікому його не повідомляйте."
     )
     try:
-        send_mail(
-            subject,
-            message,
-            getattr(dj_settings, "DEFAULT_FROM_EMAIL", "noreply@vector.com"),
-            [email],
-            fail_silently=False,
-        )
-        return True
+        ok = send_transactional_email(email, subject, message)
+        if not ok:
+            print(f"[EmailVerification] не вдалось надіслати лист на {email} | код: {code}")
+        return ok
     except Exception as exc:
         print(f"[EmailVerification] не вдалось надіслати лист на {email}: {exc} | код: {code}")
         return False
