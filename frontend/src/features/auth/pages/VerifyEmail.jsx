@@ -101,6 +101,16 @@ const VerifyEmail = ({ email, onVerified, onBack }) => {
       {error && <p className={styles.errorText}>{error}</p>}
       {info && <p style={{ color: "#15803d", fontSize: 12 }}>{info}</p>}
 
+      <button
+        type="button"
+        className="btn-primary btn-block"
+        disabled={code.trim().length !== 6 || loading}
+        onClick={handleVerify}
+        style={{ marginTop: 12 }}
+      >
+        {loading ? "Перевірка…" : "Підтвердити"}
+      </button>
+
       <div style={{ fontSize: 13, color: "#666" }}>
         {resendTimer > 0 ? (
           <span>Надіслати код повторно можна через {resendTimer} сек</span>
