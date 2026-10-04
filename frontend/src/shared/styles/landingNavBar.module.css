@@ -236,6 +236,7 @@ html {
 @media (max-width: 768px) {
     .header {
         padding: 12px 16px;
+        column-gap: 12px;
     }
 
     /* логотип обмежуємо */
@@ -244,8 +245,11 @@ html {
         height: auto;
     }
 
-    /* ховаємо десктопні елементи */
+    /* ховаємо десктопні елементи.
+       УВАГА: саме .jellyNav класом — голе `nav` (0,0,1) програє
+       `.jellyNav { display:flex }` (0,1,0) по специфічності. */
     nav,
+    .jellyNav,
     .buttons {
         display: none;
     }
