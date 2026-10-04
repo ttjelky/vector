@@ -131,6 +131,11 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Vector <noreply@vector.com>')
+# Gmail: 587 + TLS (USE_TLS=True, USE_SSL=False) або 465 + SSL (навпаки).
+# Неправильна комбінація (напр. 465 + TLS) = зависання з'єднання!
+EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
+# Fail fast замість хвилин зависання, якщо SMTP недоступний з хостингу.
+EMAIL_TIMEOUT = env.int('EMAIL_TIMEOUT', default=10)
 
 # ========================== CORS ==========================
 CORS_ALLOW_ALL_ORIGINS = False
