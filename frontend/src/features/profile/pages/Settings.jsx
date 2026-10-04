@@ -11,7 +11,6 @@ const Icon = ({ children }) => (
   </svg>
 );
 
-const MoonIcon   = () => <Icon><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></Icon>;
 const BellIcon   = () => <Icon><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></Icon>;
 const MailIcon   = () => <Icon><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></Icon>;
 const SoundIcon  = () => <Icon><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></Icon>;
@@ -81,7 +80,6 @@ const Settings = () => {
     catch { return fallback; }
   };
 
-  const [darkMode,      setDarkMode]      = useState(() => get("setting_dark",   false));
   const [warmMode,      setWarmMode]      = useState(() => get("setting_warm",   false));
   const [reduceMotion,  setReduceMotion]  = useState(() => get("setting_motion", false));
   const [notifications, setNotifications] = useState(() => get("setting_notifs", true));
@@ -90,12 +88,6 @@ const Settings = () => {
   const [solidSidebar,  setSolidSidebar]  = useState(() => get("setting_sidebar", false));
   const [showLogoutBtn, setShowLogoutBtn] = useState(() => get("setting_logout", true));
   const [forgotOpen,    setForgotOpen]    = useState(false);
-
-  // Темна тема — клас на <html>
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark-theme", darkMode);
-    saveSetting("setting_dark", darkMode);
-  }, [darkMode]);
 
   // Зменшення анімацій — клас на <html> (правило в jellyButtons.css)
   useEffect(() => {
@@ -124,15 +116,6 @@ const Settings = () => {
         {/* ── Вигляд ── */}
         <div className="settings-section">
           <div className="settings-section-title">Вигляд</div>
-
-          <ToggleRow
-            icon={<MoonIcon />}
-            tile="tile-purple"
-            label="Темна тема"
-            desc="Темне оформлення застосунку"
-            checked={darkMode}
-            onChange={() => setDarkMode(v => !v)}
-          />
 
           <ToggleRow
             icon={<WarmIcon />}
