@@ -30,7 +30,6 @@ COPY --from=frontend /app/frontend/dist ./frontend/dist
 RUN SECRET_KEY=build-only-dummy-key DEBUG=False \
     python manage.py collectstatic --noinput
 
-VOLUME ["/data"]
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
