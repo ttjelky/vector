@@ -1,0 +1,45 @@
+# ========================== Docker ==========================
+# Все, що не має потрапляти в production-образ.
+
+# Python / venv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Локальні дані (в контейнері живуть у /data volume)
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Secrets
+.env
+.env*.local
+
+# Frontend build inputs/outputs
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Git / IDE / OS
+.git/
+.gitignore
+.vscode/
+.idea/
+.DS_Store
+desktop.ini
+Thumbs.db
+*.swp
+*.swo
+*.log
+
+# Docs / screenshots не потрібні в рантаймі
+screenshots/
+test.hmtl
+installed.txt

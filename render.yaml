@@ -1,0 +1,40 @@
+# Render Blueprint — альтернатива Railway/VPS.
+# УВАГА: SQLite живе на persistent disk, а диски на Render доступні
+# лише з платним інстансом (від ~$7/міс). Без диска БД зітреться при redeploy!
+# Безкоштовно + надійно → дивись DEPLOY.md (Railway з Volume).
+
+services:
+  - type: web
+    name: vector
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /api/health/
+    disk:
+      name: vector-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_PATH
+        value: /data/db.sqlite3
+      - key: MEDIA_ROOT
+        value: /data/media
+      - key: ALLOWED_HOSTS
+        # Допиши свій домен через кому:
+        value: localhost,127.0.0.1,.onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://vector.onrender.com
+      - key: FRONTEND_URL
+        value: https://vector.onrender.com
+      - key: AUTH_COOKIE_SECURE
+        value: "True"
+      - key: SESSION_COOKIE_SECURE
+        value: "True"
+      - key: CSRF_COOKIE_SECURE
+        value: "True"
+      - key: SECURE_SSL_REDIRECT
+        value: "True"

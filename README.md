@@ -157,6 +157,13 @@ Frontend runs at `http://localhost:5173`
 
 ---
 
+## Deployment
+
+See **[DEPLOY.md](DEPLOY.md)** — Docker image, Railway (recommended), VPS with
+auto-HTTPS, Render notes, env reference, backups and troubleshooting.
+
+---
+
 ## Environment Variables
 
 Create a `.env` file in the project root based on `.env.example`:
@@ -185,7 +192,7 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 
 ```
 POST   /api/users/register/            Register a new user
-POST   /api/users/token/               Obtain JWT token pair
+POST   /api/users/login/               Obtain JWT token pair (refresh in httpOnly cookie)
 POST   /api/users/token/refresh/       Refresh access token
 
 GET    /api/tournaments/               List tournaments (supports ?search=)

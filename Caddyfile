@@ -1,0 +1,10 @@
+# Caddy — reverse proxy з автоматичним HTTPS (Let's Encrypt).
+# DOMAIN=localhost (за замовчуванням) → звичайний HTTP.
+# DOMAIN=example.com (+ A-запис на сервер) → автоматичний HTTPS.
+{
+	admin off
+}
+
+{$DOMAIN:localhost} {
+	reverse_proxy web:8000
+}

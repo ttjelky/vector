@@ -1,0 +1,49 @@
+# Production: Django + React SPA в одному контейнері (SQLite у volume /data).
+# Локально / VPS:  cp .env.example .env  →  заповни  →  docker compose up -d --build
+#
+# Змінні беруть участь:
+#   DOMAIN        — публічний домен (Caddy сам випустить HTTPS). Без домена — http://localhost
+#   Остальное — з .env (SECRET_KEY, ALLOWED_HOSTS, ...)
+
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DEBUG: "False"
+      DATABASE_PATH: /data/db.sqlite3
+      MEDIA_ROOT: /data/media
+      # FRONTEND_URL (публічна адреса для листів) береться з .env
+    volumes:
+      - appdata:/data
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  appdata:
+  caddy_data:
+  caddy_config:

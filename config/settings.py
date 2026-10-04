@@ -17,6 +17,19 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+
+# За проксі (Railway / Render / Caddy) саме проксі термінує HTTPS,
+# Django має довіряти заголовку X-Forwarded-Proto.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Увімкни в production з HTTPS (через env, щоб не зламати локальний HTTP):
+SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=False)
+SESSION_COOKIE_SECURE = env.bool('SESSION_COOKIE_SECURE', default=False)
+CSRF_COOKIE_SECURE = env.bool('CSRF_COOKIE_SECURE', default=False)
+
+# Публічна адреса фронтенда — для листів (reset password) тощо.
+FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173').rstrip('/')
 
 # ========================== APPLICATIONS ==========================
 INSTALLED_APPS = [
@@ -43,8 +56,9 @@ INSTALLED_APPS = [
 
 # ========================== MIDDLEWARE ==========================
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,10 +88,12 @@ TEMPLATES = [
 ]
 
 # ========================== DATABASE ==========================
+# SQLite за замовчуванням; шлях перевизначається env (напр. /data/db.sqlite3
+# для persistent volume в Docker / Railway / Render).
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': Path(env('DATABASE_PATH', default=BASE_DIR / 'db.sqlite3')),
     }
 }
 
@@ -106,12 +122,14 @@ SIMPLE_JWT = {
 }
 
 # ========================== EMAIL ==========================
+# Пошта потрібна лише для reset-password; без кредів листи просто не підуть
+# (а старт сервера не падає).
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = env.int('EMAIL_PORT', default=587)
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Vector <noreply@vector.com>')
 
 # ========================== CORS ==========================
@@ -126,9 +144,22 @@ CORS_ALLOW_CREDENTIALS = True
 
 # ========================== MEDIA & STATIC ==========================
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = Path(env('MEDIA_ROOT', default=BASE_DIR / 'media'))
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+
+# Зібраний фронтенд (frontend/dist) для SPA fallback-сторінки.
+FRONTEND_DIST_DIR = BASE_DIR / 'frontend' / 'dist'
 
 # ========================== SECURITY ==========================
 # Cookie settings
@@ -148,6 +179,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'uk'
-TIME_ZONE = 'Europe/Kiev'
+TIME_ZONE = env('TIME_ZONE', default='Europe/Kyiv')
 USE_I18N = True
 USE_TZ = True

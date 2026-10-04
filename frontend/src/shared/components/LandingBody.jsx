@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "@shared/styles/landingBody.module.css";
+import styles from "@shared/styles/LandingBody.module.css";
 import Cableicon from "@static/icons/Cableicon.svg";
 import Earthicon from "@static/icons/Earthicon.svg";
 import Charticon from "@static/icons/Charticon.svg";
