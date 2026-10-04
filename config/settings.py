@@ -139,11 +139,20 @@ EMAIL_TIMEOUT = env.int('EMAIL_TIMEOUT', default=10)
 
 # HTTP email-API (Brevo) — для хостингів на кшталт Railway, де вихідний
 # SMTP заблоковано (Network is unreachable). Якщо ключ задано — листи йдуть
-# через Brevo, SMTP ігнорується. Безкоштовно ~300/день, свій домен не потрібен:
+# через Brevo, SMTP ігнорується. Безкоштовно ~300 листів/день, свій домен не потрібен:
 # достатньо підтвердити адресу відправника на сторінці Brevo → Senders.
 BREVO_API_KEY = env('BREVO_API_KEY', default='')
 # Має збігатися з підтвердженою в Brevo адресою; порожнє = EMAIL_HOST_USER.
 BREVO_SENDER = env('BREVO_SENDER', default='')
+# Альтернативи без верифікації номера (перемикач EMAIL_PROVIDER):
+# Mailjet (API Key + Secret Key; sender підтверджується листом) і
+# SMTP2GO (API key; sender підтверджується листом).
+EMAIL_PROVIDER = env('EMAIL_PROVIDER', default='auto')
+MAILJET_API_KEY = env('MAILJET_API_KEY', default='')
+MAILJET_API_SECRET = env('MAILJET_API_SECRET', default='')
+MAILJET_SENDER = env('MAILJET_SENDER', default='')
+SMTP2GO_API_KEY = env('SMTP2GO_API_KEY', default='')
+SMTP2GO_SENDER = env('SMTP2GO_SENDER', default='')
 
 # ========================== CORS ==========================
 CORS_ALLOW_ALL_ORIGINS = False
