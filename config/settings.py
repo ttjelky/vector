@@ -161,6 +161,11 @@ STORAGES = {
 # Зібраний фронтенд (frontend/dist) для SPA fallback-сторінки.
 FRONTEND_DIST_DIR = BASE_DIR / 'frontend' / 'dist'
 
+# Vite кладе збірку в /assets/* (поза /static/), тому віддаємо весь dist
+# як WhiteNoise-root: реальні файли роздаються напряму, решта падає
+# в SPA fallback (config/urls.py). Без dist — пропускаємо мовчки (dev).
+WHITENOISE_ROOT = FRONTEND_DIST_DIR if FRONTEND_DIST_DIR.exists() else None
+
 # ========================== SECURITY ==========================
 # Cookie settings
 AUTH_COOKIE = "refresh_token"
