@@ -24,7 +24,13 @@
   position: relative;
   overflow: hidden;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   animation: modalIn 0.4s ease;
+}
+
+.forgot::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Floating header ─────────────────────────────────────────────────────── */
@@ -85,7 +91,7 @@
 
 /* ── Body ────────────────────────────────────────────────────────────────── */
 .form {
-  padding: 40px 24px 100px;
+  padding: 80px 24px 100px;
   display: flex;
   flex-direction: column;
   gap: 16px;

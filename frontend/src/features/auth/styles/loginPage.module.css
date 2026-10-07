@@ -24,7 +24,13 @@
   position: relative;
   overflow: hidden;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   animation: modalIn 0.4s ease;
+}
+
+.login::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Header (floating, glassmorphism) ───────────────────────────────────────── */

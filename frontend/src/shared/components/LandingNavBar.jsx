@@ -108,10 +108,10 @@ const LandingNavBar = () => {
                 <GlassSurface
                     width={48}
                     height={48}
-                    borderRadius={14}
+                    borderRadius="50%"
                     backgroundOpacity={0.65}
                     saturation={1.6}
-                    className={`glass-surface--flat ${styles.landingGlassBorder}`}
+                    className={`glass-surface--flat ${styles.landingGlassBorder} ${styles.burgerGlass}`}
                 >
                     <button
                         className={`${styles.burgerBtn} ${menuOpen ? styles.burgerOpen : ""}`}
@@ -128,10 +128,10 @@ const LandingNavBar = () => {
                     <GlassSurface
                         width="100%"
                         height="100%"
-                        borderRadius={24}
+                        borderRadius={32}
                         backgroundOpacity={0.65}
                         saturation={1.6}
-                        className={`glass-surface--flat ${styles.landingGlassBorder}`}
+                        className={`glass-surface--flat ${styles.mobileDropdownGlass}`}
                     >
                         <div style={{ width: "100%" }}>
                             <ul className={styles.mobileNavList}>

@@ -24,6 +24,28 @@
     color: rgb(100, 100, 100);
 }
 
+.LandingFooterGithub {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgb(100, 100, 100);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s ease;
+}
+
+.LandingFooterGithub:hover {
+    color: #111;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.GithubIcon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
 .LandingFooterSFLU {
     color: rgb(100, 100, 100);
     text-align: right;
@@ -47,7 +69,8 @@
         gap: 12px;
     }
 
-    .LandingFooterEmail {
+    .LandingFooterEmail,
+    .LandingFooterGithub {
         word-break: break-all;
         font-size: 13px;
         color: #111;

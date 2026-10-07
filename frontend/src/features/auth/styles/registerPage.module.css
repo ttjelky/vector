@@ -24,7 +24,13 @@
   position: relative;
   overflow: hidden;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   animation: modalIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.register::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Floating header ─────────────────────────────────────────────────────── */

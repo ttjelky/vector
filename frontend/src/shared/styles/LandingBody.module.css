@@ -27,7 +27,7 @@ html, body {
     align-items: center;
     border: 5px solid rgb(238, 238, 238);
     border-radius: 50px;
-    padding: 20px 100px 140px 100px;
+    padding: 20px 140px 140px 140px;
     margin-top: 50px;
 }
 
@@ -67,6 +67,9 @@ span.heroRotatorWord {
 
 .LogoText {
     position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
     margin-top: 140px;
     font-family: "Google Sans", sans-serif;
     font-size: 120px;
