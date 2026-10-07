@@ -219,6 +219,7 @@ html {
 
 .mobileButtons {
     display: flex;
+    flex-direction: column;
     gap: 8px;
     padding: 10px 12px 12px;
 

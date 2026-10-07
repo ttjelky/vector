@@ -132,13 +132,17 @@ class TeamCaptainAnnouncementsTests(BaseTest):
         r = self.client.post(
             f"/api/tournaments/{self.t.id}/announcements/{ann.id}/comments/",
             {"text": "ok"},
-            content_type="application/json",
+            format="json",
         )
-        self.assertIn(r.status_code, [status.HTTP_200_OK, status.HTTP_201_CREATED])
+        self.assertIn(
+            r.status_code,
+            [status.HTTP_200_OK, status.HTTP_201_CREATED],
+            r.data,
+        )
         cid = r.data["id"]
         r = self.client.post(
             f"/api/tournaments/{self.t.id}/announcements/{ann.id}/comments/",
             {"text": "reply", "parent": cid},
-            content_type="application/json",
+            format="json",
         )
         self.assertIn(r.status_code, [status.HTTP_200_OK, status.HTTP_201_CREATED])

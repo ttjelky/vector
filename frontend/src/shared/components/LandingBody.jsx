@@ -5,14 +5,14 @@ import Cableicon from "@static/icons/Cableicon.svg";
 import Earthicon from "@static/icons/Earthicon.svg";
 import Charticon from "@static/icons/Charticon.svg";
 import Accounticon from "@static/icons/Accounticon.svg";
-import HeroImage from "@static/HeroImage.png";
-import HeroImage2 from "@static/HeroImage2.png";
+import HeroImage from "@static/HeroImage.jpg";
+import HeroImage2 from "@static/HeroImage2.jpg";
 import HelloS from "@static/stickers/HelloS.svg";
 import YouCanS from "@static/stickers/YouCanS.svg";
 import { BlackButton } from "./blackbutton";
 import { WhiteButton } from "./WhiteButton";
 import RotatingText from "./RotatingText";
-import iPad from "@static/Ipad.png";
+import iPad from "@static/Ipad.jpg";
 import { CopyPopup } from "./CopyPopup";
 import joinStyles from "@features/tournaments/styles/JoinTournamentPage.module.css";
 
