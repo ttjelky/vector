@@ -8,6 +8,10 @@
 
 <br/>
 
+### [🌐 Live demo](https://vector-production-f0f5.up.railway.app)
+
+<br/>
+
 [![Django](https://img.shields.io/badge/Django-6.0-092E20?style=flat&logo=django&logoColor=white)](https://djangoproject.com)
 [![DRF](https://img.shields.io/badge/Django_REST_Framework-3.x-red?style=flat)](https://www.django-rest-framework.org)
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev)
@@ -207,4 +211,8 @@ POST   /api/notifications/mark-read/  Mark notifications as read
 
 ## Authors
 
-Built by **Oleksii Bezklynskyi**, **Serhii Deineha** and **Artem Tsvelyh** as a team project over 3 months.
+Built by **Oleksii Bezklynskyi** (team lead), **Serhii Deineha** and **Artem Tsvelyh** as a team project over 3 months — finalist of the SFLU 2026 All-Ukrainian team programming tournament. Since the tournament, Vector is maintained and developed by Oleksii Bezklynskyi.
+
+## License
+
+[MIT](LICENSE)
